@@ -1,0 +1,16 @@
+from __future__ import absolute_import, unicode_literals
+
+from django import forms
+from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext
+from wiki.core.plugins.base import PluginSidebarFormMixin
+from wiki.plugins.images import models
+
+
+class SidebarForm(PluginSidebarFormMixin):
+	title = forms.CharField(label=_('Title'),)
+    content = forms.CharField(
+        label=_('Contents'),
+        required=False,
+        widget=getEditor().get_widget())  # @UndefinedVariable
+

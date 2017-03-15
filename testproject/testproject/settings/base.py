@@ -26,9 +26,10 @@ BASE_DIR = os.path.dirname(PROJECT_DIR)
 SECRET_KEY = 'b^fv_)t39h%9p40)fnkfblo##jkr!$0)lkp6bpy!fi*f$4*92!'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
+
 
 
 INSTALLED_APPS = [
@@ -52,6 +53,8 @@ INSTALLED_APPS = [
     'wiki.plugins.attachments',
     'wiki.plugins.notifications',
     'mptt',
+    'wiki.plugins.categories',
+    'wiki.plugins.categories.editor',
 ]
 
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
