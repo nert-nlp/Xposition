@@ -1,3 +1,11 @@
+Installation
+============
+
+Once you've cloned the git repository, you'll need to install the __django-wiki__ and __django-categories__ libraries (and their dependencies):
+
+    pip install wiki
+    pip install django-categories
+
 Testing
 ===========
 
