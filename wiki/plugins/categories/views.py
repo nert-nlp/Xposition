@@ -180,7 +180,7 @@ class CategoryView( ArticleMixin, FormView ):
             article_id=self.article.id)
 
     def get_form_kwargs(self):
-	kwargs = super(CategoryView, self).get_form_kwargs()
+        kwargs = super(CategoryView, self).get_form_kwargs()
         return kwargs
 
     def get_queryset(self):
@@ -188,10 +188,8 @@ class CategoryView( ArticleMixin, FormView ):
         return categories
 
     def get_context_data(self, **kwargs):
-	kwargs['categories'] = Category.objects.all()
-	kwargs['form'] = self.get_form()
+        kwargs['categories'] = Category.objects.all()
+        kwargs['form'] = self.get_form()
         context = FormView.get_context_data(self, **kwargs)
-	context['article'] = self.article
+        context['article'] = self.article
         return context
-
-
