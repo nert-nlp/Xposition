@@ -24,11 +24,11 @@ class SidebarForm(PluginSidebarFormMixin):
             "New category set.")
 
     def save(self, *args, **kwargs):
-	if self.is_valid():
-  	   data = self.cleaned_data
-  	   field = data['categories']
-           self.article.categories = field
-	   self.article.save()
+        if self.is_valid():
+            data = self.cleaned_data
+            field = data['categories']
+            self.article.categories = field
+            self.article.save()
         return super(SidebarForm, self).save(*args, **kwargs)
 
     class Meta:
