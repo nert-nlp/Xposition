@@ -164,8 +164,8 @@ class CategoryView( ArticleMixin, FormView ):
 
     @method_decorator(get_article(can_read=True))
     def dispatch(self, request, article, *args, **kwargs):
-	self.categories = Category.objects.all()
-	return super(
+        self.categories = Category.objects.all()
+        return super(
             CategoryView,
             self).dispatch(
             request,
