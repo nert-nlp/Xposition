@@ -8,6 +8,16 @@ from wiki.core.plugins.base import PluginSidebarFormMixin
 from wiki import models
 from wiki.plugins.categories.models import Category
 
+class CategoryForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super(CategoryForm, self).__init__(*args, **kwargs)
+        self.fields['parent'].queryset = Category.objects.all()
+
+    class Meta:
+        model = Category
+        fields = ('__all__')
+
+
 class SidebarForm(PluginSidebarFormMixin):
 
     def __init__(self, article, request, *args, **kwargs):

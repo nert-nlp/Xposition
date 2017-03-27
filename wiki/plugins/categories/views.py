@@ -1,3 +1,4 @@
+
 from django.views.generic.edit import FormView
 from django.forms import modelform_factory
 from wiki.views.mixins import ArticleMixin
@@ -24,7 +25,7 @@ except ImportError:
 
 
 from .models import Category
-
+from . import forms
 
 def category_detail(request, path, template_name='categories/category_detail.html', extra_context={}):
     path_items = path.strip('/').split('/')
@@ -155,12 +156,10 @@ class CategoryRelatedList(ListView):
         return names
 
 
-
 class CategoryView( ArticleMixin, FormView ):
 
-    form_class = modelform_factory(Category, fields = '__all__')
+    form_class = forms.CategoryForm
     template_name = "category_detail.html"
-
 
     @method_decorator(get_article(can_read=True))
     def dispatch(self, request, article, *args, **kwargs):
@@ -173,15 +172,15 @@ class CategoryView( ArticleMixin, FormView ):
             *args,
             **kwargs)
 
+    def get_form_kwargs(self, **kwargs):
+         kwargs = super(CategoryView, self).get_form_kwargs(**kwargs)
+         return kwargs
+
     def form_valid(self, form):
         return redirect(
             "wiki:categories_list",
             path=self.urlpath.path,
             article_id=self.article.id)
-
-    def get_form_kwargs(self):
-        kwargs = super(CategoryView, self).get_form_kwargs()
-        return kwargs
 
     def get_queryset(self):
         categories = Category.objects.all()
@@ -189,7 +188,7 @@ class CategoryView( ArticleMixin, FormView ):
 
     def get_context_data(self, **kwargs):
         kwargs['categories'] = Category.objects.all()
-        kwargs['form'] = self.get_form()
-        context = FormView.get_context_data(self, **kwargs)
-        context['article'] = self.article
-        return context
+        kwargs['form'] = super(CategoryView, self).get_form(form_class=forms.CategoryForm)
+        kwargs = super(CategoryView, self).get_context_data(**kwargs)
+        kwargs['article'] = self.article
+        return kwargs
