@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, unicode_literals
-from categories.models import Category
+
 from django.contrib.contenttypes.models import ContentType
 from django.core.cache import cache
 from django.core.urlresolvers import reverse
@@ -15,11 +15,13 @@ from wiki.conf import settings
 from wiki.core import compat, permissions
 from wiki.core.markdown import article_markdown
 from wiki.decorators import disable_signal_for_loaddata
+
 # Django 1.9 deprecation of IPAddressField
 try:
     from django.db.models.fields import GenericIPAddressField as IPAddressField
 except ImportError:
     from django.db.models.fields import IPAddressField
+
 
 # Django 1.9 deprecation of contenttypes.generic
 try:
@@ -27,12 +29,11 @@ try:
 except ImportError:
     from django.contrib.contenttypes.generic import GenericForeignKey
 
+
 @python_2_unicode_compatible
 class Article(models.Model):
 
     objects = managers.ArticleManager()
-
-    categories = models.ManyToManyField(Category, related_name="categories+")
 
     current_revision = models.OneToOneField(
         'ArticleRevision', verbose_name=_('current revision'),
