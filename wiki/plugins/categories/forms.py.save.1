@@ -12,12 +12,6 @@ class SidebarForm(PluginSidebarFormMixin):
 
     def __init__(self, article, request, *args, **kwargs):
         self.article = article
-        self.request = request
-        super(SidebarForm, self).__init__(*args, **kwargs)
-        self.fields['categories'].required = True
-        self.fields['categories'].label_from_instance = lambda obj: "%s" % obj.short_title
-        self.fields['categories'].initial = article.categories.all
-
 
     def get_usermessage(self):
         return ugettext(
@@ -32,5 +26,5 @@ class SidebarForm(PluginSidebarFormMixin):
         return super(SidebarForm, self).save(*args, **kwargs)
 
     class Meta:
-        model = models.Article
-        fields = ('categories',)
+        model = Category
+        fields = '__all__'
