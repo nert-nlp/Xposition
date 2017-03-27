@@ -5,28 +5,24 @@
 {% block wiki_pagetitle %}{% trans "Categories" %}: {{ article.title }}{% endblock %}
 
 {% block wiki_contents_tab %}
-    <h1>Category Creation Form</h1>
-    {% for category in article.categories.all %}
-	{{category.name}}
-    {% endfor %}
 
 
-<div class="col-lg-8">
-    <form method="POST" class="form-horizontal" id="category_create_form">
-      {{form}}
-      <input type="hidden" name="save" value="1" />
-      <input type="hidden" name="preview" value="1" />
-      <div class="form-group form-actions">
-        <div class="col-lg-8">
-    	  <div class="col-lg-offset-2">
-	    <button type="submit" name="save_changes" class="btn btn-primary btn-lg">
-            <span class="fa fa-check"></span>
-            {% trans "Create Category" %}
+    <div class="col-lg-8">
+         <form method="POST" class="form-horizontal" id="category_create_form">
+           {% wiki_form form %}
+           <input type="hidden" name="save" value="1" />
+           <input type="hidden" name="preview" value="1" />
+           <div class="form-group form-actions">
+            <div class="col-lg-8">
+    	      <div class="col-lg-offset-2">
+	        <button type="submit" name="save_changes" class="btn btn-primary btn-lg">
+                <span class="fa fa-check"></span>
+                {% trans "Create Category" %}
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
-    </form>
-</div>
+        </form>
+    </div>
 
 
 {% endblock %}
