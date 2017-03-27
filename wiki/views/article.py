@@ -9,8 +9,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
 from django.db.models import Q
 from django.http import Http404
-from django.shortcuts import get_object_or_404, redirect, render_to_response
-from django.template.context import RequestContext
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.decorators import method_decorator
 from django.utils.translation import ugettext as _
 from django.views.generic.base import RedirectView, TemplateView, View
@@ -23,7 +22,8 @@ from wiki.core import permissions
 from wiki.core.diff import simple_merge
 from wiki.core.exceptions import NoRootURL
 from wiki.core.plugins import registry as plugin_registry
-from wiki.decorators import get_article, json_view
+from wiki.core.utils import object_to_json_response
+from wiki.decorators import get_article
 from wiki.views.mixins import ArticleMixin
 
 log = logging.getLogger(__name__)
@@ -788,7 +788,6 @@ class Preview(ArticleMixin, TemplateView):
         return ArticleMixin.get_context_data(self, **kwargs)
 
 
-@json_view
 def diff(request, revision_id, other_revision_id=None):
 
     revision = get_object_or_404(models.ArticleRevision, id=revision_id)
@@ -807,7 +806,9 @@ def diff(request, revision_id, other_revision_id=None):
     if not other_revision or other_revision.title != revision.title:
         other_changes.append((_('New title'), revision.title))
 
-    return dict(diff=list(diff), other_changes=other_changes)
+    return object_to_json_response(
+        dict(diff=list(diff), other_changes=other_changes)
+    )
 
 # TODO: Throw in a class-based view
 
@@ -836,11 +837,12 @@ def merge(
         old_revision = article.current_revision
 
         if revision.deleted:
-            c = RequestContext(
-                request,
-                {'error_msg': _('You cannot merge with a deleted revision'),
-                 'article': article, 'urlpath': urlpath})
-            return render_to_response("wiki/error.html", context_instance=c)
+            c = {
+                'error_msg': _('You cannot merge with a deleted revision'),
+                'article': article,
+                'urlpath': urlpath
+            }
+            return render(request, "wiki/error.html", context=c)
 
         new_revision = models.ArticleRevision()
         new_revision.inherit_predecessor(article)
@@ -868,14 +870,16 @@ def merge(
         else:
             return redirect('wiki:edit', article_id=article.id)
 
-    c = RequestContext(request, {'article': article,
-                                 'title': article.current_revision.title,
-                                 'revision': None,
-                                 'merge1': revision,
-                                 'merge2': article.current_revision,
-                                 'merge': True,
-                                 'content': content})
-    return render_to_response(template_file, context=c)
+    c = {
+        'article': article,
+        'title': article.current_revision.title,
+        'revision': None,
+        'merge1': revision,
+        'merge2': article.current_revision,
+        'merge': True,
+        'content': content
+    }
+    return render(request, template_file, c)
 
 
 class CreateRootView(FormView):
