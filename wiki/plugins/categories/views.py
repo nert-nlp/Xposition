@@ -186,9 +186,16 @@ class CategoryView( ArticleMixin, FormView ):
         categories = Category.objects.all()
         return categories
 
+
+    def get_form(self):
+        form = super(CategoryView, self).get_form(form_class=forms.CategoryForm)
+        form.fields['parent'].queryset = Category.objects.all()
+        return form
+
+
     def get_context_data(self, **kwargs):
         kwargs['categories'] = Category.objects.all()
-        kwargs['form'] = super(CategoryView, self).get_form(form_class=forms.CategoryForm)
+        kwargs['form'] = self.get_form()
         kwargs = super(CategoryView, self).get_context_data(**kwargs)
         kwargs['article'] = self.article
         return kwargs
