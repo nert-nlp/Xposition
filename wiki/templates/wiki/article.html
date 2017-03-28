@@ -1,6 +1,6 @@
 {% extends "wiki/base.html" %}
 {% load wiki_tags i18n sekizai_tags %}
-
+{% load category_tags %}
 
 {% block wiki_pagetitle %}{{ article.current_revision.title }}{% endblock %}
 
@@ -30,6 +30,16 @@
     <div>
       {% block wiki_contents_tab %}
       {% endblock %}
+    </div>
+    <div>
+      {% with article.categories.all as categories %}
+        {% trans "This article is in the following categories: " %}
+        <ul>
+            {% for category in categories %}
+              <li><a href="{{ category.url }}">{{category.short_title}}</a></li>
+            {% endfor %}
+        </ul>
+      {% endwith %}
     </div>
   </div>
 
