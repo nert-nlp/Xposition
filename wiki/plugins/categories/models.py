@@ -1,3 +1,4 @@
+from wiki.models import Article
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.utils.encoding import force_text
@@ -18,6 +19,7 @@ from .base import CategoryBase
 STORAGE = get_storage_class(THUMBNAIL_STORAGE)
 
 class Category(CategoryBase):
+    landing_article = models.ForeignKey(Article, null=True)
     thumbnail = models.FileField(
         upload_to=THUMBNAIL_UPLOAD_PATH,
         null=True, blank=True,
