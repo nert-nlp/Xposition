@@ -1,5 +1,5 @@
 from django.shortcuts import redirect
-from wiki.models import URLPath
+from wiki.models import URLPath, Article, Category
 from django.views.generic.edit import FormView
 from django.forms import modelform_factory
 from wiki.views.mixins import ArticleMixin
@@ -25,7 +25,6 @@ except ImportError:
         raise ImproperlyConfigured("For older versions of Django, you need django-cbv.")
 
 
-from .models import Category
 from . import forms
 
 def category_detail(request, path, template_name='categories/category_detail.html', extra_context={}):
@@ -181,7 +180,7 @@ class CategoryView( ArticleMixin, FormView ):
 	clean_data = form.cleaned_data
         slug = clean_data['slug']
         title = clean_data['name']
-        self.landing_article = URLPath.create_article(
+        self.landing_article_urlpath = URLPath.create_article(
             URLPath.root(),
             slug,
             title = title,
@@ -195,12 +194,14 @@ class CategoryView( ArticleMixin, FormView ):
                               'other_read': self.article.other_read,
                               'other_write': self.article.other_write,
                               })
-        category = form.save()
-        self.landing_article.categories = form.instance
-        self.landing_article.save()
+        form.save()
+        category = Category.objects.get(name = title)
+        landing_article = Article.objects.get(urlpath = self.landing_article_urlpath)
+        landing_article.categories.add(category)
+        self.landing_article_urlpath.save()
         return redirect(
-            "wiki:categories_list",
-            path=self.urlpath.path,
+            "wiki:get",
+            path=self.landing_article_urlpath.path,
             article_id=self.article.id)
 
     def get_form(self):
