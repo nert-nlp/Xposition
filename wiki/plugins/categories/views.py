@@ -1,4 +1,5 @@
 from django.shortcuts import redirect
+from wiki.models import URLPath
 from django.views.generic.edit import FormView
 from django.forms import modelform_factory
 from wiki.views.mixins import ArticleMixin
@@ -161,7 +162,7 @@ class CategoryView( ArticleMixin, FormView ):
     form_class = forms.CategoryForm
     template_name = "category_detail.html"
 
-    @method_decorator(get_article(can_read=True))
+    @method_decorator(get_article(can_read=True, can_create=True),)
     def dispatch(self, request, article, *args, **kwargs):
         self.categories = Category.objects.all()
         return super(
@@ -177,8 +178,26 @@ class CategoryView( ArticleMixin, FormView ):
          return kwargs
 
     def form_valid(self, form):
+	clean_data = form.cleaned_data
+        slug = clean_data['slug']
+        title = clean_data['name']
+        self.landing_article = URLPath.create_article(
+            URLPath.root(),
+            slug,
+            title = title,
+            content = " ",
+            user_message = " ",
+            user = self.request.user,
+            article_kwargs = {'owner': self.request.user,
+                              'group': self.article.group,
+                              'group_read': self.article.group_read,
+                              'group_write': self.article.group_write,
+                              'other_read': self.article.other_read,
+                              'other_write': self.article.other_write,
+                              })
         category = form.save()
-        print("saved")
+        self.landing_article.categories = form.instance
+        self.landing_article.save()
         return redirect(
             "wiki:categories_list",
             path=self.urlpath.path,

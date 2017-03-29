@@ -19,7 +19,6 @@ from .base import CategoryBase
 STORAGE = get_storage_class(THUMBNAIL_STORAGE)
 
 class Category(CategoryBase):
-    landing_article = models.ForeignKey(Article, null=True)
     thumbnail = models.FileField(
         upload_to=THUMBNAIL_UPLOAD_PATH,
         null=True, blank=True,
