@@ -33,12 +33,14 @@
     </div>
     <div>
       {% with article.categories.all as categories %}
-        {% trans "This article is in the following categories: " %}
-        <ul>
-            {% for category in categories %}
-              <li><a href="{{ category.url }}">{{category.short_title}}</a></li>
-            {% endfor %}
-        </ul>
+        {% if categories.all %}
+          {% trans "This article is in the following categories: " %}
+          <ul>
+              {% for category in categories %}
+                <li><a href="{{ category.url }}">{{category.short_title}}</a></li>
+              {% endfor %}
+          </ul>
+       {% endif %}
       {% endwith %}
     </div>
   </div>
