@@ -6,15 +6,16 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ugettext
 from wiki.core.plugins.base import PluginSidebarFormMixin
 from wiki import models
-from wiki.plugins.categories.models import Category
 
 class CategoryForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(CategoryForm, self).__init__(*args, **kwargs)
-        self.fields['parent'].queryset = Category.objects.all()
+
+    def save(self, *args, **kwargs):
+        super(CategoryForm, self).save(*args, **kwargs)
 
     class Meta:
-        model = Category
+        model = models.Category
         fields = ('__all__')
 
 

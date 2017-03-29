@@ -1,4 +1,4 @@
-
+from django.shortcuts import redirect
 from django.views.generic.edit import FormView
 from django.forms import modelform_factory
 from wiki.views.mixins import ArticleMixin
@@ -177,19 +177,16 @@ class CategoryView( ArticleMixin, FormView ):
          return kwargs
 
     def form_valid(self, form):
+        category = form.save()
+        print("saved")
         return redirect(
             "wiki:categories_list",
             path=self.urlpath.path,
             article_id=self.article.id)
 
-    def get_queryset(self):
-        categories = Category.objects.all()
-        return categories
-
-
     def get_form(self):
         form = super(CategoryView, self).get_form(form_class=forms.CategoryForm)
-        form.fields['parent'].queryset = Category.objects.all()
+        """form.fields['parent'].queryset = Category.objects.all()"""
         return form
 
 
