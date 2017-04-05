@@ -37,7 +37,11 @@
           {% trans "This article is in the following categories: " %}
           <ul>
               {% for category in categories %}
-                <li><a href="{{ category.url }}">{{category.short_title}}</a></li>
+                <li><a href="{{ category.url }}">{{category.short_title}}</a>
+                  {% if category.parent %}
+                    <a href="/{{category.parent.slug}}"> (Parent: {{category.parent}}) </a>
+                  {% endif %}
+                </li>
               {% endfor %}
           </ul>
        {% endif %}
