@@ -178,13 +178,15 @@ class CategoryView( ArticleMixin, FormView ):
 
     def form_valid(self, form):
 	clean_data = form.cleaned_data
+        print(clean_data)
         slug = clean_data['slug']
         title = clean_data['name']
+        content = clean_data['description']
         self.landing_article_urlpath = URLPath.create_article(
             URLPath.root(),
             slug,
             title = title,
-            content = " ",
+            content = content,
             user_message = " ",
             user = self.request.user,
             article_kwargs = {'owner': self.request.user,
