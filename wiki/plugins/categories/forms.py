@@ -1,6 +1,7 @@
 
 from __future__ import absolute_import, unicode_literals
 
+from django.utils.safestring import mark_safe
 from django import forms
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ugettext
@@ -26,7 +27,7 @@ class SidebarForm(PluginSidebarFormMixin):
         self.request = request
         super(SidebarForm, self).__init__(*args, **kwargs)
         self.fields['categories'].required = True
-        self.fields['categories'].label_from_instance = lambda obj: "%s" % obj.short_title
+        self.fields['categories'].label_from_instance = lambda obj: mark_safe("%s" % obj.short_title + (' <a href=/'+obj.slug+' target="_blank">View</a>'))
         self.fields['categories'].initial = article.categories.all
         self.fields['categories'].widget = forms.CheckboxSelectMultiple()
         self.fields['categories'].queryset = models.Category.objects.all()
