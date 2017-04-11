@@ -28,6 +28,8 @@ class SidebarForm(PluginSidebarFormMixin):
         self.fields['categories'].required = True
         self.fields['categories'].label_from_instance = lambda obj: "%s" % obj.short_title
         self.fields['categories'].initial = article.categories.all
+        self.fields['categories'].widget = forms.CheckboxSelectMultiple()
+        self.fields['categories'].queryset = models.Category.objects.all()
 
 
     def get_usermessage(self):
