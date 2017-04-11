@@ -32,6 +32,18 @@
       {% endblock %}
     </div>
     <div>
+      {% for category in article.categories.all %}
+        {% if urlpath.slug == category.slug %}
+          {% if category.articles_set.all %}
+            <h2>Entries</h2> 
+            {% for article in category.articles_set.all %}
+              <p><a href="{{ article.get_absolute_url }}">{{ article.headline }}</a></p>
+            {% endfor %}
+          {% endif %}          
+        {% endif %}
+      {% endfor %}
+    </div>
+    <div>
       {% with article.categories.all as categories %}
         {% if categories.all %}
           {% trans "This article is in the following categories: " %}
