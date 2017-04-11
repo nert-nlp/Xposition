@@ -31,7 +31,7 @@
         {{ field.label|safe }}
         </label>-->
       {% endif %}
-      {{ field }}
+      {{field}}
       {% if field.errors %}
       <div id="error_{{ forloop.counter }}_{{ field.auto_id }}" class="help-block">
         {% for error in field.errors %}
