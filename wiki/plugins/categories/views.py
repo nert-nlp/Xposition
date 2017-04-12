@@ -173,11 +173,11 @@ class CategoryView( ArticleMixin, FormView ):
             **kwargs)
 
     def get_form_kwargs(self, **kwargs):
-         kwargs = super(CategoryView, self).get_form_kwargs(**kwargs)
-         return kwargs
+        kwargs = super(CategoryView, self).get_form_kwargs(**kwargs)
+        return kwargs
 
     def form_valid(self, form):
-	clean_data = form.cleaned_data
+        clean_data = form.cleaned_data
         print(clean_data)
         slug = clean_data['slug']
         title = clean_data['name']
