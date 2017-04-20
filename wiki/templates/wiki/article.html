@@ -35,9 +35,6 @@
     <div>
       {% for category in article.categories.all %}
         {% if urlpath.slug == category.slug %}
-          <a href="_plugin/categories">
-            <button class="btn btn-primary btn-lg" style="margin-bottom:5px">Edit this category</button>
-          </a>
           {% if category.articles_set.all %}
             <h2>Entries</h2> 
             {% for article in category.articles_set.all %}

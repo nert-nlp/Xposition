@@ -26,6 +26,24 @@
     </div>    
     {% endif %}
    {% endfor %}
+   
+    <div class="panel panel-default">
+      <div class="panel-heading" style="margin-bottom:5px" class="col-lg-12">
+         <a class="panel-toggle" href="#collapse_list" data-toggle="collapse">
+           <h2>List of Categories</h2>
+         </a>
+      </div>
+    
+      <br>    
+
+      <div id="collapse_list" class="panel-collapse collapse" style="margin:10px">
+        Category list here
+        {% for category in Category.objects.all %}
+          {{category}}
+        {% endfor %} 
+      </div>  
+    </div>   
+ 
     <div class="panel panel-default">
 
       <div class="panel-heading" style="margin-bottom:5px" class="col-lg-12">
