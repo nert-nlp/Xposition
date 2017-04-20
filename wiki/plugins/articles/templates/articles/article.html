@@ -1,0 +1,73 @@
+{% extends "articles/base.html" %}
+{% load wiki_tags i18n sekizai_tags %}
+{% load category_tags %}
+
+{% block wiki_pagetitle %}{{ articleplugin.current_revision.title }}{% endblock %}
+
+{% block wiki_breadcrumbs %}
+{% include "articles/includes/breadcrumbs.html" %}
+{% endblock %}
+
+{% block wiki_contents %}
+
+  <div id="article-container">
+    <ul class="nav nav-pills" id="article-menu">
+      <li class="pull-left" id="article-title-li">
+        <h1 id="article-title">
+          {{ articleplugin.current_revision.title }}
+          <small style="font-size: 14px;">
+            {% if urlpath.parent %}
+            <a href="{% url 'wiki:get' path=urlpath.path %}"><span class="fa fa-bookmark"></span> {{ urlpath.slug }}</a>
+            {% endif %}
+            {% if articleplugin.current_revision.locked %}
+              <span class="fa fa-lock"></span> {% trans "locked" %}
+            {% endif %}
+          </small>
+        </h1>
+      </li>
+      {% include "articles/includes/article_menu.html" %}
+    </ul>
+    <div>
+      {% block wiki_contents_tab %}
+      {% endblock %}
+    </div>
+    {% if not "_plugin/categories" in request.path %}
+    <div>
+      {% for category in articleplugin.categories.all %}
+        {% if urlpath.slug == category.slug %}
+          <a href="_plugin/categories">
+            <button class="btn btn-primary btn-lg" style="margin-bottom:5px">Edit this category</button>
+          </a>
+          {% if category.articles_set.all %}
+            <h2>Entries</h2> 
+            {% for article in category.articles_set.all %}
+              <p><a href="{{ articleplugin.get_absolute_url }}">{{ articleplugin.headline }}</a></p>
+            {% endfor %}
+          {% endif %}          
+        {% endif %}
+      {% endfor %}
+    </div>
+    <div>
+      {% with articleplugin.categories.all as categories %}
+        {% if categories.all %}
+          {% trans "This article is in the following categories: " %}
+          <ul>
+              {% for category in categories %}
+                <li><a href="{{ category.url }}">{{category.short_title}}</a>
+                  {% if category.parent %}
+                    <a href="/{{category.parent.slug}}"> (Parent: {{category.parent}}) </a>
+                  {% endif %}
+                </li>
+              {% endfor %}
+          </ul>
+       {% endif %}
+      {% endwith %}
+    </div>
+    {% endif %}
+  </div>
+
+{% endblock %}
+
+{% block wiki_footer_prepend %}
+  <p style="margin-bottom: 10px;"><em>{% trans "This article was last modified:" %} {{ articleplugin.current_revision.modified }}</em></p>
+{% endblock %}
