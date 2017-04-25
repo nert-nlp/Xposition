@@ -7,25 +7,7 @@
 {% block wiki_contents_tab %}
 
 
-  <div class="panel-group">  
-   {% for category in article.categories.all %}
-    {% if urlpath.slug == category.slug %}    
-    <div class="panel panel-default">
-      <div class="panel-heading" style="margin-bottom:5px" class="col-lg-12">
-        <a class="panel-toggle" href="#collapse_edit" data-toggle="collapse">
-          <h2>Edit this category</h2>
-        </a>
-      </div>
-    
-      <br>
-
-      <div id="collapse_edit" class="panel-collapse collapse" style="margin:10px">
-        Edit form goes here
-      </div>    
-
-    </div>    
-    {% endif %}
-   {% endfor %}
+  <div class="panel-group">
    
     <div class="panel panel-default">
       <div class="panel-heading" style="margin-bottom:5px" class="col-lg-12">

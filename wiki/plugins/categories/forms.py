@@ -48,3 +48,22 @@ class SidebarForm(PluginSidebarFormMixin):
     class Meta:
         model = models.Article
         fields = ('categories',)
+
+class EditCategoryForm(PluginSidebarFormMixin, forms.ModelForm):
+    def __init__(self, article, request, *args, **kwargs):
+        self.article = article
+        self.request = request
+        self.instance = article.categories.all()[0]
+        super(EditCategoryForm, self).__init__(*args, **kwargs)
+        self.fields['parent'].label_from_instance = lambda obj: mark_safe("%s" %  obj.parent + '--->' + obj.short_title if not obj.parent is None else obj.short_title)
+
+    def save(self, *args, **kwargs):
+        self.instance = self.article.categories.all()[0]
+        data = self.cleaned_data
+        self.instance.parent = data['parent']
+        self.instance.save()
+        super(EditCategoryForm, self).save(*args, **kwargs)
+
+    class Meta:
+        model = models.Category
+        fields = ('parent',)

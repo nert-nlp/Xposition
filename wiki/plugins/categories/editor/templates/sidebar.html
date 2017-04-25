@@ -2,6 +2,7 @@
 {% load category_tags %}
 
 
+{% if not article.categories.all.0.slug == urlpath.slug %}
 <h4>{% trans "Change Category" %}</h4>
 
 <p>
@@ -54,6 +55,15 @@
   </p>
 </div>
 
+{% endif %}
+
+{% if article.categories.all.0.slug == urlpath.slug %}
+
+<p>
+  Cannot change the category of this article because it is a category article.
+</p>
+
+{% endif %}
 
 <hr />
 
