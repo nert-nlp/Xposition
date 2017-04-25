@@ -34,4 +34,22 @@ class CategoryPlugin(BasePlugin):
         # print "I WAS LOADED!"
         pass
 
+class CategoryEditPlugin(BasePlugin):
+    slug = 'categoryEdit'
+
+    sidebar = {
+        'headline': _('Category Edit'),
+        'icon_class': 'fa-sitemap',
+        'template': 'sidebarEdit.html',
+        'form_class': forms.EditCategoryForm,
+        'get_form_kwargs': (lambda a: {})
+    }
+
+
+    def __init__(self):
+        # print "I WAS LOADED!"
+        pass
+
+
 registry.register(CategoryPlugin)
+registry.register(CategoryEditPlugin)
