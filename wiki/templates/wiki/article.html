@@ -33,16 +33,12 @@
     </div>
     {% if not "_plugin/categories" in request.path %}
     <div>
-      {% for category in article.categories.all %}
-        {% if urlpath.slug == category.slug %}
-          {% if category.articles_set.all %}
+        {% if urlpath.slug == article.categories.all.0.slug %}
             <h2>Entries</h2> 
-            {% for article in category.articles_set.all %}
+            {% for article in article.categories.values_list.all %}
               <p><a href="{{ article.get_absolute_url }}">{{ article.headline }}</a></p>
             {% endfor %}
-          {% endif %}          
         {% endif %}
-      {% endfor %}
     </div>
     <div>
       {% with article.categories.all as categories %}

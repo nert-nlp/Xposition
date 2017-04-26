@@ -19,9 +19,10 @@
       <br>    
 
       <div id="collapse_list" class="panel-collapse collapse" style="margin:10px">
-        Category list here
-        {% for category in Category.objects.all %}
-          {{category}}
+        {% for category in categories %}
+          <div>
+              <a href="/{{category.slug}}">{{category.short_title}}</a>
+          </div>
         {% endfor %} 
       </div>  
     </div>   
