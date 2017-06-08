@@ -37,7 +37,7 @@ class Article(models.Model):
 
     objects = managers.ArticleManager()
 
-    categories = models.ManyToManyField(Category, related_name="categories+")
+    categories = models.ManyToManyField(Category, related_name="article_set")
 
     current_revision = models.OneToOneField(
         'ArticleRevision', verbose_name=_('current revision'),

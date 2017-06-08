@@ -26,7 +26,7 @@ class SidebarForm(PluginSidebarFormMixin):
         self.article = article
         self.request = request
         super(SidebarForm, self).__init__(*args, **kwargs)
-        self.fields['categories'].required = True
+        self.fields['categories'].required = False
         self.fields['categories'].label_from_instance = lambda obj: mark_safe("%s" % obj.short_title + (' <a href=/'+obj.slug+' target="_blank">View</a>'))
         self.fields['categories'].initial = article.categories.all
         self.fields['categories'].widget = forms.CheckboxSelectMultiple()
@@ -53,7 +53,8 @@ class EditCategoryForm(PluginSidebarFormMixin, forms.ModelForm):
     def __init__(self, article, request, *args, **kwargs):
         self.article = article
         self.request = request
-        self.instance = article.categories.all()[0]
+        if(article.categories.all()):
+            self.instance = article.categories.all()[0]
         super(EditCategoryForm, self).__init__(*args, **kwargs)
         self.fields['parent'].label_from_instance = lambda obj: mark_safe("%s" %  obj.parent.short_title + '--->' + obj.short_title if not obj.parent is None else obj.short_title)
 
