@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'mptt',
     'wiki.plugins.categories',
     'wiki.plugins.categories.editor',
+    'wiki.plugins.metadata',
 ]
 
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
