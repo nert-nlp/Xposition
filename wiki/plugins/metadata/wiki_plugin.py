@@ -8,7 +8,7 @@ from wiki.models import Article
 from wiki.core.plugins.base import BasePlugin
 from wiki.plugins.notifications.settings import ARTICLE_EDIT
 from wiki.plugins.notifications.util import truncate_title
-from . import views  #, forms, models#
+from . import views, forms, models
 
 class MetadataPlugin(BasePlugin):
 
