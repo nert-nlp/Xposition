@@ -49,20 +49,11 @@ class MetadataView(ArticleMixin, FormView):
         return kwargs
 
     def form_valid(self, form):
-        if 'supersense' in form.data:
-            self.metadata = models.Supersense.objects.create(name = form.data['name'],
-                                                             description = form.data['description'],
-                                                             animacy = form.data['animacy'],
-                                                             counterpart = form.data['counterpart'])
-        elif 'metadata' in form.data:
-            self.metadata = models.Metadata.objects.create(name = form.data['name'],
-                                                           description = form.data['description'])
         self.article_urlpath = URLPath.create_article(
             URLPath.root(),
             form.data['name'],
             title=form.data['name'],
             content=form.data['description'],
-            metadata=self.metadata,
             user_message=" ",
             user=self.request.user,
             article_kwargs={'owner': self.request.user,
@@ -72,6 +63,21 @@ class MetadataView(ArticleMixin, FormView):
                             'other_read': self.article.other_read,
                             'other_write': self.article.other_write,
                             })
+        if 'supersense' in form.data:
+            self.metadata = models.Supersense.objects.create(name = form.data['name'],
+                                                             description = form.data['description'],
+                                                             animacy = form.data['animacy'],
+                                                             counterpart = form.data['counterpart'])
+        elif 'metadata' in form.data:
+            self.metadata = models.Metadata.objects.create(name = form.data['name'],
+                                                           description = form.data['description'])
+        self.metadata.article = Article.objects.get(urlpath = self.article_urlpath)
+        if 'supersense' in form.data:
+            self.supersense_category = Category.objects.create(slug = form.data['name'],
+                                                                name = form.data['name'],
+                                                                description = form.data['description'])
+            self.metadata.article.categories.add(self.supersense_category)
+        self.metadata.save()
         return redirect(
             "wiki:get",
             path=self.article_urlpath.path,

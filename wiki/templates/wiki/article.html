@@ -31,15 +31,17 @@
       {% block wiki_contents_tab %}
       {% endblock %}
     </div>
-    {% if not "_plugin/categories" in request.path %}
+    {% if not "_" in request.path %}
     <div>
         {% if article.categories.all %}
         {% if urlpath.slug == article.categories.all.0.slug %}
             <h2>Entries</h2> 
-            {% for article in article.categories.all.0.article_set.all %}
-              <p>
-                <a href="{{ article.get_absolute_url }}">{{ article }}</a>
-              </p>
+            {% for category_article in article.categories.all.0.article_set.all %}
+              {% if category_article != article %}
+                <p>
+                  <a href="{{ article.get_absolute_url }}">{{ category_article }}</a>
+                </p>
+              {% endif %}
             {% endfor %}
         {% endif %}
         {% endif %}
@@ -60,6 +62,22 @@
        {% endif %}
       {% endwith %}
     </div>
+
+
+      {% if article.metadata %}
+      <div>
+        <h1>
+          Metadata
+        </h1>
+        {% if article.metadata.supersense %}
+          {{ article.metadata.supersense }}
+        {% endif %}
+        {% if not article.metadata.supersense %}
+          {{ article.metadata }}
+        {% endif %}
+      </div>
+      {% endif %}
+
     {% endif %}
   </div>
 
