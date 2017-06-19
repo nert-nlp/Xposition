@@ -53,10 +53,15 @@ class EditCategoryForm(PluginSidebarFormMixin, forms.ModelForm):
     def __init__(self, article, request, *args, **kwargs):
         self.article = article
         self.request = request
-        if(article.categories.all()):
-            self.instance = article.categories.all()[0]
         super(EditCategoryForm, self).__init__(*args, **kwargs)
         self.fields['parent'].label_from_instance = lambda obj: mark_safe("%s" %  obj.parent.short_title + '--->' + obj.short_title if not obj.parent is None else obj.short_title)
+        for category in article.categories.all():
+            ids = []
+            cat_parent = category.parent
+            while cat_parent is not None:
+                ids.append(cat_parent.id)
+                cat_parent = cat_parent.parent
+            self.fields['parent'].queryset = models.Category.objects.exclude(id__in = ids).exclude(slug = category.slug)
 
     def save(self, *args, **kwargs):
         self.instance = self.article.categories.all()[0]
