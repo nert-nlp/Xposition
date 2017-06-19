@@ -1,0 +1,50 @@
+{% load i18n sekizai_tags static %}
+{% load category_tags %}
+
+<h4>{% trans "Edit Metadata" %}</h4>
+
+
+<div class="form-horizontal sidebar-form">
+  {% if form.non_field_errors %}
+    {% if form_error_title %}<h4 class="alert-heading">{{ form_error_title }}</h4>{% endif %}
+    {% for error_message in form.non_field_errors %}
+      <div class="alert alert-block alert-danger">
+        {{ error_message }}
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  {# Include the hidden fields #}
+  {% for hidden in form.hidden_fields %}
+    {{ hidden }}
+  {% endfor %}
+
+  <p>
+  {% for field in form.visible_fields %}
+    <fieldset id="div_{{ field.auto_id }}" class="control-group fields {% if field.errors %} error{% endif %}">
+      {{field}}
+      {% if field.errors %}
+      <div id="error_{{ forloop.counter }}_{{ field.auto_id }}" class="help-block">
+        {% for error in field.errors %}
+        <div>{{ error }}</div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </fieldset>
+    {% if field.help_text %}
+      <p id="hint_{{ field.auto_id }}" class="help-block">{{ field.help_text|safe }}</p>
+    {% endif %}
+  {% endfor %}
+  </p>
+
+  <p>
+    <button type="submit" name="{{ plugin.slug }}_save" value="1" class="btn btn-default btn-md">
+      <span class="fa fa-database"></span>
+      {% trans "Save changes" %}
+    </button>
+  </p>
+</div>
+
+
+<hr />
+

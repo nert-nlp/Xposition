@@ -14,6 +14,13 @@ class MetadataPlugin(BasePlugin):
 
     slug = 'metadata'
 
+    sidebar = {
+        'headline': _('Metadata'),
+        'icon_class': 'fa-asterisk',
+        'template': 'metadatasidebar.html',
+        'form_class': forms.MetaSidebarForm,
+        'get_form_kwargs': (lambda a: {})
+    }
 
     article_tab = (_('Metadata'), "fa fa-asterisk")
     article_view = views.MetadataView.dispatch
@@ -27,4 +34,21 @@ class MetadataPlugin(BasePlugin):
         pass
 
 
+'''class SupersensePlugin(BasePlugin):
+
+    slug = 'supersense'
+
+    sidebar = {
+        'headline': _('Supersense'),
+        'icon_class': 'fa-asterisk',
+        'template': 'metadatasidebar.html',
+        'form_class': forms.SupersenseSidebarForm,
+        'get_form_kwargs': (lambda a: {})
+    }
+
+    def __init__(self):
+        # print "I WAS LOADED!"
+        pass
+
+registry.register(SupersensePlugin)'''
 registry.register(MetadataPlugin)
