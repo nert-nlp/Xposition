@@ -18,8 +18,12 @@ except ImportError:
 
 class MetadataView(ArticleMixin, FormView):
 
+
+    ''' View used to generate forms and process new metadata creation via the metadata 'tab' '''
+
     form_class = forms.MetadataForm
     template_name = "metadata.html"
+    # metadata.html contains the template for displaying the metadata creation forms
 
     @method_decorator(get_article(can_read=True, can_create=True), )
     def dispatch(self, request, article, *args, **kwargs):
@@ -36,6 +40,9 @@ class MetadataView(ArticleMixin, FormView):
         kwargs = super(MetadataView, self).get_form_kwargs(**kwargs)
         return kwargs
 
+
+    # To add a new type of metadata creation, create a form and return it in this array
+
     def get_forms(self):
         form = [super(MetadataView, self).get_form(form_class=forms.MetadataForm),
                 super(MetadataView, self).get_form(form_class=forms.SupersenseForm)]
@@ -43,10 +50,16 @@ class MetadataView(ArticleMixin, FormView):
 
     def get_context_data(self, **kwargs):
         kwargs = super(MetadataView, self).get_context_data(**kwargs)
-        kwargs['form_choices'] = ["Metadata", "Supersense"]
+
+        # get forms and insert into context
+
         kwargs['forms'] = self.get_forms()
         kwargs['article'] = self.article
         return kwargs
+
+
+
+    # This is where form validation is done, we process the form and create the new metadata here
 
     def form_valid(self, form):
         self.article_urlpath = URLPath.create_article(
@@ -63,6 +76,9 @@ class MetadataView(ArticleMixin, FormView):
                             'other_read': self.article.other_read,
                             'other_write': self.article.other_write,
                             })
+
+        # Logic here is dense, will need to use better logic to make adding new metadata to process easier
+
         if 'supersense' in form.data:
             self.metadata = models.Supersense.objects.create(name = form.data['name'],
                                                              description = form.data['description'],
@@ -72,6 +88,9 @@ class MetadataView(ArticleMixin, FormView):
             self.metadata = models.Metadata.objects.create(name = form.data['name'],
                                                            description = form.data['description'])
         self.metadata.article = Article.objects.get(urlpath = self.article_urlpath)
+
+
+        # if supersense create a category for the supersense and associate it with the article
         if 'supersense' in form.data:
             self.supersense_category = Category.objects.create(slug = form.data['name'],
                                                                 name = form.data['name'],
@@ -83,9 +102,4 @@ class MetadataView(ArticleMixin, FormView):
             path=self.article_urlpath.path,
             article_id=self.article.id)
 
-    def processSupersense(self, data):
-        1+1
-
-    def processMetadata(self, data):
-        2+2
 

@@ -8,7 +8,12 @@ from django.utils.translation import ugettext
 from wiki.core.plugins.base import PluginSidebarFormMixin
 from wiki import models
 
+# It would be cleaner if we combined the SidebarForm and EditCategoryForm, however the logic of
+# the form might be too complex if we do
+
 class CategoryForm(forms.ModelForm):
+
+    '''Simple model form for category creation, edit this to hide fields that are unnecessary'''
     def __init__(self, *args, **kwargs):
         super(CategoryForm, self).__init__(*args, **kwargs)
 
@@ -22,6 +27,7 @@ class CategoryForm(forms.ModelForm):
 
 class SidebarForm(PluginSidebarFormMixin):
 
+    ''' This edit form allows us to change what categories an article is in '''
     def __init__(self, article, request, *args, **kwargs):
         self.article = article
         self.request = request
@@ -50,11 +56,20 @@ class SidebarForm(PluginSidebarFormMixin):
         fields = ('categories',)
 
 class EditCategoryForm(PluginSidebarFormMixin, forms.ModelForm):
+
+
+    ''' This edit form allows us to change the parent category of a category
+        via the edit screen of its category landing article'''
+
     def __init__(self, article, request, *args, **kwargs):
         self.article = article
         self.request = request
         super(EditCategoryForm, self).__init__(*args, **kwargs)
         self.fields['parent'].label_from_instance = lambda obj: mark_safe("%s" %  obj.parent.short_title + '--->' + obj.short_title if not obj.parent is None else obj.short_title)
+
+        # logic to remove the category itself and its children from the available choices
+        # to avoid edge cases
+
         for category in article.categories.all():
             ids = []
             cat_children = []
