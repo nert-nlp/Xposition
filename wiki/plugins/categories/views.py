@@ -156,7 +156,12 @@ class CategoryRelatedList(ListView):
         return names
 
 
+
+
+
 class CategoryView( ArticleMixin, FormView ):
+
+    ''' This view manages the creation of new categories '''
 
     form_class = forms.CategoryForm
     template_name = "category_detail.html"
@@ -178,12 +183,18 @@ class CategoryView( ArticleMixin, FormView ):
         kwargs = super(CategoryView, self).get_form_kwargs(**kwargs)
         return kwargs
 
+
+
+    # Processing of category creation form goes here, modify the category creation process below
     def form_valid(self, form):
         clean_data = form.cleaned_data
         print(clean_data)
         slug = clean_data['slug']
         title = clean_data['name']
         content = clean_data['description']
+
+        # creates an article for the category and then associates them by having equaling titles and slugs
+
         self.landing_article_urlpath = URLPath.create_article(
             URLPath.root(),
             slug,
@@ -213,15 +224,11 @@ class CategoryView( ArticleMixin, FormView ):
         return form
 
 
-    def get_edit_form(self):
-        form = super(CategoryView, self).get_form(form_class=forms.CategoryForm)
-        form.instance = self.article.categories.objects.filter(slug = self.urlpath.slug)
-        return form
+    # Insert form and category list into context for retrieval in template
 
     def get_context_data(self, **kwargs):
         kwargs['categories'] = Category.objects.all()
         kwargs['form'] = self.get_form()
-        kwargs['edit_form'] = 0
         kwargs = super(CategoryView, self).get_context_data(**kwargs)
         kwargs['article'] = self.article
         return kwargs

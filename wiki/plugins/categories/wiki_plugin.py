@@ -12,8 +12,12 @@ from . import views, settings, forms, models
 
 class CategoryPlugin(BasePlugin):
 
+    '''This class initializes the entirety of categories for the app, and also allows
+     the editing and creation of new categories through the 'edit sidebar' and 'tab' respectively'''
+
     slug = 'categories'
 
+    # for editing of which categories the article is in
     sidebar = {
         'headline': _('Categories'),
         'icon_class': 'fa-sitemap',
@@ -34,7 +38,14 @@ class CategoryPlugin(BasePlugin):
         # print "I WAS LOADED!"
         pass
 
+
+
+
 class CategoryEditPlugin(BasePlugin):
+
+    '''created this separate plugin to create a separate category edit sidebar plugin so that we can edit
+     category parent if on a category landing article'''
+
     slug = 'categoryEdit'
 
     sidebar = {
@@ -50,6 +61,8 @@ class CategoryEditPlugin(BasePlugin):
         # print "I WAS LOADED!"
         pass
 
+
+# register both plugins
 
 registry.register(CategoryPlugin)
 registry.register(CategoryEditPlugin)

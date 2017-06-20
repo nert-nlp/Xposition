@@ -13,6 +13,8 @@ from django.core.files.storage import get_storage_class
 
 from django.utils.translation import ugettext_lazy as _
 
+# These are the different metadata models. Extend from the base metadata class if you want to add a
+# new metadata type. Make sure to register your model below.
 
 class Metadata(models.Model):
     name = models.CharField(max_length=100)
@@ -27,6 +29,8 @@ class Supersense(Metadata):
     animacy = models.DecimalField(max_digits=100, decimal_places=0)
     counterpart = models.CharField(max_length=100)
 
+
+# You must register the model here
 
 admin.site.register(Metadata)
 admin.site.register(Supersense)
