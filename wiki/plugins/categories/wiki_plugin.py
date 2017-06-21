@@ -19,7 +19,7 @@ class CategoryPlugin(BasePlugin):
 
     # for editing of which categories the article is in
     sidebar = {
-        'headline': _('Categories'),
+        'headline': _('Change this article\'s Categories'),
         'icon_class': 'fa-sitemap',
         'template': 'sidebar.html',
         'form_class': forms.SidebarForm,
@@ -49,7 +49,7 @@ class CategoryEditPlugin(BasePlugin):
     slug = 'categoryEdit'
 
     sidebar = {
-        'headline': _('Category Edit'),
+        'headline': _('Edit this Category'),
         'icon_class': 'fa-sitemap',
         'template': 'sidebarEdit.html',
         'form_class': forms.EditCategoryForm,

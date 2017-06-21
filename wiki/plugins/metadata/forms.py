@@ -58,8 +58,6 @@ class MetaSidebarForm(forms.Form):
         try:
             if self.instance.supersense:
                 self.form_type = 'supersense'
-                self.fields['name'] = forms.CharField(label='Name', max_length=100)
-                self.fields['description'] = forms.CharField(label='Description', max_length=100)
                 self.fields['animacy'] = forms.DecimalField(max_digits=2,decimal_places=0)
                 self.fields['counterpart'] = forms.CharField(label='Counterpart', max_length=100)
 
@@ -68,8 +66,6 @@ class MetaSidebarForm(forms.Form):
 
         except:
             self.form_type = 'metadata'
-            self.fields['name'] = forms.CharField(label='Name', max_length=100)
-            self.fields['description'] = forms.CharField(label='Description', max_length=100)
 
     def save(self, *args, **kwargs):
         super(MetaSidebarForm, self).save(*args, **kwargs)

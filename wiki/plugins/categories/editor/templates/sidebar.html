@@ -2,11 +2,9 @@
 {% load category_tags %}
 
 
-{# if this isn't a landing category, render the following and allow the user to edit
-    which categories the article is in #}
+{# if this isn't a landing category, render the following and allow the user to edit which categories the article is in #}
 
-{# easy hack to check if the article is a landing category,
-  compare the slug of the article's first category with the urlpath slug #}
+{# easy hack to check if the article is a landing category, compare the slug of the article's first category with the urlpath slug #}
 
 {% if not article.categories.all.0.slug == urlpath.slug %}
   <h4>{% trans "Change Category" %}</h4>
