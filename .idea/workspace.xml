@@ -2,18 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="f3b4c887-8f9b-4af6-9346-dcbd40c93b67" name="Default" comment="">
+      <change type="DELETED" beforePath="$PROJECT_DIR$/wiki/plugins/metadata/templates/sidebar.html" afterPath="" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/wiki/plugins/categories/editor/templates/sidebar.html" afterPath="$PROJECT_DIR$/wiki/plugins/categories/editor/templates/sidebar.html" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/wiki/plugins/categories/editor/templates/sidebarEdit.html" afterPath="$PROJECT_DIR$/wiki/plugins/categories/editor/templates/sidebarEdit.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/wiki/plugins/categories/forms.py" afterPath="$PROJECT_DIR$/wiki/plugins/categories/forms.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/wiki/plugins/categories/views.py" afterPath="$PROJECT_DIR$/wiki/plugins/categories/views.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/wiki/plugins/categories/wiki_plugin.py" afterPath="$PROJECT_DIR$/wiki/plugins/categories/wiki_plugin.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/wiki/plugins/metadata/forms.py" afterPath="$PROJECT_DIR$/wiki/plugins/metadata/forms.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/wiki/plugins/metadata/models.py" afterPath="$PROJECT_DIR$/wiki/plugins/metadata/models.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/wiki/plugins/metadata/templates/metadata.html" afterPath="$PROJECT_DIR$/wiki/plugins/metadata/templates/metadata.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/wiki/plugins/metadata/templates/metadatasidebar.html" afterPath="$PROJECT_DIR$/wiki/plugins/metadata/templates/metadatasidebar.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/wiki/plugins/metadata/views.py" afterPath="$PROJECT_DIR$/wiki/plugins/metadata/views.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/wiki/plugins/metadata/wiki_plugin.py" afterPath="$PROJECT_DIR$/wiki/plugins/metadata/wiki_plugin.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/wiki/templates/wiki/article.html" afterPath="$PROJECT_DIR$/wiki/templates/wiki/article.html" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -28,41 +22,33 @@
   <component name="ExecutionTargetManager" SELECTED_TARGET="default_target" />
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="600">
-      <file leaf-file-name="wiki_plugin.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="wiki_plugin.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/wiki/plugins/categories/wiki_plugin.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1763">
-              <caret line="58" column="0" lean-forward="true" selection-start-line="58" selection-start-column="0" selection-end-line="58" selection-end-column="0" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="views.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/wiki/plugins/categories/views.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="237">
-              <caret line="166" column="42" lean-forward="false" selection-start-line="166" selection-start-column="42" selection-end-line="166" selection-end-column="42" />
+            <state relative-caret-position="1075">
+              <caret line="34" column="6" lean-forward="false" selection-start-line="34" selection-start-column="6" selection-end-line="34" selection-end-column="6" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
       <file leaf-file-name="forms.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/wiki/plugins/categories/forms.py">
+        <entry file="file://$PROJECT_DIR$/wiki/plugins/metadata/forms.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1333">
-              <caret line="38" column="55" lean-forward="false" selection-start-line="38" selection-start-column="55" selection-end-line="38" selection-end-column="55" />
-              <folding />
+            <state relative-caret-position="2580">
+              <caret line="67" column="39" lean-forward="false" selection-start-line="67" selection-start-column="39" selection-end-line="67" selection-end-column="39" />
+              <folding>
+                <element signature="e#1#57#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="sidebar.html" pinned="false" current-in-tab="false">
+      <file leaf-file-name="sidebar.html" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/wiki/plugins/categories/editor/templates/sidebar.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="75">
-              <caret line="4" column="0" lean-forward="false" selection-start-line="4" selection-start-column="0" selection-end-line="8" selection-end-column="75" />
+            <state relative-caret-position="774">
+              <caret line="18" column="54" lean-forward="false" selection-start-line="18" selection-start-column="54" selection-end-line="18" selection-end-column="54" />
               <folding />
             </state>
           </provider>
@@ -71,8 +57,8 @@
       <file leaf-file-name="sidebarEdit.html" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/wiki/plugins/categories/editor/templates/sidebarEdit.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="946">
-              <caret line="22" column="10" lean-forward="true" selection-start-line="22" selection-start-column="10" selection-end-line="22" selection-end-column="10" />
+            <state relative-caret-position="258">
+              <caret line="6" column="60" lean-forward="false" selection-start-line="6" selection-start-column="60" selection-end-line="6" selection-end-column="60" />
               <folding />
             </state>
           </provider>
@@ -107,25 +93,24 @@
         <option value="$PROJECT_DIR$/testproject/testproject/settings/base.py" />
         <option value="$PROJECT_DIR$/wiki/plugins/metadata/templates/sidebar.html" />
         <option value="$PROJECT_DIR$/wiki/plugins/metadata/wiki_plugin.py" />
-        <option value="$PROJECT_DIR$/wiki/plugins/metadata/forms.py" />
         <option value="$PROJECT_DIR$/wiki/plugins/metadata/templates/metadatasidebar.html" />
         <option value="$PROJECT_DIR$/wiki/templates/wiki/article.html" />
         <option value="$PROJECT_DIR$/wiki/plugins/metadata/templates/metadata.html" />
         <option value="$PROJECT_DIR$/wiki/plugins/metadata/views.py" />
-        <option value="$PROJECT_DIR$/wiki/plugins/categories/wiki_plugin.py" />
         <option value="$PROJECT_DIR$/wiki/plugins/categories/views.py" />
         <option value="$PROJECT_DIR$/wiki/plugins/categories/forms.py" />
         <option value="$PROJECT_DIR$/wiki/plugins/metadata/models.py" />
-        <option value="$PROJECT_DIR$/wiki/plugins/categories/editor/templates/sidebar.html" />
+        <option value="$PROJECT_DIR$/wiki/plugins/categories/wiki_plugin.py" />
         <option value="$PROJECT_DIR$/wiki/plugins/categories/editor/templates/sidebarEdit.html" />
+        <option value="$PROJECT_DIR$/wiki/plugins/categories/editor/templates/sidebar.html" />
+        <option value="$PROJECT_DIR$/wiki/plugins/metadata/forms.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="-16" />
-    <option name="y" value="-16" />
-    <option name="width" value="3872" />
-    <option name="height" value="2092" />
+    <option name="x" value="1" />
+    <option name="width" value="3838" />
+    <option name="height" value="2060" />
   </component>
   <component name="ProjectLevelVcsManager">
     <ConfirmationsSetting value="2" id="Add" />
@@ -145,6 +130,8 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scratches" />
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -335,8 +322,6 @@
           </PATH>
         </subPane>
       </pane>
-      <pane id="Scratches" />
-      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -556,26 +541,26 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-16" y="-16" width="3872" height="2092" extended-state="6" />
-    <editor active="true" />
+    <frame x="1" y="0" width="3838" height="2060" extended-state="0" />
+    <editor active="false" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.24973959" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.25170782" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.329718" sideWeight="0.50104165" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.329718" sideWeight="0.49895832" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.38014403" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33554083" sideWeight="0.49895832" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.329718" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.38014403" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
     </layout>
   </component>
   <component name="VcsContentAnnotationSettings">
@@ -590,7 +575,7 @@
           </properties>
         </breakpoint>
       </default-breakpoints>
-      <option name="time" value="42" />
+      <option name="time" value="43" />
     </breakpoint-manager>
     <watches-manager>
       <configuration name="PythonConfigurationType">
@@ -606,7 +591,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1591">
           <caret line="37" column="54" lean-forward="false" selection-start-line="37" selection-start-column="54" selection-end-line="37" selection-end-column="54" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -802,18 +786,10 @@
       </provider>
     </entry>
     <entry file="file://$USER_HOME$/Downloads/lol.py.py" />
-    <entry file="file://$PROJECT_DIR$/wiki/plugins/metadata/templates/sidebar.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="903">
-          <caret line="48" column="6" lean-forward="true" selection-start-line="48" selection-start-column="6" selection-end-line="48" selection-end-column="6" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/wiki/plugins/categories/models.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="4171">
           <caret line="102" column="32" lean-forward="false" selection-start-line="102" selection-start-column="32" selection-end-line="102" selection-end-column="32" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -828,7 +804,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="364">
           <caret line="34" column="0" lean-forward="false" selection-start-line="34" selection-start-column="0" selection-end-line="34" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -836,7 +811,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="350">
           <caret line="87" column="0" lean-forward="false" selection-start-line="87" selection-start-column="0" selection-end-line="87" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -844,15 +818,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="351">
           <caret line="323" column="0" lean-forward="false" selection-start-line="323" selection-start-column="0" selection-end-line="323" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wiki/plugins/metadata/templates/metadatasidebar.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2322">
-          <caret line="54" column="2" lean-forward="false" selection-start-line="54" selection-start-column="2" selection-end-line="54" selection-end-column="2" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -860,27 +825,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="903">
           <caret line="33" column="7" lean-forward="false" selection-start-line="33" selection-start-column="7" selection-end-line="33" selection-end-column="7" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wiki/plugins/metadata/wiki_plugin.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1183">
-          <caret line="36" column="0" lean-forward="true" selection-start-line="36" selection-start-column="0" selection-end-line="36" selection-end-column="0" />
-          <folding>
-            <element signature="e#24#80#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wiki/plugins/metadata/forms.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2838">
-          <caret line="66" column="99" lean-forward="true" selection-start-line="66" selection-start-column="99" selection-end-line="66" selection-end-column="99" />
-          <folding>
-            <element signature="e#1#57#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -888,9 +832,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-1827">
           <caret line="27" column="49" lean-forward="false" selection-start-line="27" selection-start-column="49" selection-end-line="27" selection-end-column="49" />
-          <folding>
-            <element signature="e#0#37#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -898,23 +839,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-120">
           <caret line="71" column="39" lean-forward="false" selection-start-line="71" selection-start-column="39" selection-end-line="71" selection-end-column="39" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wiki/plugins/metadata/templates/metadata.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="559">
-          <caret line="13" column="16" lean-forward="false" selection-start-line="13" selection-start-column="16" selection-end-line="13" selection-end-column="16" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wiki/plugins/categories/views.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="237">
-          <caret line="166" column="42" lean-forward="false" selection-start-line="166" selection-start-column="42" selection-end-line="166" selection-end-column="42" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -922,7 +846,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="151">
           <caret line="16" column="60" lean-forward="false" selection-start-line="16" selection-start-column="60" selection-end-line="16" selection-end-column="60" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -930,38 +853,75 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-1109">
           <caret line="5" column="0" lean-forward="true" selection-start-line="5" selection-start-column="0" selection-end-line="5" selection-end-column="0" />
-          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wiki/plugins/metadata/templates/sidebar.html" />
+    <entry file="file://$PROJECT_DIR$/wiki/plugins/metadata/wiki_plugin.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="759">
+          <caret line="19" column="31" lean-forward="false" selection-start-line="19" selection-start-column="31" selection-end-line="19" selection-end-column="31" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wiki/plugins/categories/views.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="237">
+          <caret line="166" column="42" lean-forward="false" selection-start-line="166" selection-start-column="42" selection-end-line="166" selection-end-column="42" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wiki/plugins/metadata/templates/metadatasidebar.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1247">
+          <caret line="54" column="2" lean-forward="false" selection-start-line="54" selection-start-column="2" selection-end-line="54" selection-end-column="2" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/wiki/plugins/categories/forms.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1333">
+        <state relative-caret-position="-1161">
           <caret line="38" column="55" lean-forward="false" selection-start-line="38" selection-start-column="55" selection-end-line="38" selection-end-column="55" />
-          <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/wiki/plugins/categories/editor/templates/sidebar.html">
+    <entry file="file://$PROJECT_DIR$/wiki/plugins/metadata/templates/metadata.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="75">
-          <caret line="4" column="0" lean-forward="false" selection-start-line="4" selection-start-column="0" selection-end-line="8" selection-end-column="75" />
-          <folding />
+        <state relative-caret-position="-1103">
+          <caret line="13" column="16" lean-forward="false" selection-start-line="13" selection-start-column="16" selection-end-line="13" selection-end-column="16" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/wiki/plugins/categories/editor/templates/sidebarEdit.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="946">
-          <caret line="22" column="10" lean-forward="true" selection-start-line="22" selection-start-column="10" selection-end-line="22" selection-end-column="10" />
+        <state relative-caret-position="258">
+          <caret line="6" column="60" lean-forward="false" selection-start-line="6" selection-start-column="60" selection-end-line="6" selection-end-column="60" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/wiki/plugins/categories/wiki_plugin.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1763">
-          <caret line="58" column="0" lean-forward="true" selection-start-line="58" selection-start-column="0" selection-end-line="58" selection-end-column="0" />
+        <state relative-caret-position="1075">
+          <caret line="34" column="6" lean-forward="false" selection-start-line="34" selection-start-column="6" selection-end-line="34" selection-end-column="6" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wiki/plugins/metadata/forms.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2580">
+          <caret line="67" column="39" lean-forward="false" selection-start-line="67" selection-start-column="39" selection-end-line="67" selection-end-column="39" />
+          <folding>
+            <element signature="e#1#57#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wiki/plugins/categories/editor/templates/sidebar.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="774">
+          <caret line="18" column="54" lean-forward="false" selection-start-line="18" selection-start-column="54" selection-end-line="18" selection-end-column="54" />
           <folding />
         </state>
       </provider>
