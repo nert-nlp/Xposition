@@ -17,17 +17,20 @@ from django.utils.translation import ugettext_lazy as _
 # new metadata type. Make sure to register your model below.
 
 class Metadata(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, primary_key=True)
     description = models.CharField(max_length=200)
     article = models.OneToOneField(Article, null=True)
+
+    def __str__(self):  # __unicode__ on Python 2
+        return self.name
 
     class Meta():
         verbose_name = _('metadata')
 
 
 class Supersense(Metadata):
-    animacy = models.DecimalField(max_digits=100, decimal_places=0)
-    counterpart = models.CharField(max_length=100)
+    animacy = models.DecimalField(max_digits=2, decimal_places=0)
+    counterpart = models.ForeignKey('self', null=True, blank=True)
 
 
 # You must register the model here

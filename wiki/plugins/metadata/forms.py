@@ -59,7 +59,7 @@ class MetaSidebarForm(forms.Form):
             if self.instance.supersense:
                 self.form_type = 'supersense'
                 self.fields['animacy'] = forms.DecimalField(max_digits=2,decimal_places=0)
-                self.fields['counterpart'] = forms.CharField(label='Counterpart', max_length=100)
+                self.fields['counterpart'] = forms.ModelChoiceField(queryset=models.Supersense.objects.all())
 
         # else if not a supersense then set form to edit a default metadata
         # if you want to add a different metadata type to edit then here is the best place to do so
