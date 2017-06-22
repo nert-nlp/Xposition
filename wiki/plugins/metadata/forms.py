@@ -58,8 +58,9 @@ class MetaSidebarForm(forms.Form):
         try:
             if self.instance.supersense:
                 self.form_type = 'supersense'
-                self.fields['animacy'] = forms.DecimalField(max_digits=2,decimal_places=0)
-                self.fields['counterpart'] = forms.ModelChoiceField(queryset=models.Supersense.objects.all())
+                self.fields['animacy'] = forms.DecimalField(max_digits=2,decimal_places=0, initial=self.instance.supersense.animacy)
+                self.fields['counterpart'] = forms.ModelChoiceField(queryset=models.Supersense.objects.all(),
+                                                                    initial=self.instance.supersense.counterpart, required=False)
 
         # else if not a supersense then set form to edit a default metadata
         # if you want to add a different metadata type to edit then here is the best place to do so
@@ -67,5 +68,18 @@ class MetaSidebarForm(forms.Form):
         except:
             self.form_type = 'metadata'
 
+    def get_usermessage(self):
+        return ugettext(
+            "Metadata changes saved.")
+
     def save(self, *args, **kwargs):
-        super(MetaSidebarForm, self).save(*args, **kwargs)
+        # implement saving in edit
+        if self.is_valid():
+            if self.form_type is 'supersense':
+                supersense = models.Supersense.objects.get(name = self.article.metadata.name)
+                supersense.animacy = self.cleaned_data['animacy']
+                supersense.counterpart = self.cleaned_data['counterpart']
+                supersense.save()
+                #must include the following data because django-wiki requires it in sidebar forms
+                self.cleaned_data['unsaved_article_title'] = self.article.metadata.name
+                self.cleaned_data['unsaved_article_content'] = self.article.metadata.description
