@@ -66,6 +66,7 @@ class EditCategoryForm(PluginSidebarFormMixin, forms.ModelForm):
         self.request = request
         super(EditCategoryForm, self).__init__(*args, **kwargs)
         self.fields['parent'].label_from_instance = lambda obj: mark_safe("%s" %  obj.parent.short_title + '--->' + obj.short_title if not obj.parent is None else obj.short_title)
+        self.fields['parent'].initial = self.article.categories.all()[0].parent
 
         # logic to remove the category itself and its children from the available choices
         # to avoid edge cases
