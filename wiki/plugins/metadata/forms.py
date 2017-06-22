@@ -73,13 +73,21 @@ class MetaSidebarForm(forms.Form):
             "Metadata changes saved.")
 
     def save(self, *args, **kwargs):
-        # implement saving in edit
         if self.is_valid():
+            #  supersense saving logic
             if self.form_type is 'supersense':
                 supersense = models.Supersense.objects.get(name = self.article.metadata.name)
                 supersense.animacy = self.cleaned_data['animacy']
+                if supersense.counterpart is not None and supersense.counterpart is not self.cleaned_data['counterpart']:
+                    supersense.counterpart.counterpart = None
+                    supersense.counterpart.save()
                 supersense.counterpart = self.cleaned_data['counterpart']
                 supersense.save()
+                if self.cleaned_data['counterpart'] is not None:
+                    counterpart = models.Supersense.objects.get(name = self.cleaned_data['counterpart'].name)
+                    counterpart.counterpart = supersense
+                    counterpart.save()
                 #must include the following data because django-wiki requires it in sidebar forms
                 self.cleaned_data['unsaved_article_title'] = self.article.metadata.name
                 self.cleaned_data['unsaved_article_content'] = self.article.metadata.description
+            # add any new metadata type save logic here

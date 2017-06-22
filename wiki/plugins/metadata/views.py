@@ -77,32 +77,34 @@ class MetadataView(ArticleMixin, FormView):
                             'other_write': self.article.other_write,
                             })
 
-        # Logic here is dense, will need to use better logic to make adding new metadata to process easier
+        # if we are dealing with a base metadata object
+        if 'metadata' in form.data:
+            self.metadata = models.Metadata.objects.create(name = form.data['name'],
+                                                           description = form.data['description'])
+            self.metadata.article = Article.objects.get(urlpath=self.article_urlpath)
 
+
+        # if supersense create a category and update counterpart if necessary
         if 'supersense' in form.data:
-            self.metadata = models.Supersense.objects.create(name = form.data['name'],
-                                                             description = form.data['description'],
-                                                             animacy = form.data['animacy'],
-                                                             counterpart = None)
+            self.metadata = models.Supersense.objects.create(name=form.data['name'],
+                                                             description=form.data['description'],
+                                                             animacy=form.data['animacy'],
+                                                             counterpart=None)
             if form.data['counterpart']:
                 counterpart = models.Supersense.objects.get(name=form.data['counterpart'])
                 self.metadata.counterpart = counterpart
-                counterpart.metadata.counterpart = self.metadata
+                counterpart.counterpart = self.metadata
                 counterpart.save()
             else:
                 pass
-        elif 'metadata' in form.data:
-            self.metadata = models.Metadata.objects.create(name = form.data['name'],
-                                                           description = form.data['description'])
-        self.metadata.article = Article.objects.get(urlpath = self.article_urlpath)
-
-
-        # if supersense create a category for the supersense and associate it with the article
-        if 'supersense' in form.data:
-            self.supersense_category = Category.objects.create(slug = form.data['name'],
+            supersense_category = Category.objects.create(slug = form.data['name'],
                                                                 name = form.data['name'],
                                                                 description = form.data['description'])
-            self.metadata.article.categories.add(self.supersense_category)
+            self.metadata.article = Article.objects.get(urlpath=self.article_urlpath)
+            self.metadata.article.categories.add(supersense_category)
+
+        #if adding a new metadata type, include save logic here
+
         self.metadata.save()
         return redirect(
             "wiki:get",
