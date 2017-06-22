@@ -83,7 +83,14 @@ class MetadataView(ArticleMixin, FormView):
             self.metadata = models.Supersense.objects.create(name = form.data['name'],
                                                              description = form.data['description'],
                                                              animacy = form.data['animacy'],
-                                                             counterpart = form.data['counterpart'])
+                                                             counterpart = None)
+            if form.data['counterpart']:
+                counterpart = models.Supersense.objects.get(name=form.data['counterpart'])
+                self.metadata.counterpart = counterpart
+                counterpart.metadata.counterpart = self.metadata
+                counterpart.save()
+            else:
+                pass
         elif 'metadata' in form.data:
             self.metadata = models.Metadata.objects.create(name = form.data['name'],
                                                            description = form.data['description'])
