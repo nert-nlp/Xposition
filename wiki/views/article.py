@@ -35,6 +35,10 @@ class ArticleView(ArticleMixin, TemplateView):
 
     @method_decorator(get_article(can_read=True))
     def dispatch(self, request, article, *args, **kwargs):
+        try:
+            self.template_name = article.metadata.template
+        except:
+            pass
         return super(
             ArticleView,
             self).dispatch(

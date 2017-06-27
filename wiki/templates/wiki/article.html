@@ -69,21 +69,6 @@
         {% endwith %}
       </div>
 
-      {# if article has metadata render it here #}
-      {% if article.metadata %}
-        <div>
-          <h1>
-            Metadata
-          </h1>
-          {% if article.metadata.supersense %}
-            {{ article.metadata.supersense }}
-          {% endif %}
-          {% if not article.metadata.supersense %}
-            {{ article.metadata }}
-          {% endif %}
-        </div>
-      {% endif %}
-
     {% endif %}
   </div>
 

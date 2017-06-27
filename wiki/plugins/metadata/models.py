@@ -17,6 +17,7 @@ from django.utils.translation import ugettext_lazy as _
 # new metadata type. Make sure to register your model below.
 
 class Metadata(models.Model):
+    template = models.CharField(max_length=100, default="wiki/view.html",editable=False)
     name = models.CharField(max_length=100, primary_key=True)
     description = models.CharField(max_length=200)
     article = models.OneToOneField(Article, null=True)
