@@ -89,6 +89,7 @@ class MetadataView(ArticleMixin, FormView):
             self.metadata = models.Supersense.objects.create(name=form.data['name'],
                                                              description=form.data['description'],
                                                              animacy=form.data['animacy'],
+                                                             template="supersense_article_view.html",
                                                              counterpart=None)
             if form.data['counterpart']:
                 counterpart = models.Supersense.objects.get(name=form.data['counterpart'])
@@ -103,7 +104,7 @@ class MetadataView(ArticleMixin, FormView):
             self.metadata.article = Article.objects.get(urlpath=self.article_urlpath)
             self.metadata.article.categories.add(supersense_category)
 
-        #if adding a new metadata type, include save logic here
+        #if adding a new metadata type, include save logic here. MAKE SURE TO INCLUDE YOUR CUSTOM METADATA TEMPLATE IN CREATION, SEE ABOVE
 
         self.metadata.save()
         return redirect(

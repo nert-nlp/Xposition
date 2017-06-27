@@ -1,0 +1,20 @@
+{% extends "wiki/article.html" %}
+{% load wiki_tags i18n sekizai_tags %}
+
+
+{% block wiki_contents_tab %}
+
+  {% wiki_render article %}
+  <div>
+    <h1>
+      Supersense
+    </h1>
+    {% if article.metadata.supersense %}
+      {{ article.metadata.supersense }}
+    {% endif %}
+    {% if not article.metadata.supersense %}
+      {{ article.metadata }}
+    {% endif %}
+  </div>
+
+{% endblock %}
