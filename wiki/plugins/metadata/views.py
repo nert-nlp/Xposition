@@ -79,14 +79,16 @@ class MetadataView(ArticleMixin, FormView):
 
         # if we are dealing with a base metadata object
         if 'metadata' in form.data:
-            self.metadata = models.Metadata.objects.create(name = form.data['name'],
+            self.metadata = models.Metadata()
+            self.metadataRevision = models.MetadataRevision.objects.create(name = form.data['name'],
                                                            description = form.data['description'])
             self.metadata.article = Article.objects.get(urlpath=self.article_urlpath)
 
 
         # if supersense create a category and update counterpart if necessary
         if 'supersense' in form.data:
-            self.metadata = models.Supersense.objects.create(name=form.data['name'],
+            self.metadata = models.Supersense()
+            self.metadataRevision = models.SupersenseRevision.objects.create(name=form.data['name'],
                                                              description=form.data['description'],
                                                              animacy=form.data['animacy'],
                                                              template="supersense_article_view.html",
@@ -102,11 +104,14 @@ class MetadataView(ArticleMixin, FormView):
                                                                 name = form.data['name'],
                                                                 description = form.data['description'])
             self.metadata.article = Article.objects.get(urlpath=self.article_urlpath)
+            self.metadataRevision.article = Article.objects.get(urlpath=self.article_urlpath)
             self.metadata.article.categories.add(supersense_category)
 
         #if adding a new metadata type, include save logic here. MAKE SURE TO INCLUDE YOUR CUSTOM METADATA TEMPLATE IN CREATION, SEE ABOVE
 
+        self.metadata.current_revision = self.metadataRevision
         self.metadata.save()
+        self.metadataRevision.save()
         return redirect(
             "wiki:get",
             path=self.article_urlpath.path,
