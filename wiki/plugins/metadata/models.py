@@ -4,7 +4,10 @@ from django.utils.encoding import force_text
 from django.contrib.contenttypes.models import ContentType
 from functools import reduce
 from wiki.models import Article
+from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import ugettext
 from django.contrib import admin
+from wiki.models.pluginbase import RevisionPlugin, RevisionPluginRevision
 try:
     from django.contrib.contenttypes.fields import GenericForeignKey
 except ImportError:
@@ -16,22 +19,48 @@ from django.utils.translation import ugettext_lazy as _
 # These are the different metadata models. Extend from the base metadata class if you want to add a
 # new metadata type. Make sure to register your model below.
 
-class Metadata(models.Model):
-    template = models.CharField(max_length=100, default="wiki/view.html",editable=False)
-    name = models.CharField(max_length=100, primary_key=True)
-    description = models.CharField(max_length=200)
-    article = models.OneToOneField(Article, null=True)
+class Metadata(RevisionPlugin):
 
-    def __str__(self):  # __unicode__ on Python 2
-        return self.name
+    def __str__(self):
+        if self.current_revision:
+            return self.current_revision
+        else:
+            return ugettext('Current revision not set!!')
 
     class Meta():
         verbose_name = _('metadata')
 
+class MetadataRevision(RevisionPluginRevision):
+    article = models.OneToOneField(Article, null=True)
+    template = models.CharField(max_length=100, default="wiki/view.html", editable=False)
+    name = models.CharField(max_length=100, primary_key=True)
+    description = models.CharField(max_length=200)
+
+    def __str__(self):
+        return ugettext('Metadata Revsion: %d') % self.revision_number
+
+    class Meta:
+        verbose_name = _('metadata revision')
+
 
 class Supersense(Metadata):
+    def __str__(self):
+        if self.current_revision:
+            return self.current_revision.imagerevision
+        else:
+            return ugettext('Current revision not set!!')
+    class Meta:
+        verbose_name = _('supersense')
+
+class SupersenseRevision(MetadataRevision):
     animacy = models.DecimalField(max_digits=2, decimal_places=0)
     counterpart = models.ForeignKey('self', null=True, blank=True)
+
+    def __str__(self):
+        return ('Supersense Revsion: %d') % self.revision_number
+
+    class Meta:
+        verbose_name = _('supersense revision')
 
 
 # You must register the model here
