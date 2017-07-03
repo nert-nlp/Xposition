@@ -21,7 +21,6 @@ class MetadataView(ArticleMixin, FormView):
 
     ''' View used to generate forms and process new metadata creation via the metadata 'tab' '''
 
-    form_class = forms.MetadataForm
     template_name = "metadata.html"
     # metadata.html contains the template for displaying the metadata creation forms
 
@@ -38,12 +37,15 @@ class MetadataView(ArticleMixin, FormView):
 
     def get_form_kwargs(self, **kwargs):
         kwargs = super(MetadataView, self).get_form_kwargs(**kwargs)
+        kwargs['article'] = self.article
+        kwargs['request'] = self.request
         return kwargs
 
 
     # To add a new type of metadata creation, create a form and return it in this array
 
     def get_forms(self):
+        kwargs = self.get_form_kwargs()
         form = [super(MetadataView, self).get_form(form_class=forms.MetadataForm),
                 super(MetadataView, self).get_form(form_class=forms.SupersenseForm)]
         return form
@@ -61,23 +63,16 @@ class MetadataView(ArticleMixin, FormView):
 
     # This is where form validation is done, we process the form and create the new metadata here
 
-    def form_valid(self, form):
-        self.article_urlpath = URLPath.create_article(
-            URLPath.root(),
-            form.data['name'],
-            title=form.data['name'],
-            content=form.data['description'],
-            user_message=" ",
-            user=self.request.user,
-            article_kwargs={'owner': self.request.user,
-                            'group': self.article.group,
-                            'group_read': self.article.group_read,
-                            'group_write': self.article.group_write,
-                            'other_read': self.article.other_read,
-                            'other_write': self.article.other_write,
-                            })
-
+    def post(self, form):
+        metadataForm = self.get_form(forms.MetadataForm)
+        supersenseForm = self.get_form(forms.SupersenseForm)
+        if 'supersense' in supersenseForm.data:
+            self.article_urlpath = supersenseForm.save()
+        else:
+            self.article_urlpath = metadataForm.save()
+        # self.article_urlpath = form.save()
         # if we are dealing with a base metadata object
+        '''
         if 'metadata' in form.data:
             self.metadata = models.Metadata()
             self.metadataRevision = models.MetadataRevision.objects.create(name = form.data['name'],
@@ -112,6 +107,7 @@ class MetadataView(ArticleMixin, FormView):
         self.metadata.current_revision = self.metadataRevision
         self.metadata.save()
         self.metadataRevision.save()
+        '''
         return redirect(
             "wiki:get",
             path=self.article_urlpath.path,

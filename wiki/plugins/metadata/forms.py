@@ -1,41 +1,103 @@
 
 from __future__ import absolute_import, unicode_literals
-
+from wiki.models import URLPath
 from django.utils.safestring import mark_safe
 from django import forms
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ugettext
 from wiki.core.plugins.base import PluginSidebarFormMixin
 from . import models
+from wiki.models import Category
 
 
 class MetadataForm(forms.ModelForm):
 
     ''' This form is used in the creation of a base metadata object/article '''
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, article, request, *args, **kwargs):
+        self.article = article
+        self.request = request
         super(MetadataForm, self).__init__(*args, **kwargs)
 
-    def save(self, *args, **kwargs):
-        super(MetadataForm, self).save(*args, **kwargs)
+    def save(self,  *args, **kwargs):
+        if not self.instance.id:
+            self.article_urlpath = URLPath.create_article(
+                URLPath.root(),
+                self.data['name'],
+                title=self.data['name'],
+                content=self.data['description'],
+                user_message=" ",
+                user=self.request.user,
+                article_kwargs={'owner': self.request.user,
+                                'group': self.article.group,
+                                'group_read': self.article.group_read,
+                                'group_write': self.article.group_write,
+                                'other_read': self.article.other_read,
+                                'other_write': self.article.other_write,
+                                })
+            metadata = models.Metadata()
+            metadata.article = models.Article.objects.get(urlpath = self.article_urlpath)
+            kwargs['commit'] = False
+            revision = super(MetadataForm, self).save(*args, **kwargs)
+            revision.set_from_request(self.request)
+            revision.article = metadata.article
+            metadata.add_revision(self.instance, save=True)
+            return self.article_urlpath
+        return super(MetadataForm, self).save(*args, **kwargs)
 
     class Meta:
-        model = models.Metadata
-        exclude = ['article']
+        model = models.MetadataRevision
+        fields = ('name', 'description',)
 
 class SupersenseForm(forms.ModelForm):
 
     ''' This form is used in the creation of a combined supersense object/article/category '''
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, article, request, *args, **kwargs):
+        self.article = article
+        self.request = request
         super(SupersenseForm, self).__init__(*args, **kwargs)
 
     def save(self, *args, **kwargs):
-        super(SupersenseForm, self).save(*args, **kwargs)
+        if not self.instance.id:
+            self.article_urlpath = URLPath.create_article(
+                URLPath.root(),
+                self.data['name'],
+                title=self.data['name'],
+                content=self.data['description'],
+                user_message=" ",
+                user=self.request.user,
+                article_kwargs={'owner': self.request.user,
+                                'group': self.article.group,
+                                'group_read': self.article.group_read,
+                                'group_write': self.article.group_write,
+                                'other_read': self.article.other_read,
+                                'other_write': self.article.other_write,
+                                })
+            supersense = models.Supersense()
+            supersense.article = models.Article.objects.get(urlpath = self.article_urlpath)
+            kwargs['commit'] = False
+            revision = super(SupersenseForm, self).save(*args, **kwargs)
+            revision.set_from_request(self.request)
+            revision.article = supersense.article
+            revision.template = "supersense_article_view.html"
+            supersense.add_revision(self.instance, save=True)
+            if self.cleaned_data['counterpart']:
+                counterpart = self.cleaned_data['counterpart']
+                counterpart.counterpart = supersense
+                counterpart.save()
+            supersense_category = Category(slug=self.data['name'],
+                                                          name=self.data['name'],
+                                                          description=self.data['description'])
+            supersense_category.save()
+            supersense.article.categories.add(supersense_category)
+            supersense.article.save()
+            return self.article_urlpath
+        return super(SupersenseForm, self).save(*args, **kwargs)
 
     class Meta:
-        model = models.Supersense
-        exclude = ['article']
+        model = models.SupersenseRevision
+        fields = ('name', 'description', 'animacy', 'counterpart')
 
 class MetaSidebarForm(forms.Form):
 
