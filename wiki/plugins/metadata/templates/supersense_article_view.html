@@ -9,11 +9,11 @@
     <h1>
       Supersense
     </h1>
-    {% if article.metadata.supersense %}
-      {{ article.metadata.supersense }}
+    {% if article.metadatarevision.supersenserevision %}
+      {{ article.metadatarevision.supersenserevision }}
     {% endif %}
-    {% if not article.metadata.supersense %}
-      {{ article.metadata }}
+    {% if not article.metadatarevision.supersenserevision %}
+      {{ article.metadatarevision }}
     {% endif %}
   </div>
   {% include "category_article_view.html" %}

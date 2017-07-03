@@ -23,7 +23,7 @@ class Metadata(RevisionPlugin):
 
     def __str__(self):
         if self.current_revision:
-            return self.current_revision
+            return self.current_revision.metadatarevision.name
         else:
             return ugettext('Current revision not set!!')
 
@@ -37,7 +37,7 @@ class MetadataRevision(RevisionPluginRevision):
     description = models.CharField(max_length=200)
 
     def __str__(self):
-        return ugettext('Metadata Revsion: %d') % self.revision_number
+        return ('Supersense Revsion: %s %d') % (self.name, self.revision_number)
 
     class Meta:
         verbose_name = _('metadata revision')
@@ -46,7 +46,7 @@ class MetadataRevision(RevisionPluginRevision):
 class Supersense(Metadata):
     def __str__(self):
         if self.current_revision:
-            return self.current_revision.imagerevision
+            return self.current_revision.metadatarevision.name
         else:
             return ugettext('Current revision not set!!')
     class Meta:
@@ -54,10 +54,10 @@ class Supersense(Metadata):
 
 class SupersenseRevision(MetadataRevision):
     animacy = models.DecimalField(max_digits=2, decimal_places=0)
-    counterpart = models.ForeignKey('self', null=True, blank=True)
+    counterpart = models.ForeignKey(Supersense, null=True, blank=True)
 
     def __str__(self):
-        return ('Supersense Revsion: %d') % self.revision_number
+        return ('Supersense Revsion: %s %d') % (self.name, self.revision_number)
 
     class Meta:
         verbose_name = _('supersense revision')
