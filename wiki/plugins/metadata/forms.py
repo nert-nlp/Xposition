@@ -83,7 +83,7 @@ class SupersenseForm(forms.ModelForm):
             revision.template = "supersense_article_view.html"
             supersense.add_revision(self.instance, save=True)
             if self.cleaned_data['counterpart']:
-                counterpart = self.cleaned_data['counterpart']
+                counterpart = self.cleaned_data['counterpart'].current_revision.metadatarevision.supersenserevision
                 counterpart.counterpart = supersense
                 counterpart.save()
             supersense_category = Category(slug=self.data['name'],
