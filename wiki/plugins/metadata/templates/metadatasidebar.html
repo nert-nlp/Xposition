@@ -4,7 +4,7 @@
 <h4>{% trans "Edit Metadata" %}</h4>
 
 {# if metadata exists then render the following template #}
-{% if article.metadata %}
+{% if article.metadatarevision %}
 
   <div class="form-horizontal sidebar-form">
     {% if form.non_field_errors %}
@@ -50,7 +50,7 @@
 
 {% endif %}
 
-{% if not article.metadata %}
+{% if not article.metadatarevision %}
 
   This article has no metadata
 

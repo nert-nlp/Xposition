@@ -2,21 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="f3b4c887-8f9b-4af6-9346-dcbd40c93b67" name="Default" comment="">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/wiki/plugins/metadata/migrations/0002_auto_20170612_1411.py" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/wiki/plugins/metadata/migrations/0003_supersense.py" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/wiki/plugins/metadata/migrations/0004_metadata_article.py" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/wiki/plugins/metadata/migrations/0005_auto_20170622_1410.py" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/wiki/plugins/metadata/migrations/0006_auto_20170622_1421.py" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/wiki/plugins/metadata/migrations/0007_auto_20170622_1437.py" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/wiki/plugins/metadata/migrations/0008_auto_20170622_1440.py" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/wiki/plugins/metadata/migrations/0009_auto_20170622_1441.py" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/wiki/plugins/metadata/migrations/0010_metadata_template.py" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/wiki/plugins/metadata/migrations/0011_auto_20170627_1138.py" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/testproject/testproject/db/prepopulated.db" afterPath="$PROJECT_DIR$/testproject/testproject/db/prepopulated.db" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/wiki/plugins/metadata/migrations/0001_initial.py" afterPath="$PROJECT_DIR$/wiki/plugins/metadata/migrations/0001_initial.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/wiki/plugins/metadata/models.py" afterPath="$PROJECT_DIR$/wiki/plugins/metadata/models.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/wiki/plugins/metadata/views.py" afterPath="$PROJECT_DIR$/wiki/plugins/metadata/views.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/wiki/plugins/metadata/forms.py" afterPath="$PROJECT_DIR$/wiki/plugins/metadata/forms.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/wiki/plugins/metadata/templates/metadatasidebar.html" afterPath="$PROJECT_DIR$/wiki/plugins/metadata/templates/metadatasidebar.html" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -31,11 +19,31 @@
   <component name="ExecutionTargetManager" SELECTED_TARGET="default_target" />
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="600">
-      <file leaf-file-name="models.py" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/wiki/plugins/metadata/models.py">
+      <file leaf-file-name="forms.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/wiki/plugins/metadata/forms.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="4150">
+              <caret line="163" column="63" lean-forward="false" selection-start-line="163" selection-start-column="63" selection-end-line="163" selection-end-column="63" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="metadatasidebar.html" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/wiki/plugins/metadata/templates/metadatasidebar.html">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="1978">
-              <caret line="55" column="65" lean-forward="false" selection-start-line="55" selection-start-column="65" selection-end-line="55" selection-end-column="65" />
+              <caret line="46" column="15" lean-forward="true" selection-start-line="46" selection-start-column="15" selection-end-line="46" selection-end-column="15" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="models.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/wiki/plugins/metadata/models.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-457">
+              <caret line="38" column="8" lean-forward="true" selection-start-line="38" selection-start-column="8" selection-end-line="38" selection-end-column="8" />
               <folding />
             </state>
           </provider>
@@ -71,7 +79,6 @@
         <option value="$PROJECT_DIR$/testproject/testproject/settings/base.py" />
         <option value="$PROJECT_DIR$/wiki/plugins/metadata/templates/sidebar.html" />
         <option value="$PROJECT_DIR$/wiki/plugins/metadata/wiki_plugin.py" />
-        <option value="$PROJECT_DIR$/wiki/plugins/metadata/templates/metadatasidebar.html" />
         <option value="$PROJECT_DIR$/wiki/templates/wiki/article.html" />
         <option value="$PROJECT_DIR$/wiki/plugins/metadata/templates/metadata.html" />
         <option value="$PROJECT_DIR$/wiki/plugins/categories/views.py" />
@@ -81,6 +88,7 @@
         <option value="$PROJECT_DIR$/wiki/plugins/categories/forms.py" />
         <option value="$PROJECT_DIR$/wiki/plugins/metadata/models.py" />
         <option value="$PROJECT_DIR$/wiki/plugins/metadata/views.py" />
+        <option value="$PROJECT_DIR$/wiki/plugins/metadata/templates/metadatasidebar.html" />
         <option value="$PROJECT_DIR$/wiki/plugins/metadata/forms.py" />
       </list>
     </option>
@@ -110,6 +118,7 @@
     </navigator>
     <panes>
       <pane id="Scope" />
+      <pane id="Scratches" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -216,6 +225,32 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
+              <option name="myItemId" value="templates" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="Xposition" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="Xposition" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="wiki" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="plugins" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="metadata" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
               <option name="myItemId" value="migrations" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
@@ -262,7 +297,6 @@
           </PATH>
         </subPane>
       </pane>
-      <pane id="Scratches" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -534,7 +568,7 @@
           </properties>
         </breakpoint>
       </default-breakpoints>
-      <option name="time" value="55" />
+      <option name="time" value="60" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -667,13 +701,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/wiki/plugins/metadata/templates/metadatasidebar.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1247">
-          <caret line="54" column="2" lean-forward="false" selection-start-line="54" selection-start-column="2" selection-end-line="54" selection-end-column="2" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/wiki/plugins/metadata/templates/metadata.html">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-1103">
@@ -709,24 +736,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/wiki/views/mixins.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="403">
-          <caret line="34" column="0" lean-forward="false" selection-start-line="34" selection-start-column="0" selection-end-line="34" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python36/Lib/site-packages/django/utils/decorators.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="535">
           <caret line="66" column="0" lean-forward="false" selection-start-line="66" selection-start-column="0" selection-end-line="66" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python36/Lib/site-packages/django/views/generic/base.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="363">
-          <caret line="67" column="0" lean-forward="false" selection-start-line="67" selection-start-column="0" selection-end-line="67" selection-end-column="0" />
         </state>
       </provider>
     </entry>
@@ -758,13 +771,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/wiki/views/article.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="363">
-          <caret line="269" column="0" lean-forward="false" selection-start-line="269" selection-start-column="0" selection-end-line="269" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/wiki/plugins/categories/forms.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2021">
@@ -777,26 +783,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="3483">
           <caret line="87" column="77" lean-forward="false" selection-start-line="87" selection-start-column="77" selection-end-line="87" selection-end-column="77" />
-          <folding>
-            <marker date="1499024623023" expanded="true" signature="2800:2844" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wiki/plugins/metadata/forms.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2909">
-          <caret line="72" column="22" lean-forward="false" selection-start-line="72" selection-start-column="22" selection-end-line="72" selection-end-column="22" />
-          <folding>
-            <element signature="e#1#57#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wiki/models/pluginbase.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-2064">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding />
         </state>
       </provider>
@@ -805,102 +791,78 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/wiki/plugins/metadata/migrations/0002_auto_20170612_1411.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wiki/plugins/metadata/migrations/0003_supersense.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wiki/plugins/metadata/migrations/0004_metadata_article.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wiki/plugins/metadata/migrations/0005_auto_20170622_1410.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wiki/plugins/metadata/migrations/0006_auto_20170622_1421.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wiki/plugins/metadata/migrations/0007_auto_20170622_1437.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wiki/plugins/metadata/migrations/0008_auto_20170622_1440.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/wiki/plugins/metadata/migrations/0002_auto_20170612_1411.py" />
+    <entry file="file://$PROJECT_DIR$/wiki/plugins/metadata/migrations/0003_supersense.py" />
+    <entry file="file://$PROJECT_DIR$/wiki/plugins/metadata/migrations/0004_metadata_article.py" />
+    <entry file="file://$PROJECT_DIR$/wiki/plugins/metadata/migrations/0005_auto_20170622_1410.py" />
+    <entry file="file://$PROJECT_DIR$/wiki/plugins/metadata/migrations/0006_auto_20170622_1421.py" />
+    <entry file="file://$PROJECT_DIR$/wiki/plugins/metadata/migrations/0007_auto_20170622_1437.py" />
+    <entry file="file://$PROJECT_DIR$/wiki/plugins/metadata/migrations/0008_auto_20170622_1440.py" />
     <entry file="file://$PROJECT_DIR$/wiki/plugins/metadata/migrations/__init__.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wiki/plugins/metadata/migrations/0010_metadata_template.py" />
+    <entry file="file://$PROJECT_DIR$/wiki/plugins/metadata/migrations/0011_auto_20170627_1138.py" />
+    <entry file="file://$PROJECT_DIR$/wiki/plugins/metadata/migrations/0009_auto_20170622_1441.py" />
+    <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python36/Lib/site-packages/django/views/generic/base.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="363">
+          <caret line="87" column="0" lean-forward="false" selection-start-line="87" selection-start-column="0" selection-end-line="87" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/wiki/plugins/metadata/migrations/0010_metadata_template.py">
+    <entry file="file://$PROJECT_DIR$/wiki/models/pluginbase.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wiki/plugins/metadata/migrations/0011_auto_20170627_1138.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/wiki/plugins/metadata/migrations/0009_auto_20170622_1441.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        <state relative-caret-position="707">
+          <caret line="189" column="0" lean-forward="false" selection-start-line="189" selection-start-column="0" selection-end-line="189" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/wiki/plugins/metadata/models.py">
       <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-457">
+          <caret line="38" column="8" lean-forward="true" selection-start-line="38" selection-start-column="8" selection-end-line="38" selection-end-column="8" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wiki/views/article.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="879">
+          <caret line="347" column="0" lean-forward="false" selection-start-line="347" selection-start-column="0" selection-end-line="347" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wiki/plugins/metadata/templates/metadatasidebar.html">
+      <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1978">
-          <caret line="55" column="65" lean-forward="false" selection-start-line="55" selection-start-column="65" selection-end-line="55" selection-end-column="65" />
+          <caret line="46" column="15" lean-forward="true" selection-start-line="46" selection-start-column="15" selection-end-line="46" selection-end-column="15" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wiki/views/mixins.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="495">
+          <caret line="34" column="0" lean-forward="false" selection-start-line="34" selection-start-column="0" selection-end-line="34" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/wiki/plugins/metadata/forms.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="4150">
+          <caret line="163" column="63" lean-forward="false" selection-start-line="163" selection-start-column="63" selection-end-line="163" selection-end-column="63" />
           <folding />
         </state>
       </provider>
