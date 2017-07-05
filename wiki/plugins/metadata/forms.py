@@ -111,18 +111,18 @@ class MetaSidebarForm(forms.Form):
         # Must use try except blocks in order to avoid django errors if an article has no associated metadata
 
         try:
-            self.instance = article.metadata
+            self.instance = article.metadatarevision
         except:
             pass
 
         # If metadata is a supersense then set the form to edit the supersense fields
 
         try:
-            if self.instance.supersense:
+            if self.instance.supersenserevision:
                 self.form_type = 'supersense'
-                self.fields['animacy'] = forms.DecimalField(max_digits=2,decimal_places=0, initial=self.instance.supersense.animacy)
-                self.fields['counterpart'] = forms.ModelChoiceField(queryset=models.Supersense.objects.all(),
-                                                                    initial=self.instance.supersense.counterpart, required=False)
+                self.fields['animacy'] = forms.DecimalField(max_digits=2,decimal_places=0, initial=self.instance.supersenserevision.animacy)
+                self.fields['counterpart'] = forms.ModelChoiceField(queryset=models.Supersense.objects.exclude(current_revision__exact = self.instance.supersenserevision),
+                                                                    initial=self.instance.supersenserevision.counterpart, required=False)
 
         # else if not a supersense then set form to edit a default metadata
         # if you want to add a different metadata type to edit then here is the best place to do so
@@ -138,18 +138,28 @@ class MetaSidebarForm(forms.Form):
         if self.is_valid():
             #  supersense saving logic
             if self.form_type is 'supersense':
-                supersense = models.Supersense.objects.get(name = self.article.metadata.name)
-                supersense.animacy = self.cleaned_data['animacy']
-                if supersense.counterpart is not None and supersense.counterpart is not self.cleaned_data['counterpart']:
-                    supersense.counterpart.counterpart = None
-                    supersense.counterpart.save()
-                supersense.counterpart = self.cleaned_data['counterpart']
-                supersense.save()
+                supersense = models.Supersense.objects.get(current_revision__exact = self.instance)
+                old_revision = supersense.current_revision.metadatarevision.supersenserevision
+                if old_revision.counterpart is not None and old_revision.counterpart is not self.cleaned_data['counterpart']:
+                    old_revision.counterpart.current_revision.metadatarevision.supersenserevision.counterpart = None
+                    old_revision.counterpart.current_revision.save()
+                revision = models.SupersenseRevision(name=old_revision.name,
+                                                     description=old_revision.description,
+                                                     animacy = self.cleaned_data['animacy'],
+                                                    counterpart = self.cleaned_data['counterpart'])
+                revision.article = supersense.article
+                revision.template = "supersense_article_view.html"
+                self.article.metadatarevision = revision
+                self.article.save()
+                old_revision.article = None
+                old_revision.save()
+                supersense.add_revision(revision, save=True)
+                revision.save()
                 if self.cleaned_data['counterpart'] is not None:
-                    counterpart = models.Supersense.objects.get(name = self.cleaned_data['counterpart'].name)
+                    counterpart = supersense.current_revision.counterpart.current_revision.metadatarevision.supersenserevision
                     counterpart.counterpart = supersense
                     counterpart.save()
                 #must include the following data because django-wiki requires it in sidebar forms
-                self.cleaned_data['unsaved_article_title'] = self.article.metadata.name
-                self.cleaned_data['unsaved_article_content'] = self.article.metadata.description
+                self.cleaned_data['unsaved_article_title'] = revision.name
+                self.cleaned_data['unsaved_article_content'] = revision.description
             # add any new metadata type save logic here
