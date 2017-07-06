@@ -44,6 +44,34 @@ class MetadataRevision(RevisionPluginRevision):
 
 
 class Supersense(Metadata):
+
+    def newRevision(self):
+        article = self.current_revision.metadatarevision.supersenserevision.article
+        oldRevision = self.current_revision.metadatarevision.supersenserevision
+        revision = SupersenseRevision(name=oldRevision.name,
+                                             description=oldRevision.description,
+                                             animacy=oldRevision.animacy,
+                                             counterpart=oldRevision.counterpart,
+                                             template="supersense_article_view.html",
+                                             article=oldRevision.article)
+        article.metadatarevision = revision
+        article.save()
+        oldRevision.article = None
+        oldRevision.save()
+        self.add_revision(revision, save=True)
+        revision.save()
+        return revision
+
+
+    def setCounterpart(self, newCounterpart):
+        revision = self.current_revision.metadatarevision.supersenserevision
+        oldCounterpart = self.current_revision.metadatarevision.supersenserevision.counterpart
+
+        if newCounterpart is not oldCounterpart:
+            revision.counterpart = newCounterpart
+            revision.save()
+
+
     def __str__(self):
         if self.current_revision:
             return self.current_revision.metadatarevision.name
