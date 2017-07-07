@@ -85,7 +85,7 @@ class SupersenseRevision(MetadataRevision):
     counterpart = models.ForeignKey(Supersense, null=True, blank=True)
 
     def __str__(self):
-        return ('Supersense Revsion: %s %d') % (self.name, self.revision_number)
+        return ('Supersense Revision: %s %d') % (self.name, self.revision_number)
 
     class Meta:
         verbose_name = _('supersense revision')
