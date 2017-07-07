@@ -6,7 +6,7 @@
 
 {# easy hack to check if the article is a landing category, compare the slug of the article's first category with the urlpath slug #}
 
-{% if not article.categories.all.0.slug == urlpath.slug %}
+{% if not form.validCategory or not article.categories.all.0.slug == urlpath.slug %}
   <h4>{% trans "Change Category" %}</h4>
 
   <p>
@@ -64,7 +64,7 @@
 
 {# if this is a category landing article then display the following instead #}
 
-{% if article.categories.all.0.slug == urlpath.slug %}
+{% if form.validCategory and article.categories.all.0.slug == urlpath.slug %}
 
   <p>
     Cannot change the categories of this article because it is a category landing article.
