@@ -141,26 +141,31 @@ class MetaSidebarForm(forms.Form):
                 supersense = models.Supersense.objects.get(current_revision__exact = self.instance)
 
                 oldCounterpart = supersense.current_revision.metadatarevision.supersenserevision.counterpart
-                if oldCounterpart is not self.cleaned_data['counterpart']:
+                oldAnimacy = supersense.current_revision.metadatarevision.supersenserevision.animacy
+                if oldCounterpart is not self.cleaned_data['counterpart'] or oldAnimacy != self.cleaned_data['animacy']:
                     supersense.newRevision()
-                    supersense.setCounterpart(self.cleaned_data['counterpart'])
+                    if oldAnimacy != self.cleaned_data['animacy']:
+                        supersense.current_revision.metadatarevision.supersenserevision.animacy = self.cleaned_data['animacy']
+                        supersense.current_revision.metadatarevision.supersenserevision.save()
+                    if oldCounterpart is not self.cleaned_data['counterpart']:
+                        supersense.setCounterpart(self.cleaned_data['counterpart'])
 
-                    if oldCounterpart is not None:
-                        oldCounterpart.newRevision()
-                        oldCounterpart.setCounterpart(newCounterpart=None)
+                        if oldCounterpart is not None:
+                            oldCounterpart.newRevision()
+                            oldCounterpart.setCounterpart(newCounterpart=None)
 
-                    if self.cleaned_data['counterpart'] is not None:
-                        if self.cleaned_data[
-                            'counterpart'].current_revision.metadatarevision.supersenserevision.counterpart is not None:
-                            self.cleaned_data[
-                                'counterpart'].current_revision.metadatarevision.supersenserevision.counterpart.newRevision()
-                            self.cleaned_data[
-                                'counterpart'].current_revision.metadatarevision.supersenserevision.counterpart.setCounterpart(newCounterpart=None)
+                        if self.cleaned_data['counterpart'] is not None:
+                            if self.cleaned_data[
+                                'counterpart'].current_revision.metadatarevision.supersenserevision.counterpart is not None:
+                                self.cleaned_data[
+                                    'counterpart'].current_revision.metadatarevision.supersenserevision.counterpart.newRevision()
+                                self.cleaned_data[
+                                    'counterpart'].current_revision.metadatarevision.supersenserevision.counterpart.setCounterpart(newCounterpart=None)
 
-                        self.cleaned_data['counterpart'].newRevision()
-                        self.cleaned_data['counterpart'].setCounterpart(newCounterpart=supersense)
+                            self.cleaned_data['counterpart'].newRevision()
+                            self.cleaned_data['counterpart'].setCounterpart(newCounterpart=supersense)
 
                 #must include the following data because django-wiki requires it in sidebar forms
-                self.cleaned_data['unsaved_article_title'] = supersense.current_revision.name
-                self.cleaned_data['unsaved_article_content'] = supersense.current_revision.description
-            # add any new metadata type save logic here
+                self.cleaned_data['unsaved_article_title'] = supersense.current_revision.metadatarevision.name
+                self.cleaned_data['unsaved_article_content'] = supersense.current_revision.metadatarevision.description
+                # add any new metadata type save logic here
