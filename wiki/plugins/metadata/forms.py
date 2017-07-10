@@ -42,6 +42,8 @@ class MetadataForm(forms.ModelForm):
             revision.set_from_request(self.request)
             revision.article = metadata.article
             metadata.add_revision(self.instance, save=True)
+            metadata.article.current_revision.metadata = revision
+            metadata.article.current_revision.save()
             return self.article_urlpath
         return super(MetadataForm, self).save(*args, **kwargs)
 
@@ -92,6 +94,8 @@ class SupersenseForm(forms.ModelForm):
             supersense_category.save()
             supersense.article.categories.add(supersense_category)
             supersense.article.save()
+            supersense.article.current_revision.metadata = revision
+            supersense.article.current_revision.save()
             return self.article_urlpath
         return super(SupersenseForm, self).save(*args, **kwargs)
 
