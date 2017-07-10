@@ -392,6 +392,8 @@ class Edit(ArticleMixin, FormView):
         revision.title = form.cleaned_data['title']
         revision.content = form.cleaned_data['content']
         revision.user_message = form.cleaned_data['summary']
+        if self.article.current_revision.metadata:
+            revision.metadata = self.article.current_revision.metadata
         revision.deleted = False
         revision.set_from_request(self.request)
         self.article.add_revision(revision)

@@ -339,6 +339,8 @@ class ArticleRevision(BaseRevisionMixin, models.Model):
     article = models.ForeignKey('Article', on_delete=models.CASCADE,
                                 verbose_name=_('article'))
 
+    metadata = models.ForeignKey('metadata.MetadataRevision', verbose_name=_('metadata'), null=True)
+
     # This is where the content goes, with whatever markup language is used
     content = models.TextField(blank=True, verbose_name=_('article contents'))
 
