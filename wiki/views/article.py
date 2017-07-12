@@ -4,7 +4,7 @@ from __future__ import absolute_import, unicode_literals
 import difflib
 import logging
 
-from wiki.plugins.metadata.models import Metadata, SupersenseRevision
+from wiki.plugins.metadata.models import Supersense, SupersenseRevision
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
@@ -37,8 +37,8 @@ class ArticleView(ArticleMixin, TemplateView):
     @method_decorator(get_article(can_read=True))
     def dispatch(self, request, article, *args, **kwargs):
         try:
-            metadata = Metadata.objects.get(article = article)
-            self.template_name = metadata.current_revision.metadatarevision.template
+            supersense = Supersense.objects.get(article = article)
+            self.template_name = supersense.current_revision.supersenserevision.template
         except:
             pass
         return super(
@@ -52,7 +52,7 @@ class ArticleView(ArticleMixin, TemplateView):
     def get_context_data(self, **kwargs):
         kwargs['selected_tab'] = 'view'
         try:
-            kwargs['metadata'] = Metadata.objects.get(article = self.article).current_revision.metadatarevision
+            kwargs['metadata'] = Supersense.objects.get(article = self.article).current_revision.supersenserevision
         except:
             pass
         return ArticleMixin.get_context_data(self, **kwargs)
@@ -422,7 +422,7 @@ class Edit(ArticleMixin, FormView):
         kwargs['selected_tab'] = 'edit'
         kwargs['sidebar'] = self.sidebar
         try:
-            kwargs['metadata'] = Metadata.objects.get(article = self.article)
+            kwargs['metadata'] = Supersense.objects.get(article = self.article)
         except:
             pass
         return super(Edit, self).get_context_data(**kwargs)
