@@ -3,7 +3,7 @@ from django.db import models
 from django.utils.encoding import force_text
 from django.contrib.contenttypes.models import ContentType
 from functools import reduce
-from wiki.models import Article
+from wiki.models import Article, ArticleRevision
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ugettext
 from django.contrib import admin
@@ -31,7 +31,6 @@ class Metadata(RevisionPlugin):
         verbose_name = _('metadata')
 
 class MetadataRevision(RevisionPluginRevision):
-    article = models.OneToOneField(Article, null=True)
     template = models.CharField(max_length=100, default="wiki/view.html", editable=False)
     name = models.CharField(max_length=100, primary_key=True)
     description = models.CharField(max_length=200)
@@ -46,18 +45,12 @@ class MetadataRevision(RevisionPluginRevision):
 class Supersense(Metadata):
 
     def newRevision(self):
-        article = self.current_revision.metadatarevision.supersenserevision.article
         oldRevision = self.current_revision.metadatarevision.supersenserevision
         revision = SupersenseRevision(name=oldRevision.name,
                                              description=oldRevision.description,
                                              animacy=oldRevision.animacy,
                                              counterpart=oldRevision.counterpart,
-                                             template="supersense_article_view.html",
-                                             article=oldRevision.article)
-        article.metadatarevision = revision
-        article.save()
-        oldRevision.article = None
-        oldRevision.save()
+                                             template="supersense_article_view.html")
         self.add_revision(revision, save=True)
         revision.save()
         return revision
