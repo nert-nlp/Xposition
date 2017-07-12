@@ -89,3 +89,5 @@ class SupersenseRevision(MetadataRevision):
 
 admin.site.register(Metadata)
 admin.site.register(Supersense)
+admin.site.register(MetadataRevision)
+admin.site.register(SupersenseRevision)
