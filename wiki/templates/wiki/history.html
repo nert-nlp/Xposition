@@ -49,6 +49,10 @@
   {% trans "Click each revision to see a list of edited lines. Click the Preview button to see how the article looked at this stage. At the bottom of this page, you can change to a particular revision or merge an old revision with the current one." %}
 </p>
 
+{% for revision in metadataRevisions %}
+  {{revision.metadatarevision}}
+{% endfor %}
+
 <form method="GET">
   <div class="tab-content" style="overflow: visible;">
     {% for revision in revisions %}
@@ -103,9 +107,10 @@
                 <dt>{% trans "Auto log:" %}</dt>
                 <dd>{{ revision.automatic_log|default:"-"|linebreaksbr }}</dd>
               </dl>
-              {% if revision.metadata %}
+              {% if revision.metadatarevision %}
                 <dl class="dl-horizontal">
-                  <dt>Metadata: {{revision.metadata.automatic_log|default:"-"|linebreaksbr }}</dt>
+                  <dt>Metadata:</dt>
+                  <dd>{{revision.metadatarevision }}</dd>
                 </dl>
               {% endif %}
               <table class="table table-condensed" style="margin: 0; border-collapse: collapse;">

@@ -4,6 +4,7 @@ from __future__ import absolute_import, unicode_literals
 import difflib
 import logging
 
+from wiki.plugins.metadata.models import Metadata
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
@@ -36,7 +37,8 @@ class ArticleView(ArticleMixin, TemplateView):
     @method_decorator(get_article(can_read=True))
     def dispatch(self, request, article, *args, **kwargs):
         try:
-            self.template_name = article.metadatarevision.template
+            metadata = Metadata.objects.get(article = article)
+            self.template_name = metadata.current_revision.metadatarevision.template
         except:
             pass
         return super(
@@ -49,6 +51,7 @@ class ArticleView(ArticleMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         kwargs['selected_tab'] = 'view'
+        kwargs['metadata'] = Metadata.objects.get(article = self.article).current_revision.metadatarevision
         return ArticleMixin.get_context_data(self, **kwargs)
 
 
@@ -392,8 +395,6 @@ class Edit(ArticleMixin, FormView):
         revision.title = form.cleaned_data['title']
         revision.content = form.cleaned_data['content']
         revision.user_message = form.cleaned_data['summary']
-        if self.article.current_revision.metadata:
-            revision.metadata = self.article.current_revision.metadata
         revision.deleted = False
         revision.set_from_request(self.request)
         self.article.add_revision(revision)
@@ -417,6 +418,7 @@ class Edit(ArticleMixin, FormView):
         kwargs['editor'] = editors.getEditor()
         kwargs['selected_tab'] = 'edit'
         kwargs['sidebar'] = self.sidebar
+        kwargs['metadata'] = Metadata.objects.get(article = self.article)
         return super(Edit, self).get_context_data(**kwargs)
 
 
@@ -521,6 +523,7 @@ class History(ListView, ArticleMixin):
         kwargs.update(kwargs_article)
         kwargs.update(kwargs_listview)
         kwargs['selected_tab'] = 'history'
+        kwargs['metadataRevisions'] = Metadata.objects.get(article = self.article).revision_set.all()
         return kwargs
 
     @method_decorator(get_article(can_read=True))
