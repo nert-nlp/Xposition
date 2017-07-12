@@ -28,6 +28,7 @@ class Metadata(RevisionPlugin):
             return ugettext('Current revision not set!!')
 
     class Meta():
+        abstract = True
         verbose_name = _('metadata')
 
 class MetadataRevision(RevisionPluginRevision):
@@ -39,18 +40,21 @@ class MetadataRevision(RevisionPluginRevision):
         return ('Supersense Revision: %s %d') % (self.name, self.revision_number)
 
     class Meta:
+        abstract = True
         verbose_name = _('metadata revision')
 
 
 class Supersense(Metadata):
 
-    def newRevision(self):
-        oldRevision = self.current_revision.metadatarevision.supersenserevision
+    def newRevision(self, request):
+        oldRevision = self.current_revision.supersenserevision
         revision = SupersenseRevision(name=oldRevision.name,
                                              description=oldRevision.description,
                                              animacy=oldRevision.animacy,
                                              counterpart=oldRevision.counterpart,
                                              template="supersense_article_view.html")
+        revision.set_from_request(request)
+        revision.inherit_predecessor(self)
         self.add_revision(revision, save=True)
         revision.save()
         self.save()
@@ -58,8 +62,8 @@ class Supersense(Metadata):
 
 
     def setCounterpart(self, newCounterpart):
-        revision = self.current_revision.metadatarevision.supersenserevision
-        oldCounterpart = self.current_revision.metadatarevision.supersenserevision.counterpart
+        revision = self.current_revision.supersenserevision
+        oldCounterpart = self.current_revision.supersenserevision.counterpart
 
         if newCounterpart is not oldCounterpart:
             revision.counterpart = newCounterpart
@@ -68,7 +72,7 @@ class Supersense(Metadata):
 
     def __str__(self):
         if self.current_revision:
-            return self.current_revision.metadatarevision.name
+            return self.current_revision.supersenserevision.name
         else:
             return ugettext('Current revision not set!!')
     class Meta:
@@ -87,7 +91,5 @@ class SupersenseRevision(MetadataRevision):
 
 # You must register the model here
 
-admin.site.register(Metadata)
 admin.site.register(Supersense)
-admin.site.register(MetadataRevision)
 admin.site.register(SupersenseRevision)
