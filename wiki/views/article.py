@@ -4,7 +4,7 @@ from __future__ import absolute_import, unicode_literals
 import difflib
 import logging
 
-from wiki.plugins.metadata.models import Metadata
+from wiki.plugins.metadata.models import Metadata, SupersenseRevision
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
@@ -51,7 +51,10 @@ class ArticleView(ArticleMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         kwargs['selected_tab'] = 'view'
-        kwargs['metadata'] = Metadata.objects.get(article = self.article).current_revision.metadatarevision
+        try:
+            kwargs['metadata'] = Metadata.objects.get(article = self.article).current_revision.metadatarevision
+        except:
+            pass
         return ArticleMixin.get_context_data(self, **kwargs)
 
 
@@ -418,7 +421,10 @@ class Edit(ArticleMixin, FormView):
         kwargs['editor'] = editors.getEditor()
         kwargs['selected_tab'] = 'edit'
         kwargs['sidebar'] = self.sidebar
-        kwargs['metadata'] = Metadata.objects.get(article = self.article)
+        try:
+            kwargs['metadata'] = Metadata.objects.get(article = self.article)
+        except:
+            pass
         return super(Edit, self).get_context_data(**kwargs)
 
 
@@ -523,7 +529,10 @@ class History(ListView, ArticleMixin):
         kwargs.update(kwargs_article)
         kwargs.update(kwargs_listview)
         kwargs['selected_tab'] = 'history'
-        kwargs['metadataRevisions'] = Metadata.objects.get(article = self.article).revision_set.all()
+        try:
+            kwargs['metadataRevisions'] = SupersenseRevision.objects.all()
+        except:
+            pass
         return kwargs
 
     @method_decorator(get_article(can_read=True))

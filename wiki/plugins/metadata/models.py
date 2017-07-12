@@ -53,7 +53,8 @@ class Supersense(Metadata):
                                              template="supersense_article_view.html")
         self.add_revision(revision, save=True)
         revision.save()
-        return revision
+        self.save()
+        return self
 
 
     def setCounterpart(self, newCounterpart):
