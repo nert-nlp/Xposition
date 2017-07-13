@@ -160,8 +160,8 @@ class MetaSidebarForm(forms.Form):
     def updateMetadata(self, oldAnimacy, oldCounterpart):
         self.metadata = self.metadata.newRevision(self.request)
         if oldAnimacy != self.cleaned_data['animacy']:
-            self.metadata.current_revision.supersenserevision.animacy = self.cleaned_data['animacy']
-            self.metadata.current_revision.supersenserevision.save()
+            self.metadata.current_revision.animacy = self.cleaned_data['animacy']
+            self.metadata.current_revision.save()
         if oldCounterpart is not self.cleaned_data['counterpart']:
             self.metadata = self.metadata.setCounterpart(self.cleaned_data['counterpart'])
 
