@@ -48,14 +48,16 @@ class Supersense(Metadata):
 
     def newRevision(self, request):
         oldRevision = self.current_revision.supersenserevision
-        revision = SupersenseRevision(name=oldRevision.name,
-                                             description=oldRevision.description,
-                                             animacy=oldRevision.animacy,
-                                             counterpart=oldRevision.counterpart,
-                                             template="supersense_article_view.html")
-        revision.set_from_request(request)
+        revision = SupersenseRevision()
         revision.inherit_predecessor(self)
-        self.add_revision(revision, save=True)
+        revision.deleted = False
+        revision.name=oldRevision.name
+        revision.description=oldRevision.description
+        revision.animacy=oldRevision.animacy
+        revision.counterpart=oldRevision.counterpart
+        revision.template="supersense_article_view.html"
+        revision.set_from_request(request)
+        self.add_revision(revision)
         revision.save()
         self.save()
         return self
