@@ -50,7 +50,7 @@
 </p>
 
 {% for revision in metadataRevisions %}
-  {{revision.metadatarevision}}
+  {{revision.supersenserevision.previous_revision.supersenserevision}}
 {% endfor %}
 
 <form method="GET">

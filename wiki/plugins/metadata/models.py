@@ -62,12 +62,13 @@ class Supersense(Metadata):
 
 
     def setCounterpart(self, newCounterpart):
-        revision = self.current_revision.supersenserevision
-        oldCounterpart = self.current_revision.supersenserevision.counterpart
+        revision = self.current_revision
+        oldCounterpart = self.current_revision.counterpart
 
         if newCounterpart is not oldCounterpart:
-            revision.counterpart = newCounterpart
-            revision.save()
+            self.current_revision.counterpart = newCounterpart
+            self.current_revision.save()
+        return self
 
 
     def __str__(self):
