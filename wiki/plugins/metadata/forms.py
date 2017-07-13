@@ -148,6 +148,7 @@ class MetaSidebarForm(forms.Form):
                     self.updateMetadata(supersense,oldAnimacy,oldCounterpart)
 
                     #must create new article revision to track changes to metadata
+                    self.metadata.save()
                     self.updateArticle(supersense)
                 #must include the following data because django-wiki requires it in sidebar forms
                 self.cleaned_data['unsaved_article_title'] = self.metadata.current_revision.supersenserevision.name
@@ -164,23 +165,23 @@ class MetaSidebarForm(forms.Form):
             supersenseRevision.animacy = self.cleaned_data['animacy']
             supersenseRevision.save()
         if oldCounterpart is not self.cleaned_data['counterpart']:
-            self.metadata.supersense.setCounterpart(self.cleaned_data['counterpart'])
+            self.metadata = self.metadata.setCounterpart(self.cleaned_data['counterpart'])
 
             if oldCounterpart is not None:
-                oldCounterpart.newRevision()
-                oldCounterpart.setCounterpart(newCounterpart=None)
+                oldCounterpart.newRevision(self.request)
+                oldCounterpart = oldCounterpart.setCounterpart(newCounterpart=None)
 
             if self.cleaned_data['counterpart'] is not None:
                 if self.cleaned_data[
                     'counterpart'].current_revision.supersenserevision.counterpart is not None:
                     self.cleaned_data[
-                        'counterpart'].current_revision.supersenserevision.counterpart.newRevision()
+                        'counterpart'].current_revision.supersenserevision.counterpart.newRevision(self.request)
                     self.cleaned_data[
                         'counterpart'].current_revision.supersenserevision.counterpart.setCounterpart(
                         newCounterpart=None)
 
-                self.cleaned_data['counterpart'].newRevision()
-                self.cleaned_data['counterpart'].setCounterpart(newCounterpart=supersenseRevision)
+                self.cleaned_data['counterpart'].newRevision(self.request)
+                self.cleaned_data['counterpart'] = self.cleaned_data['counterpart'].setCounterpart(newCounterpart=self.metadata)
         supersenseRevision.automatic_log = (
         "Animacy: " + str(supersense.animacy) +
         " Counterpart: " + str(supersense.counterpart))
