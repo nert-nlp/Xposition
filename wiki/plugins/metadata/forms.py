@@ -9,6 +9,7 @@ from wiki.core.plugins.base import PluginSidebarFormMixin
 from . import models
 from wiki.models import Category
 from wiki.models import ArticleRevision
+import copy
 
 
 class MetadataForm(forms.ModelForm):
@@ -146,22 +147,19 @@ class MetaSidebarForm(forms.Form):
                     self.metadata = self.updateMetadata(oldAnimacy,oldCounterpart)
 
                     #must create new article revision to track changes to metadata
-                    self.metadata.save()
                     self.updateArticle(self.metadata)
                 #must include the following data because django-wiki requires it in sidebar forms
                 self.cleaned_data['unsaved_article_title'] = self.metadata.current_revision.supersenserevision.name
                 self.cleaned_data['unsaved_article_content'] = self.metadata.current_revision.supersenserevision.description
                 # add any new metadata type save logic here
-                self.metadata.save()
                 return self.metadata
 
 
 
     def updateMetadata(self, oldAnimacy, oldCounterpart):
-        self.metadata = self.metadata.newRevision(self.request)
+        self.metadata.newRevision(self.request)
         if oldAnimacy != self.cleaned_data['animacy']:
             self.metadata.current_revision.animacy = self.cleaned_data['animacy']
-            self.metadata.current_revision.save()
         if oldCounterpart is not self.cleaned_data['counterpart']:
             self.metadata = self.metadata.setCounterpart(self.cleaned_data['counterpart'])
 
