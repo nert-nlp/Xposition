@@ -1,5 +1,6 @@
 from django.core.urlresolvers import reverse
 from django.db import models
+import copy
 from django.utils.encoding import force_text
 from django.contrib.contenttypes.models import ContentType
 from functools import reduce
@@ -33,7 +34,7 @@ class Metadata(RevisionPlugin):
 
 class MetadataRevision(RevisionPluginRevision):
     template = models.CharField(max_length=100, default="wiki/view.html", editable=False)
-    name = models.CharField(max_length=100, primary_key=True)
+    name = models.CharField(max_length=100)
     description = models.CharField(max_length=200)
 
     def __str__(self):
@@ -47,19 +48,16 @@ class MetadataRevision(RevisionPluginRevision):
 class Supersense(Metadata):
 
     def newRevision(self, request):
-        oldRevision = self.current_revision.supersenserevision
         revision = SupersenseRevision()
         revision.inherit_predecessor(self)
         revision.deleted = False
-        revision.name=oldRevision.name
-        revision.description=oldRevision.description
-        revision.animacy=oldRevision.animacy
-        revision.counterpart=oldRevision.counterpart
-        revision.template="supersense_article_view.html"
+        revision.name = copy.deepcopy(self.current_revision.supersenserevision.name)
+        revision.description = copy.deepcopy(self.current_revision.supersenserevision.description)
+        revision.animacy = copy.deepcopy(self.current_revision.supersenserevision.animacy)
+        revision.counterpart = copy.deepcopy(self.current_revision.supersenserevision.counterpart)
+        revision.template = "supersense_article_view.html"
         revision.set_from_request(request)
         self.add_revision(revision)
-        revision.save()
-        self.save()
         return self
 
 
