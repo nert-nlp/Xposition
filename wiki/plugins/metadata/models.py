@@ -29,19 +29,18 @@ class Metadata(RevisionPlugin):
             return ugettext('Current revision not set!!')
 
     class Meta():
-        abstract = True
         verbose_name = _('metadata')
 
 class MetadataRevision(RevisionPluginRevision):
     template = models.CharField(max_length=100, default="wiki/view.html", editable=False)
     name = models.CharField(max_length=100)
     description = models.CharField(max_length=200)
+    articleRevision = models.OneToOneField(ArticleRevision, null=True)
 
     def __str__(self):
         return ('Supersense Revision: %s %d') % (self.name, self.revision_number)
 
     class Meta:
-        abstract = True
         verbose_name = _('metadata revision')
 
 
@@ -51,10 +50,10 @@ class Supersense(Metadata):
         revision = SupersenseRevision()
         revision.inherit_predecessor(self)
         revision.deleted = False
-        revision.name = copy.deepcopy(self.current_revision.supersenserevision.name)
-        revision.description = copy.deepcopy(self.current_revision.supersenserevision.description)
-        revision.animacy = copy.deepcopy(self.current_revision.supersenserevision.animacy)
-        revision.counterpart = copy.deepcopy(self.current_revision.supersenserevision.counterpart)
+        revision.name = copy.deepcopy(self.current_revision.metadatarevision.supersenserevision.name)
+        revision.description = copy.deepcopy(self.current_revision.metadatarevision.supersenserevision.description)
+        revision.animacy = copy.deepcopy(self.current_revision.metadatarevision.supersenserevision.animacy)
+        revision.counterpart = copy.deepcopy(self.current_revision.metadatarevision.supersenserevision.counterpart)
         revision.template = "supersense_article_view.html"
         revision.set_from_request(request)
         self.add_revision(revision)

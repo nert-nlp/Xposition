@@ -4,7 +4,7 @@ from __future__ import absolute_import, unicode_literals
 import difflib
 import logging
 
-from wiki.plugins.metadata.models import Supersense, SupersenseRevision
+from wiki.plugins.metadata.models import Supersense, SupersenseRevision, Metadata
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
@@ -37,8 +37,8 @@ class ArticleView(ArticleMixin, TemplateView):
     @method_decorator(get_article(can_read=True))
     def dispatch(self, request, article, *args, **kwargs):
         try:
-            supersense = Supersense.objects.get(article = article)
-            self.template_name = supersense.current_revision.supersenserevision.template
+            metadata = Metadata.objects.get(article = article)
+            self.template_name = metadata.current_revision.metadatarevision.template
         except:
             pass
         return super(
@@ -52,7 +52,7 @@ class ArticleView(ArticleMixin, TemplateView):
     def get_context_data(self, **kwargs):
         kwargs['selected_tab'] = 'view'
         try:
-            kwargs['metadata'] = Supersense.objects.get(article = self.article).current_revision.supersenserevision
+            kwargs['metadata'] = Metadata.objects.get(article = self.article).current_revision.metadatarevision
         except:
             pass
         return ArticleMixin.get_context_data(self, **kwargs)

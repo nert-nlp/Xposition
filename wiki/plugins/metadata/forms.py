@@ -82,6 +82,7 @@ class SupersenseForm(forms.ModelForm):
             revision.set_from_request(self.request)
             revision.article = supersense.article
             revision.template = "supersense_article_view.html"
+            revision.articleRevision = supersense.article.current_revision
             supersense.add_revision(self.instance, save=True)
             if self.cleaned_data['counterpart']:
                 counterpart = self.cleaned_data['counterpart'].current_revision.metadatarevision.supersenserevision
@@ -119,11 +120,11 @@ class MetaSidebarForm(forms.Form):
         # If metadata is a supersense then set the form to edit the supersense fields
 
         try:
-            if self.metadata.current_revision.supersenserevision:
+            if self.metadata.current_revision.metadatarevision.supersenserevision:
                 self.form_type = 'supersense'
-                self.fields['animacy'] = forms.DecimalField(max_digits=2,decimal_places=0, initial=self.metadata.current_revision.supersenserevision.animacy)
-                self.fields['counterpart'] = forms.ModelChoiceField(queryset=models.Supersense.objects.exclude(current_revision__exact = self.metadata.current_revision.supersenserevision),
-                                                                    initial=self.metadata.current_revision.supersenserevision.counterpart, required=False)
+                self.fields['animacy'] = forms.DecimalField(max_digits=2,decimal_places=0, initial=self.metadata.current_revision.metadatarevision.supersenserevision.animacy)
+                self.fields['counterpart'] = forms.ModelChoiceField(queryset=models.Supersense.objects.exclude(current_revision__exact = self.metadata.current_revision.metadatarevision.supersenserevision),
+                                                                    initial=self.metadata.current_revision.metadatarevision.supersenserevision.counterpart, required=False)
 
         # else if not a supersense then set form to edit a default metadata
         # if you want to add a different metadata type to edit then here is the best place to do so
@@ -140,8 +141,8 @@ class MetaSidebarForm(forms.Form):
             #  supersense saving logic
             if self.form_type is 'supersense':
 
-                oldCounterpart = self.metadata.current_revision.supersenserevision.counterpart
-                oldAnimacy = self.metadata.current_revision.supersenserevision.animacy
+                oldCounterpart = self.metadata.current_revision.metadatarevision.supersenserevision.counterpart
+                oldAnimacy = self.metadata.current_revision.metadatarevision.supersenserevision.animacy
                 if oldCounterpart is not self.cleaned_data['counterpart'] or oldAnimacy != self.cleaned_data['animacy']:
 
                     self.metadata = self.updateMetadata(oldAnimacy,oldCounterpart)
@@ -149,8 +150,8 @@ class MetaSidebarForm(forms.Form):
                     #must create new article revision to track changes to metadata
                     self.updateArticle(self.metadata)
                 #must include the following data because django-wiki requires it in sidebar forms
-                self.cleaned_data['unsaved_article_title'] = self.metadata.current_revision.supersenserevision.name
-                self.cleaned_data['unsaved_article_content'] = self.metadata.current_revision.supersenserevision.description
+                self.cleaned_data['unsaved_article_title'] = self.metadata.current_revision.metadatarevision.supersenserevision.name
+                self.cleaned_data['unsaved_article_content'] = self.metadata.current_revision.metadatarevision.supersenserevision.description
                 # add any new metadata type save logic here
                 return self.metadata
 
@@ -169,18 +170,18 @@ class MetaSidebarForm(forms.Form):
 
             if self.cleaned_data['counterpart'] is not None:
                 if self.cleaned_data[
-                    'counterpart'].current_revision.supersenserevision.counterpart is not None:
+                    'counterpart'].current_revision.metadatarevision.supersenserevision.counterpart is not None:
                     self.cleaned_data[
-                        'counterpart'].current_revision.supersenserevision.counterpart.newRevision(self.request)
+                        'counterpart'].current_revision.metadatarevision.supersenserevision.counterpart.newRevision(self.request)
                     self.cleaned_data[
-                        'counterpart'].current_revision.supersenserevision.counterpart.setCounterpart(
+                        'counterpart'].current_revision.metadatarevision.supersenserevision.counterpart.setCounterpart(
                         newCounterpart=None)
 
                 self.cleaned_data['counterpart'] =self.cleaned_data['counterpart'].newRevision(self.request)
                 self.cleaned_data['counterpart'] = self.cleaned_data['counterpart'].setCounterpart(newCounterpart=self.metadata)
         self.metadata.current_revision.automatic_log = (
-        "Animacy: " + str(self.metadata.current_revision.supersenserevision.animacy) +
-        " Counterpart: " + str(self.metadata.current_revision.supersenserevision.counterpart))
+        "Animacy: " + str(self.cleaned_data['animacy']) +
+        " Counterpart: " + str(self.cleaned_data['counterpart']))
         self.metadata.current_revision.save()
         return self.metadata
 
@@ -193,3 +194,5 @@ class MetaSidebarForm(forms.Form):
         revision.deleted = False
         revision.set_from_request(self.request)
         self.article.add_revision(revision)
+        supersense.current_revision.articleRevision = revision
+        supersense.current_revision.save()
