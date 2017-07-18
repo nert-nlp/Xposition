@@ -401,6 +401,13 @@ class Edit(ArticleMixin, FormView):
         revision.deleted = False
         revision.set_from_request(self.request)
         self.article.add_revision(revision)
+
+        currentMetadata = Metadata.objects.get(article=self.article)
+        if currentMetadata:
+            metadataRevision = currentMetadata.createNewRevision(self.request)
+            metadataRevision.articleRevision = revision
+            metadataRevision.save()
+
         messages.success(
             self.request,
             _('A new revision of the article was successfully added.'))

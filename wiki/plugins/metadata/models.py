@@ -28,6 +28,11 @@ class Metadata(RevisionPlugin):
         else:
             return ugettext('Current revision not set!!')
 
+    def createNewRevision(self, request):
+        if self.supersense:
+            return self.supersense.newRevision(request).current_revision
+
+
     class Meta():
         verbose_name = _('metadata')
 
@@ -72,7 +77,7 @@ class Supersense(Metadata):
 
     def __str__(self):
         if self.current_revision:
-            return self.current_revision.supersenserevision.name
+            return self.current_revision.metadatarevision.name
         else:
             return ugettext('Current revision not set!!')
     class Meta:
