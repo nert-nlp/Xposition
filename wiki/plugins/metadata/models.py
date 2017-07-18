@@ -29,6 +29,8 @@ class Metadata(RevisionPlugin):
             return ugettext('Current revision not set!!')
 
     def createNewRevision(self, request):
+        # Add self.metadatatype check and call the relevant newRevision method on the derived class object
+                # USED WHEN AN ARTICLE IS EDITED
         if self.supersense:
             return self.supersense.newRevision(request).current_revision
 
