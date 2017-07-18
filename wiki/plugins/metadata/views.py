@@ -72,42 +72,6 @@ class MetadataView(ArticleMixin, FormView):
             self.article_urlpath = metadataForm.save()
         # self.article_urlpath = form.save()
         # if we are dealing with a base metadata object
-        '''
-        if 'metadata' in form.data:
-            self.metadata = models.Metadata()
-            self.metadataRevision = models.MetadataRevision.objects.create(name = form.data['name'],
-                                                           description = form.data['description'])
-            self.metadata.article = Article.objects.get(urlpath=self.article_urlpath)
-
-
-        # if supersense create a category and update counterpart if necessary
-        if 'supersense' in form.data:
-            self.metadata = models.Supersense()
-            self.metadataRevision = models.SupersenseRevision.objects.create(name=form.data['name'],
-                                                             description=form.data['description'],
-                                                             animacy=form.data['animacy'],
-                                                             template="supersense_article_view.html",
-                                                             counterpart=None)
-            if form.data['counterpart']:
-                counterpart = models.Supersense.objects.get(name=form.data['counterpart'])
-                self.metadata.counterpart = counterpart
-                counterpart.counterpart = self.metadata
-                counterpart.save()
-            else:
-                pass
-            supersense_category = Category.objects.create(slug = form.data['name'],
-                                                                name = form.data['name'],
-                                                                description = form.data['description'])
-            self.metadata.article = Article.objects.get(urlpath=self.article_urlpath)
-            self.metadataRevision.article = Article.objects.get(urlpath=self.article_urlpath)
-            self.metadata.article.categories.add(supersense_category)
-
-        #if adding a new metadata type, include save logic here. MAKE SURE TO INCLUDE YOUR CUSTOM METADATA TEMPLATE IN CREATION, SEE ABOVE
-
-        self.metadata.current_revision = self.metadataRevision
-        self.metadata.save()
-        self.metadataRevision.save()
-        '''
         return redirect(
             "wiki:get",
             path=self.article_urlpath.path,
