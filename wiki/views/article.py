@@ -52,7 +52,7 @@ class ArticleView(ArticleMixin, TemplateView):
     def get_context_data(self, **kwargs):
         kwargs['selected_tab'] = 'view'
         try:
-            kwargs['metadata'] = Metadata.objects.get(article = self.article).current_revision.metadatarevision
+            kwargs['metadata'] = self.article.current_revision.metadatarevision
         except:
             pass
         return ArticleMixin.get_context_data(self, **kwargs)
