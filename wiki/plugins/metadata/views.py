@@ -47,7 +47,8 @@ class MetadataView(ArticleMixin, FormView):
     def get_forms(self):
         kwargs = self.get_form_kwargs()
         form = [super(MetadataView, self).get_form(form_class=forms.MetadataForm),
-                super(MetadataView, self).get_form(form_class=forms.SupersenseForm)]
+                super(MetadataView, self).get_form(form_class=forms.SupersenseForm),
+                super(MetadataView, self).get_form(form_class=forms.ExampleForm)]
         return form
 
     def get_context_data(self, **kwargs):

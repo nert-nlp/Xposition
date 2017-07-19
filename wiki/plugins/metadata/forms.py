@@ -196,3 +196,13 @@ class MetaSidebarForm(forms.Form):
         self.article.add_revision(revision)
         supersense.current_revision.articleRevision = revision
         supersense.current_revision.save()
+
+class ExampleForm(forms.Form):
+
+    def __init__(self, article, request, *args, **kwargs):
+        self.article = article
+        self.request = request
+        super(ExampleForm, self).__init__(*args, **kwargs)
+
+    example_Title = forms.CharField()
+    example_File = forms.FileField()
