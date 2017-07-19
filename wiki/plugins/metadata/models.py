@@ -96,7 +96,54 @@ class SupersenseRevision(MetadataRevision):
         verbose_name = _('supersense revision')
 
 
+class Usage(Metadata):
+
+    def __str__(self):
+        if self.current_revision:
+            return self.current_revision.metadatarevision.name
+        else:
+            return ugettext('Current revision not set!!')
+    class Meta:
+        verbose_name = _('usage')
+
+class UsageRevision(MetadataRevision):
+
+    def __str__(self):
+        return ('Usage Revision: %s %d') % (self.name, self.revision_number)
+
+    class Meta:
+        verbose_name = _('usage revision')
+
+
+class Example(models.Model):
+    exampleString = models.CharField(max_length=200)
+
+
+class Adposition(Metadata):
+
+    def __str__(self):
+        if self.current_revision:
+            return self.current_revision.metadatarevision.name
+        else:
+            return ugettext('Current revision not set!!')
+    class Meta:
+        verbose_name = _('adposition')
+
+class AdpositionRevision(MetadataRevision):
+
+    def __str__(self):
+        return ('Adposition Revision: %s %d') % (self.name, self.revision_number)
+
+    class Meta:
+        verbose_name = _('adposition revision')
+
+
 # You must register the model here
 
 admin.site.register(Supersense)
 admin.site.register(SupersenseRevision)
+admin.site.register(Usage)
+admin.site.register(UsageRevision)
+admin.site.register(Example)
+admin.site.register(Adposition)
+admin.site.register(AdpositionRevision)
