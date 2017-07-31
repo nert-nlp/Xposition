@@ -108,6 +108,9 @@ class Usage(Metadata):
 
 class UsageRevision(MetadataRevision):
 
+    role = models.ForeignKey(Supersense, null=True, related_name='role')
+    function = models.ForeignKey(Supersense, null=True, related_name='function')
+
     def __str__(self):
         return ('Usage Revision: %s %d') % (self.name, self.revision_number)
 
