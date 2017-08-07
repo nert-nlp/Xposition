@@ -10,7 +10,7 @@ register = template.Library()
 def metadata_display(context, metadata):
     metadata = metadata.metadatarevision.supersenserevision
     generic_flds = MetadataRevision._meta.get_fields()
-    display = '<h3 id="metadata">Metadata</h3>\n<table class="metadata">\n'
+    display = '<h4 id="metadata">Metadata</h4>\n<table class="metadata">\n'
     for fld in metadata._meta.get_fields(include_hidden=False):
         if fld not in generic_flds and not fld.name.endswith('_ptr'):
             display += f'    <tr><th style="padding: 10px;">{fld.name}</th><td>'
