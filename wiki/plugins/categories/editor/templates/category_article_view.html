@@ -1,3 +1,4 @@
+{% load wiki_tags i18n sekizai_tags %}
 {# check if article is in tab like 'edit' or 'metadata' or 'categories' if so don't render the following #}
     {% if not "_" in request.path %}
 
@@ -5,7 +6,7 @@
       <div>
           {% if article.categories.all %}
             {% if urlpath.slug == article.categories.all.0.slug %}
-                <h2>Entries</h2>
+                <h4>{% trans "Entries" %}</h4>
                 {% for category_article in article.categories.all.0.article_set.all %}
                   {% if category_article != article %}
                     <p>
@@ -21,7 +22,7 @@
       <div>
         {% with article.categories.all as categories %}
           {% if categories.all %}
-          <h4>This article is in the following categories:</h4>
+          <h4>{% trans "Categories" %}</h4>
             <ul>
                 {% for category in categories %}
                   <li><a href="{{ category.url }}">{{category.short_title}}</a>
