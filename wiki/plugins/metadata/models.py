@@ -28,6 +28,11 @@ class Metadata(RevisionPlugin):
         else:
             return ugettext('Current revision not set!!')
 
+    def html(self):
+        if self.current_revision:
+            return self.current_revision.metadatarevision.html()
+        return ''
+
     def createNewRevision(self, request):
         # Add self.metadatatype check and call the relevant newRevision method on the derived class object
                 # USED WHEN AN ARTICLE IS EDITED
@@ -45,7 +50,10 @@ class MetadataRevision(RevisionPluginRevision):
     articleRevision = models.OneToOneField(ArticleRevision, null=True)
 
     def __str__(self):
-        return ('Supersense Revision: %s %d') % (self.name, self.revision_number)
+        return ('Metadata Revision: %s %d') % (self.name, self.revision_number)
+
+    def html(self):
+        return '<a href="' + self.articleRevision.article.get_absolute_url() + '">' + str(self.name) + '</a>'
 
     class Meta:
         verbose_name = _('metadata revision')
@@ -82,6 +90,8 @@ class Supersense(Metadata):
             return self.current_revision.metadatarevision.name
         else:
             return ugettext('Current revision not set!!')
+
+
     class Meta:
         verbose_name = _('supersense')
 
