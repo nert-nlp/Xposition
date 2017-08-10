@@ -7,9 +7,10 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ugettext
 from wiki.core.plugins.base import PluginSidebarFormMixin
 from . import models
+from .models import deepest_instance
 from wiki.models import Category
 from wiki.models import ArticleRevision
-import copy
+import copy, sys
 
 
 class MetadataForm(forms.ModelForm):
@@ -114,6 +115,7 @@ class MetaSidebarForm(forms.Form):
 
         try:
             self.metadata = models.Supersense.objects.get(article = self.article)
+            self.metacurr = deepest_instance(self.metadata.current_revision)
         except:
             pass
 
@@ -122,9 +124,10 @@ class MetaSidebarForm(forms.Form):
         try:
             if self.metadata.current_revision.metadatarevision.supersenserevision:
                 self.form_type = 'supersense'
-                self.fields['animacy'] = forms.DecimalField(max_digits=2,decimal_places=0, initial=self.metadata.current_revision.metadatarevision.supersenserevision.animacy)
-                self.fields['counterpart'] = forms.ModelChoiceField(queryset=models.Supersense.objects.exclude(current_revision__exact = self.metadata.current_revision.metadatarevision.supersenserevision),
-                                                                    initial=self.metadata.current_revision.metadatarevision.supersenserevision.counterpart, required=False)
+                self.fields['animacy'] = forms.DecimalField(max_digits=2,decimal_places=0, initial=self.metacurr.animacy)
+                self.fields['counterpart'] = forms.ModelChoiceField(queryset=models.Supersense.objects.exclude(current_revision__exact = self.metacurr),
+                                                                    initial=self.metacurr.counterpart, required=False)
+
 
         # else if not a supersense then set form to edit a default metadata
         # if you want to add a different metadata type to edit then here is the best place to do so
@@ -140,7 +143,7 @@ class MetaSidebarForm(forms.Form):
         if self.is_valid():
             #  supersense saving logic
             if self.form_type is 'supersense':
-
+                """
                 oldCounterpart = self.metadata.current_revision.metadatarevision.supersenserevision.counterpart
                 oldAnimacy = self.metadata.current_revision.metadatarevision.supersenserevision.animacy
                 if oldCounterpart is not self.cleaned_data['counterpart'] or oldAnimacy != self.cleaned_data['animacy']:
@@ -149,6 +152,10 @@ class MetaSidebarForm(forms.Form):
 
                     #must create new article revision to track changes to metadata
                     self.updateArticle(self.metadata)
+                """
+                curr = deepest_instance(self.metadata)
+                curr.newRevision(self.request, **self.cleaned_data)
+
                 #must include the following data because django-wiki requires it in sidebar forms
                 self.cleaned_data['unsaved_article_title'] = self.metadata.current_revision.metadatarevision.supersenserevision.name
                 self.cleaned_data['unsaved_article_content'] = self.metadata.current_revision.metadatarevision.supersenserevision.description
@@ -157,7 +164,7 @@ class MetaSidebarForm(forms.Form):
 
 
 
-    def updateMetadata(self, oldAnimacy, oldCounterpart):
+    def __updateMetadata(self, oldAnimacy, oldCounterpart):
         self.metadata.newRevision(self.request)
         if oldAnimacy != self.cleaned_data['animacy']:
             self.metadata.current_revision.animacy = self.cleaned_data['animacy']

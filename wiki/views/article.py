@@ -52,7 +52,8 @@ class ArticleView(ArticleMixin, TemplateView):
     def get_context_data(self, **kwargs):
         kwargs['selected_tab'] = 'view'
         try:
-            kwargs['metadata'] = self.article.current_revision.metadatarevision
+            #kwargs['metadata'] = self.article.current_revision.metadatarevision # TODO: I think this pointer is not being updated properly
+            kwargs['metadata'] = Metadata.objects.get(article = self.article).current_revision
         except:
             pass
         return ArticleMixin.get_context_data(self, **kwargs)
