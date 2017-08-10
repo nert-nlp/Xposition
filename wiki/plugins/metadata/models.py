@@ -1,6 +1,6 @@
 from django.core.urlresolvers import reverse
 from django.db import models
-import copy
+import copy, sys
 from django.utils.encoding import force_text
 from django.contrib.contenttypes.models import ContentType
 from functools import reduce
@@ -16,6 +16,31 @@ except ImportError:
 from django.core.files.storage import get_storage_class
 
 from django.utils.translation import ugettext_lazy as _
+
+def deepest_instance(x):
+    """
+    Simulate true inheritance given an instance of
+    an object that uses multi-table inheritance.
+    E.g., if Z is a subclass of Y which is a subclass of X,
+    instantiating a Z() will result in an X whose .y is a Y, whose .z is a Z.
+    deepest_instance(x) returns x.y.z.
+    This is only necessary to access a database field defined by Z
+    (methods inherit normally).
+    """
+    inst = x
+    typ = type(x)
+    #s = str(inst)
+    while inst:
+        # list the subclasses of 'typ' which are instantiated as attributes of 'inst'
+        sub = [cls for cls in typ.__subclasses__() if hasattr(inst, cls.__name__.lower())]
+        if not sub:
+            break
+        typ = sub[0]
+        # dot into the corresponding attribute of the instance
+        inst = getattr(inst, typ.__name__.lower())
+        #s += '.' + y.__name__.lower()
+    return inst
+
 
 # These are the different metadata models. Extend from the base metadata class if you want to add a
 # new metadata type. Make sure to register your model below.
@@ -47,13 +72,13 @@ class MetadataRevision(RevisionPluginRevision):
     template = models.CharField(max_length=100, default="wiki/view.html", editable=False)
     name = models.CharField(max_length=100)
     description = models.CharField(max_length=200)
-    articleRevision = models.OneToOneField(ArticleRevision, null=True)
+    #articleRevision = models.OneToOneField(ArticleRevision, null=True) # TODO: is this even used?
 
     def __str__(self):
         return ('Metadata Revision: %s %d') % (self.name, self.revision_number)
 
     def html(self):
-        return '<a href="' + self.articleRevision.article.get_absolute_url() + '">' + str(self.name) + '</a>'
+        return '<a href="' + self.plugin.article.get_absolute_url() + '">' + str(self.name) + '</a>'
 
     class Meta:
         verbose_name = _('metadata revision')
@@ -61,21 +86,58 @@ class MetadataRevision(RevisionPluginRevision):
 
 class Supersense(Metadata):
 
-    def newRevision(self, request):
+
+    def newRevision(self, request, recursive=False, **changes):
         revision = SupersenseRevision()
         revision.inherit_predecessor(self)
         revision.deleted = False
-        revision.name = copy.deepcopy(self.current_revision.metadatarevision.supersenserevision.name)
-        revision.description = copy.deepcopy(self.current_revision.metadatarevision.supersenserevision.description)
-        revision.animacy = copy.deepcopy(self.current_revision.metadatarevision.supersenserevision.animacy)
-        revision.counterpart = copy.deepcopy(self.current_revision.metadatarevision.supersenserevision.counterpart)
-        revision.template = "supersense_article_view.html"
-        revision.set_from_request(request)
-        self.add_revision(revision)
+        curr = deepest_instance(self.current_revision)
+        for fld in ('name', 'description', 'animacy'):
+            if fld in changes and changes[fld]==getattr(curr, fld):
+                del changes[fld]    # actually no change to this field
+            if fld not in changes:
+                setattr(revision, fld, copy.deepcopy(getattr(curr, fld)))
+            else:
+                setattr(revision, fld, changes[fld])
+        if 'counterpart' in changes:
+            if changes['counterpart']==curr.counterpart:
+                del changes['counterpart']
+            elif not recursive:
+                print(f'{changes["counterpart"]} ({id(changes["counterpart"])}) is not {curr.counterpart} ({id(curr.counterpart)})')
+                print(f'in {self}, setting counterpart to {changes["counterpart"]} recursively', file=sys.stderr)
+                revision.counterpart = self.updateCounterpart(changes['counterpart'], request)
+            else:
+                print(f'{changes["counterpart"]} is not {curr.counterpart}')
+                print(f'in {self}, setting counterpart to {changes["counterpart"]} nonrecursively', file=sys.stderr)
+                revision.counterpart = changes['counterpart']
+
+        if changes.keys() & {'name', 'description', 'animacy', 'counterpart'}:
+            revision.template = "supersense_article_view.html"
+            revision.set_from_request(request)
+            revision.automatic_log = repr({f: v for f,v in changes.items() if f in {'name','description','animacy'}})  # TODO: make HTML
+            #revision.articleRevision = # TODO: do we need to set this?
+            self.add_revision(revision)
+            curr2 = deepest_instance(self.current_revision)
+            print(f'in {self}, counterpart is now {curr2.counterpart}', file=sys.stderr)
         return self
 
+    def updateCounterpart(self, ss2, request):
+        """Orchestrates new revisions required for changing a counterpart link between two supersenses"""
+        ss1curr = deepest_instance(self.current_revision)
+        if ss1curr.counterpart:
+            print(f"{ss1curr}'s current counterpart {ss1curr.counterpart}: changing its counterpart from {deepest_instance(ss1curr.counterpart.current_revision).counterpart}", file=sys.stderr)
+            ss1curr.counterpart.newRevision(request, counterpart=None, recursive=True)  # unset counterpart
+            print(f"{ss1curr}'s counterpart {ss1curr.counterpart}'s counterpart changed to {deepest_instance(ss1curr.counterpart.current_revision).counterpart}", file=sys.stderr)
+        if ss2:
+            ss2curr = deepest_instance(ss2.current_revision)
+            if ss2curr.counterpart:
+                print(f"{ss2curr}'s current counterpart {ss2curr.counterpart}: changing its counterpart from {deepest_instance(ss2curr.counterpart.current_revision).counterpart}", file=sys.stderr)
+                ss2curr.counterpart.newRevision(request, counterpart=None, recursive=True)  # unset counterpart
+                print(f"{ss2curr}'s counterpart {ss2curr.counterpart}'s counterpart changed to {deepest_instance(ss2curr.counterpart.current_revision).counterpart}", file=sys.stderr)
+        ss2.newRevision(request, counterpart=self, recursive=True)
+        return ss2
 
-    def setCounterpart(self, newCounterpart):
+    def __setCounterpart(self, newCounterpart):
         revision = self.current_revision
         oldCounterpart = self.current_revision.counterpart
 
