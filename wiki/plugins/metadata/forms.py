@@ -99,12 +99,8 @@ class SupersenseForm(forms.ModelForm):
 
             revision.article = supersense.article
             revision.template = "supersense_article_view.html"
-            revision.articleRevision = supersense.article.current_revision # TODO: do we need this?
+            #revision.articleRevision = supersense.article.current_revision # TODO: do we need this?
             supersense.add_revision(self.instance, save=True)
-            if self.cleaned_data['counterpart']:
-                counterpart = self.cleaned_data['counterpart'].current_revision.metadatarevision.supersenserevision
-                counterpart.counterpart = supersense
-                counterpart.save()
 
             supersense.article.categories.add(supersense_category)
             supersense.article.save()
@@ -113,7 +109,7 @@ class SupersenseForm(forms.ModelForm):
 
     class Meta:
         model = models.SupersenseRevision
-        fields = ('name', 'description', 'parent', 'animacy', 'counterpart')
+        fields = ('name', 'description', 'parent', 'animacy')
         widgets = {'animacy': HorizontalRadioSelect}
 
 class MetaSidebarForm(forms.Form):
@@ -139,9 +135,7 @@ class MetaSidebarForm(forms.Form):
             if self.metadata.current_revision.metadatarevision.supersenserevision:
                 self.form_type = 'supersense'
                 self.fields['animacy'] = forms.DecimalField(max_digits=2,decimal_places=0, initial=self.metacurr.animacy)
-                self.fields['counterpart'] = forms.ModelChoiceField(queryset=models.Supersense.objects.exclude(current_revision__exact = self.metacurr),
-                                                                    initial=self.metacurr.counterpart, required=False)
-
+                # parent field is edited through category plugin sidebar
 
         # else if not a supersense then set form to edit a default metadata
         # if you want to add a different metadata type to edit then here is the best place to do so
@@ -157,16 +151,6 @@ class MetaSidebarForm(forms.Form):
         if self.is_valid():
             #  supersense saving logic
             if self.form_type is 'supersense':
-                """
-                oldCounterpart = self.metadata.current_revision.metadatarevision.supersenserevision.counterpart
-                oldAnimacy = self.metadata.current_revision.metadatarevision.supersenserevision.animacy
-                if oldCounterpart is not self.cleaned_data['counterpart'] or oldAnimacy != self.cleaned_data['animacy']:
-
-                    self.metadata = self.updateMetadata(oldAnimacy,oldCounterpart)
-
-                    #must create new article revision to track changes to metadata
-                    self.updateArticle(self.metadata)
-                """
                 curr = deepest_instance(self.metadata)
                 curr.newRevision(self.request, **self.cleaned_data)
 
@@ -175,36 +159,6 @@ class MetaSidebarForm(forms.Form):
                 self.cleaned_data['unsaved_article_content'] = self.metadata.current_revision.metadatarevision.supersenserevision.description
                 # add any new metadata type save logic here
                 return self.metadata
-
-
-
-    def __updateMetadata(self, oldAnimacy, oldCounterpart):
-        self.metadata.newRevision(self.request)
-        if oldAnimacy != self.cleaned_data['animacy']:
-            self.metadata.current_revision.animacy = self.cleaned_data['animacy']
-        if oldCounterpart is not self.cleaned_data['counterpart']:
-            self.metadata = self.metadata.setCounterpart(self.cleaned_data['counterpart'])
-
-            if oldCounterpart is not None:
-                oldCounterpart = oldCounterpart.newRevision(self.request)
-                oldCounterpart = oldCounterpart.setCounterpart(newCounterpart=None)
-
-            if self.cleaned_data['counterpart'] is not None:
-                if self.cleaned_data[
-                    'counterpart'].current_revision.metadatarevision.supersenserevision.counterpart is not None:
-                    self.cleaned_data[
-                        'counterpart'].current_revision.metadatarevision.supersenserevision.counterpart.newRevision(self.request)
-                    self.cleaned_data[
-                        'counterpart'].current_revision.metadatarevision.supersenserevision.counterpart.setCounterpart(
-                        newCounterpart=None)
-
-                self.cleaned_data['counterpart'] =self.cleaned_data['counterpart'].newRevision(self.request)
-                self.cleaned_data['counterpart'] = self.cleaned_data['counterpart'].setCounterpart(newCounterpart=self.metadata)
-        self.metadata.current_revision.automatic_log = (
-        "Animacy: " + str(self.cleaned_data['animacy']) +
-        " Counterpart: " + str(self.cleaned_data['counterpart']))
-        self.metadata.current_revision.save()
-        return self.metadata
 
     def updateArticle(self, supersense):
         revision = ArticleRevision()
