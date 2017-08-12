@@ -12,6 +12,14 @@ from wiki.models import Category
 from wiki.models import ArticleRevision
 import copy, sys
 
+class HorizontalRadioSelect(forms.RadioSelect):
+    """Adapted from https://stackoverflow.com/a/39538735"""
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        css_style = 'style="display: inline-block; margin-right: 10px;"'
+        self.renderer.outer_html = '<ul{id_attr} style="display: inline-block">{content}</ul>'
+        self.renderer.inner_html = '<li ' + css_style + '>{choice_value}{sub_widgets}</li>'
 
 class MetadataForm(forms.ModelForm):
 
@@ -77,22 +85,27 @@ class SupersenseForm(forms.ModelForm):
                                 'other_write': self.article.other_write,
                                 })
             supersense = models.Supersense()
-            supersense.article = models.Article.objects.get(urlpath = self.article_urlpath)
             kwargs['commit'] = False
             revision = super(SupersenseForm, self).save(*args, **kwargs)
             revision.set_from_request(self.request)
+
+            supersense_category = Category(slug=self.data['name'],
+                                           name=self.data['name'],
+                                           description=self.data['description'],
+                                           parent=self.cleaned_data['parent'].category if self.cleaned_data['parent'] else None)
+            supersense_category.save()
+            supersense.category = supersense_category
+            supersense.article = models.Article.objects.get(urlpath = self.article_urlpath)
+
             revision.article = supersense.article
             revision.template = "supersense_article_view.html"
-            revision.articleRevision = supersense.article.current_revision
+            revision.articleRevision = supersense.article.current_revision # TODO: do we need this?
             supersense.add_revision(self.instance, save=True)
             if self.cleaned_data['counterpart']:
                 counterpart = self.cleaned_data['counterpart'].current_revision.metadatarevision.supersenserevision
                 counterpart.counterpart = supersense
                 counterpart.save()
-            supersense_category = Category(slug=self.data['name'],
-                                                          name=self.data['name'],
-                                                          description=self.data['description'])
-            supersense_category.save()
+
             supersense.article.categories.add(supersense_category)
             supersense.article.save()
             return self.article_urlpath
@@ -100,7 +113,8 @@ class SupersenseForm(forms.ModelForm):
 
     class Meta:
         model = models.SupersenseRevision
-        fields = ('name', 'description', 'animacy', 'counterpart')
+        fields = ('name', 'description', 'parent', 'animacy', 'counterpart')
+        widgets = {'animacy': HorizontalRadioSelect}
 
 class MetaSidebarForm(forms.Form):
 
