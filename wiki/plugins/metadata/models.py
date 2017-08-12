@@ -8,6 +8,7 @@ from wiki.models import Article, ArticleRevision
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ugettext
 from django.contrib import admin
+from wiki.models import Category
 from wiki.models.pluginbase import RevisionPlugin, RevisionPluginRevision
 try:
     from django.contrib.contenttypes.fields import GenericForeignKey
@@ -85,14 +86,14 @@ class MetadataRevision(RevisionPluginRevision):
 
 
 class Supersense(Metadata):
-
+    category = models.ForeignKey(Category, null=False)
 
     def newRevision(self, request, recursive=False, **changes):
         revision = SupersenseRevision()
         revision.inherit_predecessor(self)
         revision.deleted = False
         curr = deepest_instance(self.current_revision)
-        for fld in ('name', 'description', 'animacy'):
+        for fld in ('name', 'description', 'parent', 'animacy'):
             if fld in changes and changes[fld]==getattr(curr, fld):
                 del changes[fld]    # actually no change to this field
             if fld not in changes:
@@ -111,10 +112,10 @@ class Supersense(Metadata):
                 print(f'in {self}, setting counterpart to {changes["counterpart"]} nonrecursively', file=sys.stderr)
                 revision.counterpart = changes['counterpart']
 
-        if changes.keys() & {'name', 'description', 'animacy', 'counterpart'}:
+        if changes.keys() & {'name', 'description', 'parent', 'animacy', 'counterpart'}:
             revision.template = "supersense_article_view.html"
             revision.set_from_request(request)
-            revision.automatic_log = repr({f: v for f,v in changes.items() if f in {'name','description','animacy'}})  # TODO: make HTML
+            revision.automatic_log = ','.join(f'{f.title()}: {getattr(self.current_revision, f)} → {v}' for f,v in changes.items())
             #revision.articleRevision = # TODO: do we need to set this?
             self.add_revision(revision)
             curr2 = deepest_instance(self.current_revision)
@@ -158,7 +159,12 @@ class Supersense(Metadata):
         verbose_name = _('supersense')
 
 class SupersenseRevision(MetadataRevision):
-    animacy = models.DecimalField(max_digits=2, decimal_places=0)
+    ANIMACY_TYPES = (
+        (0, 'unspecified'),
+        (1, 'animate'),
+    )
+    animacy = models.PositiveIntegerField(choices=ANIMACY_TYPES, default=0)
+    parent = models.ForeignKey(Supersense, null=True, blank=True, related_name='sschildren')
     counterpart = models.ForeignKey(Supersense, null=True, blank=True)
 
     def __str__(self):
@@ -168,7 +174,7 @@ class SupersenseRevision(MetadataRevision):
         verbose_name = _('supersense revision')
 
 
-class Usage(Metadata):
+class RoleFunction(Metadata):
 
     def __str__(self):
         if self.current_revision:
@@ -176,25 +182,41 @@ class Usage(Metadata):
         else:
             return ugettext('Current revision not set!!')
     class Meta:
-        verbose_name = _('usage')
+        verbose_name = _('rolefunction')
 
-class UsageRevision(MetadataRevision):
+class RoleFunctionRevision(MetadataRevision):
 
-    role = models.ForeignKey(Supersense, null=True, related_name='role')
-    function = models.ForeignKey(Supersense, null=True, related_name='function')
+    role = models.ForeignKey(Supersense, null=True, related_name='rfs_with_role')
+    function = models.ForeignKey(Supersense, null=True, related_name='rfs_with_function')
 
     def __str__(self):
-        return ('Usage Revision: %s %d') % (self.name, self.revision_number)
+        return ('RoleFunction Revision: %s %d') % (self.name, self.revision_number)
 
     class Meta:
-        verbose_name = _('usage revision')
+        verbose_name = _('rolefunction revision')
 
+class Language(Metadata):
 
-class Example(models.Model):
-    exampleString = models.CharField(max_length=200)
+    def __str__(self):
+        if self.current_revision:
+            return self.current_revision.metadatarevision.name
+        else:
+            return ugettext('Current revision not set!!')
+    class Meta:
+        verbose_name = _('language')
 
+class Corpus(Metadata):
+
+    def __str__(self):
+        if self.current_revision:
+            return self.current_revision.metadatarevision.name
+        else:
+            return ugettext('Current revision not set!!')
+    class Meta:
+        verbose_name = _('corpus')
 
 class Adposition(Metadata):
+    lang = models.ForeignKey(Language, null=True, related_name='adpositions')
 
     def __str__(self):
         if self.current_revision:
@@ -212,13 +234,58 @@ class AdpositionRevision(MetadataRevision):
     class Meta:
         verbose_name = _('adposition revision')
 
+class Usage(Metadata):
+
+    def __str__(self):
+        if self.current_revision:
+            return self.current_revision.metadatarevision.name
+        else:
+            return ugettext('Current revision not set!!')
+    class Meta:
+        verbose_name = _('usage')
+
+class UsageRevision(MetadataRevision):
+
+    adposition = models.ForeignKey(Adposition, null=True, related_name='usages')
+    rolefunction = models.ForeignKey(RoleFunction, null=True, related_name='usages')
+
+    def __str__(self):
+        return ('Usage Revision: %s %d') % (self.name, self.revision_number)
+
+    class Meta:
+        verbose_name = _('usage revision')
+
+class Example(models.Model):
+
+    def __str__(self):
+        if self.current_revision:
+            return self.current_revision.metadatarevision.name
+        else:
+            return ugettext('Current revision not set!!')
+    class Meta:
+        verbose_name = _('example')
+
+class ExampleRevision(MetadataRevision):
+    exampleXML = models.CharField(max_length=200)
+    usage = models.ForeignKey(RoleFunction, null=True, related_name='examples')
+
+    def __str__(self):
+        return ('Example Revision: %s %d') % (self.name, self.revision_number)
+
+    class Meta:
+        verbose_name = _('example revision')
 
 # You must register the model here
 
 admin.site.register(Supersense)
 admin.site.register(SupersenseRevision)
+admin.site.register(RoleFunction)
+admin.site.register(RoleFunctionRevision)
+admin.site.register(Language)
+admin.site.register(Corpus)
+admin.site.register(Adposition)
+admin.site.register(AdpositionRevision)
 admin.site.register(Usage)
 admin.site.register(UsageRevision)
 admin.site.register(Example)
-admin.site.register(Adposition)
-admin.site.register(AdpositionRevision)
+admin.site.register(ExampleRevision)
