@@ -100,53 +100,15 @@ class Supersense(Metadata):
                 setattr(revision, fld, copy.deepcopy(getattr(curr, fld)))
             else:
                 setattr(revision, fld, changes[fld])
-        if 'counterpart' in changes:
-            if changes['counterpart']==curr.counterpart:
-                del changes['counterpart']
-            elif not recursive:
-                print(f'{changes["counterpart"]} ({id(changes["counterpart"])}) is not {curr.counterpart} ({id(curr.counterpart)})')
-                print(f'in {self}, setting counterpart to {changes["counterpart"]} recursively', file=sys.stderr)
-                revision.counterpart = self.updateCounterpart(changes['counterpart'], request)
-            else:
-                print(f'{changes["counterpart"]} is not {curr.counterpart}')
-                print(f'in {self}, setting counterpart to {changes["counterpart"]} nonrecursively', file=sys.stderr)
-                revision.counterpart = changes['counterpart']
 
-        if changes.keys() & {'name', 'description', 'parent', 'animacy', 'counterpart'}:
+        if changes.keys() & {'name', 'description', 'parent', 'animacy'}:
             revision.template = "supersense_article_view.html"
             revision.set_from_request(request)
             revision.automatic_log = ','.join(f'{f.title()}: {getattr(self.current_revision, f)} → {v}' for f,v in changes.items())
             #revision.articleRevision = # TODO: do we need to set this?
             self.add_revision(revision)
             curr2 = deepest_instance(self.current_revision)
-            print(f'in {self}, counterpart is now {curr2.counterpart}', file=sys.stderr)
         return self
-
-    def updateCounterpart(self, ss2, request):
-        """Orchestrates new revisions required for changing a counterpart link between two supersenses"""
-        ss1curr = deepest_instance(self.current_revision)
-        if ss1curr.counterpart:
-            print(f"{ss1curr}'s current counterpart {ss1curr.counterpart}: changing its counterpart from {deepest_instance(ss1curr.counterpart.current_revision).counterpart}", file=sys.stderr)
-            ss1curr.counterpart.newRevision(request, counterpart=None, recursive=True)  # unset counterpart
-            print(f"{ss1curr}'s counterpart {ss1curr.counterpart}'s counterpart changed to {deepest_instance(ss1curr.counterpart.current_revision).counterpart}", file=sys.stderr)
-        if ss2:
-            ss2curr = deepest_instance(ss2.current_revision)
-            if ss2curr.counterpart:
-                print(f"{ss2curr}'s current counterpart {ss2curr.counterpart}: changing its counterpart from {deepest_instance(ss2curr.counterpart.current_revision).counterpart}", file=sys.stderr)
-                ss2curr.counterpart.newRevision(request, counterpart=None, recursive=True)  # unset counterpart
-                print(f"{ss2curr}'s counterpart {ss2curr.counterpart}'s counterpart changed to {deepest_instance(ss2curr.counterpart.current_revision).counterpart}", file=sys.stderr)
-        ss2.newRevision(request, counterpart=self, recursive=True)
-        return ss2
-
-    def __setCounterpart(self, newCounterpart):
-        revision = self.current_revision
-        oldCounterpart = self.current_revision.counterpart
-
-        if newCounterpart is not oldCounterpart:
-            self.current_revision.counterpart = newCounterpart
-            self.current_revision.save()
-        return self
-
 
     def __str__(self):
         if self.current_revision:
@@ -165,8 +127,7 @@ class SupersenseRevision(MetadataRevision):
     )
     animacy = models.PositiveIntegerField(choices=ANIMACY_TYPES, default=0)
     parent = models.ForeignKey(Supersense, null=True, blank=True, related_name='sschildren')
-    counterpart = models.ForeignKey(Supersense, null=True, blank=True)
-
+    
     def __str__(self):
         return ('Supersense Revision: %s %d') % (self.name, self.revision_number)
 
