@@ -7,6 +7,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ugettext
 from wiki.core.plugins.base import PluginSidebarFormMixin
 from wiki import models
+from wiki.plugins.metadata.models import deepest_instance
 
 # It would be cleaner if we combined the SidebarForm and EditCategoryForm, however the logic of
 # the form might be too complex if we do
@@ -102,7 +103,18 @@ class EditCategoryForm(PluginSidebarFormMixin, forms.ModelForm):
     def save(self, *args, **kwargs):
         self.instance = self.article.categories.all()[0]
         data = self.cleaned_data
-        self.instance.parent = data['parent']
+        newparent = data['parent']
+        if newparent!=self.instance.parent: # parent has changed
+            # make a new revision of the article to record the change
+            revision = models.ArticleRevision()
+            revision.inherit_predecessor(self.article)
+            revision.set_from_request(self.request)
+            revision.parent = newparent
+            revision.categories = self.article.categories
+            revision.automatic_log = f'Parent Category: {self.instance.parent.name} → {newparent.name} (not revertible)'
+            self.article.add_revision(revision)
+            # reverting to a previous revision from the Changes page currently does not affect the category parent
+        self.instance.parent = newparent
         self.instance.save()
         super(EditCategoryForm, self).save(*args, **kwargs)
 
