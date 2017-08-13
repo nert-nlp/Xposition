@@ -101,10 +101,11 @@ class Supersense(Metadata):
             else:
                 setattr(revision, fld, changes[fld])
 
-        if changes.keys() & {'name', 'description', 'parent', 'animacy'}:
+        keydiff = changes.keys() & {'name', 'description', 'parent', 'animacy'}
+        if keydiff:
             revision.template = "supersense_article_view.html"
             revision.set_from_request(request)
-            revision.automatic_log = ','.join(f'{f.title()}: {getattr(self.current_revision, f)} → {v}' for f,v in changes.items())
+            revision.automatic_log = ','.join(f'{f.title()}: {getattr(deepest_instance(self.current_revision), f)} → {changes[f]}' for f in keydiff)
             #revision.articleRevision = # TODO: do we need to set this?
             self.add_revision(revision)
             curr2 = deepest_instance(self.current_revision)
@@ -127,7 +128,7 @@ class SupersenseRevision(MetadataRevision):
     )
     animacy = models.PositiveIntegerField(choices=ANIMACY_TYPES, default=0)
     parent = models.ForeignKey(Supersense, null=True, blank=True, related_name='sschildren')
-    
+
     def __str__(self):
         return ('Supersense Revision: %s %d') % (self.name, self.revision_number)
 
