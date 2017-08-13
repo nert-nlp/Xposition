@@ -49,10 +49,6 @@
   {% trans "Click each revision to see a list of edited lines. Click the Preview button to see how the article looked at this stage. At the bottom of this page, you can change to a particular revision or merge an old revision with the current one." %}
 </p>
 
-{% for revision in metadataRevisions %}
-  {{revision.supersenserevision}}
-{% endfor %}
-
 <form method="GET">
   <div class="tab-content" style="overflow: visible;">
     {% for revision in revisions %}
