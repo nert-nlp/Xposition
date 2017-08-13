@@ -65,6 +65,14 @@ class Metadata(RevisionPlugin):
         if self.supersense:
             return self.supersense.newRevision(request).current_revision
 
+    def add_revision(self, newrevision, request):
+        """Given a revision to make to the metadata, create a corresponding article revision"""
+        arevision = ArticleRevision()
+        arevision.inherit_predecessor(self.article)
+        arevision.set_from_request(request)
+        arevision.automatic_log = newrevision.automatic_log
+        self.article.add_revision(arevision)
+        super(Metadata, self).add_revision(newrevision)
 
     class Meta():
         verbose_name = _('metadata')
@@ -103,11 +111,22 @@ class Supersense(Metadata):
 
         keydiff = changes.keys() & {'name', 'description', 'parent', 'animacy'}
         if keydiff:
+            hchanges = {}   # human-readable (old,new) pairs for log message
+            for f in keydiff:
+                # raw values
+                old = getattr(deepest_instance(self.current_revision), f)
+                new = changes[f]
+                # convert to human-readable if applicable
+                fld = type(curr)._meta.get_field(f)
+                if fld.choices:
+                    choices = dict(fld.choices)
+                    old = choices[int(old)]
+                    new = choices[int(new)]
+                hchanges[f] = (old, new)
             revision.template = "supersense_article_view.html"
             revision.set_from_request(request)
-            revision.automatic_log = ','.join(f'{f.title()}: {getattr(deepest_instance(self.current_revision), f)} → {changes[f]}' for f in keydiff)
-            #revision.articleRevision = # TODO: do we need to set this?
-            self.add_revision(revision)
+            revision.automatic_log = ' • '.join(f'{f.title()}: {old} → {new}' for f,(old,new) in hchanges.items())
+            self.add_revision(revision, request)
             curr2 = deepest_instance(self.current_revision)
         return self
 
