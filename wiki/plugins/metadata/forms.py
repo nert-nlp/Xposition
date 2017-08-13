@@ -110,67 +110,50 @@ class SupersenseForm(forms.ModelForm):
     class Meta:
         model = models.SupersenseRevision
         fields = ('name', 'description', 'parent', 'animacy')
+        labels = {'description': _('Short Description')}
         widgets = {'animacy': HorizontalRadioSelect}
 
-class MetaSidebarForm(forms.Form):
 
-    ''' Multipurpose form that is used in the 'edit sidebar' to dynamically edit different metadata types'''
+def MetaSidebarForm(article, request, *args, **kwargs):
+    """
+    Each plugin sets a form_class attribute for use when instantiating a sidebar form.
+    Setting form_class=MetaSidebarForm allows for dynamic selection of the class
+    depending on the type of metadata attached to the article. The classes need
+    to be declared separately in order for ModelForm metaclasses to work.
+    """
+    try:
+        metadata = models.Metadata.objects.get(article = article)
+    except models.Metadata.DoesNotExist:
+        return EmptySidebarForm()
 
+    metacurr = deepest_instance(metadata)
+    themodel = type(metacurr)
+
+    if themodel is models.Supersense:
+        kwargs['instance'] = deepest_instance(metacurr.current_revision)
+        x = SupersenseSidebarForm(article, request, *args, **kwargs)
+    return x
+
+class EmptySidebarForm():
+    pass
+
+class BaseMetaSidebarForm(PluginSidebarFormMixin):
     def __init__(self, article, request, *args, **kwargs):
         self.article = article
         self.request = request
-        super(MetaSidebarForm, self).__init__(*args, **kwargs)
+        self.metadata = models.Metadata.objects.get(article = self.article)
+        self.metacurr = deepest_instance(self.metadata)
+        super(BaseMetaSidebarForm, self).__init__(*args, **kwargs)
 
-        # Must use try except blocks in order to avoid django errors if an article has no associated metadata
-
-        try:
-            self.metadata = models.Supersense.objects.get(article = self.article)
-            self.metacurr = deepest_instance(self.metadata.current_revision)
-        except:
-            pass
-
-        # If metadata is a supersense then set the form to edit the supersense fields
-
-        try:
-            if self.metadata.current_revision.metadatarevision.supersenserevision:
-                self.form_type = 'supersense'
-                self.fields['animacy'] = forms.DecimalField(max_digits=2,decimal_places=0, initial=self.metacurr.animacy)
-                # parent field is edited through category plugin sidebar
-
-        # else if not a supersense then set form to edit a default metadata
-        # if you want to add a different metadata type to edit then here is the best place to do so
-
-        except:
-            self.form_type = 'metadata'
-
-    def get_usermessage(self):
-        return ugettext(
-            "Metadata changes saved.")
-
+class SupersenseSidebarForm(BaseMetaSidebarForm):
     def save(self, *args, **kwargs):
         if self.is_valid():
-            #  supersense saving logic
-            if self.form_type is 'supersense':
-                curr = deepest_instance(self.metadata)
-                curr.newRevision(self.request, **self.cleaned_data)
+            self.metacurr.newRevision(self.request, **self.cleaned_data)
 
-                #must include the following data because django-wiki requires it in sidebar forms
-                self.cleaned_data['unsaved_article_title'] = self.metadata.current_revision.metadatarevision.supersenserevision.name
-                self.cleaned_data['unsaved_article_content'] = self.metadata.current_revision.metadatarevision.supersenserevision.description
-                # add any new metadata type save logic here
-                return self.metadata
-
-    def updateArticle(self, supersense):
-        revision = ArticleRevision()
-        revision.inherit_predecessor(self.article)
-        revision.title = self.article.current_revision.title
-        revision.content = self.article.current_revision.content
-        revision.user_message = "Metadata change id: " + str(supersense.current_revision.revision_number)
-        revision.deleted = False
-        revision.set_from_request(self.request)
-        self.article.add_revision(revision)
-        supersense.current_revision.articleRevision = revision
-        supersense.current_revision.save()
+    class Meta:
+        model = models.SupersenseRevision
+        fields = ('animacy', 'description')
+        labels = {'description': _('Short Description')}
 
 class ExampleForm(forms.Form):
 
