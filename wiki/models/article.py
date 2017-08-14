@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import, unicode_literals
 
-from categories.models import Category
-
 from django.contrib.contenttypes.models import ContentType
 from django.core.cache import cache
 from django.core.urlresolvers import reverse
@@ -36,8 +34,6 @@ except ImportError:
 class Article(models.Model):
 
     objects = managers.ArticleManager()
-
-    categories = models.ManyToManyField(Category, related_name="article_set", blank=True)
 
     current_revision = models.OneToOneField(
         'ArticleRevision', verbose_name=_('current revision'),

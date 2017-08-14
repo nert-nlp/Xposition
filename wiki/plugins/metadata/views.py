@@ -1,6 +1,7 @@
 from django.shortcuts import redirect
 from . import models
-from wiki.models import URLPath, Article, Category
+from wiki.models import URLPath, Article
+from wiki.plugins.categories.models import ArticleCategory
 from django.utils.decorators import method_decorator
 from wiki.views.mixins import ArticleMixin
 from . import forms
@@ -77,5 +78,3 @@ class MetadataView(ArticleMixin, FormView):
             "wiki:get",
             path=self.article_urlpath.path,
             article_id=self.article.id)
-
-

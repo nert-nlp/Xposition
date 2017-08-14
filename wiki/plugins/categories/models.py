@@ -102,6 +102,34 @@ class Category(CategoryBase):
     class MPTTMeta:
         order_insertion_by = ('order', 'name')
 
+class ArticleCategory(CategoryBase):
+    """
+    Category with an associated article landing page.
+    """
+    # the landing page article
+    article = models.OneToOneField(Article, on_delete=models.CASCADE, null=False, related_name='category')
+    # articles in the category
+    member_articles = models.ManyToManyField(Article, related_name="categories", blank=True)
+    # category description
+    description = models.TextField(blank=True, null=True)
+
+    @property
+    def short_title(self):
+        return self.name
+
+    def subtree_ids(self):
+        """Return a list containing the ID of this category and all its subcategories"""
+        queue = [self]
+        ids = [] # IDs of inheriting categories
+        while queue:
+            child = queue.pop()
+            ids.append(child.id)
+            queue.extend(child.children.all())
+        return ids
+
+    class Meta(CategoryBase.Meta):
+        verbose_name = _('article category')
+        verbose_name_plural = _('article categories')
 
 if RELATIONS:
     CATEGORY_RELATION_LIMITS = reduce(lambda x, y: x | y, RELATIONS)
@@ -129,7 +157,8 @@ class CategoryRelation(models.Model):
     """Related category item"""
     category = models.ForeignKey(Category, verbose_name=_('category'))
     content_type = models.ForeignKey(
-        ContentType, limit_choices_to=CATEGORY_RELATION_LIMITS, verbose_name=_('content type'))
+        ContentType, limit_choices_to=CATEGORY_RELATION_LIMITS, verbose_name=_('content type'),
+        related_name='cat_rel')
     object_id = models.PositiveIntegerField(verbose_name=_('object id'))
     content_object = GenericForeignKey('content_type', 'object_id')
     relation_type = models.CharField(
