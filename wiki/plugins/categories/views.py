@@ -1,5 +1,6 @@
 from django.shortcuts import redirect
-from wiki.models import URLPath, Article, Category
+from .models import ArticleCategory as Category
+from wiki.models import URLPath, Article
 from django.views.generic.edit import FormView
 from django.forms import modelform_factory
 from wiki.views.mixins import ArticleMixin
@@ -163,7 +164,7 @@ class CategoryView( ArticleMixin, FormView ):
 
     ''' This view manages the creation of new categories '''
 
-    form_class = forms.CategoryForm
+    form_class = forms.ArticleCategoryForm
     template_name = "category_detail.html"
 
     @method_decorator(get_article(can_read=True, can_create=True),)
@@ -220,7 +221,7 @@ class CategoryView( ArticleMixin, FormView ):
             article_id=self.article.id)
 
     def get_form(self):
-        form = super(CategoryView, self).get_form(form_class=forms.CategoryForm)
+        form = super(CategoryView, self).get_form(form_class=forms.ArticleCategoryForm)
         return form
 
 

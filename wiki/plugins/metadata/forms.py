@@ -8,10 +8,11 @@ from django.utils.translation import ugettext
 from wiki.core.plugins.base import PluginSidebarFormMixin
 from . import models
 from .models import deepest_instance
-from wiki.models import Category
+from wiki.plugins.categories.models import ArticleCategory
 from wiki.models import ArticleRevision
 import copy, sys
 
+'''
 class HorizontalRadioSelect(forms.RadioSelect):
     """Adapted from https://stackoverflow.com/a/39538735"""
     def __init__(self, *args, **kwargs):
@@ -20,6 +21,7 @@ class HorizontalRadioSelect(forms.RadioSelect):
         css_style = 'style="display: inline-block; margin-right: 10px;"'
         self.renderer.outer_html = '<ul{id_attr} style="display: inline-block">{content}</ul>'
         self.renderer.inner_html = '<li ' + css_style + '>{choice_value}{sub_widgets}</li>'
+'''
 
 class MetadataForm(forms.ModelForm):
 
@@ -85,24 +87,29 @@ class SupersenseForm(forms.ModelForm):
                                 'other_write': self.article.other_write,
                                 })
             supersense = models.Supersense()
+            supersense.article = models.Article.objects.get(urlpath = self.article_urlpath)
             kwargs['commit'] = False
             revision = super(SupersenseForm, self).save(*args, **kwargs)
-            revision.set_from_request(self.request)
+            #revision.set_from_request(self.request)
 
-            supersense_category = Category(slug=self.data['name'],
+            supersense_category = ArticleCategory(slug=self.data['name'],
                                            name=self.data['name'],
                                            description=self.data['description'],
                                            parent=self.cleaned_data['parent'].category if self.cleaned_data['parent'] else None)
+            supersense_category.article = supersense.article
             supersense_category.save()
             supersense.category = supersense_category
-            supersense.article = models.Article.objects.get(urlpath = self.article_urlpath)
+
+            #supersense.article.category = supersense_category
+
 
             revision.article = supersense.article
             revision.template = "supersense_article_view.html"
-            #revision.articleRevision = supersense.article.current_revision # TODO: do we need this?
-            supersense.add_revision(self.instance, save=True)
+            #supersense.add_revision(self.instance)
+            supersense.add_revision(revision, self.request)
 
-            supersense.article.categories.add(supersense_category)
+            #supersense.article.categories.add(supersense_category) # don't add category landing article to its category
+            #supersense.article.category.save()
             supersense.article.save()
             return self.article_urlpath
         return super(SupersenseForm, self).save(*args, **kwargs)
@@ -111,7 +118,7 @@ class SupersenseForm(forms.ModelForm):
         model = models.SupersenseRevision
         fields = ('name', 'description', 'parent', 'animacy')
         labels = {'description': _('Short Description')}
-        widgets = {'animacy': HorizontalRadioSelect}
+        widgets = {'animacy': forms.RadioSelect}
 
 
 def MetaSidebarForm(article, request, *args, **kwargs):

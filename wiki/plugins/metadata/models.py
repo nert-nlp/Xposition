@@ -8,7 +8,7 @@ from wiki.models import Article, ArticleRevision
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ugettext
 from django.contrib import admin
-from wiki.models import Category
+from wiki.plugins.categories.models import ArticleCategory
 from wiki.models.pluginbase import RevisionPlugin, RevisionPluginRevision
 try:
     from django.contrib.contenttypes.fields import GenericForeignKey
@@ -94,7 +94,7 @@ class MetadataRevision(RevisionPluginRevision):
 
 
 class Supersense(Metadata):
-    category = models.ForeignKey(Category, null=False)
+    category = models.ForeignKey(ArticleCategory, null=False, related_name='supersense')
 
     def newRevision(self, request, recursive=False, **changes):
         revision = SupersenseRevision()
@@ -177,6 +177,9 @@ class RoleFunctionRevision(MetadataRevision):
         verbose_name = _('rolefunction revision')
 
 class Language(Metadata):
+
+    def with_nav_links(self):
+        return self.objects.get(navlink=True)
 
     def __str__(self):
         if self.current_revision:
