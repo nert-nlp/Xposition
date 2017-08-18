@@ -6,7 +6,7 @@ from django import forms
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ugettext
 from wiki.core.plugins.base import PluginSidebarFormMixin
-from wiki.models import Article, ArticleRevision
+from wiki.models import Article, ArticleRevision, URLPath
 from .models import ArticleCategory
 from wiki.plugins.metadata.models import deepest_instance
 
@@ -14,17 +14,12 @@ from wiki.plugins.metadata.models import deepest_instance
 # the form might be too complex if we do
 
 class ArticleCategoryForm(forms.ModelForm):
-
-    '''Simple model form for category creation, edit this to hide fields that are unnecessary'''
-    def __init__(self, *args, **kwargs):
-        super(ArticleCategoryForm, self).__init__(*args, **kwargs)
-
-    def save(self, *args, **kwargs):
-        super(ArticleCategoryForm, self).save(*args, **kwargs)
+    '''Simple model form for category creation, edit this to hide fields that are unnecessary.
+    Landing article creation handled in views.py: form_valid()'''
 
     class Meta:
         model = ArticleCategory
-        fields = ('__all__')
+        exclude = ('article',)
 
 class SidebarForm(PluginSidebarFormMixin):
 

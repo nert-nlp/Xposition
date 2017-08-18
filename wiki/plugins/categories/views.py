@@ -182,6 +182,8 @@ class CategoryView( ArticleMixin, FormView ):
 
     def get_form_kwargs(self, **kwargs):
         kwargs = super(CategoryView, self).get_form_kwargs(**kwargs)
+        #kwargs['article'] = self.article
+        #kwargs['request'] = self.request
         return kwargs
 
 
@@ -210,11 +212,10 @@ class CategoryView( ArticleMixin, FormView ):
                               'other_read': self.article.other_read,
                               'other_write': self.article.other_write,
                               })
-        form.save()
-        category = Category.objects.get(name = title)
         landing_article = Article.objects.get(urlpath = self.landing_article_urlpath)
-        landing_article.categories.add(category)
-        self.landing_article_urlpath.save()
+        form.instance.article = landing_article
+        form.save()
+        category = Category.objects.get(slug = slug)
         return redirect(
             "wiki:get",
             path=self.landing_article_urlpath.path,
