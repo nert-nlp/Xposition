@@ -1,0 +1,18 @@
+{% extends "wiki/article.html" %}
+{% load wiki_tags i18n sekizai_tags %}
+{% load metadata_tags %}
+
+{% block wiki_articletitle %}
+<i class="fa fa-language fa-2x" aria-hidden="true" style="opacity: .1; position: absolute; left: -80px;"></i>
+{{block.super}}
+{% endblock %}
+
+{% block wiki_contents_tab %}
+
+  {% wiki_render article %}
+  <div>[language_article_view.html]
+    {% metadata_display metadata %}
+  </div>
+  {% include "category_article_view.html" %}
+
+{% endblock %}
