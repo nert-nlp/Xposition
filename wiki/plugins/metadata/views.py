@@ -44,17 +44,6 @@ class LanguageView(ArticleMixin, FormView):
             kwargs['form_heading'] = 'Create Language'
             if 'form' not in kwargs:
                 kwargs['form'] = self.get_form()
-
-            """
-            kwargs['attachments'] = self.attachments
-            kwargs['deleted_attachments'] = models.Attachment.objects.filter(
-                articles=self.article,
-                current_revision__deleted=True)
-            kwargs['search_form'] = forms.SearchForm()
-            kwargs['selected_tab'] = 'attachments'
-            kwargs['anonymous_disallowed'] = self.request.user.is_anonymous(
-            ) and not settings.ANONYMOUS
-            """
             return super(LanguageView, self).get_context_data(**kwargs)
 
     def form_valid(self, form):
