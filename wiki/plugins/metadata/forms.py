@@ -120,6 +120,43 @@ class SupersenseForm(forms.ModelForm):
         labels = {'description': _('Short Description')}
         widgets = {'animacy': forms.RadioSelect}
 
+class LanguageForm(forms.ModelForm):
+    def __init__(self, article, request, *args, **kwargs):
+        self.article = article
+        self.request = request
+        super(LanguageForm, self).__init__(*args, **kwargs)
+
+    def save(self, commit=True):
+        m = super(LanguageForm, self).save(commit=False)
+        if not self.instance.id:
+            self.article_urlpath = URLPath.create_article(
+                URLPath.root(),
+                slug=self.data['slug'],
+                title=self.data['name'],
+                content=self.data['name'],
+                user_message=" ",
+                user=self.request.user,
+                article_kwargs={'owner': self.request.user,
+                                'group': self.article.group,
+                                'group_read': self.article.group_read,
+                                'group_write': self.article.group_write,
+                                'other_read': self.article.other_read,
+                                'other_write': self.article.other_write,
+                                })
+
+            self.instance.article = models.Article.objects.get(urlpath = self.article_urlpath)
+            category = models.ArticleCategory()
+            category.article = self.instance.article
+            category.save()
+            self.instance.category = category
+            if commit:
+                m.save()
+            return self.article_urlpath
+        return m
+
+    class Meta:
+        model = models.Language
+        exclude = ('article', 'deleted', 'current_revision', 'category')
 
 def MetaSidebarForm(article, request, *args, **kwargs):
     """
@@ -129,38 +166,56 @@ def MetaSidebarForm(article, request, *args, **kwargs):
     to be declared separately in order for ModelForm metaclasses to work.
     """
     try:
-        metadata = models.Metadata.objects.get(article = article)
-    except models.Metadata.DoesNotExist:
-        return EmptySidebarForm()
+        metadata = models.SimpleMetadata.objects.get(article = article)
+    except models.SimpleMetadata.DoesNotExist:
+        try:
+            metadata = models.Metadata.objects.get(article = article)
+        except models.Metadata.DoesNotExist:
+            return EmptySidebarForm()
 
-    metacurr = deepest_instance(metadata)
-    themodel = type(metacurr)
+    metad = deepest_instance(metadata)
+    themodel = type(metad)
 
     if themodel is models.Supersense:
-        kwargs['instance'] = deepest_instance(metacurr.current_revision)
-        x = SupersenseSidebarForm(article, request, *args, **kwargs)
+        metac = deepest_instance(metad.current_revision)
+        kwargs['instance'] = metac
+        x = SupersenseSidebarForm(article, request, metad, *args, **kwargs)
+    elif themodel is models.Language:
+        kwargs['instance'] = metad
+        x = LanguageSidebarForm(article, request, metad, *args, **kwargs)
     return x
 
 class EmptySidebarForm():
     pass
 
 class BaseMetaSidebarForm(PluginSidebarFormMixin):
-    def __init__(self, article, request, *args, **kwargs):
+    def __init__(self, article, request, metad, *args, **kwargs):
         self.article = article
         self.request = request
-        self.metadata = models.Metadata.objects.get(article = self.article)
-        self.metacurr = deepest_instance(self.metadata)
+        self.metadata = metad #models.Metadata.objects.get(article = self.article)
+
+
         super(BaseMetaSidebarForm, self).__init__(*args, **kwargs)
 
-class SupersenseSidebarForm(BaseMetaSidebarForm):
-    def save(self, *args, **kwargs):
-        if self.is_valid():
-            self.metacurr.newRevision(self.request, **self.cleaned_data)
+        # self.instance = metac
+        # x = self.metacurr
+        # z = self.metadata
+        #y = self.instance
 
+class SupersenseSidebarForm(BaseMetaSidebarForm):
     class Meta:
         model = models.SupersenseRevision
         fields = ('animacy', 'description')
         labels = {'description': _('Short Description')}
+
+    def save(self, *args, **kwargs):
+        if self.is_valid():
+            self.metacurr.newRevision(self.request, **self.cleaned_data)
+
+class LanguageSidebarForm(BaseMetaSidebarForm):
+    class Meta:
+        model = models.Language
+        exclude = ('article', 'deleted', 'current_revision', 'category')
 
 class ExampleForm(forms.Form):
 
