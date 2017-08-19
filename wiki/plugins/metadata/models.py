@@ -1,6 +1,7 @@
 from django.core.urlresolvers import reverse
+from django.core.validators import RegexValidator
 from django.db import models
-import copy, sys
+import copy, sys, re
 from django.utils.encoding import force_text
 from django.contrib.contenttypes.models import ContentType
 from functools import reduce
@@ -9,7 +10,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ugettext
 from django.contrib import admin
 from wiki.plugins.categories.models import ArticleCategory
-from wiki.models.pluginbase import RevisionPlugin, RevisionPluginRevision
+from wiki.models.pluginbase import ArticlePlugin, RevisionPlugin, RevisionPluginRevision
 try:
     from django.contrib.contenttypes.fields import GenericForeignKey
 except ImportError:
@@ -46,6 +47,14 @@ def deepest_instance(x):
 # These are the different metadata models. Extend from the base metadata class if you want to add a
 # new metadata type. Make sure to register your model below.
 
+class SimpleMetadata(ArticlePlugin):
+    """Metadata without revision tracking."""
+    @property
+    def template(self):
+        if deepest_instance(self)!=self:
+            return deepest_instance(self).template
+
+
 class Metadata(RevisionPlugin):
 
     def __str__(self):
@@ -73,6 +82,11 @@ class Metadata(RevisionPlugin):
         arevision.automatic_log = newrevision.automatic_log
         self.article.add_revision(arevision)
         super(Metadata, self).add_revision(newrevision)
+
+    @property
+    def template(self):
+        if deepest_instance(self)!=self:
+            return deepest_instance(self).template
 
     class Meta():
         verbose_name = _('metadata')
@@ -136,6 +150,9 @@ class Supersense(Metadata):
         else:
             return ugettext('Current revision not set!!')
 
+    @property
+    def template(self):
+        return "supersense_article_view.html"
 
     class Meta:
         verbose_name = _('supersense')
@@ -155,7 +172,7 @@ class SupersenseRevision(MetadataRevision):
         verbose_name = _('supersense revision')
 
 
-class RoleFunction(Metadata):
+class Construal(Metadata):
 
     def __str__(self):
         if self.current_revision:
@@ -163,29 +180,88 @@ class RoleFunction(Metadata):
         else:
             return ugettext('Current revision not set!!')
     class Meta:
-        verbose_name = _('rolefunction')
+        verbose_name = _('construal')
 
-class RoleFunctionRevision(MetadataRevision):
+class ConstrualRevision(MetadataRevision):
 
     role = models.ForeignKey(Supersense, null=True, related_name='rfs_with_role')
     function = models.ForeignKey(Supersense, null=True, related_name='rfs_with_function')
 
     def __str__(self):
-        return ('RoleFunction Revision: %s %d') % (self.name, self.revision_number)
+        return ('Construal Revision: %s %d') % (self.name, self.revision_number)
 
     class Meta:
-        verbose_name = _('rolefunction revision')
+        verbose_name = _('construal revision')
 
-class Language(Metadata):
+lang_code_validator = RegexValidator(r'^[a-z]+(-?[a-z]+)*$',
+    message="Language code should consist of lowercase ASCII strings separated by hyphens")
 
-    def with_nav_links(self):
-        return self.objects.get(navlink=True)
+class Language(SimpleMetadata):
+    """
+    A language, language family, or dialect.
+    The slug should be an ISO language code (2-digit if possible)
+    for languages and dialects, but this is not enforced.
+    Associated with an ArticleCategory, but metadata revisions are not tracked.
+    Genetic relationships can be reflected in the category inheritance structure.
+    """
+
+    name = models.CharField(max_length=200,
+        help_text="Basic name, e.g. <tt>English</tt>")
+
+    slug = models.CharField(max_length=20,
+        help_text="Short (typically 2-character ISO) code for the language/dialect, "
+                  "such as <tt>en</tt> for English and <tt>en-us</tt> for American English.",
+        validators=[lang_code_validator])
+
+    category = models.ForeignKey(ArticleCategory, null=False, related_name='language')
+
+    # Other names for the language/dialect, possibly in other orthographies
+    other_names = models.CharField(max_length=200, blank=True, verbose_name="Other names for the language/dialect")
+
+    wals_url = models.URLField(max_length=200, blank=True, verbose_name="WALS URL",
+    help_text="World Atlas of Linguistic Structures entry listed on "
+              "<a href='http://wals.info/languoid'>this page</a>, e.g. "
+              "<tt>http://wals.info/languoid/lect/wals_code_heb</tt>")
+
+    # Writing direction: LTR or RTL?
+    rtl = models.BooleanField(default=False, verbose_name="Right-to-left language?")
+
+    # Should the language be featured with a navigation link
+    # on the main menu?
+    navlink = models.BooleanField(default=False)
+
+    # Linguistic characterization of adpositions/case marking in the language.
+    # This probably needs some work.
+
+
+    PRESENCE = (
+        (1, 'none'),
+        (2, 'some'),
+        (3, 'primary or sole type')
+    )
+    pre = models.PositiveIntegerField(choices=PRESENCE, verbose_name="Prepositions/case prefixes or proclitics?")
+    post = models.PositiveIntegerField(choices=PRESENCE, verbose_name="Postpositions/case suffixes or enclitics?")
+    circum = models.PositiveIntegerField(choices=PRESENCE, verbose_name="Circumpositions/case circumfixes?")
+    separate_word = models.PositiveIntegerField(choices=PRESENCE, verbose_name="Adpositions/overt case markers can be separate words?")
+    clitic_or_affix = models.PositiveIntegerField(choices=PRESENCE, verbose_name="Adpositions/overt case markers can be clitics or affixes?")
+
+    # Maybe also: Does adposition/case morpheme ever encode other features,
+    # like definiteness? Is there differential case marking?
+    # Do all adpositions assign the same case? Which kinds of adpositions inflect e.g. for pronouns?
+
+    #exclude_supersenses = models.ManyToManyField(Supersense, related_name="not_in_language", blank=True)
+
+    @classmethod
+    def with_nav_links(cls):
+        return cls.objects.filter(navlink=True)
 
     def __str__(self):
-        if self.current_revision:
-            return self.current_revision.metadatarevision.name
-        else:
-            return ugettext('Current revision not set!!')
+        return self.name
+
+    @property
+    def template(self):
+        return "language_article_view.html"
+
     class Meta:
         verbose_name = _('language')
 
@@ -231,7 +307,7 @@ class Usage(Metadata):
 class UsageRevision(MetadataRevision):
 
     adposition = models.ForeignKey(Adposition, null=True, related_name='usages')
-    rolefunction = models.ForeignKey(RoleFunction, null=True, related_name='usages')
+    construal = models.ForeignKey(Construal, null=True, related_name='usages')
 
     def __str__(self):
         return ('Usage Revision: %s %d') % (self.name, self.revision_number)
@@ -251,7 +327,7 @@ class Example(models.Model):
 
 class ExampleRevision(MetadataRevision):
     exampleXML = models.CharField(max_length=200)
-    usage = models.ForeignKey(RoleFunction, null=True, related_name='examples')
+    usage = models.ForeignKey(Construal, null=True, related_name='examples')
 
     def __str__(self):
         return ('Example Revision: %s %d') % (self.name, self.revision_number)
@@ -263,8 +339,8 @@ class ExampleRevision(MetadataRevision):
 
 admin.site.register(Supersense)
 admin.site.register(SupersenseRevision)
-admin.site.register(RoleFunction)
-admin.site.register(RoleFunctionRevision)
+admin.site.register(Construal)
+admin.site.register(ConstrualRevision)
 admin.site.register(Language)
 admin.site.register(Corpus)
 admin.site.register(Adposition)

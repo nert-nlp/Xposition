@@ -16,6 +16,10 @@ class MetadataPlugin(BasePlugin):
 
     slug = 'metadata'
 
+    urlpatterns = {
+        'article': [url('', include('wiki.plugins.metadata.urls'))]
+    }
+
     sidebar = {
         'headline': _('Metadata'),
         'icon_class': 'fa-asterisk',
@@ -27,9 +31,7 @@ class MetadataPlugin(BasePlugin):
     article_tab = (_('Metadata'), "fa fa-asterisk")
     article_view = views.MetadataView.dispatch
 
-    urlpatterns = { 'article': [
-      url(r'^$', views.MetadataView.as_view(), name ='metadata_view'),
-    ]}
+
 
     def __init__(self):
         # print "I WAS LOADED!"
