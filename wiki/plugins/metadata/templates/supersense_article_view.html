@@ -8,11 +8,14 @@
 {% endblock %}
 
 {% block wiki_contents_tab %}
+  <div class="col-md-9">
+    {% wiki_render article %}
 
-  {% wiki_render article %}
-  <div>
+    {% include "category_article_view.html" %}
+  </div>
+  <div class="col-md-3">
     {% metadata_display metadata %}
   </div>
-  {% include "category_article_view.html" %}
+
 
 {% endblock %}
