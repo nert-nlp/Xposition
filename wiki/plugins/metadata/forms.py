@@ -124,7 +124,11 @@ class LanguageForm(forms.ModelForm):
     def __init__(self, article, request, *args, **kwargs):
         self.article = article
         self.request = request
+        #self.edit = edit    # creating a new instance or editing an existing one?
         super(LanguageForm, self).__init__(*args, **kwargs)
+        if self.instance.id:    # editing an existing instance
+            self.fields['name'].disabled = True
+            self.fields['slug'].disabled = True
 
     def save(self, commit=True):
         m = super(LanguageForm, self).save(commit=False)
@@ -152,7 +156,9 @@ class LanguageForm(forms.ModelForm):
             if commit:
                 m.save()
             return self.article_urlpath
-        return m
+        if commit:
+            m.save()
+        return m.article.urlpath_set.all()[0]
 
     class Meta:
         model = models.Language

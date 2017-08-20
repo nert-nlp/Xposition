@@ -10,7 +10,11 @@ register = template.Library()
 def metadata_display(context, metadata):
     meta = deepest_instance(metadata)
     generic_flds = MetadataRevision._meta.get_fields() + SimpleMetadata._meta.get_fields()
-    display = '<h4 id="metadata">Metadata</h4>\n<table class="metadata">\n'
+    display = '<h4 id="metadata">Metadata'
+    if hasattr(meta, 'editurl'):
+        editurl = meta.editurl(context['urlpath'])
+        display += ' <a href="' + editurl + '" style="float: right;"><i class="fa fa-edit" alt="edit metadata"></i></a>'
+    display += '</h4>\n<table class="metadata">\n'
     for fld in meta._meta.get_fields(include_hidden=False):
         if fld.name=='description' or fld not in generic_flds and not fld.name.endswith('_ptr'):
             display += f'    <tr><th style="padding: 10px;">{fld.name}</th><td>'
