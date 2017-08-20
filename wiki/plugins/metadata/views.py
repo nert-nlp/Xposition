@@ -19,11 +19,14 @@ except ImportError:
 class LanguageView(ArticleMixin, FormView):
     template_name = "metadataform.html"
     form_class = forms.LanguageForm
-    #success_url =
+    edit = False
+
+    def __init__(self, edit=False, **kwargs):
+        self.edit = edit    # creating a new instance or editing an existing one?
+        super(LanguageView, self).__init__(**kwargs)
 
     @method_decorator(get_article(can_read=True))
     def dispatch(self, request, article, *args, **kwargs):
-
         return super(
             LanguageView,
             self).dispatch(
@@ -36,6 +39,8 @@ class LanguageView(ArticleMixin, FormView):
         kwargs = super(LanguageView, self).get_form_kwargs()
         kwargs['article'] = self.article
         kwargs['request'] = self.request
+        if self.edit:
+            kwargs['instance'] = models.Language.objects.get(article = self.article)
         return kwargs
 
     def get_context_data(self, **kwargs):

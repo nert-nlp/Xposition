@@ -262,6 +262,11 @@ class Language(SimpleMetadata):
     def template(self):
         return "language_article_view.html"
 
+    @classmethod
+    def editurl(cls, urlpath):
+        #return "_plugin/metadata/editlang"
+        return reverse('wiki:metadata_edit_language', args=[urlpath])
+
     class Meta:
         verbose_name = _('language')
 
