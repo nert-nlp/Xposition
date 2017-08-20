@@ -168,6 +168,18 @@ class SupersenseRevision(MetadataRevision):
     def __str__(self):
         return ('Supersense Revision: %s %d') % (self.name, self.revision_number)
 
+    @classmethod
+    def editurl(cls, urlpath):
+        return reverse('wiki:metadata_edit_supersense', args=[urlpath])
+
+    @property
+    def supersense(self):
+        return Supersense.objects.get(current_revision = self)
+
+    @property
+    def article(self):
+        return self.supersense.article
+
     class Meta:
         verbose_name = _('supersense revision')
 
