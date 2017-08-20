@@ -9,6 +9,8 @@ register = template.Library()
 @register.simple_tag(takes_context=True)
 def metadata_display(context, metadata):
     meta = deepest_instance(metadata)
+    if hasattr(meta, 'current_revision'):
+        meta = deepest_instance(meta.current_revision)
     generic_flds = MetadataRevision._meta.get_fields() + SimpleMetadata._meta.get_fields()
     display = '<h4 id="metadata">Metadata'
     if hasattr(meta, 'editurl'):
