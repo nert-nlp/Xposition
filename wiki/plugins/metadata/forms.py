@@ -88,6 +88,9 @@ class SupersenseForm(ArticleMetadataForm):
     def __init__(self, article, request, *args, **kwargs):
         super(SupersenseForm, self).__init__(article, request, *args, **kwargs)
 
+        # use horizontal radio buttons (requires metadata.css)
+        self.fields['animacy'].widget.attrs={'class': 'inline'}
+
         # set up the slug text field, modeled after the create article page
         self.fields['slug'].widget = wiki.forms.TextInputPrepend(
             prepend='/', # + self.urlpath.path,
@@ -128,6 +131,15 @@ class SupersenseForm(ArticleMetadataForm):
 
 class LanguageForm(ArticleMetadataForm):
 
+    def __init__(self, article, request, *args, **kwargs):
+        super(LanguageForm, self).__init__(article, request, *args, **kwargs)
+
+        # use horizontal radio buttons (requires metadata.css)
+        for f in self.fields.values():
+            if isinstance(f.widget, forms.RadioSelect):
+                f.widget.attrs={'class': 'inline'}
+                f.widget.choices = f.widget.choices[1:] # remove the empty default
+
     def edit(self, m, commit=True):
         if commit:
             m.save()
@@ -144,7 +156,7 @@ class LanguageForm(ArticleMetadataForm):
     class Meta:
         model = models.Language
         exclude = ('article', 'deleted', 'current_revision', 'category')
-
+        widgets = {f: forms.RadioSelect for f in {'pre','post','circum','separate_word','clitic_or_affix'}}
 
 
 def MetaSidebarForm(article, request, *args, **kwargs):

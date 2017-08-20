@@ -31,7 +31,10 @@ class MetadataPlugin(BasePlugin):
     article_tab = (_('Metadata'), "fa fa-asterisk")
     article_view = views.MetadataView.dispatch
 
-
+    class RenderMedia:
+        css = {
+            'screen': 'wiki/css/metadata.css'
+        }
 
     def __init__(self):
         # print "I WAS LOADED!"
