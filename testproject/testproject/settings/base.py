@@ -132,7 +132,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/1.9/topics/i18n/
 
-TIME_ZONE = 'Europe/Berlin'
+TIME_ZONE = 'America/New_York'
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
@@ -158,3 +158,5 @@ MEDIA_URL = '/media/'
 
 WIKI_ANONYMOUS_WRITE = True
 WIKI_ANONYMOUS_CREATE = False
+
+WIKI_URL_CASE_SENSITIVE = True
