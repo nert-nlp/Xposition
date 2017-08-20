@@ -10,6 +10,8 @@ from . import models
 from .models import deepest_instance
 from wiki.plugins.categories.models import ArticleCategory
 from wiki.models import ArticleRevision
+import wiki.forms
+from wiki.conf import settings
 import copy, sys
 
 '''
@@ -23,96 +25,100 @@ class HorizontalRadioSelect(forms.RadioSelect):
         self.renderer.inner_html = '<li ' + css_style + '>{choice_value}{sub_widgets}</li>'
 '''
 
-class MetadataForm(forms.ModelForm):
 
-    ''' This form is used in the creation of a base metadata object/article '''
+class ArticleMetadataForm(forms.ModelForm):
+    """
+    Base class for building a form for a model with an associated article,
+    and optionally, an associated ArticleCategory.
+    The form allows creation of a new model instance with its associated article/category,
+    or for editing an existing model instance. (Attaching a new model instance
+    to an existing article/category is not supported.)
+    Once created, the associated article/category can be edited elsewhere.
+    The model instance cannot be detached from the article/category.
+
+    Subclasses are recommended to supply new() and edit() methods
+    that will be called by save() as appropriate.
+    """
+    def __init__(self, article, request, *args, disable_on_edit=('name','slug'), **kwargs):
+        self.article = article #kwargs['article']  # the article in the URL path
+        self.request = request #kwargs['request']
+        super(ArticleMetadataForm, self).__init__(*args, **kwargs)
+        if self.instance.id and disable_on_edit:    # editing an existing instance
+            for fldname in disable_on_edit:
+                self.fields[fldname].disabled = True
+
+    def newArticle(self):
+        self.article_urlpath = URLPath.create_article(
+            URLPath.root(),
+            slug=self.data['slug'],
+            title=self.data['name'],
+            content=self.data['name'],
+            user_message=" ",
+            user=self.request.user,
+            article_kwargs={'owner': self.request.user,
+                            'group': self.article.group,
+                            'group_read': self.article.group_read,
+                            'group_write': self.article.group_write,
+                            'other_read': self.article.other_read,
+                            'other_write': self.article.other_write,
+                            })
+        newarticle = models.Article.objects.get(urlpath = self.article_urlpath)
+        return newarticle
+
+    def newArticle_ArticleCategory(self):
+        newarticle = self.newArticle()
+        newcategory = ArticleCategory(slug=self.data['name'],
+                                      name=self.data['name'],
+                                      description=self.data.get('description', self.data['name']),
+                                      parent=self.cleaned_data['parent'].category if self.cleaned_data.get('parent') else None)
+        newcategory.article = newarticle
+        newcategory.save()
+        return newarticle, newcategory
+
+    def save(self, commit=True):
+        m = super(ArticleMetadataForm, self).save(commit=False)
+        if self.instance.id:
+            return self.edit(m, commit=commit)
+        return self.new(m, commit=commit)
+
+class SupersenseForm(ArticleMetadataForm):
+
+    slug = forms.SlugField(max_length=200)
 
     def __init__(self, article, request, *args, **kwargs):
-        self.article = article
-        self.request = request
-        super(MetadataForm, self).__init__(*args, **kwargs)
+        super(SupersenseForm, self).__init__(article, request, *args, **kwargs)
 
-    def save(self,  *args, **kwargs):
-        if not self.instance.id:
-            self.article_urlpath = URLPath.create_article(
-                URLPath.root(),
-                self.data['name'],
-                title=self.data['name'],
-                content=self.data['description'],
-                user_message=" ",
-                user=self.request.user,
-                article_kwargs={'owner': self.request.user,
-                                'group': self.article.group,
-                                'group_read': self.article.group_read,
-                                'group_write': self.article.group_write,
-                                'other_read': self.article.other_read,
-                                'other_write': self.article.other_write,
-                                })
-            metadata = models.Metadata()
-            metadata.article = models.Article.objects.get(urlpath = self.article_urlpath)
-            kwargs['commit'] = False
-            revision = super(MetadataForm, self).save(*args, **kwargs)
-            revision.set_from_request(self.request)
-            metadata.add_revision(self.instance, save=True)
-            return self.article_urlpath
-        return super(MetadataForm, self).save(*args, **kwargs)
+        # set up the slug text field, modeled after the create article page
+        self.fields['slug'].widget = wiki.forms.TextInputPrepend(
+            prepend='/', # + self.urlpath.path,
+            attrs={
+                # Make patterns force lowercase if we are case insensitive to bless the user with a
+                # bit of strictness, anyways
+                'pattern': '[a-z0-9_-]+' if not settings.URL_CASE_SENSITIVE else '[a-zA-Z0-9_-]+',
+                'title': 'Lowercase letters, numbers, hyphens and underscores' if not settings.URL_CASE_SENSITIVE else 'Letters, numbers, hyphens and underscores',
+            }
+        )
 
-    class Meta:
-        model = models.MetadataRevision
-        fields = ('name', 'description',)
+    def edit(self, m, commit=True):
+        if commit:
+            m.save()
+        return m.article.urlpath_set.all()[0]
 
-class SupersenseForm(forms.ModelForm):
+    def new(self, m, commit=True):
+        newarticle, newcategory = self.newArticle_ArticleCategory()
+        # associate the article with the SupersenseRevision
+        m.article = newarticle
 
-    ''' This form is used in the creation of a combined supersense object/article/category '''
+        # create the Supersense, add the article, category, and revision
+        supersense = models.Supersense()
+        supersense.article = newarticle
+        supersense.category = newcategory
+        supersense.add_revision(m, self.request)
 
-    def __init__(self, article, request, *args, **kwargs):
-        self.article = article
-        self.request = request
-        super(SupersenseForm, self).__init__(*args, **kwargs)
-
-    def save(self, *args, **kwargs):
-        if not self.instance.id:
-            self.article_urlpath = URLPath.create_article(
-                URLPath.root(),
-                self.data['name'],
-                title=self.data['name'],
-                content=self.data['description'],
-                user_message=" ",
-                user=self.request.user,
-                article_kwargs={'owner': self.request.user,
-                                'group': self.article.group,
-                                'group_read': self.article.group_read,
-                                'group_write': self.article.group_write,
-                                'other_read': self.article.other_read,
-                                'other_write': self.article.other_write,
-                                })
-            supersense = models.Supersense()
-            supersense.article = models.Article.objects.get(urlpath = self.article_urlpath)
-            kwargs['commit'] = False
-            revision = super(SupersenseForm, self).save(*args, **kwargs)
-            #revision.set_from_request(self.request)
-
-            supersense_category = ArticleCategory(slug=self.data['name'],
-                                           name=self.data['name'],
-                                           description=self.data['description'],
-                                           parent=self.cleaned_data['parent'].category if self.cleaned_data['parent'] else None)
-            supersense_category.article = supersense.article
-            supersense_category.save()
-            supersense.category = supersense_category
-
-            #supersense.article.category = supersense_category
-
-
-            revision.article = supersense.article
-            revision.template = "supersense_article_view.html"
-            #supersense.add_revision(self.instance)
-            supersense.add_revision(revision, self.request)
-
-            #supersense.article.categories.add(supersense_category) # don't add category landing article to its category
-            #supersense.article.category.save()
-            supersense.article.save()
-            return self.article_urlpath
-        return super(SupersenseForm, self).save(*args, **kwargs)
+        if commit:
+            m.save()
+            supersense.save()
+        return self.article_urlpath
 
     class Meta:
         model = models.SupersenseRevision
@@ -120,49 +126,26 @@ class SupersenseForm(forms.ModelForm):
         labels = {'description': _('Short Description')}
         widgets = {'animacy': forms.RadioSelect}
 
-class LanguageForm(forms.ModelForm):
-    def __init__(self, article, request, *args, **kwargs):
-        self.article = article
-        self.request = request
-        #self.edit = edit    # creating a new instance or editing an existing one?
-        super(LanguageForm, self).__init__(*args, **kwargs)
-        if self.instance.id:    # editing an existing instance
-            self.fields['name'].disabled = True
-            self.fields['slug'].disabled = True
+class LanguageForm(ArticleMetadataForm):
 
-    def save(self, commit=True):
-        m = super(LanguageForm, self).save(commit=False)
-        if not self.instance.id:
-            self.article_urlpath = URLPath.create_article(
-                URLPath.root(),
-                slug=self.data['slug'],
-                title=self.data['name'],
-                content=self.data['name'],
-                user_message=" ",
-                user=self.request.user,
-                article_kwargs={'owner': self.request.user,
-                                'group': self.article.group,
-                                'group_read': self.article.group_read,
-                                'group_write': self.article.group_write,
-                                'other_read': self.article.other_read,
-                                'other_write': self.article.other_write,
-                                })
-
-            self.instance.article = models.Article.objects.get(urlpath = self.article_urlpath)
-            category = models.ArticleCategory()
-            category.article = self.instance.article
-            category.save()
-            self.instance.category = category
-            if commit:
-                m.save()
-            return self.article_urlpath
+    def edit(self, m, commit=True):
         if commit:
             m.save()
         return m.article.urlpath_set.all()[0]
 
+    def new(self, m, commit=True):
+        newarticle, newcategory = self.newArticle_ArticleCategory()
+        m.article = newarticle
+        m.category = newcategory
+        if commit:
+            m.save()
+        return self.article_urlpath
+
     class Meta:
         model = models.Language
         exclude = ('article', 'deleted', 'current_revision', 'category')
+
+
 
 def MetaSidebarForm(article, request, *args, **kwargs):
     """
@@ -203,10 +186,6 @@ class BaseMetaSidebarForm(PluginSidebarFormMixin):
 
         super(BaseMetaSidebarForm, self).__init__(*args, **kwargs)
 
-        # self.instance = metac
-        # x = self.metacurr
-        # z = self.metadata
-        #y = self.instance
 
 class SupersenseSidebarForm(BaseMetaSidebarForm):
     class Meta:
