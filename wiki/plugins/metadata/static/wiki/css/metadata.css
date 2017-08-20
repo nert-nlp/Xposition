@@ -1,0 +1,4 @@
+/* for horizontal radio buttons */
+ul.inline,ul.inline > li { display: inline-block; }
+ul.inline { padding: 0; }
+ul.inline > li { margin: 0px 5px; }
