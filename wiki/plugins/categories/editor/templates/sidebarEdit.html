@@ -6,7 +6,9 @@
 
 {# easy hack to check if the article is a landing category, compare the slug of the article's first category with the urlpath slug #}
 
-{% if form.validCategory and article.category.slug == urlpath.slug %}
+{# if form.validCategory and article.category.slug == urlpath.slug #}
+
+{% if article.category %}
   <h4>{% trans "Edit Category" %}</h4>
     <div class="form-horizontal sidebar-form" style="margin-bottom:5px, overflow:">
 
