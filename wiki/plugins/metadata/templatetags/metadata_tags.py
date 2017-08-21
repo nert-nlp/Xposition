@@ -8,6 +8,9 @@ register = template.Library()
 
 @register.simple_tag(takes_context=True)
 def metadata_display(context):
+    if 'article' not in context:
+        return ''
+
     article = context['article']
     c = article.current_revision
     if hasattr(c, 'metadata_revision'):
@@ -51,6 +54,9 @@ def metadata_display(context):
 @register.simple_tag(takes_context=True)
 def langs_display(context):
     """Display a list of languages recorded in the database."""
+    if 'article' not in context:
+        return ''
+    
     article = context['article']
     s = ''
     for lang in Language.with_nav_links():
