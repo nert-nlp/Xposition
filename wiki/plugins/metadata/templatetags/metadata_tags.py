@@ -7,10 +7,23 @@ from wiki.plugins.metadata.models import MetadataRevision, SimpleMetadata, Langu
 register = template.Library()
 
 @register.simple_tag(takes_context=True)
-def metadata_display(context, metadata):
-    meta = deepest_instance(metadata)
-    if hasattr(meta, 'current_revision'):
-        meta = deepest_instance(meta.current_revision)
+def metadata_display(context):
+    article = context['article']
+    c = article.current_revision
+    if hasattr(c, 'metadata_revision'):
+        meta = deepest_instance(c.metadata_revision)
+    else:
+        articleplugins = [deepest_instance(z) for z in article.articleplugin_set.all()]
+        meta = [z for z in articleplugins if isinstance(z, SimpleMetadata)]   # not Metadata, because that will have an article_revision pointer and be handled above
+        assert 0<=len(meta)<=1
+        if meta:
+            meta = meta[0]
+        else:
+            return
+
+    #meta = deepest_instance(metadata)
+    #if hasattr(meta, 'current_revision'):
+    #    meta = deepest_instance(meta.current_revision)
     generic_flds = MetadataRevision._meta.get_fields() + SimpleMetadata._meta.get_fields()
     display = '<h4 id="metadata">Metadata'
     if hasattr(meta, 'editurl'):
@@ -31,7 +44,7 @@ def metadata_display(context, metadata):
                 display += str(v)
             display += '</td></tr>\n'
     display += '</table>'
-    #display += str(meta) + '; ' + str(metadata)
+    display += str(meta)
     return mark_safe(display)
 
 
