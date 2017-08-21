@@ -103,9 +103,10 @@ class SupersenseForm(ArticleMetadataForm):
         )
 
     def edit(self, m, commit=True):
-        if commit:
-            m.save()
-        return m.article.urlpath_set.all()[0]
+        thesupersense = self.instance.supersense
+        thesupersense.newRevision(self.request, commit=commit, **self.cleaned_data)
+        # no change to the present model instance (the previous SupersenseRevision)
+        return thesupersense.article.urlpath_set.all()[0]
 
     def new(self, m, commit=True):
         newarticle, newcategory = self.newArticle_ArticleCategory()
@@ -116,7 +117,7 @@ class SupersenseForm(ArticleMetadataForm):
         supersense = models.Supersense()
         supersense.article = newarticle
         supersense.category = newcategory
-        supersense.add_revision(m, self.request)
+        supersense.add_revision(m, self.request, article_revision=newarticle.current_revision, save=True) # cannot delay saving the new supersense revision
 
         if commit:
             m.save()

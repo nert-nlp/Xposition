@@ -9,6 +9,8 @@ from wiki.models import Article, ArticleRevision
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ugettext
 from django.contrib import admin
+from django.db.models.signals import pre_save, post_save
+from wiki.decorators import disable_signal_for_loaddata
 from wiki.plugins.categories.models import ArticleCategory
 from wiki.models.pluginbase import ArticlePlugin, RevisionPlugin, RevisionPluginRevision
 try:
@@ -55,7 +57,31 @@ class SimpleMetadata(ArticlePlugin):
             return deepest_instance(self).template
 
 
+@disable_signal_for_loaddata
+def on_article_revision_post_save(**kwargs):
+    article = kwargs['instance']
+    articleplugins = [deepest_instance(z) for z in article.articleplugin_set.all()]
+    metadata = [z for z in articleplugins if isinstance(z, Metadata)]   # not SimpleMetadata, because it won't have revisions to link to!
+    assert 0<=len(metadata)<=1
+    if metadata:
+        metadata = metadata[0]
+        article_current_revision = article.current_revision
+        print('69')
+        try:
+            article_current_revision.metadata_revision
+        except ArticleRevision.metadata_revision.RelatedObjectDoesNotExist:
+            # create a new metadata revision to accompany the new article revision,
+            # so the relation is 1-to-1
+            print('75')
+            metadata.link_current_to_article_revision(article_revision=article_current_revision, commit=True)
+            x = deepest_instance(metadata.current_revision)
+            print('78')
+
+post_save.connect(on_article_revision_post_save, Article)
+
 class Metadata(RevisionPlugin):
+
+    _adding_article_revision = False
 
     def __str__(self):
         if self.current_revision:
@@ -68,20 +94,69 @@ class Metadata(RevisionPlugin):
             return self.current_revision.metadatarevision.html()
         return ''
 
-    def createNewRevision(self, request):
-        # Add self.metadatatype check and call the relevant newRevision method on the derived class object
-                # USED WHEN AN ARTICLE IS EDITED
-        if self.supersense:
-            return self.supersense.newRevision(request).current_revision
+    # def createNewRevision(self, request):
+    #     # Add self.metadatatype check and call the relevant newRevision method on the derived class object
+    #             # USED WHEN AN ARTICLE IS EDITED
+    #     if self.supersense:
+    #         return self.supersense.newRevision(request).current_revision
 
-    def add_revision(self, newrevision, request):
-        """Given a revision to make to the metadata, create a corresponding article revision"""
-        arevision = ArticleRevision()
-        arevision.inherit_predecessor(self.article)
-        arevision.set_from_request(request)
-        arevision.automatic_log = newrevision.automatic_log
-        self.article.add_revision(arevision)
-        super(Metadata, self).add_revision(newrevision)
+    def add_revision(self, newrevision, request, article_revision=None, save=True):
+        """
+        Given a revision to make to the metadata, save it,
+        and create a new article revision so they are in parallel unless one is provided.
+        If an article revision is provided, then link the metadata revision to it;
+        otherwise, initially save metadata_revision.article_revision as null
+        (the signal triggered by the new article revision being saved will lead to this
+        method being called again with the article_revision).
+        """
+
+        if article_revision is None:
+            # first save the submitted metadata. article_revision will be null
+            super(Metadata, self).add_revision(newrevision, save=save)
+
+            # create article revision
+            article_revision = ArticleRevision()
+            article_revision.inherit_predecessor(self.article)
+            article_revision.set_from_request(request)
+            article_revision.automatic_log = newrevision.automatic_log
+            self.article.add_revision(article_revision, save=save)
+            # will trigger the on_article_revision_pre_save signal handler,
+            # which calls this method again, supplying an article_revision
+        else:
+            # update the metadata revision so it is attached to an article_revision
+            newrevision.article = self.article  # defined in ArticlePlugin, which SimplePlugin and RevisionPlugin both inherit from
+            newrevision.article_revision = article_revision
+
+            super(Metadata, self).add_revision(newrevision, save=save)
+
+
+    def link_current_to_article_revision(self, article_revision, commit=True):
+        """
+        Called whenever an article has been saved.
+        If that article's saving was triggered by a user edit to metadata,
+        we link the new metadata revision to the new article revision.
+        If it was triggered by a user edit to the article,
+        we create a new metadata revision and pass the article revision
+        so they will be linked.
+
+        N.B. The metadata current_revision pointer is not adjusted
+        when an article is reverted to a previous version.
+        This means that though the correct version of metadata will be displayed
+        (by following the article_revision.metadata_revision pointer),
+        code such as the editsupersense form that relies on
+        Metadata.current_revision will be led astray.
+        """
+        curr = deepest_instance(self.current_revision)
+        if curr.article_revision is not None:
+            # we need to create a new metadata revision to match the new article revision!
+            self.newRevision(request=None, article_revision=article_revision, commit=commit)
+            curr = deepest_instance(self.current_revision)
+            assert curr.article_revision is not None
+            # it was linked in newRevision
+        else:
+            curr.article_revision = article_revision
+            if commit:
+                curr.save()
 
     @property
     def template(self):
@@ -91,11 +166,14 @@ class Metadata(RevisionPlugin):
     class Meta():
         verbose_name = _('metadata')
 
+
+
+
 class MetadataRevision(RevisionPluginRevision):
     template = models.CharField(max_length=100, default="wiki/view.html", editable=False)
     name = models.CharField(max_length=100)
     description = models.CharField(max_length=200)
-    #articleRevision = models.OneToOneField(ArticleRevision, null=True) # TODO: is this even used?
+    article_revision = models.OneToOneField(ArticleRevision, null=True, related_name='metadata_revision') # TODO: is this even used?
 
     def __str__(self):
         return ('Metadata Revision: %s %d') % (self.name, self.revision_number)
@@ -110,7 +188,11 @@ class MetadataRevision(RevisionPluginRevision):
 class Supersense(Metadata):
     category = models.ForeignKey(ArticleCategory, null=False, related_name='supersense')
 
-    def newRevision(self, request, recursive=False, **changes):
+    def newRevision(self, request, article_revision=None, commit=True, **changes):
+        """Create a new SupersenseRevision either because an edit has been made
+        to the metadata, or because an edit has been made to article content."""
+        
+        x = [str(deepest_instance(r)) for r in self.revision_set.all()]
         revision = SupersenseRevision()
         revision.inherit_predecessor(self)
         revision.deleted = False
@@ -137,11 +219,10 @@ class Supersense(Metadata):
                     old = choices[int(old)]
                     new = choices[int(new)]
                 hchanges[f] = (old, new)
-            revision.template = "supersense_article_view.html"
             revision.set_from_request(request)
             revision.automatic_log = ' • '.join(f'{f.title()}: {old} → {new}' for f,(old,new) in hchanges.items())
-            self.add_revision(revision, request)
-            curr2 = deepest_instance(self.current_revision)
+        if keydiff or article_revision:
+            self.add_revision(revision, request, article_revision=article_revision, save=commit)
         return self
 
     def __str__(self):
@@ -176,9 +257,11 @@ class SupersenseRevision(MetadataRevision):
     def supersense(self):
         return Supersense.objects.get(current_revision = self)
 
+    """ # this is actually a field in ArticlePlugin. let's make sure to set it!
     @property
     def article(self):
         return self.supersense.article
+    """
 
     class Meta:
         verbose_name = _('supersense revision')
