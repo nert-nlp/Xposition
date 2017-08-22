@@ -1,4 +1,5 @@
 from django.shortcuts import redirect, get_object_or_404
+from django.utils.safestring import mark_safe
 from django.db.models import Model
 from . import models
 from wiki.models import URLPath, Article
@@ -6,6 +7,8 @@ from wiki.plugins.categories.models import ArticleCategory
 from django.utils.decorators import method_decorator
 from wiki.views.mixins import ArticleMixin
 from . import forms
+from django.views import View
+from django.http import HttpResponse
 from wiki.decorators import get_article
 try:
     from django.views.generic import DetailView, ListView, FormView, TemplateView
@@ -69,6 +72,10 @@ class LanguageView(ArticleMetadataView):
     form_class = forms.LanguageForm
     form_heading = 'Create Language'
 
+class ConstrualView(ArticleMetadataView):
+    form_class = forms.ConstrualForm
+    form_heading = 'Create Construal'
+
 class SupersenseView(ArticleMetadataView):
     form_class = forms.SupersenseForm
     form_heading = 'Create Supersense'
@@ -89,7 +96,73 @@ class MetadataView(ArticleMixin, TemplateView):
         return super(MetadataView, self).dispatch(request, article, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
+        try:
+            models.SimpleMetadata.objects.get(article=Article.objects.get(urlpath=URLPath.objects.get(slug='supersenses')))
+            models.SimpleMetadata.objects.get(article=Article.objects.get(urlpath=URLPath.objects.get(slug='construals')))
+            kwargs['install'] = ''
+        except (URLPath.DoesNotExist, Article.DoesNotExist, models.SimpleMetadata.DoesNotExist):
+            kwargs['install'] = mark_safe('<h2><a href="installmetadata">Install metadata</a></h2>')
+
         return ArticleMixin.get_context_data(self, **kwargs)
+
+class InstallView(View):
+
+    def get(self, request, *args, **kwargs):
+        s = ''
+        start_page = Article.objects.get(urlpath=URLPath.root())
+
+        # supersenses
+        try:
+            ss = models.SimpleMetadata.objects.get(article=Article.objects.get(urlpath=URLPath.objects.get(slug='supersenses')))
+            s += 'Already exists: <a href="' + ss.article.get_absolute_url() + '">supersenses</a>. '
+        except (URLPath.DoesNotExist, Article.DoesNotExist, models.SimpleMetadata.DoesNotExist):
+            s += 'Installing supersenses...'
+            meta = models.SimpleMetadata()
+            article_urlpath = URLPath.create_article(
+                URLPath.root(),
+                slug='supersenses',
+                title='List of Supersenses',
+                content='The following are the supersense categories for adpositions and case:',
+                user_message="Metadata install",
+                user=request.user,
+                article_kwargs={'owner': request.user,
+                                'group': start_page.group,
+                                'group_read': start_page.group_read,
+                                'group_write': start_page.group_write,
+                                'other_read': start_page.other_read,
+                                'other_write': start_page.other_write,
+                                })
+            newarticle = models.Article.objects.get(urlpath = article_urlpath)
+            meta.article = newarticle
+            meta.save()
+            s += '<a href="' + newarticle.get_absolute_url() + '">done</a>. '
+
+        # construals
+        try:
+            c = models.SimpleMetadata.objects.get(article=Article.objects.get(urlpath=URLPath.objects.get(slug='construals')))
+            s += 'Already exists: <a href="' + c.article.get_absolute_url() + '">construals</a>. '
+        except (URLPath.DoesNotExist, Article.DoesNotExist, models.SimpleMetadata.DoesNotExist):
+            s += 'Installing construals...'
+            meta = models.SimpleMetadata()
+            article_urlpath = URLPath.create_article(
+                URLPath.root(),
+                slug='construals',
+                title='List of Construals',
+                content='The following are the construals of the [supersense categories](/supersenses) for adpositions and case:',
+                user_message="Metadata install",
+                user=request.user,
+                article_kwargs={'owner': request.user,
+                                'group': start_page.group,
+                                'group_read': start_page.group_read,
+                                'group_write': start_page.group_write,
+                                'other_read': start_page.other_read,
+                                'other_write': start_page.other_write,
+                                })
+            newarticle = models.Article.objects.get(urlpath = article_urlpath)
+            meta.article = newarticle
+            meta.save()
+            s += '<a href="' + newarticle.get_absolute_url() + '">done</a>. '
+        return HttpResponse(mark_safe(s))
 
     # def get_context_data(self, **kwargs):
     #     kwargs = super(MetadataView, self).get_context_data(**kwargs)

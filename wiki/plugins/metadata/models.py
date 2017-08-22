@@ -53,8 +53,14 @@ class SimpleMetadata(ArticlePlugin):
     """Metadata without revision tracking."""
     @property
     def template(self):
+        a = self.article
+        u = dir(a)
         if deepest_instance(self)!=self:
             return deepest_instance(self).template
+        elif self.article.urlpath_set.filter(slug='supersenses'):
+            return 'supersense_list.html'
+        elif self.article.urlpath_set.filter(slug='construals'):
+            return 'construal_list.html'
 
 
 @disable_signal_for_loaddata
@@ -66,22 +72,17 @@ def on_article_revision_post_save(**kwargs):
     if metadata:
         metadata = metadata[0]
         article_current_revision = article.current_revision
-        print('69')
         try:
             article_current_revision.metadata_revision
         except ArticleRevision.metadata_revision.RelatedObjectDoesNotExist:
             # create a new metadata revision to accompany the new article revision,
             # so the relation is 1-to-1
-            print('75')
             metadata.link_current_to_article_revision(article_revision=article_current_revision, commit=True)
             x = deepest_instance(metadata.current_revision)
-            print('78')
 
 post_save.connect(on_article_revision_post_save, Article)
 
 class Metadata(RevisionPlugin):
-
-    _adding_article_revision = False
 
     def __str__(self):
         if self.current_revision:
@@ -191,7 +192,7 @@ class Supersense(Metadata):
     def newRevision(self, request, article_revision=None, commit=True, **changes):
         """Create a new SupersenseRevision either because an edit has been made
         to the metadata, or because an edit has been made to article content."""
-        
+
         x = [str(deepest_instance(r)) for r in self.revision_set.all()]
         revision = SupersenseRevision()
         revision.inherit_predecessor(self)
@@ -267,26 +268,21 @@ class SupersenseRevision(MetadataRevision):
         verbose_name = _('supersense revision')
 
 
-class Construal(Metadata):
-
-    def __str__(self):
-        if self.current_revision:
-            return self.current_revision.metadatarevision.name
-        else:
-            return ugettext('Current revision not set!!')
-    class Meta:
-        verbose_name = _('construal')
-
-class ConstrualRevision(MetadataRevision):
+class Construal(SimpleMetadata):
 
     role = models.ForeignKey(Supersense, null=True, related_name='rfs_with_role')
     function = models.ForeignKey(Supersense, null=True, related_name='rfs_with_function')
 
     def __str__(self):
-        return ('Construal Revision: %s %d') % (self.name, self.revision_number)
+        return str(self.role)+' ~> '+str(self.function)
+
+    @property
+    def template(self):
+        return "construal_article_view.html"
 
     class Meta:
-        verbose_name = _('construal revision')
+        verbose_name = _('construal')
+
 
 lang_code_validator = RegexValidator(r'^[a-z]+(-?[a-z]+)*$',
     message="Language code should consist of lowercase ASCII strings separated by hyphens")
@@ -440,7 +436,6 @@ class ExampleRevision(MetadataRevision):
 admin.site.register(Supersense)
 admin.site.register(SupersenseRevision)
 admin.site.register(Construal)
-admin.site.register(ConstrualRevision)
 admin.site.register(Language)
 admin.site.register(Corpus)
 admin.site.register(Adposition)
