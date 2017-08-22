@@ -47,12 +47,12 @@ class ArticleMetadataForm(forms.ModelForm):
             for fldname in disable_on_edit:
                 self.fields[fldname].disabled = True
 
-    def newArticle(self):
+    def newArticle(self, name=None, slug=None):
         self.article_urlpath = URLPath.create_article(
             URLPath.root(),
-            slug=self.data['slug'],
-            title=self.data['name'],
-            content=self.data['name'],
+            slug=slug or self.data['slug'],
+            title=name or self.data['name'],
+            content=name or self.data['name'],
             user_message=" ",
             user=self.request.user,
             article_kwargs={'owner': self.request.user,
@@ -65,11 +65,12 @@ class ArticleMetadataForm(forms.ModelForm):
         newarticle = models.Article.objects.get(urlpath = self.article_urlpath)
         return newarticle
 
-    def newArticle_ArticleCategory(self):
-        newarticle = self.newArticle()
-        newcategory = ArticleCategory(slug=self.data['name'],
-                                      name=self.data['name'],
-                                      description=self.data.get('description', self.data['name']),
+    def newArticle_ArticleCategory(self, name=None):
+        newarticle = self.newArticle(name=name or self.data['name'],
+                                     slug=name or self.data['name'])
+        newcategory = ArticleCategory(slug=name or self.data['name'],
+                                      name=name or self.data['name'],
+                                      description=self.data.get('description', name or self.data['name']),
                                       parent=self.cleaned_data['parent'].category if self.cleaned_data.get('parent') else None)
         newcategory.article = newarticle
         newcategory.save()
@@ -104,8 +105,14 @@ class SupersenseForm(ArticleMetadataForm):
 
     def edit(self, m, commit=True):
         thesupersense = self.instance.supersense
+        if self.cleaned_data['parent']:
+            thesupersense.category.parent = self.cleaned_data['parent'].category
+        else:
+            thesupersense.category.parent = None
         thesupersense.newRevision(self.request, commit=commit, **self.cleaned_data)
         # no change to the present model instance (the previous SupersenseRevision)
+        if commit:
+            thesupersense.category.save()
         return thesupersense.article.urlpath_set.all()[0]
 
     def new(self, m, commit=True):
@@ -117,6 +124,10 @@ class SupersenseForm(ArticleMetadataForm):
         supersense = models.Supersense()
         supersense.article = newarticle
         supersense.category = newcategory
+        if self.cleaned_data['parent']:
+            supersense.category.parent = self.cleaned_data['parent'].category   # the parent category is stored both on the revision and on the Supersense.category
+        else:
+            supersense.category.parent = None
         supersense.add_revision(m, self.request, article_revision=newarticle.current_revision, save=True) # cannot delay saving the new supersense revision
 
         if commit:
@@ -158,6 +169,36 @@ class LanguageForm(ArticleMetadataForm):
         model = models.Language
         exclude = ('article', 'deleted', 'current_revision', 'category')
         widgets = {f: forms.RadioSelect for f in {'pre','post','circum','separate_word','clitic_or_affix'}}
+
+class ConstrualForm(ArticleMetadataForm):
+
+    def __init__(self, article, request, *args, **kwargs):
+        super(ConstrualForm, self).__init__(article, request, *args, **kwargs)
+
+    def edit(self, m, commit=True):
+        if commit:
+            m.save()
+        return m.article.urlpath_set.all()[0]
+
+    def new(self, m, commit=True):
+        role_name = deepest_instance(self.cleaned_data['role'].current_revision).name
+        function_name = deepest_instance(self.cleaned_data['function'].current_revision).name
+        name = self.get_construal_slug(role_name, function_name)
+        # slug will be the same as name
+        newarticle, newcategory = self.newArticle_ArticleCategory(name=name)
+        m.article = newarticle
+        m.category = newcategory
+        if commit:
+            m.save()
+        return self.article_urlpath
+
+    @classmethod
+    def get_construal_slug(cls, role_name, function_name):
+        return role_name + '--' + function_name
+
+    class Meta:
+        model = models.Construal
+        fields = ('role', 'function')
 
 
 def MetaSidebarForm(article, request, *args, **kwargs):
