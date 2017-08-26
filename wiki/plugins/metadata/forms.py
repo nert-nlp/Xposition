@@ -150,8 +150,14 @@ validate_unicode_slug_mod = RegexValidator(
     _("Enter a valid 'slug' consisting of Unicode letters, numbers, underscores, hyphens, or apostrophes."),
     'invalid'
 )
+validate_slug_numbers = RegexValidator(
+    r'^\d+$',
+    _("A 'slug' cannot consist solely of numbers."),
+    'invalid',
+    inverse_match=True
+)
 class ModSlugField(forms.SlugField):
-    default_validators = [validate_unicode_slug_mod]
+    default_validators = [validate_unicode_slug_mod, validate_slug_numbers]
 
 class SupersenseForm(ArticleMetadataForm):
 
