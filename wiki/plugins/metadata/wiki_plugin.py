@@ -35,6 +35,7 @@ class MetadataPlugin(BasePlugin):
         css = {
             'screen': 'wiki/css/metadata.css'
         }
+        js = ['wiki/js/modurlify.js']
 
     def __init__(self):
         # print "I WAS LOADED!"
