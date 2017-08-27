@@ -51,7 +51,11 @@
                 <div class="col-lg-offset-2">
                   <button type="submit" name="metadata" class="btn btn-primary btn-lg">
                     <span class="fa fa-check"></span>
-                    {% trans "Create" %}
+                    {% if form.slug.value %}
+                      {% trans "Update" %}
+                    {% else %}
+                      {% trans "Create" %}
+                    {% endif %}
                   </button>
                 </div>
               </div>
