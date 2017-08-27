@@ -12,9 +12,10 @@
   <div class="col-md-9">
     {% wiki_render article %}
 
-    <h4 id="adps">Adpositions</h4>
+    {% adpositions_for_lang as adpositions %}
+    <h4 id="adps">Adpositions ({{adpositions|length}})</h4>
     <ul>
-      {% for p in article.articleplugin_set.all.0.simplemetadata.language.adpositions.all %}
+      {% for p in adpositions %}
       <li><a href="{{p.adposition.article.get_absolute_url}}">{{p.adposition}}</a></li>
       {% endfor %}
     </ul>
