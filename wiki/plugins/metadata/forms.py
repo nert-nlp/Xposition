@@ -3,6 +3,7 @@ from __future__ import absolute_import, unicode_literals
 from wiki.models import URLPath
 from django.utils.safestring import mark_safe
 from django import forms
+from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.core.validators import _lazy_re_compile, RegexValidator
@@ -85,6 +86,11 @@ class ArticleMetadataForm(forms.ModelForm):
         if self.instance.id:
             return self.edit(m, commit=commit)
         return self.new(m, commit=commit)
+
+    @property
+    def auto_slug(self):
+        """If there is a slug field, should it be autofilled when typing in the name field?"""
+        return True
 
 # From http://forums.mozillazine.org/viewtopic.php?f=25&t=834075
 UNICODE_LETTERS_NUMERICS_HYPHEN_APPOS = (
@@ -219,10 +225,49 @@ class SupersenseForm(ArticleMetadataForm):
         labels = {'description': _('Short Description')}
         widgets = {'animacy': forms.RadioSelect}
 
+
+def morphtype_validator(lang, forbidden_vals):
+    """forbidden_vals is a sequence of MorphType constants that are
+    incompatible with this field being set to NONE if they appear
+    for any of the language's adpositions"""
+    NONE = models.Language.Presence.none
+    Adp = models.Adposition
+    def validator(value):
+        if int(value)!=NONE: return
+        Ps = []
+        for forbidden in forbidden_vals:
+            Ps += list(Adp.objects.filter(current_revision__metadatarevision__adpositionrevision__lang=lang,
+                                          current_revision__metadatarevision__adpositionrevision__morphtype=forbidden))
+        if Ps:
+            raise ValidationError(f'This language has {len(Ps)} adposition(s) of this type, including "{Ps[0]}"', code='invalid')
+    return validator
+
 class LanguageForm(ArticleMetadataForm):
 
     def __init__(self, article, request, *args, **kwargs):
         super(LanguageForm, self).__init__(article, request, *args, **kwargs)
+
+        # set up the slug text field, modeled after the create article page
+        self.fields['slug'].widget = wiki.forms.TextInputPrepend(
+            prepend='/', # + self.urlpath.path,
+            attrs={
+                'pattern': '^[a-z][-a-z]+$',
+                'title': 'Lowercase letters and hyphens'
+            }
+        )
+
+        if self.instance.id:
+            MT = models.Adposition.MorphType
+            self.fields['pre'].validators.append(morphtype_validator(self.instance,
+                (MT.prefix, MT.standalone_preposition)))
+            self.fields['post'].validators.append(morphtype_validator(self.instance,
+                (MT.suffix, MT.standalone_postposition)))
+            self.fields['circum'].validators.append(morphtype_validator(self.instance,
+                (MT.circumfix, MT.standalone_circumposition)))
+            self.fields['separate_word'].validators.append(morphtype_validator(self.instance,
+                (MT.standalone_preposition, MT.standalone_postposition, MT.standalone_circumposition)))
+            self.fields['clitic_or_affix'].validators.append(morphtype_validator(self.instance,
+                (MT.prefix, MT.suffix, MT.circumfix)))
 
         # use horizontal radio buttons (requires metadata.css)
         for f in self.fields.values():
@@ -242,6 +287,10 @@ class LanguageForm(ArticleMetadataForm):
         if commit:
             m.save()
         return self.article_urlpath
+
+    @property
+    def auto_slug(self):
+        return False
 
     class Meta:
         model = models.Language
