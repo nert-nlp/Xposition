@@ -1,5 +1,6 @@
 from django.shortcuts import redirect, get_object_or_404
 from django.utils.safestring import mark_safe
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Model
 from . import models
 from wiki.models import URLPath, Article
@@ -19,11 +20,12 @@ except ImportError:
         from django.core.exceptions import ImproperlyConfigured
         raise ImproperlyConfigured("For older versions of Django, you need django-cbv.")
 
-class ArticleMetadataView(ArticleMixin, FormView):
+class ArticleMetadataView(LoginRequiredMixin, ArticleMixin, FormView):
     """Base class for a view of a form for the metadata associated with an article."""
 
     template_name = "metadataform.html"
     edit = False
+    login_url = 'wiki:login'
 
     def __init__(self, *args, edit=False, **kwargs):
         self.edit = edit    # creating a new instance or editing an existing one?
@@ -72,6 +74,18 @@ class LanguageView(ArticleMetadataView):
     form_class = forms.LanguageForm
     form_heading = 'Create Language'
 
+class AdpositionView(ArticleMetadataView):
+    form_class = forms.AdpositionForm
+    form_heading = 'Create Adposition'
+
+    def get_model_class_with_article(self):
+        return models.Adposition
+
+    def get_extra_data(self, instance):
+        article = instance.adposition.article
+        urlpath = article.urlpath_set.all()[0]
+        return {'slug': urlpath.slug}
+
 class ConstrualView(ArticleMetadataView):
     form_class = forms.ConstrualForm
     form_heading = 'Create Construal'
@@ -88,8 +102,9 @@ class SupersenseView(ArticleMetadataView):
         urlpath = article.urlpath_set.all()[0]
         return {'slug': urlpath.slug}
 
-class MetadataView(ArticleMixin, TemplateView):
+class MetadataView(LoginRequiredMixin, ArticleMixin, TemplateView):
     template_name = "metadata.html"
+    login_url = 'wiki:login'
 
     @method_decorator(get_article(can_read=True))
     def dispatch(self, request, article, *args, **kwargs):
@@ -105,7 +120,8 @@ class MetadataView(ArticleMixin, TemplateView):
 
         return ArticleMixin.get_context_data(self, **kwargs)
 
-class InstallView(View):
+class InstallView(LoginRequiredMixin, View):
+    login_url = 'wiki:login'
 
     def get(self, request, *args, **kwargs):
         s = ''

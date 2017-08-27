@@ -3,6 +3,8 @@ from __future__ import absolute_import, unicode_literals
 from wiki.models import URLPath
 from django.utils.safestring import mark_safe
 from django import forms
+from django.core.urlresolvers import reverse
+from django.shortcuts import get_object_or_404, redirect, render
 from django.core.validators import _lazy_re_compile, RegexValidator
 from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ugettext
@@ -48,9 +50,9 @@ class ArticleMetadataForm(forms.ModelForm):
             for fldname in disable_on_edit:
                 self.fields[fldname].disabled = True
 
-    def newArticle(self, name=None, slug=None):
+    def newArticle(self, name=None, slug=None, parent=None):
         self.article_urlpath = URLPath.create_article(
-            URLPath.root(),
+            parent=parent or URLPath.root(),
             slug=slug or self.data['slug'],
             title=name or self.data['name'],
             content=name or self.data['name'],
@@ -66,12 +68,13 @@ class ArticleMetadataForm(forms.ModelForm):
         newarticle = models.Article.objects.get(urlpath = self.article_urlpath)
         return newarticle
 
-    def newArticle_ArticleCategory(self, name=None):
-        newarticle = self.newArticle(name=name or self.data['name'],
-                                     slug=name or self.data['slug'])
-        newcategory = ArticleCategory(slug=name or self.data['slug'],
-                                      name=name or self.data['name'],
-                                      description=self.data.get('description', name or self.data['name']),
+    def newArticle_ArticleCategory(self, name=None, parent=None):
+        newarticle = self.newArticle(name=name or self.cleaned_data['name'],
+                                     slug=name or self.cleaned_data['slug'],
+                                     parent=parent)
+        newcategory = ArticleCategory(slug=name or self.cleaned_data['slug'],
+                                      name=name or self.cleaned_data['name'],
+                                      description=self.cleaned_data.get('description', name or self.cleaned_data['name']),
                                       parent=self.cleaned_data['parent'].category if self.cleaned_data.get('parent') else None)
         newcategory.article = newarticle
         newcategory.save()
@@ -173,8 +176,8 @@ class SupersenseForm(ArticleMetadataForm):
         self.fields['slug'].widget = wiki.forms.TextInputPrepend(
             prepend='/', # + self.urlpath.path,
             attrs={
-                'pattern': UNICODE_LETTERS_NUMERICS_HYPHEN_APPOS,
-                'title': 'Letters, numbers, hyphens, underscores, apostrophes'
+                'pattern': '^[A-Z][-A-Za-z]*[a-z][-A-Za-z]*$',
+                'title': 'Initial capital letter plus ASCII letters (at least one lowercase) and hyphens'
             }
         )
 
@@ -245,6 +248,73 @@ class LanguageForm(ArticleMetadataForm):
         exclude = ('article', 'deleted', 'current_revision', 'category')
         widgets = {f: forms.RadioSelect for f in {'pre','post','circum','separate_word','clitic_or_affix'}}
 
+class AdpositionForm(ArticleMetadataForm):
+
+    slug = ModSlugField(max_length=200)
+
+    def __init__(self, article, request, *args, **kwargs):
+
+        super(AdpositionForm, self).__init__(article, request, disable_on_edit=('name','slug','lang'), *args, **kwargs)
+
+        try:
+            lang = models.Language.objects.get(article=article)
+        except models.Language.DoesNotExist:
+            lang = article.current_revision.metadata_revision.adpositionrevision.lang
+            self.article = lang.article # so we don't put the new article under another adposition article
+        self.fields['lang'].initial = lang
+        self.fields['lang'].choices = [(lang.id, lang.name)]
+
+        # set up the slug text field, modeled after the create article page
+        self.fields['slug'].widget = wiki.forms.TextInputPrepend(
+            prepend='/' + self.article.urlpath_set.all()[0].path,
+            attrs={
+                'pattern': UNICODE_LETTERS_NUMERICS_HYPHEN_APPOS,
+                'title': 'Letters, numbers, hyphens, underscores, apostrophes'
+            }
+        )
+
+        morphtype_options, morphtype_default = lang.morph_types()
+        morphtype_choices = [(o.value, o.name.replace('_',' ')) for o in morphtype_options]
+        self.fields['morphtype'].choices = morphtype_choices
+        #assert False
+        if morphtype_default:
+            self.fields['morphtype'].initial = int(morphtype_default)
+
+        # use horizontal radio buttons (requires metadata.css)
+        for fname,f in self.fields.items():
+            if isinstance(f.widget, forms.RadioSelect):
+                f.widget.attrs={'class': 'inline'}
+                if fname!='morphtype':
+                    f.widget.choices = f.widget.choices[1:] # remove the empty default
+
+    def edit(self, m, commit=True):
+        thep = self.instance.adposition
+        thep.newRevision(self.request, commit=commit, **self.cleaned_data)
+        # no change to the present model instance (the previous SupersenseRevision)
+        return thep.article.urlpath_set.all()[0]
+
+    def new(self, m, commit=True):
+        newarticle, newcategory = self.newArticle_ArticleCategory(parent=self.article.urlpath_set.all()[0])
+        # associate the article with the SupersenseRevision
+        m.article = newarticle
+
+        # create the Supersense, add the article, category, and revision
+        p = models.Adposition()
+        p.article = newarticle
+        p.category = newcategory
+        p.add_revision(m, self.request, article_revision=newarticle.current_revision, save=True) # cannot delay saving the new adposition revision
+
+        if commit:
+            m.save()
+            p.save()
+        return self.article_urlpath
+
+    class Meta:
+        model = models.AdpositionRevision
+        fields = ('lang', 'name', 'other_forms', 'description', 'morphtype', 'transitivity', 'slug')
+        widgets = {f: forms.RadioSelect for f in {'morphtype', 'transitivity'}}
+
+
 class ConstrualForm(ArticleMetadataForm):
 
     def __init__(self, article, request, *args, **kwargs):
@@ -294,6 +364,9 @@ def MetaSidebarForm(article, request, *args, **kwargs):
     metad = deepest_instance(metadata)
     themodel = type(metad)
 
+    return EmptySidebarForm()
+
+    # TODO: dead code
     if themodel is models.Supersense:
         metac = deepest_instance(metad.current_revision)
         kwargs['instance'] = metac

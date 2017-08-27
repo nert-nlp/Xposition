@@ -2,6 +2,7 @@ from django.core.urlresolvers import reverse
 from django.core.validators import RegexValidator
 from django.db import models
 import copy, sys, re
+from enum import IntEnum
 from django.utils.encoding import force_text
 from django.contrib.contenttypes.models import ContentType
 from functools import reduce
@@ -44,6 +45,12 @@ def deepest_instance(x):
         inst = getattr(inst, typ.__name__.lower())
         #s += '.' + y.__name__.lower()
     return inst
+
+class MetaEnum(IntEnum):
+    """Base class for an enum defining choices for an integer model field."""
+    @classmethod
+    def choices(cls):
+        return [(m.value, m.name.replace('_', ' ')) for m in cls]
 
 
 # These are the different metadata models. Extend from the base metadata class if you want to add a
@@ -130,6 +137,43 @@ class Metadata(RevisionPlugin):
 
             super(Metadata, self).add_revision(newrevision, save=save)
 
+    def newRevision(self, request, article_revision=None, commit=True, **changes):
+        """Create a new revision either because an edit has been made
+        to the metadata, or because an edit has been made to article content."""
+
+        x = [str(deepest_instance(r)) for r in self.revision_set.all()]
+        curr = deepest_instance(self.current_revision)
+        revision = type(curr)()
+        revision.inherit_predecessor(self)
+        revision.deleted = False
+        fields = self.field_names()
+        for fld in fields:
+            if fld in changes and changes[fld]==getattr(curr, fld):
+                del changes[fld]    # actually no change to this field
+            if fld not in changes:
+                setattr(revision, fld, copy.deepcopy(getattr(curr, fld)))
+            else:
+                setattr(revision, fld, changes[fld])
+
+        keydiff = changes.keys() & fields
+        if keydiff:
+            hchanges = {}   # human-readable (old,new) pairs for log message
+            for f in keydiff:
+                # raw values
+                old = getattr(deepest_instance(self.current_revision), f)
+                new = changes[f]
+                # convert to human-readable if applicable
+                fld = type(curr)._meta.get_field(f)
+                if fld.choices:
+                    choices = dict(fld.choices)
+                    old = choices[int(old)]
+                    new = choices[int(new)]
+                hchanges[f] = (old, new)
+            revision.set_from_request(request)
+            revision.automatic_log = ' • '.join(f'{f.title()}: {old} → {new}' for f,(old,new) in hchanges.items())
+        if keydiff or article_revision:
+            self.add_revision(revision, request, article_revision=article_revision, save=commit)
+        return self
 
     def link_current_to_article_revision(self, article_revision, commit=True):
         """
@@ -174,7 +218,7 @@ class MetadataRevision(RevisionPluginRevision):
     template = models.CharField(max_length=100, default="wiki/view.html", editable=False)
     name = models.CharField(max_length=100)
     description = models.CharField(max_length=200)
-    article_revision = models.OneToOneField(ArticleRevision, null=True, related_name='metadata_revision') # TODO: is this even used?
+    article_revision = models.OneToOneField(ArticleRevision, null=True, related_name='metadata_revision')
 
     def __str__(self):
         return ('Metadata Revision: %s %d') % (self.name, self.revision_number)
@@ -189,42 +233,8 @@ class MetadataRevision(RevisionPluginRevision):
 class Supersense(Metadata):
     category = models.ForeignKey(ArticleCategory, null=False, related_name='supersense')
 
-    def newRevision(self, request, article_revision=None, commit=True, **changes):
-        """Create a new SupersenseRevision either because an edit has been made
-        to the metadata, or because an edit has been made to article content."""
-
-        x = [str(deepest_instance(r)) for r in self.revision_set.all()]
-        revision = SupersenseRevision()
-        revision.inherit_predecessor(self)
-        revision.deleted = False
-        curr = deepest_instance(self.current_revision)
-        for fld in ('name', 'description', 'parent', 'animacy'):
-            if fld in changes and changes[fld]==getattr(curr, fld):
-                del changes[fld]    # actually no change to this field
-            if fld not in changes:
-                setattr(revision, fld, copy.deepcopy(getattr(curr, fld)))
-            else:
-                setattr(revision, fld, changes[fld])
-
-        keydiff = changes.keys() & {'name', 'description', 'parent', 'animacy'}
-        if keydiff:
-            hchanges = {}   # human-readable (old,new) pairs for log message
-            for f in keydiff:
-                # raw values
-                old = getattr(deepest_instance(self.current_revision), f)
-                new = changes[f]
-                # convert to human-readable if applicable
-                fld = type(curr)._meta.get_field(f)
-                if fld.choices:
-                    choices = dict(fld.choices)
-                    old = choices[int(old)]
-                    new = choices[int(new)]
-                hchanges[f] = (old, new)
-            revision.set_from_request(request)
-            revision.automatic_log = ' • '.join(f'{f.title()}: {old} → {new}' for f,(old,new) in hchanges.items())
-        if keydiff or article_revision:
-            self.add_revision(revision, request, article_revision=article_revision, save=commit)
-        return self
+    def field_names(self):
+        return {'name', 'description', 'parent', 'animacy'}
 
     def __str__(self):
         if self.current_revision:
@@ -240,11 +250,11 @@ class Supersense(Metadata):
         verbose_name = _('supersense')
 
 class SupersenseRevision(MetadataRevision):
-    ANIMACY_TYPES = (
-        (0, 'unspecified'),
-        (1, 'animate'),
-    )
-    animacy = models.PositiveIntegerField(choices=ANIMACY_TYPES, default=0)
+    class AnimacyType(MetaEnum):
+        unspecified = 0
+        animate = 1
+
+    animacy = models.PositiveIntegerField(choices=AnimacyType.choices(), default=AnimacyType.unspecified)
     parent = models.ForeignKey(Supersense, null=True, blank=True, related_name='sschildren')
 
     def __str__(self):
@@ -258,7 +268,7 @@ class SupersenseRevision(MetadataRevision):
     def supersense(self):
         return Supersense.objects.get(current_revision = self)
 
-    """ # this is actually a field in ArticlePlugin. let's make sure to set it!
+    """ # TODO: this is actually a field in ArticlePlugin. let's make sure to set it!
     @property
     def article(self):
         return self.supersense.article
@@ -324,17 +334,16 @@ class Language(SimpleMetadata):
     # Linguistic characterization of adpositions/case marking in the language.
     # This probably needs some work.
 
+    class Presence(MetaEnum):
+        none = 1
+        some = 2
+        primary_or_sole_type = 3
 
-    PRESENCE = (
-        (1, 'none'),
-        (2, 'some'),
-        (3, 'primary or sole type')
-    )
-    pre = models.PositiveIntegerField(choices=PRESENCE, verbose_name="Prepositions/case prefixes or proclitics?")
-    post = models.PositiveIntegerField(choices=PRESENCE, verbose_name="Postpositions/case suffixes or enclitics?")
-    circum = models.PositiveIntegerField(choices=PRESENCE, verbose_name="Circumpositions/case circumfixes?")
-    separate_word = models.PositiveIntegerField(choices=PRESENCE, verbose_name="Adpositions/overt case markers can be separate words?")
-    clitic_or_affix = models.PositiveIntegerField(choices=PRESENCE, verbose_name="Adpositions/overt case markers can be clitics or affixes?")
+    pre = models.PositiveIntegerField(choices=Presence.choices(), verbose_name="Prepositions/case prefixes or proclitics?")
+    post = models.PositiveIntegerField(choices=Presence.choices(), verbose_name="Postpositions/case suffixes or enclitics?")
+    circum = models.PositiveIntegerField(choices=Presence.choices(), verbose_name="Circumpositions/case circumfixes?")
+    separate_word = models.PositiveIntegerField(choices=Presence.choices(), verbose_name="Adpositions/overt case markers can be separate words?")
+    clitic_or_affix = models.PositiveIntegerField(choices=Presence.choices(), verbose_name="Adpositions/overt case markers can be clitics or affixes?")
 
     # Maybe also: Does adposition/case morpheme ever encode other features,
     # like definiteness? Is there differential case marking?
@@ -348,6 +357,38 @@ class Language(SimpleMetadata):
 
     def __str__(self):
         return self.name
+
+    def morph_types(self):
+        options = []
+        default = None
+        NONE = self.Presence.none
+
+        if self.separate_word!=NONE:
+            if self.pre!=NONE: options.append(Adposition.MorphType.from_properties('separate_word','pre'))
+            if self.post!=NONE: options.append(Adposition.MorphType.from_properties('separate_word','post'))
+            if self.circum!=NONE: options.append(Adposition.MorphType.from_properties('separate_word','circum'))
+        if self.clitic_or_affix!=NONE:
+            if self.pre!=NONE: options.append(Adposition.MorphType.from_properties('clitic_or_affix','pre'))
+            if self.post!=NONE: options.append(Adposition.MorphType.from_properties('clitic_or_affix','post'))
+            if self.circum!=NONE: options.append(Adposition.MorphType.from_properties('clitic_or_affix','circum'))
+
+        if self.separate_word>self.clitic_or_affix:
+            default_attachment = 'separate_word'
+        elif self.separate_word<self.clitic_or_affix:
+            default_attachment = 'clitic_or_affix'
+        else:
+            default_attachment = None
+
+        default_position = max({'pre': self.pre, 'post': self.post, 'circum': self.circum}.items(), key=lambda x: x[1])
+        if sum(1 for x in {self.pre,self.post,self.circum} if x==default_position[1])>1:
+            default_position = None # e.g., two "some" values but no "primary or sole" value
+        else:
+            default_position = default_position[0]
+
+        if default_attachment and default_position:
+            default = Adposition.MorphType.from_properties(default_attachment, default_position)
+
+        return options, default
 
     @property
     def template(self):
@@ -372,20 +413,70 @@ class Corpus(Metadata):
         verbose_name = _('corpus')
 
 class Adposition(Metadata):
-    lang = models.ForeignKey(Language, null=True, related_name='adpositions')
+
+    class MorphType(MetaEnum):
+        standalone_preposition = 1
+        standalone_postposition = 2
+        standalone_circumposition = 3
+        prefix = 4
+        suffix = 5
+        circumfix = 6
+
+        @classmethod
+        def from_properties(cls, attachment=None, position=None):
+            props2type = {('separate_word','pre'): cls.standalone_preposition,
+                          ('separate_word','post'): cls.standalone_postposition,
+                          ('separate_word','circum'): cls.standalone_circumposition,
+                          ('clitic_or_affix','pre'): cls.prefix,
+                          ('clitic_or_affix','post'): cls.suffix,
+                          ('clitic_or_affix','circum'): cls.circumfix}
+            if attachment is None or position is None:
+                return props2type
+            return props2type[attachment,position]
+
+    class Transitivity(MetaEnum):
+        always_intransitive = 0
+        sometimes_transitive = 1
+        always_transitive = 2
+
+
+    def field_names(self):
+        return {'name', 'other_forms', 'description', 'lang', 'morphtype', 'transitivity'}
 
     def __str__(self):
         if self.current_revision:
             return self.current_revision.metadatarevision.name
         else:
             return ugettext('Current revision not set!!')
+
+    @property
+    def template(self):
+        return "adposition_article_view.html"
+
     class Meta:
         verbose_name = _('adposition')
 
 class AdpositionRevision(MetadataRevision):
 
+    lang = models.ForeignKey(Language, related_name='adpositions', verbose_name='Language/dialect')
+    # name = models.CharField(max_length=200, verbose_name='Lemma',
+    #     help_text="Lowercase unless it would normally be capitalized in a dictionary")
+    other_forms = models.CharField(max_length=200, blank=True, verbose_name="Other spellings or inflections",
+        help_text="Exclude typos")
+    morphtype = models.PositiveIntegerField(choices=Adposition.MorphType.choices(), verbose_name="Morphological type")
+    transitivity = models.PositiveIntegerField(choices=Adposition.Transitivity.choices())
+
     def __str__(self):
         return ('Adposition Revision: %s %d') % (self.name, self.revision_number)
+
+    @classmethod
+    def editurl(cls, urlpath):
+        #return "_plugin/metadata/editp"
+        return reverse('wiki:metadata_edit_adposition', args=[urlpath])
+
+    @property
+    def adposition(self):
+        return Adposition.objects.get(current_revision = self)
 
     class Meta:
         verbose_name = _('adposition revision')
