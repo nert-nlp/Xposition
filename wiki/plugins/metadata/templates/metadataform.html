@@ -14,7 +14,7 @@
   <script type="text/javascript" src="{% static "admin/js/vendor/xregexp/xregexp.min.js" %}"></script>
   <script type="text/javascript" src="{% static "wiki/js/modurlify.js" %}"></script>
   <script type="text/javascript">
-  {% if not create_form.slug.value %}
+  {% if not form.slug.value and form.auto_slug %}
   //<![CDATA[
   (function($) {
 	  $(document).ready(function (){
