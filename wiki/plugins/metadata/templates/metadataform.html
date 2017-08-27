@@ -5,6 +5,11 @@
 
 {% block wiki_contents_tab %}
 
+
+{% if user.is_anonymous %}
+  {% include "wiki/includes/anonymous_blocked.html" %}
+{% else %}
+
 {% addtoblock "js" %}
   <script type="text/javascript" src="{% static "admin/js/vendor/xregexp/xregexp.min.js" %}"></script>
   <script type="text/javascript" src="{% static "wiki/js/modurlify.js" %}"></script>
@@ -54,11 +59,8 @@
         </form>
     </div>
 
-
-
-
-
 </div>
 
+{% endif %}
 
 {% endblock %}

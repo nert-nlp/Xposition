@@ -12,6 +12,16 @@
   <div class="col-md-9">
     {% wiki_render article %}
 
+    <h4 id="adps">Adpositions</h4>
+    <ul>
+      {% for p in article.articleplugin_set.all.0.simplemetadata.language.adpositions.all %}
+      <li><a href="{{p.adposition.article.get_absolute_url}}">{{p.adposition}}</a></li>
+      {% endfor %}
+    </ul>
+
+    <h4>Usages</h4>
+    TODO
+
     {% include "category_article_view.html" %}
   </div>
   <div class="col-md-3">

@@ -7,6 +7,9 @@
 
 {% block wiki_contents_tab %}
 
+{% if user.is_anonymous %}
+  {% include "wiki/includes/anonymous_blocked.html" %}
+{% else %}
 
 {# extend this template to include any new metadata forms for metadata creation #}
 
@@ -20,7 +23,30 @@
 
   <h2><a href="createlang">Create Language</a></h2>
 
+  {% if article.articleplugin_set.all %}
+    {% with aplugin=article.articleplugin_set.all.0 %}
+      {% if aplugin.simplemetadata.language or article.current_revision.metadata_revision.adpositionrevision %}
+
+  <h2><a href="createp">Create Adposition</a></h2>
+
+      {% else %}
+
+  <p>Navigate to a language page and click on <b>Metadata</b> to create
+    an adposition for that language.</p>
+  <p>{{article}}</p>
+
+      {% endif %}
+    {% endwith %}
+  {% else %}
+
+  <p>Navigate to a language page and click on <b>Metadata</b> to create
+    an adposition for that language.</p>
+  <p>{{article}}</p>
+
+  {% endif %}
+
 </div>
 
+{% endif %}
 
 {% endblock %}
