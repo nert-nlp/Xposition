@@ -60,10 +60,12 @@ def langs_display(context):
 
     article = context['article']
     s = ''
-    for lang in Language.with_nav_links():
+    for lang in Language.with_nav_links().order_by('name'):
         langart = lang.article
         s += '<li'
-        if context['article']==langart or (hasattr(article, 'metadata') and getattr(context['article'].metadata, 'language')==lang):
+        if context['article']==langart \
+            or (hasattr(article, 'metadata') and getattr(context['article'].metadata, 'language')==lang) \
+            or (hasattr(article.current_revision, 'metadata_revision') and getattr(deepest_instance(context['article'].current_revision.metadata_revision), 'lang')==lang):
             s += ' class="active"'
         s += '><a href="' + langart.get_absolute_url() + '">' + lang.name + '</a></li>"'
     return mark_safe(s)
