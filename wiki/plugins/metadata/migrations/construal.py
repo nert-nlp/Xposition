@@ -30,7 +30,7 @@ class Migration(migrations.Migration):
             options={
                 'verbose_name': 'construal',
             },
-            bases=('metadata.metadata',),
+            bases=('metadata.simplemetadata',),
         ),
         migrations.CreateModel(
             name='ConstrualRevision',
