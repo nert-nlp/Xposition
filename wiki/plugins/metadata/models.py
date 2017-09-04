@@ -69,6 +69,8 @@ class SimpleMetadata(ArticlePlugin):
         elif self.article.urlpath_set.filter(slug='construals'):
             return 'construal_list.html'
 
+    def html(self):
+        return '<a href="' + self.article.get_absolute_url() + '">' + str(self) + '</a>'
 
 @disable_signal_for_loaddata
 def on_article_revision_post_save(**kwargs):
