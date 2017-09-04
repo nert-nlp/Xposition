@@ -10,4 +10,5 @@ METHODS = getattr(
     'WIKI_PLUGINS_METHODS',
     ('article_list',
      'toc',
+     'wikilink',
      ))
