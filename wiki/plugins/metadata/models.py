@@ -292,6 +292,7 @@ class Construal(SimpleMetadata):
 
     class Meta:
         verbose_name = _('construal')
+        unique_together = ('role', 'function')
 
 
 lang_code_validator = RegexValidator(r'^[a-z]+(-?[a-z]+)*$',
@@ -309,7 +310,7 @@ class Language(SimpleMetadata):
     name = models.CharField(max_length=200,
         help_text="Basic name, e.g. <tt>English</tt>")
 
-    slug = models.CharField(max_length=20,
+    slug = models.CharField(max_length=20, unique=True,
         help_text="Short (typically 2-character ISO) code for the language/dialect, "
                   "such as <tt>en</tt> for English and <tt>en-us</tt> for American English.",
         validators=[lang_code_validator])
@@ -501,6 +502,7 @@ class UsageRevision(MetadataRevision):
 
     class Meta:
         verbose_name = _('usage revision')
+        unique_together = ('adposition', 'construal')
 
 class Example(models.Model):
 
