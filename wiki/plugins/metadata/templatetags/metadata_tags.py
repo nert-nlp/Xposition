@@ -48,7 +48,7 @@ def metadata_display(context):
                 display += str(v)
             display += '</td></tr>\n'
     display += '</table>'
-    display += str(meta)
+    display += '<!--'+str(meta)+'-->'
     return mark_safe(display)
 
 
