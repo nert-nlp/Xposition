@@ -69,9 +69,9 @@ class ArticleMetadataForm(forms.ModelForm):
         newarticle = models.Article.objects.get(urlpath = self.article_urlpath)
         return newarticle
 
-    def newArticle_ArticleCategory(self, name=None, parent=None):
+    def newArticle_ArticleCategory(self, name=None, parent=None, slug=None):
         newarticle = self.newArticle(name=name or self.cleaned_data['name'],
-                                     slug=name or self.cleaned_data['slug'],
+                                     slug=slug or name or self.cleaned_data['slug'],
                                      parent=parent)
         newcategory = ArticleCategory(slug=name or self.cleaned_data['slug'],
                                       name=name or self.cleaned_data['name'],
@@ -393,6 +393,52 @@ class ConstrualForm(ArticleMetadataForm):
     class Meta:
         model = models.Construal
         fields = ('role', 'function')
+
+class UsageForm(ArticleMetadataForm):
+
+    def __init__(self, article, request, *args, **kwargs):
+        super(UsageForm, self).__init__(article, request, *args, **kwargs)
+
+        try:
+            adp = models.Adposition.objects.get(article=article)
+        except models.Adposition.DoesNotExist:
+            adp = article.current_revision.metadata_revision.usagerevision.adposition
+            self.article = adp.article # so we don't put the new article under another usage article
+        self.fields['adposition'].initial = adp
+        self.fields['adposition'].choices = [(adp.id, str(adp))]
+
+    def edit(self, m, commit=True):
+        assert False,"Editing a Usage is not currently supported."
+
+    def new(self, m, commit=True):
+        name = self.get_usage_name(deepest_instance(m.adposition.current_revision).name,
+                                   str(m.construal))
+        newarticle, newcategory = self.newArticle_ArticleCategory(parent=self.article.urlpath_set.all()[0],
+                                                                  name=name,
+                                                                  slug=m.construal.article.urlpath_set.all()[0].slug)
+        # associate the article with the SupersenseRevision
+        m.article = newarticle
+        m.name = name
+        # TODO: maybe set the description
+
+        # create the Supersense, add the article, category, and revision
+        u = models.Usage()
+        u.article = newarticle
+        u.category = newcategory
+        u.add_revision(m, self.request, article_revision=newarticle.current_revision, save=True) # cannot delay saving the new adposition revision
+
+        if commit:
+            m.save()
+            u.save()
+        return self.article_urlpath
+
+    @classmethod
+    def get_usage_name(cls, adp_name, construal_name):
+        return adp_name + ': ' + construal_name
+
+    class Meta:
+        model = models.UsageRevision
+        fields = ('adposition', 'construal')
 
 
 def MetaSidebarForm(article, request, *args, **kwargs):

@@ -12,12 +12,9 @@
     {% wiki_render article %}
 
     <div class="col-md-4">
-      {% usages_for_adp as usages %}
-      <h4 id="usages">Usages ({{usages|length}})</h4>
+      <h4>Examples</h4>
       <ul>
-        {% for u in usages %}
-        <li><a href="{{u.usage.article.get_absolute_url}}">{{u.current_revision.metadatarevision.usagerevision.name}}</a></li>
-        {% endfor %}
+        TODO
       </ul>
     </div>
 

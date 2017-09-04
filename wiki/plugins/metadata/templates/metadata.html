@@ -33,7 +33,6 @@
 
   <p>Navigate to a language page and click on <b>Metadata</b> to create
     an adposition for that language.</p>
-  <p>{{article}}</p>
 
       {% endif %}
     {% endwith %}
@@ -41,7 +40,28 @@
 
   <p>Navigate to a language page and click on <b>Metadata</b> to create
     an adposition for that language.</p>
-  <p>{{article}}</p>
+
+  {% endif %}
+
+
+
+  {% if article.articleplugin_set.all %}
+    {% with aplugin=article.articleplugin_set.all.0 %}
+      {% if article.current_revision.metadata_revision.adpositionrevision or article.current_revision.metadata_revision.usagerevision %}
+
+<h2><a href="createusage">Create Usage</a></h2>
+
+    {% else %}
+
+<p>Navigate to an adposition page and click on <b>Metadata</b> to create
+  a usage for that adposition.</p>
+
+      {% endif %}
+    {% endwith %}
+  {% else %}
+
+<p>Navigate to an adposition page and click on <b>Metadata</b> to create
+  a usage for that adposition.</p>
 
   {% endif %}
 

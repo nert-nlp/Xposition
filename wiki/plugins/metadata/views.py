@@ -86,6 +86,18 @@ class AdpositionView(ArticleMetadataView):
         urlpath = article.urlpath_set.all()[0]
         return {'slug': urlpath.slug}
 
+class UsageView(ArticleMetadataView):
+    form_class = forms.UsageForm
+    form_heading = 'Create Usage'
+
+    def get_model_class_with_article(self):
+        return models.Usage
+
+    def get_extra_data(self, instance):
+        article = instance.usage.article
+        urlpath = article.urlpath_set.all()[0]
+        return {'slug': urlpath.slug}
+
 class ConstrualView(ArticleMetadataView):
     form_class = forms.ConstrualForm
     form_heading = 'Create Construal'
