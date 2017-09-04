@@ -2,7 +2,7 @@ from django import template
 from django.utils.safestring import mark_safe
 from wiki.models import Article, ArticleRevision
 from wiki.models.pluginbase import RevisionPlugin, RevisionPluginRevision
-from wiki.plugins.metadata.models import MetadataRevision, SimpleMetadata, Supersense, Construal, Language, Adposition, deepest_instance
+from wiki.plugins.metadata.models import MetadataRevision, SimpleMetadata, Supersense, Construal, Language, Adposition, Usage, deepest_instance
 from wiki.plugins.categories.models import Category
 
 register = template.Library()
@@ -74,6 +74,16 @@ def langs_display(context):
 def adpositions_for_lang(context):
     article = context['article']
     return Adposition.objects.filter(current_revision__metadatarevision__adpositionrevision__lang__article=article)
+
+@register.simple_tag(takes_context=True)
+def usages_for_lang(context):
+    article = context['article']
+    return Usage.objects.filter(current_revision__metadatarevision__usagerevision__adposition__current_revision__metadatarevision__adpositionrevision__lang__article=article)
+
+@register.simple_tag(takes_context=True)
+def usages_for_adp(context):
+    article = context['article']
+    return Usage.objects.filter(current_revision__metadatarevision__usagerevision__adposition__article=article)
 
 def _category_subtree(c):
     ss = c.supersense.all()[0]

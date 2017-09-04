@@ -489,6 +489,14 @@ class Usage(Metadata):
             return self.current_revision.metadatarevision.name
         else:
             return ugettext('Current revision not set!!')
+
+    def field_names(self):
+        return {'name', 'description', 'adposition', 'construal'}
+
+    @property
+    def template(self):
+        return "usage_article_view.html"
+
     class Meta:
         verbose_name = _('usage')
 

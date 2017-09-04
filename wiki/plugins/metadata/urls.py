@@ -10,6 +10,8 @@ urlpatterns = [
   url(r'^editlang/$', views.LanguageView.as_view(edit=True), name='metadata_edit_language'),
   url(r'^createp/$', views.AdpositionView.as_view(), name='metadata_create_adposition'),
   url(r'^editp/$', views.AdpositionView.as_view(edit=True), name='metadata_edit_adposition'),
+  url(r'^createusage/$', views.UsageView.as_view(), name='metadata_create_usage'),
+  url(r'^editusage/$', views.UsageView.as_view(edit=True), name='metadata_edit_usage'),
   url(r'^createconstrual/$', views.ConstrualView.as_view(), name='metadata_create_construal'),
   url(r'^createsupersense/$', views.SupersenseView.as_view(), name='metadata_create_supersense'),
   url(r'^editsupersense/$', views.SupersenseView.as_view(edit=True), name='metadata_edit_supersense'),
