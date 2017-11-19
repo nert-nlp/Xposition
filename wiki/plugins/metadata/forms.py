@@ -275,7 +275,8 @@ class LanguageForm(ArticleMetadataForm):
             if isinstance(f.widget, (forms.RadioSelect,forms.CheckboxSelectMultiple)):
                 f.widget.attrs={'class': 'inline'}
             if isinstance(f.widget, forms.RadioSelect):
-                f.widget.choices = f.widget.choices[1:] # remove the empty default
+                if f.widget.choices[0][0]=='':
+                    f.widget.choices = f.widget.choices[1:] # remove the empty default
 
     def edit(self, m, commit=True):
         if commit:
@@ -347,7 +348,8 @@ class AdpositionForm(ArticleMetadataForm):
             if isinstance(f.widget, (forms.RadioSelect,forms.CheckboxSelectMultiple)):
                 f.widget.attrs={'class': 'inline'}
             if isinstance(f.widget, forms.RadioSelect):
-                f.widget.choices = f.widget.choices[1:] # remove the empty default
+                if f.widget.choices[0][0]=='':
+                    f.widget.choices = f.widget.choices[1:] # remove the empty default
 
     def edit(self, m, commit=True):
         thep = self.instance.adposition
