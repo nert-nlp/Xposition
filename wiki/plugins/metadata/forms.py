@@ -446,11 +446,16 @@ class UsageForm(ArticleMetadataForm):
         assert False,"Editing a Usage is not currently supported."
 
     def new(self, m, commit=True):
+        case = models.Case.shortname(self.cleaned_data['obj_case'])
+        case = None if len(self.fields['obj_case'].choices)<2 else case
+        caseSlug = '<'+case+'>' if case else ''
+        construalSlug = m.construal.article.urlpath_set.all()[0].slug
         name = self.get_usage_name(deepest_instance(m.adposition.current_revision).name,
-                                   str(m.construal))
+                                   str(m.construal),
+                                   case)
         newarticle, newcategory = self.newArticle_ArticleCategory(parent=self.article.urlpath_set.all()[0],
                                                                   name=name,
-                                                                  slug=m.construal.article.urlpath_set.all()[0].slug)
+                                                                  slug=caseSlug + construalSlug)
         # associate the article with the SupersenseRevision
         m.article = newarticle
         m.name = name
@@ -468,8 +473,10 @@ class UsageForm(ArticleMetadataForm):
         return self.article_urlpath
 
     @classmethod
-    def get_usage_name(cls, adp_name, construal_name):
-        return adp_name + ': ' + construal_name
+    def get_usage_name(cls, adp_name, construal_name, case=None):
+        """Provide 'case' only if it is potentially ambiguous for this adposition"""
+        casespec = '<'+case+'>' if case else ''
+        return adp_name + casespec + ': ' + construal_name
 
     class Meta:
         model = models.UsageRevision
