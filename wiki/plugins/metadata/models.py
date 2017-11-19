@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.core.validators import RegexValidator
 from django.db import models
@@ -227,11 +228,35 @@ class MetadataRevision(RevisionPluginRevision):
     description = models.CharField(max_length=200)
     article_revision = models.OneToOneField(ArticleRevision, null=True, related_name='metadata_revision')
 
+    unique_together = None  # can be overriden by subclasses
+
     def __str__(self):
         return ('Metadata Revision: %s %d') % (self.name, self.revision_number)
 
     def html(self):
         return '<a href="' + self.plugin.article.get_absolute_url() + '">' + str(self.name) + '</a>'
+
+    def validate_unique(self, exclude=None):
+        """
+        Implement unique_together checks which cannot be listed under Meta
+        and implemented at the database level because they contain fields
+        from the superclass, which is a different database table under
+        multi-table inheritance
+        """
+
+        if self.unique_together:
+            # revision_number is not incremented yet. pretend that it is for uniqueness check
+            if self.revision_number is None:
+                self.revision_number = 0
+            unique_checks = [(type(self), group) for group in self.unique_together]
+            errors = self._perform_unique_checks(unique_checks)
+            if errors:
+                raise ValidationError(errors)
+            # undo our temporary revision_number
+            if self.revision_number==0:
+                self.revision_number = None
+
+        return super(MetadataRevision, self).validate_unique(exclude=exclude)
 
     class Meta:
         verbose_name = _('metadata revision')
@@ -263,6 +288,8 @@ class SupersenseRevision(MetadataRevision):
 
     animacy = models.PositiveIntegerField(choices=AnimacyType.choices(), default=AnimacyType.unspecified)
     parent = models.ForeignKey(Supersense, null=True, blank=True, related_name='sschildren')
+
+    unique_together = [('name', 'revision_number')]
 
     def __str__(self):
         return ('Supersense Revision: %s %d') % (self.name, self.revision_number)
@@ -347,6 +374,14 @@ class Case(MetaEnum):
     # Aspect
     Approximative = APPRX = 2**28
     Terminative = TERM = 2**29
+
+    @classmethod
+    def longname(cls, val):
+        return val.name
+    @classmethod
+    def shortname(cls, val):
+        val = cls(val)
+        return [k for k,v in cls.__members__.items() if v is val and k.isupper()][0]
 
 
 lang_code_validator = RegexValidator(r'^[a-z]+(-?[a-z]+)*$',
@@ -531,6 +566,8 @@ class AdpositionRevision(MetadataRevision):
     transitivity = models.PositiveIntegerField(choices=Adposition.Transitivity.choices())
     obj_cases = BitField(flags=Case.flags(), verbose_name="Possible cases of the object")
 
+    unique_together = [('name', 'lang', 'revision_number')]
+
     def __str__(self):
         return ('Adposition Revision: %s %d') % (self.name, self.revision_number)
 
@@ -570,12 +607,16 @@ class UsageRevision(MetadataRevision):
     obj_case = models.PositiveIntegerField(choices=Case.choices(), null=True)
     construal = models.ForeignKey(Construal, null=True, related_name='usages')
 
+    unique_together = [('adposition', 'obj_case', 'construal', 'revision_number')]
+
     def __str__(self):
         return ('Usage Revision: %s %d') % (self.name, self.revision_number)
 
+
+
     class Meta:
         verbose_name = _('usage revision')
-        unique_together = ('adposition', 'obj_case', 'construal')
+
 
 class Example(models.Model):
 
