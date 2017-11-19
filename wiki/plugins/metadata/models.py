@@ -1,6 +1,7 @@
 from django.core.urlresolvers import reverse
 from django.core.validators import RegexValidator
 from django.db import models
+from bitfield import BitField
 import copy, sys, re
 from enum import IntEnum
 from django.utils.encoding import force_text
@@ -50,8 +51,12 @@ class MetaEnum(IntEnum):
     """Base class for an enum defining choices for an integer model field."""
     @classmethod
     def choices(cls):
+        """For use with e.g. PositiveIntegerField"""
         return [(m.value, m.name.replace('_', ' ')) for m in cls]
-
+    @classmethod
+    def flags(cls):
+        """For use with BitField"""
+        return [(m.name, m.name.replace('_', ' ')) for m in cls]
 
 # These are the different metadata models. Extend from the base metadata class if you want to add a
 # new metadata type. Make sure to register your model below.
@@ -297,6 +302,53 @@ class Construal(SimpleMetadata):
         unique_together = ('role', 'function')
 
 
+class Case(MetaEnum):
+    """Inventory of cases based on UniMorph <http://unimorph.org/>"""
+    Unknown = UNK = 1
+
+    # Core cases
+    # Nominative-Accusative alignment
+    Nominative = NOM = 2**1
+    Accusative = ACC = 2**2
+    # Ergative-Absolutive alignment
+    Ergative = ERG = 2**3
+    Absolutive = ABS = 2**4
+    # Tripartite alignment
+    NominativeSOnly = NOMS = 2**5
+
+    # Non-core, non-local cases
+    Dative = DAT = 2**6
+    Benefactive = BEN = 2**7
+    Purposive = PRP = 2**8
+    Genitive = GEN = 2**9
+    Relative = REL = 2**10
+    Partitive = PRT = 2**11
+    Instrumental = INS = 2**12
+    Comitative = COM = 2**13
+    Vocative = VOC = 2**14
+    Comparative = COMPV = 2**15
+    Equative = EQTV = 2**16
+    Privative = PRIV = 2**17
+    Proprietive = PROPR = 2**18
+    Aversive = AVR = 2**19
+    Formal = FRML = 2**20
+    Translative = TRANS = 2**21
+    EssiveModal = BYWAY = 2**22
+
+    # Local cases
+    # excluding Place cases
+    # Distal
+    Distal = REM = 2**23
+    Proximate = PROX = 2**24
+    # Motion
+    Essive = ESS = 2**25
+    Allative = ALL = 2**26
+    Ablative = ABL = 2**27
+    # Aspect
+    Approximative = APPRX = 2**28
+    Terminative = TERM = 2**29
+
+
 lang_code_validator = RegexValidator(r'^[a-z]+(-?[a-z]+)*$',
     message="Language code should consist of lowercase ASCII strings separated by hyphens")
 
@@ -353,6 +405,15 @@ class Language(SimpleMetadata):
     # Do all adpositions assign the same case? Which kinds of adpositions inflect e.g. for pronouns?
 
     #exclude_supersenses = models.ManyToManyField(Supersense, related_name="not_in_language", blank=True)
+
+    class CaseSystemType(MetaEnum):
+        none = 1
+        pronominal = 2
+        nominal = 3
+
+    case_for = models.PositiveIntegerField(choices=CaseSystemType.choices(), verbose_name="Does the language have (affixal) case on nouns and pronouns, just pronouns, or neither?")
+    cases = BitField(flags=Case.flags(), verbose_name="All cases present in the language")
+    pobj_cases = BitField(flags=Case.flags(), verbose_name="All cases that ever apply to an adpositional object")
 
     @classmethod
     def with_nav_links(cls):
@@ -444,7 +505,7 @@ class Adposition(Metadata):
 
 
     def field_names(self):
-        return {'name', 'other_forms', 'description', 'lang', 'morphtype', 'transitivity'}
+        return {'name', 'other_forms', 'description', 'lang', 'morphtype', 'transitivity', 'obj_cases'}
 
     def __str__(self):
         if self.current_revision:
@@ -468,6 +529,7 @@ class AdpositionRevision(MetadataRevision):
         help_text="Exclude typos")
     morphtype = models.PositiveIntegerField(choices=Adposition.MorphType.choices(), verbose_name="Morphological type")
     transitivity = models.PositiveIntegerField(choices=Adposition.Transitivity.choices())
+    obj_cases = BitField(flags=Case.flags(), verbose_name="Possible cases of the object")
 
     def __str__(self):
         return ('Adposition Revision: %s %d') % (self.name, self.revision_number)
@@ -493,7 +555,7 @@ class Usage(Metadata):
             return ugettext('Current revision not set!!')
 
     def field_names(self):
-        return {'name', 'description', 'adposition', 'construal'}
+        return {'name', 'description', 'adposition', 'obj_case', 'construal'}
 
     @property
     def template(self):
@@ -505,6 +567,7 @@ class Usage(Metadata):
 class UsageRevision(MetadataRevision):
 
     adposition = models.ForeignKey(Adposition, null=True, related_name='usages')
+    obj_case = models.PositiveIntegerField(choices=Case.choices(), null=True)
     construal = models.ForeignKey(Construal, null=True, related_name='usages')
 
     def __str__(self):
@@ -512,7 +575,7 @@ class UsageRevision(MetadataRevision):
 
     class Meta:
         verbose_name = _('usage revision')
-        unique_together = ('adposition', 'construal')
+        unique_together = ('adposition', 'obj_case', 'construal')
 
 class Example(models.Model):
 

@@ -30,6 +30,7 @@ class HorizontalRadioSelect(forms.RadioSelect):
 '''
 
 
+
 class ArticleMetadataForm(forms.ModelForm):
     """
     Base class for building a form for a model with an associated article,
@@ -269,10 +270,11 @@ class LanguageForm(ArticleMetadataForm):
             self.fields['clitic_or_affix'].validators.append(morphtype_validator(self.instance,
                 (MT.prefix, MT.suffix, MT.circumfix)))
 
-        # use horizontal radio buttons (requires metadata.css)
+        # use horizontal radio buttons/checkboxes (requires metadata.css)
         for f in self.fields.values():
-            if isinstance(f.widget, forms.RadioSelect):
+            if isinstance(f.widget, (forms.RadioSelect,forms.CheckboxSelectMultiple)):
                 f.widget.attrs={'class': 'inline'}
+            if isinstance(f.widget, forms.RadioSelect):
                 f.widget.choices = f.widget.choices[1:] # remove the empty default
 
     def edit(self, m, commit=True):
@@ -295,13 +297,19 @@ class LanguageForm(ArticleMetadataForm):
     class Meta:
         model = models.Language
         exclude = ('article', 'deleted', 'current_revision', 'category')
-        widgets = {f: forms.RadioSelect for f in {'pre','post','circum','separate_word','clitic_or_affix'}}
+        widgets = {f: forms.RadioSelect for f in {'pre','post','circum','separate_word','clitic_or_affix','case_for'}}
 
 class AdpositionForm(ArticleMetadataForm):
 
     slug = ModSlugField(max_length=200)
 
     def __init__(self, article, request, *args, **kwargs):
+        """If no initial data, provide some defaults."""
+        initial = kwargs.get('initial', {})
+        if 'obj_cases' not in initial:
+            # initialize all cases as checked (the choices will be filtered later based on the language)
+            initial['obj_cases'] = [case for case in models.AdpositionRevision.obj_cases]
+        kwargs['initial'] = initial
 
         super(AdpositionForm, self).__init__(article, request, disable_on_edit=('name','slug','lang'), *args, **kwargs)
 
@@ -329,12 +337,17 @@ class AdpositionForm(ArticleMetadataForm):
         if morphtype_default:
             self.fields['morphtype'].initial = int(morphtype_default)
 
-        # use horizontal radio buttons (requires metadata.css)
-        for fname,f in self.fields.items():
-            if isinstance(f.widget, forms.RadioSelect):
+        # limit case options to those allowed by Language
+        self.fields['obj_cases'].widget.choices = [(case, case) for case,allowed in lang.pobj_cases if allowed]
+        # will be checked by default due to initialization above
+        # this is good for English (Accusative is the only option, always checked)
+
+        # use horizontal radio buttons/checkboxes (requires metadata.css)
+        for f in self.fields.values():
+            if isinstance(f.widget, (forms.RadioSelect,forms.CheckboxSelectMultiple)):
                 f.widget.attrs={'class': 'inline'}
-                if fname!='morphtype':
-                    f.widget.choices = f.widget.choices[1:] # remove the empty default
+            if isinstance(f.widget, forms.RadioSelect):
+                f.widget.choices = f.widget.choices[1:] # remove the empty default
 
     def edit(self, m, commit=True):
         thep = self.instance.adposition
@@ -360,7 +373,7 @@ class AdpositionForm(ArticleMetadataForm):
 
     class Meta:
         model = models.AdpositionRevision
-        fields = ('lang', 'name', 'other_forms', 'description', 'morphtype', 'transitivity', 'slug')
+        fields = ('lang', 'name', 'other_forms', 'description', 'morphtype', 'transitivity', 'slug', 'obj_cases')
         widgets = {f: forms.RadioSelect for f in {'morphtype', 'transitivity'}}
 
 
@@ -397,6 +410,13 @@ class ConstrualForm(ArticleMetadataForm):
 class UsageForm(ArticleMetadataForm):
 
     def __init__(self, article, request, *args, **kwargs):
+        # """If no initial data, provide some defaults."""
+        # initial = kwargs.get('initial', {})
+        # if 'obj_case' not in initial:
+        #     # initialize all cases as checked (the choices will be filtered later based on the language)
+        #     initial['obj_case'] = [case for case in models.AdpositionRevision.obj_cases]
+        # kwargs['initial'] = initial
+
         super(UsageForm, self).__init__(article, request, *args, **kwargs)
 
         try:
@@ -406,6 +426,19 @@ class UsageForm(ArticleMetadataForm):
             self.article = adp.article # so we don't put the new article under another usage article
         self.fields['adposition'].initial = adp
         self.fields['adposition'].choices = [(adp.id, str(adp))]
+        self.fields['obj_case'].choices = [(int(models.Case[case]),case) for case,allowed in deepest_instance(adp.current_revision).obj_cases if allowed]
+        if len(self.fields['obj_case'].choices)==1:
+            self.fields['obj_case'].initial = self.fields['obj_case'].choices[0]
+            self.fields['obj_case'].required = True
+        elif len(self.fields['obj_case'].choices)==0:
+            self.fields['obj_case'].required = False
+        else:
+            self.fields['obj_case'].required = True
+
+        # use horizontal radio buttons (requires metadata.css)
+        for fname,f in self.fields.items():
+            if isinstance(f.widget, forms.RadioSelect):
+                f.widget.attrs={'class': 'inline'}
 
     def edit(self, m, commit=True):
         assert False,"Editing a Usage is not currently supported."
@@ -438,8 +471,8 @@ class UsageForm(ArticleMetadataForm):
 
     class Meta:
         model = models.UsageRevision
-        fields = ('adposition', 'construal')
-
+        fields = ('adposition', 'obj_case', 'construal')
+        widgets = {'obj_case': forms.RadioSelect}
 
 def MetaSidebarForm(article, request, *args, **kwargs):
     """
