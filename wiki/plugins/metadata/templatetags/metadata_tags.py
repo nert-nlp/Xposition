@@ -1,5 +1,6 @@
 from django import template
 from django.utils.safestring import mark_safe
+from bitfield import BitField
 from wiki.models import Article, ArticleRevision
 from wiki.models.pluginbase import RevisionPlugin, RevisionPluginRevision
 from wiki.plugins.metadata.models import MetadataRevision, SimpleMetadata, Supersense, Construal, Language, Adposition, Usage, deepest_instance
@@ -42,8 +43,11 @@ def metadata_display(context):
                 display += v.html()
             elif hasattr(fld, 'choices') and fld.choices:
                 choices = dict(fld.choices)
-                v = str(choices[int(v)])
-                display += str(v)
+                if v is not None:   # if None, display nothing
+                    v = str(choices[int(v)])
+                    display += str(v)
+            elif isinstance(fld, BitField):
+                display += ', '.join(case for case,allowed in v if allowed)
             else:
                 display += str(v)
             display += '</td></tr>\n'

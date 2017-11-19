@@ -5,6 +5,7 @@ Once you've cloned the git repository, you'll need to install the __django-wiki_
 
     pip install wiki
     pip install django-categories
+    pip install django-bitfield
 
 Testing
 ===========
@@ -34,7 +35,7 @@ Password: admin
 # Xposition
 
 __Xposition__ (URL forthcoming) is a multilingual database of the semantics of adpositions (prepositions, postpositions) and case markers.
-Semantic information is primarily categorized in terms of coarse-grained __supersenses__. 
+Semantic information is primarily categorized in terms of coarse-grained __supersenses__.
 The database is designed to support corpus annotation.
 
 Xposition is the successor to [PrepWiki](http://demo.ark.cs.cmu.edu/PrepWiki/), which was limited to English prepositions
