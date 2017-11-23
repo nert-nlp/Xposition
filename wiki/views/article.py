@@ -4,7 +4,7 @@ from __future__ import absolute_import, unicode_literals
 import difflib
 import logging
 
-from wiki.plugins.metadata.models import Supersense, SupersenseRevision, Metadata
+from wiki.plugins.metadata.models import Supersense, SupersenseRevision, SimpleMetadata, Metadata
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.urlresolvers import reverse
@@ -36,11 +36,19 @@ class ArticleView(ArticleMixin, TemplateView):
 
     @method_decorator(get_article(can_read=True))
     def dispatch(self, request, article, *args, **kwargs):
-        try:
-            metadata = Metadata.objects.get(article = article)
-            self.template_name = metadata.current_revision.metadatarevision.template
-        except:
-            pass
+        try:    # TODO: look for another way to choose the template dynamically
+            metadata = SimpleMetadata.objects.get(article = article)
+        except SimpleMetadata.DoesNotExist:
+            try:
+                metadata = Metadata.objects.get(article = article)
+            except Metadata.DoesNotExist:
+                metadata = None
+
+        if metadata:
+            self.metadata = metadata
+            self.template_name = metadata.template
+            #metadata.current_revision.metadatarevision.template
+
         return super(
             ArticleView,
             self).dispatch(
@@ -51,10 +59,12 @@ class ArticleView(ArticleMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         kwargs['selected_tab'] = 'view'
-        try:
-            kwargs['metadata'] = self.article.current_revision.metadatarevision
-        except:
-            pass
+        # try: # TODO: try to remove this
+        #     #kwargs['metadata'] = self.article.current_revision.metadatarevision # TODO: I think this pointer is not being updated properly
+        #     if self.metadata:
+        #         kwargs['metadata'] = self.metadata
+        # except:
+        #     pass
         return ArticleMixin.get_context_data(self, **kwargs)
 
 
@@ -402,11 +412,12 @@ class Edit(ArticleMixin, FormView):
         revision.set_from_request(self.request)
         self.article.add_revision(revision)
 
-        currentMetadata = Metadata.objects.get(article=self.article)
-        if currentMetadata:
-            metadataRevision = currentMetadata.createNewRevision(self.request)
-            metadataRevision.articleRevision = revision
-            metadataRevision.save()
+        if False:   # TODO: see if we can remove this
+            currentMetadata = Metadata.objects.get(article=self.article)
+            if currentMetadata:
+                metadataRevision = currentMetadata.createNewRevision(self.request)
+                metadataRevision.articleRevision = revision
+                metadataRevision.save()
 
         messages.success(
             self.request,
@@ -428,10 +439,10 @@ class Edit(ArticleMixin, FormView):
         kwargs['editor'] = editors.getEditor()
         kwargs['selected_tab'] = 'edit'
         kwargs['sidebar'] = self.sidebar
-        try:
-            kwargs['metadata'] = Supersense.objects.get(article = self.article)
-        except:
-            pass
+        # try:  # TODO: remove
+        #     kwargs['metadata'] = Supersense.objects.get(article = self.article)
+        # except:
+        #     pass
         return super(Edit, self).get_context_data(**kwargs)
 
 
@@ -536,10 +547,10 @@ class History(ListView, ArticleMixin):
         kwargs.update(kwargs_article)
         kwargs.update(kwargs_listview)
         kwargs['selected_tab'] = 'history'
-        try:
-            kwargs['metadataRevisions'] = SupersenseRevision.objects.all()
-        except:
-            pass
+        # try:  # TODO: remove
+        #     kwargs['metadataRevisions'] = SupersenseRevision.objects.all()
+        # except:
+        #     pass
         return kwargs
 
     @method_decorator(get_article(can_read=True))

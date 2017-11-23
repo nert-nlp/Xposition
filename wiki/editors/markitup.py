@@ -37,7 +37,7 @@ class MarkItUpAdminWidget(forms.Widget):
     def render(self, name, value, attrs=None):
         if value is None:
             value = ''
-        final_attrs = self.build_attrs(attrs, name=name)
+        final_attrs = self.build_attrs(dict(attrs, name=name))
         return mark_safe(
             '<textarea%s>%s</textarea>' %
             (flatatt(final_attrs),
@@ -58,7 +58,7 @@ class MarkItUpWidget(forms.Widget):
     def render(self, name, value, attrs=None):
         if value is None:
             value = ''
-        final_attrs = self.build_attrs(attrs, name=name)
+        final_attrs = self.build_attrs(dict(attrs, name=name))
         return mark_safe(
             '<div><textarea%s>%s</textarea></div>' %
             (flatatt(final_attrs),

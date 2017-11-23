@@ -1,0 +1,37 @@
+{% extends "wiki/article.html" %}
+{% load wiki_tags i18n sekizai_tags %}
+{% load metadata_tags %}
+
+{% block wiki_articletitle %}
+<i class="fa fa-language fa-2x" aria-hidden="true" style="opacity: .1; position: absolute; left: -80px;"></i>
+{{block.super}}
+{% endblock %}
+
+{% block wiki_contents_tab %}
+
+  <div class="col-md-9">
+    {% wiki_render article %}
+
+    {% adpositions_for_lang as adpositions %}
+    <h4 id="adps">Adpositions ({{adpositions|length}})</h4>
+    <ul>
+      {% for p in adpositions %}
+      <li><a href="{{p.adposition.article.get_absolute_url}}">{{p.adposition}}</a></li>
+      {% endfor %}
+    </ul>
+
+    {% usages_for_lang as usages %}
+    <h4 id="usages">Usages ({{usages|length}})</h4>
+    <ul>
+      {% for u in usages %}
+      <li><a href="{{u.usage.article.get_absolute_url}}">{{u.current_revision.metadatarevision.usagerevision.name}}</a></li>
+      {% endfor %}
+    </ul>
+
+    {% include "category_article_view.html" %}
+  </div>
+  <div class="col-md-3">
+    {% metadata_display %}{# if there is metadata for the article, display it! #}
+  </div>
+
+{% endblock %}

@@ -3,28 +3,18 @@
 {% load metadata_tags %}
 
 {% block wiki_articletitle %}
-<i class="fa fa-globe fa-2x" aria-hidden="true" style="opacity: .1; position: absolute; left: -80px;"></i>
+<i class="fa fa-book fa-2x" aria-hidden="true" style="opacity: .1; position: absolute; left: -80px;"></i>
 {{block.super}}
 {% endblock %}
 
 {% block wiki_contents_tab %}
   <div class="col-md-9">
-    <p class="lead">{{article.current_revision.metadata_revision.description}}</p>
-
     {% wiki_render article %}
 
-
-
     <div class="col-md-4">
-      <h4>Construals with role</h4>
+      <h4>Examples</h4>
       <ul>
-        {% construals_display role=article.current_revision.title %}
-      </ul>
-    </div>
-    <div class="col-md-5">
-      <h4>Construals with function</h4>
-      <ul>
-        {% construals_display function=article.current_revision.title %}
+        TODO
       </ul>
     </div>
 

@@ -1,5 +1,6 @@
 from django.shortcuts import redirect
-from wiki.models import URLPath, Article, Category
+from .models import ArticleCategory as Category
+from wiki.models import URLPath, Article
 from django.views.generic.edit import FormView
 from django.forms import modelform_factory
 from wiki.views.mixins import ArticleMixin
@@ -163,7 +164,7 @@ class CategoryView( ArticleMixin, FormView ):
 
     ''' This view manages the creation of new categories '''
 
-    form_class = forms.CategoryForm
+    form_class = forms.ArticleCategoryForm
     template_name = "category_detail.html"
 
     @method_decorator(get_article(can_read=True, can_create=True),)
@@ -181,6 +182,8 @@ class CategoryView( ArticleMixin, FormView ):
 
     def get_form_kwargs(self, **kwargs):
         kwargs = super(CategoryView, self).get_form_kwargs(**kwargs)
+        #kwargs['article'] = self.article
+        #kwargs['request'] = self.request
         return kwargs
 
 
@@ -209,18 +212,17 @@ class CategoryView( ArticleMixin, FormView ):
                               'other_read': self.article.other_read,
                               'other_write': self.article.other_write,
                               })
-        form.save()
-        category = Category.objects.get(name = title)
         landing_article = Article.objects.get(urlpath = self.landing_article_urlpath)
-        landing_article.categories.add(category)
-        self.landing_article_urlpath.save()
+        form.instance.article = landing_article
+        form.save()
+        category = Category.objects.get(slug = slug)
         return redirect(
             "wiki:get",
             path=self.landing_article_urlpath.path,
             article_id=self.article.id)
 
     def get_form(self):
-        form = super(CategoryView, self).get_form(form_class=forms.CategoryForm)
+        form = super(CategoryView, self).get_form(form_class=forms.ArticleCategoryForm)
         return form
 
 

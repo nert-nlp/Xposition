@@ -1,104 +1,72 @@
 {% extends "wiki/article.html" %}
 {% load wiki_tags i18n humanize %}
 
-{% block wiki_pagetitle %}{% trans "Metadata" %}: {{ article.title }}{% endblock %}
+{% block wiki_pagetitle %}{% trans "Metadata" %}{% endblock %}
+
+{% block wiki_articletitle %}{% trans "Metadata" %}{% endblock %}
 
 {% block wiki_contents_tab %}
 
+{% if user.is_anonymous %}
+  {% include "wiki/includes/anonymous_blocked.html" %}
+{% else %}
 
 {# extend this template to include any new metadata forms for metadata creation #}
 
 <div class="panel-group">
 
-    <div class="panel panel-default">
-      <div class="panel-heading" style="margin-bottom:5px" class="col-lg-12">
-          <a class="panel-toggle" href="#collapse_metadata" data-toggle="collapse">
-            <h2>Create a new Article with Metadata</h2>
-          </a>
-      </div>
+  {{install}}
 
-        <br>
-        <div id="collapse_metadata" class="panel-collapse collapse">
-            <form method="POST" class="form-horizontal" id="category_create_form">
-             {% wiki_form forms.0%}
-                 <input type="hidden" name="save" value="1" />
-                 <input type="hidden" name="preview" value="1" />
-                 <div class="form-group form-actions">
-                  <div class="col-lg-8">
-                  <div class="col-lg-offset-2">
-                    <button type="submit" name="metadata" class="btn btn-primary btn-lg">
-                      <span class="fa fa-check"></span>
-                      {% trans "Create" %}
-                    </button>
-                    </div>
-                  </div>
-                </div>
-            </form>
-        </div>
-    </div>
+  <h2><a href="createsupersense">Create Supersense</a></h2>
 
+  <h2><a href="createconstrual">Create Construal</a></h2>
 
+  <h2><a href="createlang">Create Language</a></h2>
 
+  {% if article.articleplugin_set.all %}
+    {% with aplugin=article.articleplugin_set.all.0 %}
+      {% if aplugin.simplemetadata.language or article.current_revision.metadata_revision.adpositionrevision %}
 
-    <div class="panel panel-default">
-      <div class="panel-heading" style="margin-bottom:5px" class="col-lg-12">
-          <a class="panel-toggle" href="#collapse_supersense" data-toggle="collapse">
-            <h2>Create a new Supersense</h2>
-          </a>
-      </div>
+  <h2><a href="createp">Create Adposition</a></h2>
 
-        <br>
-        <div id="collapse_supersense" class="panel-collapse collapse">
-            <form method="POST" class="form-horizontal">
-             {% wiki_form forms.1%}
-                 <input type="hidden" name="save" value="1" />
-                 <input type="hidden" name="preview" value="1" />
-                 <div class="form-group form-actions">
-                  <div class="col-lg-8">
-                  <div class="col-lg-offset-2">
-                    <button type="submit" name="supersense" class="btn btn-primary btn-lg">
-                      <span class="fa fa-check"></span>
-                      {% trans "Create" %}
-                    </button>
-                    </div>
-                  </div>
-                </div>
-            </form>
-        </div>
-    </div>
+      {% else %}
+
+  <p>Navigate to a language page and click on <b>Metadata</b> to create
+    an adposition for that language.</p>
+
+      {% endif %}
+    {% endwith %}
+  {% else %}
+
+  <p>Navigate to a language page and click on <b>Metadata</b> to create
+    an adposition for that language.</p>
+
+  {% endif %}
 
 
 
-    <div class="panel panel-default">
-      <div class="panel-heading" style="margin-bottom:5px" class="col-lg-12">
-          <a class="panel-toggle" href="#collapse_example" data-toggle="collapse">
-            <h2>Create a new Example</h2>
-          </a>
-      </div>
+  {% if article.articleplugin_set.all %}
+    {% with aplugin=article.articleplugin_set.all.0 %}
+      {% if article.current_revision.metadata_revision.adpositionrevision or article.current_revision.metadata_revision.usagerevision %}
 
-        <br>
-        <div id="collapse_example" class="panel-collapse collapse">
-            <form method="POST" class="form-horizontal">
-             {% wiki_form forms.2%}
-                 <input type="hidden" name="save" value="1" />
-                 <input type="hidden" name="preview" value="1" />
-                 <div class="form-group form-actions">
-                  <div class="col-lg-8">
-                  <div class="col-lg-offset-2">
-                    <button type="submit" name="example" class="btn btn-primary btn-lg">
-                      <span class="fa fa-check"></span>
-                      {% trans "Create" %}
-                    </button>
-                    </div>
-                  </div>
-                </div>
-            </form>
-        </div>
-    </div>
+<h2><a href="createusage">Create Usage</a></h2>
 
+    {% else %}
 
+<p>Navigate to an adposition page and click on <b>Metadata</b> to create
+  a usage for that adposition.</p>
+
+      {% endif %}
+    {% endwith %}
+  {% else %}
+
+<p>Navigate to an adposition page and click on <b>Metadata</b> to create
+  a usage for that adposition.</p>
+
+  {% endif %}
 
 </div>
 
+{% endif %}
 
 {% endblock %}
