@@ -9,11 +9,10 @@
 
 {% block wiki_contents_tab %}
   <div class="col-md-9">
-    <p class="lead" style="border: solid 1px #aaa; padding: 1em;">{{article.current_revision.metadata_revision.description}}</p>
+    <p class="lead">{{article.current_revision.metadata_revision.description}}</p>
 
-    <div style="font-size: 14pt;">
     {% wiki_render article %}
-    </div>
+
 
 
     <div class="col-md-4">
