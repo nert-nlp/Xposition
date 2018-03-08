@@ -46,4 +46,4 @@ def load(modname, verbose=False, failfast=False):
 
 
 def load_wiki_plugins():
-    load('wiki_plugin', verbose=True, failfast=False)
+    load('wiki_plugin', verbose=False, failfast=False)
