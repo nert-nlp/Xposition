@@ -1,6 +1,7 @@
 
 from __future__ import absolute_import, unicode_literals
 
+from django.utils.html import escape
 from django.utils.safestring import mark_safe
 from django import forms
 from django.utils.translation import ugettext_lazy as _
@@ -35,10 +36,10 @@ class SidebarForm(PluginSidebarFormMixin):
         self.request = request
         super(SidebarForm, self).__init__(*args, **kwargs)
         self.fields['categories'].required = False
-        self.fields['categories'].label_from_instance = lambda obj: mark_safe("%s" % obj.short_title + (' <a href=/'+obj.slug+' target="_blank">View</a>'))
+        self.fields['categories'].label_from_instance = lambda obj: mark_safe("%s" % escape(obj.short_title) + (' <a href="/'+str(obj.article.urlpath_set.all()[0])+'" target="_blank">View</a>'))
         self.fields['categories'].initial = article.categories.all()
         self.fields['categories'].widget = forms.CheckboxSelectMultiple()
-        ids = self.article.category.subtree_ids()
+        ids = self.article.category.subtree_ids() if hasattr(self.article, 'category') else []
         self.fields['categories'].queryset = ArticleCategory.objects.exclude(id__in = ids)
         if not self.article.categories.all():
             self.validCategory = False
