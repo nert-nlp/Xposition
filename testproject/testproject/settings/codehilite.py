@@ -1,9 +1,9 @@
-from __future__ import absolute_import, unicode_literals
+, 'ufrom __future__ import absolute_import, unicode_literals
 
 from testproject.settings import *
 from testproject.settings.local import *
 
-WIKI_MARKDOWN_HTML_WHITELIST = ['sub', 'sup', 'hr']
+WIKI_MARKDOWN_HTML_WHITELIST = ['sub', 'sup', 'hr', 'u', 'i', 'b']
 
 # Test codehilite with pygments
 
