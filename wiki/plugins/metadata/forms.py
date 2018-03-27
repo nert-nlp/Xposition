@@ -446,8 +446,10 @@ class UsageForm(ArticleMetadataForm):
         assert False,"Editing a Usage is not currently supported."
 
     def new(self, m, commit=True):
-        case = models.Case.shortname(self.cleaned_data['obj_case'])
-        case = None if len(self.fields['obj_case'].choices)<2 else case
+        if len(self.fields['obj_case'].choices)<2:
+            case = None
+        else:
+            case = models.Case.shortname(self.cleaned_data['obj_case'])
         caseSlug = '<'+case+'>' if case else ''
         construalSlug = m.construal.article.urlpath_set.all()[0].slug
         name = self.get_usage_name(deepest_instance(m.adposition.current_revision).name,
