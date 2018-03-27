@@ -430,7 +430,7 @@ class UsageForm(ArticleMetadataForm):
         self.fields['adposition'].choices = [(adp.id, str(adp))]
         self.fields['obj_case'].choices = [(int(models.Case[case]),case) for case,allowed in deepest_instance(adp.current_revision).obj_cases if allowed]
         if len(self.fields['obj_case'].choices)==1:
-            self.fields['obj_case'].initial = self.fields['obj_case'].choices[0]
+            self.fields['obj_case'].initial = self.fields['obj_case'].choices[0][0]
             self.fields['obj_case'].required = True
         elif len(self.fields['obj_case'].choices)==0:
             self.fields['obj_case'].required = False
