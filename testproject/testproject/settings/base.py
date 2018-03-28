@@ -25,6 +25,7 @@ BASE_DIR = os.path.dirname(PROJECT_DIR)
 from .unversioned import SECRET_KEY
 
 # to set DEBUG = True, import dev.py into local.py
+
 DEBUG = False
 
 ALLOWED_HOSTS = ['*']
@@ -55,6 +56,7 @@ INSTALLED_APPS = [
     'wiki.plugins.categories',
     'wiki.plugins.categories.editor',
     'wiki.plugins.metadata',
+    'markdown-macros',
 ]
 
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
