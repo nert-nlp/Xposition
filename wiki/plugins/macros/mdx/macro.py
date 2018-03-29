@@ -104,3 +104,12 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
             'Insert a link to another wiki page with a short notation.'),
         example_code='[[WikiLink]]',
         args={})
+    
+    def enprep(self, prep, construal):
+        return '['+prep+'](/en/'+prep+'/'+construal+')'
+    enprep.meta = dict(
+        short_description=_('Link to English Adposition Usage'),
+        help_text=_('Create a link to a preposition-construal pair'),
+        example_code='[enprep prep:in construal:Locus--Locus]',
+        args={'prep': _('Name of adposition'), 'construal': _('Name of construal')}
+    )
