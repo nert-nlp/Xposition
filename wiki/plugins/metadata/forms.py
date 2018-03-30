@@ -430,7 +430,7 @@ class UsageForm(ArticleMetadataForm):
         self.fields['adposition'].choices = [(adp.id, str(adp))]
         self.fields['obj_case'].choices = [(int(models.Case[case]),case) for case,allowed in deepest_instance(adp.current_revision).obj_cases if allowed]
         if len(self.fields['obj_case'].choices)==1:
-            self.fields['obj_case'].initial = self.fields['obj_case'].choices[0]
+            self.fields['obj_case'].initial = self.fields['obj_case'].choices[0][0]
             self.fields['obj_case'].required = True
         elif len(self.fields['obj_case'].choices)==0:
             self.fields['obj_case'].required = False
@@ -446,8 +446,10 @@ class UsageForm(ArticleMetadataForm):
         assert False,"Editing a Usage is not currently supported."
 
     def new(self, m, commit=True):
-        case = models.Case.shortname(self.cleaned_data['obj_case'])
-        case = None if len(self.fields['obj_case'].choices)<2 else case
+        if len(self.fields['obj_case'].choices)<2:
+            case = None
+        else:
+            case = models.Case.shortname(self.cleaned_data['obj_case'])
         caseSlug = '<'+case+'>' if case else ''
         construalSlug = m.construal.article.urlpath_set.all()[0].slug
         name = self.get_usage_name(deepest_instance(m.adposition.current_revision).name,

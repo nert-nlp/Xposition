@@ -22,11 +22,10 @@ BASE_DIR = os.path.dirname(PROJECT_DIR)
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'b^fv_)t39h%9p40)fnkfblo##jkr!$0)lkp6bpy!fi*f$4*92!'
+from .unversioned import SECRET_KEY
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# to set DEBUG = True, import dev.py into local.py
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
@@ -160,3 +159,11 @@ WIKI_ANONYMOUS_WRITE = True
 WIKI_ANONYMOUS_CREATE = False
 
 WIKI_URL_CASE_SENSITIVE = True
+
+WIKI_MARKDOWN_HTML_WHITELIST = ['sub', 'sup', 'hr', 'u']
+
+# To make deployment happy
+SECURE_BROWSER_XSS_FILTER = True
+SESSION_COOKIE_SECURE = False   # setting to True breaks django-wiki login
+CSRF_COOKIE_SECURE = False  # setting to True breaks django-wiki login
+X_FRAME_OPTIONS = 'DENY'

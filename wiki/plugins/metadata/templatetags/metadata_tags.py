@@ -89,6 +89,11 @@ def usages_for_adp(context):
     article = context['article']
     return Usage.objects.filter(current_revision__metadatarevision__usagerevision__adposition__article=article)
 
+@register.simple_tag(takes_context=True)
+def usages_for_construal(context):
+    article = context['article']
+    return Usage.objects.filter(current_revision__metadatarevision__usagerevision__construal__article=article)
+
 def _category_subtree(c):
     ss = c.supersense.all()[0]
     a = ss.article
