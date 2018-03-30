@@ -13,13 +13,20 @@ from wiki.plugins.macros import settings
 # http://stackoverflow.com/questions/430759/regex-for-managing-escaped-characters-for-items-like-string-literals
 re_sq_short = r"'([^'\\]*(?:\\.[^'\\]*)*)'"
 
+# MACRO_RE = re.compile(
+#     r".*(\[(?P<macro>\w+)(?P<kwargs>\s\w+\:.+)*\]).*",
+#     re.IGNORECASE)
+# KWARG_RE = re.compile(
+#     r'\s*(?P<arg>\w+)(:(?P<value>([^\']+|%s)))?' %
+#     re_sq_short,
+#     re.IGNORECASE)
 MACRO_RE = re.compile(
-    r'.*(\[(?P<macro>\w+)(?P<kwargs>\s\w+\:.+)*\]).*',
-    re.IGNORECASE)
-KWARG_RE = re.compile(
-    r'\s*(?P<arg>\w+)(:(?P<value>([^\']+|%s)))?' %
+    r".*(\[(?P<macro>\w+)(?P<args>\s[\w/'-]+)*\]).*",
+    re.IGNORECASE|re.UNICODE)
+ARG_RE = re.compile(
+    r"\s*(\w+\:)?(?P<value>([\w/'-]+|%s))?" %
     re_sq_short,
-    re.IGNORECASE)
+    re.IGNORECASE|re.UNICODE)
 
 
 
@@ -47,12 +54,32 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
             if m:
                 macro = m.group('macro').strip()
                 if macro in settings.METHODS and hasattr(self, macro):
-                    kwargs = m.group('kwargs')
-                    if kwargs:
-                        kwargs_dict = {}
-                        for kwarg in KWARG_RE.finditer(kwargs):
-                            arg = kwarg.group('arg')
-                            value = kwarg.group('value')
+#                     kwargs = m.group('kwargs')
+#                     if kwargs:
+#                         kwargs_dict = {}
+#                         for kwarg in KWARG_RE.finditer(kwargs):
+#                             arg = kwarg.group('arg')
+#                             value = kwarg.group('value')
+#                             if value is None:
+#                                 value = True
+#                             if isinstance(value, string_types):
+#                                 # If value is enclosed with ': Remove and
+#                                 # remove escape sequences
+#                                 if value.startswith("'") and len(value) > 2:
+#                                     value = value[1:-1]
+#                                     value = value.replace("\\\\", "¤KEEPME¤")
+#                                     value = value.replace("\\", "")
+#                                     value = value.replace("¤KEEPME¤", "\\")
+#                             kwargs_dict[str(arg)] = value
+#                         line = getattr(self, macro)(**kwargs_dict)
+#                     else:
+#                         line = getattr(self, macro)()
+                        
+                    args = m.group('args')
+                    if args:
+                        args_list = []
+                        for arg in ARG_RE.finditer(args):
+                            value = arg.group('value')
                             if value is None:
                                 value = True
                             if isinstance(value, string_types):
@@ -63,10 +90,10 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
                                     value = value.replace("\\\\", "¤KEEPME¤")
                                     value = value.replace("\\", "")
                                     value = value.replace("¤KEEPME¤", "\\")
-                            kwargs_dict[str(arg)] = value
-                        line = getattr(self, macro)(**kwargs_dict)
-                    else:
-                        line = getattr(self, macro)()
+                            args_list.append[value]
+                            line = getattr(self, macro)(*args_list)
+                     else:
+                         line = getattr(self, macro)()
             if line is not None:
                 new_text.append(line)
         return new_text
@@ -105,11 +132,24 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
         example_code='[[WikiLink]]',
         args={})
     
-    def enprep(self, prep, construal):
-        return '['+prep+'](/en/'+prep+'/'+construal+')'
-    enprep.meta = dict(
-        short_description=_('Link to English Adposition Usage'),
-        help_text=_('Create a link to a preposition-construal pair'),
-        example_code='[enprep prep:in construal:Locus--Locus]',
+    def p(self, *args):
+        if len(args)>1:
+            prep, construal = args[0], args[1]
+            return '['+prep+'](/'+prep+'/'+construal+')'
+        return '['+args[0]+'](/'+args[0]+')'
+    p.meta = dict(
+        short_description=_('Link to English Adposition, Usage'),
+        help_text=_('Create a link to a preposition or preposition-construal pair'),
+        example_code='[p en/in] or [p en/in Locus--Locus]',
         args={'prep': _('Name of adposition'), 'construal': _('Name of construal')}
+    )
+
+    
+    def ss(self, *args):
+        return '['+args[0]+'](/'+args[0]+')'
+    ss.meta = dict(
+        short_description=_('Link to Supersense or Construal'),
+        help_text=_('Create a link to a supersense or construal'),
+        example_code='[ss Locus] or [ss Locus--Locus]',
+        args={'name': _('Name of supersense/construal label')}
     )
