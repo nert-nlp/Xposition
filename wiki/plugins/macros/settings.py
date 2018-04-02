@@ -11,4 +11,6 @@ METHODS = getattr(
     ('article_list',
      'toc',
      'wikilink',
+	 'p',
+	 'ss',
      ))
