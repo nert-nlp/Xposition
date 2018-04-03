@@ -14,12 +14,12 @@ from wiki.plugins.macros import settings
 re_sq_short = r"'([^'\\]*(?:\\.[^'\\]*)*)'"
 
 MACRO_RE = re.compile(
-    r".*(\[(?P<macro>\w+)(?P<args>(\s([\w/':`-]+(%s)?))*)\]).*",
+    r".*(\[(?P<macro>\w+)(?P<args>(\s([\w/'`:$-]+(%s)?))*)\]).*",
 
     re.IGNORECASE | re.UNICODE)
 
 ARG_RE = re.compile(
-    r"\s(\w+:)?(?P<value>([\w/'`-]+|%s))" %
+    r"\s(\w+:)?(?P<value>([\w/'`$-]+|%s))" %
     re_sq_short,
     re.IGNORECASE | re.UNICODE)
 
@@ -62,7 +62,6 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
                                     value = value.replace("\\", "")
                                     value = value.replace("¤KEEPME¤", "\\")
                             if value is not None:
-                                args_list.append(str(len(args_list)))
                                 args_list.append(value)
                         line = getattr(self, macro)(*args_list)
                     else:
@@ -104,23 +103,18 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
             'Insert a link to another wiki page with a short notation.'),
         example_code='[[WikiLink]]',
         args={})
-
-
-    def link(text, link, clazz):
-        return '<a href="'
-        link + '" class="' + clazz + '">' + text + '</a>'
-
+		
 
     def p(self, *args):
         if len(args) > 1:
             prep, construal = args[0], args[1]
             if '`' in args[0]:
-                return link(prep, '/' + prep + '/' + construal.replace('`', "'"), 'usage')
+                return link(prep.split('/')[-1], '/' + prep + '/' + construal.replace('`', "'"), 'usage')
             elif '--' in args[0]:
-                return link(prep, '/' + prep + '/' + construal, 'usage')
+                return link(prep.split('/')[-1], '/' + prep + '/' + construal, 'usage')
             else:
-                return link(prep, '/' + prep + '/' + construal + '--' + construal, 'usage')
-        return link(prep, '/' + prep, 'adposition')
+                return link(prep.split('/')[-1], '/' + prep + '/' + construal + '--' + construal, 'usage')
+        return link(args[0].split('/')[-1], '/' + args[0], 'adposition')
     # meta data
     p.meta = dict(
         short_description=_('Link to Adposition, Usage'),
@@ -144,3 +138,7 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
         example_code='[ss Locus] or [ss Locus--Locus]',
         args={'name': _('Name of supersense/construal label')}
     )
+
+	
+def link(t, l, clazz):
+    return '<a href="'+l+'" class="'+clazz+'">'+t+'</a>'
