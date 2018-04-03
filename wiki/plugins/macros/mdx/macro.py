@@ -9,20 +9,20 @@ from django.utils.translation import ugettext as _
 from six import string_types
 from wiki.plugins.macros import settings
 
-
 # See:
 # http://stackoverflow.com/questions/430759/regex-for-managing-escaped-characters-for-items-like-string-literals
 re_sq_short = r"'([^'\\]*(?:\\.[^'\\]*)*)'"
 
 MACRO_RE = re.compile(
     r".*(\[(?P<macro>\w+)(?P<args>(\s([\w/':`-]+(%s)?))*)\]).*",
-    
+
     re.IGNORECASE | re.UNICODE)
 
 ARG_RE = re.compile(
     r"\s(\w+:)?(?P<value>([\w/'`-]+|%s))" %
     re_sq_short,
     re.IGNORECASE | re.UNICODE)
+
 
 class MacroExtension(markdown.Extension):
     """ Macro plugin markdown extension for django-wiki. """
@@ -31,7 +31,8 @@ class MacroExtension(markdown.Extension):
         """ Insert MacroPreprocessor before ReferencePreprocessor. """
         md.preprocessors.add('dw-macros', MacroPreprocessor(md), '>html_block')
 
-		class MacroPreprocessor(markdown.preprocessors.Preprocessor):
+
+class MacroPreprocessor(markdown.preprocessors.Preprocessor):
     """django-wiki macro preprocessor - parse text for various [some_macro] and
     [some_macro (kw:arg)*] references. """
 
@@ -50,8 +51,8 @@ class MacroExtension(markdown.Extension):
                         args_list = []
                         for arg in ARG_RE.finditer(args):
                             value = arg.group('value')
-                            #if value is None:
-                                #value = True
+                            # if value is None:
+                            # value = True
                             if isinstance(value, string_types):
                                 # If value is enclosed with ': Remove and
                                 # remove escape sequences
@@ -85,7 +86,7 @@ class MacroExtension(markdown.Extension):
         example_code='[article_list depth:2]',
         args={'depth': _('Maximum depth to show levels for.')}
     )
-	
+
     def toc(self):
         return "[TOC]"
     toc.meta = dict(
@@ -94,8 +95,8 @@ class MacroExtension(markdown.Extension):
         example_code='[TOC]',
         args={}
     )
-    
-	def wikilink(self):
+
+    def wikilink(self):
         return ""
     wikilink.meta = dict(
         short_description=_('WikiLinks'),
@@ -103,34 +104,40 @@ class MacroExtension(markdown.Extension):
             'Insert a link to another wiki page with a short notation.'),
         example_code='[[WikiLink]]',
         args={})
-    
-	def link(text, link, clazz):
-		return '<a href="'link+'" class="'+clazz+'">'+text+'</a>'
-	
+
+
+    def link(text, link, clazz):
+        return '<a href="'
+        link + '" class="' + clazz + '">' + text + '</a>'
+
+
     def p(self, *args):
-        if len(args)>1:
+        if len(args) > 1:
             prep, construal = args[0], args[1]
-			if '`' in args[0]:
-				return link(prep, '/'+prep+'/'+construal.replace('`', "'"), 'usage')
-			elif '--' in args[0]:
-				return link(prep, '/'+prep+'/'+construal, 'usage')
-			else:
-				return link(prep, '/'+prep+'/'+construal+'--'+construal, 'usage')
-        return link(prep, '/'+prep, 'adposition')
+            if '`' in args[0]:
+                return link(prep, '/' + prep + '/' + construal.replace('`', "'"), 'usage')
+            elif '--' in args[0]:
+                return link(prep, '/' + prep + '/' + construal, 'usage')
+            else:
+                return link(prep, '/' + prep + '/' + construal + '--' + construal, 'usage')
+        return link(prep, '/' + prep, 'adposition')
+    # meta data
     p.meta = dict(
         short_description=_('Link to Adposition, Usage'),
         help_text=_('Create a link to a preposition or preposition-construal pair'),
         example_code='[p en/in] or [p en/in Locus--Locus]',
         args={'prep': _('Name of adposition'), 'construal': _('Name of construal')}
     )
-    
+
+
     def ss(self, *args):
-		if '`' in args[0]:
-			return link(args[0], '/'+args[0].replace('`', "'"), 'construal')
-		elif '--' in args[0]:
-			return link(args[0], '/'+args[0], 'construal')
-		else:
-			return link(args[0], '/'+args[0], 'supersense')
+        if '`' in args[0]:
+            return link(args[0], '/' + args[0].replace('`', "'"), 'construal')
+        elif '--' in args[0]:
+            return link(args[0], '/' + args[0], 'construal')
+        else:
+            return link(args[0], '/' + args[0], 'supersense')
+    # meta data
     ss.meta = dict(
         short_description=_('Link to Supersense or Construal'),
         help_text=_('Create a link to a supersense or construal'),
