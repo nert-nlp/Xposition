@@ -106,37 +106,44 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
 		
 
     def p(self, *args):
-        if len(args) > 1:
+        cl = None
+        if len(args) >= 3:
+            cl = args[2]
+        if len(args) > 1 and not '-' == args[1]:
             prep, construal = args[0], args[1]
+            short = prep.split('/')[-1]
             if '`' in args[0]:
-                return link(prep.split('/')[-1], '/' + prep + '/' + construal.replace('`', "'"), 'usage')
+                return link(short, '/' + prep + '/' + construal.replace('`', "'"), cl if cl else 'usage')
             elif '--' in args[0]:
-                return link(prep.split('/')[-1], '/' + prep + '/' + construal, 'usage')
+                return link(short, '/' + prep + '/' + construal, cl if cl else 'usage')
             else:
-                return link(prep.split('/')[-1], '/' + prep + '/' + construal + '--' + construal, 'usage')
-        return link(args[0].split('/')[-1], '/' + args[0], 'adposition')
+                return link(short, '/' + prep + '/' + construal + '--' + construal, cl if cl else 'usage')
+        return link(args[0].split('/')[-1], '/' + args[0], cl if cl else 'adposition')
     # meta data
     p.meta = dict(
         short_description=_('Link to Adposition, Usage'),
         help_text=_('Create a link to a preposition or preposition-construal pair'),
         example_code='[p en/in] or [p en/in Locus--Locus]',
-        args={'prep': _('Name of adposition'), 'construal': _('Name of construal')}
+        args={'prep': _('Name of adposition'), 'construal': _('Name of construal'), 'class': _('optional class')}
     )
 
 
     def ss(self, *args):
+        cl = None
+        if len(args) >= 2:
+            cl = args[1]
         if '`' in args[0]:
-            return link(args[0], '/' + args[0].replace('`', "'"), 'construal')
+            return link(args[0], '/' + args[0].replace('`', "'"), cl if cl else 'construal')
         elif '--' in args[0]:
-            return link(args[0], '/' + args[0], 'construal')
+            return link(args[0], '/' + args[0], cl if cl else 'construal')
         else:
-            return link(args[0], '/' + args[0], 'supersense')
+            return link(args[0], '/' + args[0], cl if cl else 'supersense')
     # meta data
     ss.meta = dict(
         short_description=_('Link to Supersense or Construal'),
         help_text=_('Create a link to a supersense or construal'),
         example_code='[ss Locus] or [ss Locus--Locus]',
-        args={'name': _('Name of supersense/construal label')}
+        args={'name': _('Name of supersense/construal label'), 'class': _('optional class')}
     )
 
 	
