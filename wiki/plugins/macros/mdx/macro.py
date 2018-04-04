@@ -14,12 +14,12 @@ from wiki.plugins.macros import settings
 re_sq_short = r"'([^'\\]*(?:\\.[^'\\]*)*)'"
 
 MACRO_RE = re.compile(
-    r"(\[(?P<macro>\w+)(?P<args>(\s(\S+(%s)?))*)\])",
+    r"(\[(?P<macro>\w+)(?P<args>(\s((\w+:)?(%s|[\w'`&%!+/$-]+)))*)\])",
 
     re.IGNORECASE | re.UNICODE)
 
 ARG_RE = re.compile(
-    r"\s(\w+:)?(?P<value>(%s|[^\s:]+))" %
+    r"\s(\w+:)?(?P<value>(%s|[^\s:\]\[]+))" %
     re_sq_short,
     re.IGNORECASE | re.UNICODE)
 
@@ -42,9 +42,9 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
         # Please note that this pattern is also in plugins.images
         new_text = []
         for line in lines:
-            for m in MACRO_RE.finditer(line):
-                macro = m.group('macro').strip()
-                for test_macro in settings.METHODS:
+            for test_macro in settings.METHODS:
+                for m in MACRO_RE.finditer(line):
+                    macro = m.group('macro').strip()
                     if macro == test_macro and hasattr(self, macro):
                         args = m.group('args')
                         if args:
@@ -63,9 +63,9 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
                                         value = value.replace("¤KEEPME¤", "\\")
                                 if value is not None:
                                     args_list.append(value)
-                            line = line[:m.start()] + getattr(self, macro)(*args_list) + line[m.end():]
+                            line = line.replace(m.group(0), getattr(self, macro)(*args_list))
                         else:
-                            line = line[:m.start()] + getattr(self, macro)() + line[m.end():]
+                            line = line.replace(m.group(0), getattr(self, macro)())
             if line is not None:
                 new_text.append(line)
         return new_text
