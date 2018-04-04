@@ -14,12 +14,12 @@ from wiki.plugins.macros import settings
 re_sq_short = r"'([^'\\]*(?:\\.[^'\\]*)*)'"
 
 MACRO_RE = re.compile(
-    r".*(\[(?P<macro>\w+)(?P<args>(\s([\w/'`:$-]+(%s)?))*)\]).*",
+    r"(\[(?P<macro>\w+)(?P<args>(\s(\S+(%s)?))*)\])",
 
     re.IGNORECASE | re.UNICODE)
 
 ARG_RE = re.compile(
-    r"\s(\w+:)?(?P<value>([\w/'`$-]+|%s))" %
+    r"\s(\w+:)?(?P<value>(%s|[^\s:]+))" %
     re_sq_short,
     re.IGNORECASE | re.UNICODE)
 
@@ -42,30 +42,30 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
         # Please note that this pattern is also in plugins.images
         new_text = []
         for line in lines:
-            m = MACRO_RE.match(line)
-            if m:
+            for m in MACRO_RE.finditer(line):
                 macro = m.group('macro').strip()
-                if macro in settings.METHODS and hasattr(self, macro):
-                    args = m.group('args')
-                    if args:
-                        args_list = []
-                        for arg in ARG_RE.finditer(args):
-                            value = arg.group('value')
-                            # if value is None:
-                            # value = True
-                            if isinstance(value, string_types):
-                                # If value is enclosed with ': Remove and
-                                # remove escape sequences
-                                if value.startswith("'") and len(value) > 2:
-                                    value = value[1:-1]
-                                    value = value.replace("\\\\", "¤KEEPME¤")
-                                    value = value.replace("\\", "")
-                                    value = value.replace("¤KEEPME¤", "\\")
-                            if value is not None:
-                                args_list.append(value)
-                        line = getattr(self, macro)(*args_list)
-                    else:
-                        line = getattr(self, macro)()
+                for test_macro in settings.METHODS:
+                    if macro == test_macro and hasattr(self, macro):
+                        args = m.group('args')
+                        if args:
+                            args_list = []
+                            for arg in ARG_RE.finditer(args):
+                                value = arg.group('value')
+                                # if value is None:
+                                # value = True
+                                if isinstance(value, string_types):
+                                    # If value is enclosed with ': Remove and
+                                    # remove escape sequences
+                                    if value.startswith("'") and len(value) > 2:
+                                        value = value[1:-1]
+                                        value = value.replace("\\\\", "¤KEEPME¤")
+                                        value = value.replace("\\", "")
+                                        value = value.replace("¤KEEPME¤", "\\")
+                                if value is not None:
+                                    args_list.append(value)
+                            line = line[:m.start()] + getattr(self, macro)(*args_list) + line[m.end():]
+                        else:
+                            line = line[:m.start()] + getattr(self, macro)() + line[m.end():]
             if line is not None:
                 new_text.append(line)
         return new_text
@@ -133,7 +133,7 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
         if len(args) >= 2:
             cl = args[1]
         if '`' in args[0]:
-            return link(args[0], '/' + args[0].replace('`', "'"), cl if cl else 'construal')
+            return link(args[0], '/' + args[0].replace('`', "'"), cl if cl else 'misc')
         elif '--' in args[0]:
             return link(args[0], '/' + args[0], cl if cl else 'construal')
         else:
