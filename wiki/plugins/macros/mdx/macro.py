@@ -42,9 +42,9 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
         # Please note that this pattern is also in plugins.images
         new_text = []
         for line in lines:
-            for m in MACRO_RE.finditer(line):
-                macro = m.group('macro').strip()
-                for test_macro in settings.METHODS:
+            for test_macro in settings.METHODS:
+                for m in MACRO_RE.finditer(line):
+                    macro = m.group('macro').strip()
                     if macro == test_macro and hasattr(self, macro):
                         args = m.group('args')
                         if args:
