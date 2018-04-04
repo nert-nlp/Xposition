@@ -14,7 +14,7 @@ from wiki.plugins.macros import settings
 re_sq_short = r"'([^'\\]*(?:\\.[^'\\]*)*)'"
 
 MACRO_RE = re.compile(
-    r"(\[(?P<macro>\w+)(?P<args>(\s(\S+(%s)?))*)\])",
+    r"(\[(?P<macro>\w+?)(?P<args>(\s(\S+?(%s)?))*?)\])",
 
     re.IGNORECASE | re.UNICODE)
 
