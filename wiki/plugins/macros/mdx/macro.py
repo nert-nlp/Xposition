@@ -157,14 +157,14 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
         args={'id': _('id of example'), 'page': _('page example is on')}
     )
 
-    def ex(self, id, sent):
-        return '<a id="' + id + '"></a>"<span class="example">' + sent + '</span>" (' + id + ')'
+    def ex(self, id, sent, label=None):
+        return '<a id="' + id + '"></a>"<span class="example">' + sent + '</span>" (' + (label if label else id) + ')'
     # meta data
     ex.meta = dict(
         short_description=_('Create an Example'),
         help_text=_('Create an example sentence with a linkable id'),
         example_code='[ex 001 \'The cat [p en/under Locus] the table.\']',
-        args={'id': _('id of example'), 'sent': _('full sentence in single quotes')}
+        args={'id': _('id of example'), 'sent': _('full sentence in single quotes'), 'label': _('string to display after ex. (if not id)')}
     )
 
 
