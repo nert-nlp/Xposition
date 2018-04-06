@@ -14,12 +14,12 @@ from wiki.plugins.macros import settings
 re_sq_short = r"'([^'\\]*(?:\\.[^'\\]*)*)'"
 
 MACRO_RE = re.compile(
-    r"(\[(?P<macro>\w+)(?P<args>(\s((\w+:)?(%s|[\w'`&%!+/$-]+)))*)\])",
-
+    r"(\[(?P<macro>\w+)(?P<args>(\s(\w+:)?(%s|[\w'`&!%%+/$-]+))*)\])" %
+    re_sq_short,
     re.IGNORECASE | re.UNICODE)
 
 ARG_RE = re.compile(
-    r"\s(\w+:)?(?P<value>(%s|[^\s:\]\[]+))" %
+    r"\s(\w+:)?(?P<value>(%s|[^\s\[\]:]+))" %
     re_sq_short,
     re.IGNORECASE | re.UNICODE)
 
@@ -43,6 +43,8 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
         new_text = []
         for line in lines:
             for test_macro in settings.METHODS:
+                if ('[' + test_macro) not in line:
+                    continue
                 for m in MACRO_RE.finditer(line):
                     macro = m.group('macro').strip()
                     if macro == test_macro and hasattr(self, macro):
@@ -51,8 +53,6 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
                             args_list = []
                             for arg in ARG_RE.finditer(args):
                                 value = arg.group('value')
-                                # if value is None:
-                                # value = True
                                 if isinstance(value, string_types):
                                     # If value is enclosed with ': Remove and
                                     # remove escape sequences
@@ -79,6 +79,7 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
                 'depth': int(depth) + 1,
             })
         return self.markdown.htmlStash.store(html, safe=True)
+
     article_list.meta = dict(
         short_description=_('Article list'),
         help_text=_('Insert a list of articles in this level.'),
@@ -103,7 +104,7 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
             'Insert a link to another wiki page with a short notation.'),
         example_code='[[WikiLink]]',
         args={})
-		
+
 
     def p(self, *args):
         cl = None
@@ -127,7 +128,6 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
         args={'prep': _('Name of adposition'), 'construal': _('Name of construal'), 'class': _('optional class')}
     )
 
-
     def ss(self, *args):
         cl = None
         if len(args) >= 2:
@@ -146,6 +146,27 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
         args={'name': _('Name of supersense/construal label'), 'class': _('optional class')}
     )
 
-	
+    def exref(self, id, page):
+        return link('ex. ' + page + ' ' + id, '/' + page.replace('`', "'") + '/#' + id, 'exref')
+
+    # meta data
+    exref.meta = dict(
+        short_description=_('Link to Example'),
+        help_text=_('Create a link to an example sentence'),
+        example_code='[exref 001 Locus]',
+        args={'id': _('id of example'), 'page': _('page example is on')}
+    )
+
+    def ex(self, id, sent, label=None):
+        return '<a id="' + id + '"></a>"<span class="example">' + sent + '</span>" (' + (label if label else id) + ')'
+    # meta data
+    ex.meta = dict(
+        short_description=_('Create an Example'),
+        help_text=_('Create an example sentence with a linkable id'),
+        example_code='[ex 001 \'The cat [p en/under Locus] the table.\']',
+        args={'id': _('id of example'), 'sent': _('full sentence in single quotes'), 'label': _('string to display after ex. (if not id)')}
+    )
+
+
 def link(t, l, clazz):
-    return '<a href="'+l+'" class="'+clazz+'">'+t+'</a>'
+    return '<a href="' + l + '" class="' + clazz + '">' + t + '</a>'
