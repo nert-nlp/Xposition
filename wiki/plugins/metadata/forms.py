@@ -375,7 +375,7 @@ class AdpositionForm(ArticleMetadataForm):
 
     class Meta:
         model = models.AdpositionRevision
-        fields = ('lang', 'name', 'other_forms', 'description', 'morphtype', 'transitivity', 'slug', 'obj_cases')
+        fields = ('lang', 'name', 'transliteration', 'other_forms', 'description', 'morphtype', 'transitivity', 'slug', 'obj_cases')
         widgets = {f: forms.RadioSelect for f in {'morphtype', 'transitivity'}}
 
 
