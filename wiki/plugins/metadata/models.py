@@ -560,7 +560,7 @@ class AdpositionRevision(MetadataRevision):
     lang = models.ForeignKey(Language, related_name='adpositionrevisions', verbose_name='Language/dialect')
     # name = models.CharField(max_length=200, verbose_name='Lemma',
     #     help_text="Lowercase unless it would normally be capitalized in a dictionary")
-	transliteration = models.CharField(max_length=200, blank=True, verbose_name="Transliteration",
+    transliteration = models.CharField(max_length=200, blank=True, verbose_name="Transliteration",
         help_text="Pronunciation written in alphabetic letters")
     other_forms = models.CharField(max_length=200, blank=True, verbose_name="Other spellings or inflections",
         help_text="Exclude typos")
