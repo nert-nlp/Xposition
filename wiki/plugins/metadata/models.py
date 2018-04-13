@@ -218,6 +218,7 @@ class Metadata(RevisionPlugin):
 
     class Meta():
         verbose_name = _('metadata')
+        ordering = ['current_revision__metadatarevision__name']
 
 
 
@@ -281,6 +282,7 @@ class Supersense(Metadata):
     class Meta:
         verbose_name = _('supersense')
 
+
 class SupersenseRevision(MetadataRevision):
     class AnimacyType(MetaEnum):
         unspecified = 0
@@ -327,7 +329,7 @@ class Construal(SimpleMetadata):
     class Meta:
         verbose_name = _('construal')
         unique_together = ('role', 'function')
-
+        ordering = ['role', 'function']
 
 class Case(MetaEnum):
     """Inventory of cases based on UniMorph <http://unimorph.org/>"""
@@ -555,6 +557,7 @@ class Adposition(Metadata):
     class Meta:
         verbose_name = _('adposition')
 
+
 class AdpositionRevision(MetadataRevision):
 
     lang = models.ForeignKey(Language, related_name='adpositionrevisions', verbose_name='Language/dialect')
@@ -603,6 +606,7 @@ class Usage(Metadata):
     class Meta:
         verbose_name = _('usage')
 
+
 class UsageRevision(MetadataRevision):
 
     adposition = models.ForeignKey(Adposition, null=True, related_name='usages')
@@ -618,6 +622,7 @@ class UsageRevision(MetadataRevision):
 
     class Meta:
         verbose_name = _('usage revision')
+        ordering = ['adposition', 'construal']
 
 
 class Example(models.Model):
