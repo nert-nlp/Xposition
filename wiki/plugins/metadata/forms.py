@@ -300,6 +300,7 @@ class LanguageForm(ArticleMetadataForm):
         exclude = ('article', 'deleted', 'current_revision', 'category')
         widgets = {f: forms.RadioSelect for f in {'pre','post','circum','separate_word','clitic_or_affix','case_for'}}
 
+
 class AdpositionForm(ArticleMetadataForm):
 
     slug = ModSlugField(max_length=200)
@@ -375,6 +376,7 @@ class AdpositionForm(ArticleMetadataForm):
 
     class Meta:
         model = models.AdpositionRevision
+		# issue #4: transliteration field
         fields = ('lang', 'name', 'transliteration', 'other_forms', 'description', 'morphtype', 'transitivity', 'slug', 'obj_cases')
         widgets = {f: forms.RadioSelect for f in {'morphtype', 'transitivity'}}
 
@@ -408,6 +410,7 @@ class ConstrualForm(ArticleMetadataForm):
     class Meta:
         model = models.Construal
         fields = ('role', 'function')
+
 
 class UsageForm(ArticleMetadataForm):
 
@@ -484,6 +487,7 @@ class UsageForm(ArticleMetadataForm):
         model = models.UsageRevision
         fields = ('adposition', 'obj_case', 'construal')
         widgets = {'obj_case': forms.RadioSelect}
+
 
 def MetaSidebarForm(article, request, *args, **kwargs):
     """
