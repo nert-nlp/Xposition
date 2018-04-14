@@ -66,7 +66,7 @@ def langs_display(context):
     s = ''
     for lang in Language.with_nav_links().order_by('name'):
         # issue #9: get rid of deleted articles in lists
-        if lang.current_revision.metadatarevision.article_revision.deleted:
+        if lang.article.deleted:
             continue
         langart = lang.article
         s += '<li'
@@ -150,7 +150,7 @@ def construals_display(context, role=None, function=None, order_by='role' or 'fu
     if function is not None:
         cc = cc.filter(function__current_revision__metadatarevision__name=function)
     # issue #9: get rid of deleted articles in lists
-    cc = cc.filter(current_revision__metadatarevision__article_revision__deleted=False)
+    cc = cc.filter(deleted=False)
     for c in cc.order_by(order_by+'__current_revision__metadatarevision__name',
                          order_by2+'__current_revision__metadatarevision__name'):
         a = c.article
