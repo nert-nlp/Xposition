@@ -568,7 +568,7 @@ class AdpositionRevision(MetadataRevision):
     #     help_text="Lowercase unless it would normally be capitalized in a dictionary")
 	# issue #4: transliteration field
     transliteration = models.CharField(max_length=200, blank=True, verbose_name="Transliteration",
-        help_text="Pronunciation written in alphabetic letters")
+        help_text="Romanization/phonemic spelling")
     other_forms = models.CharField(max_length=200, blank=True, verbose_name="Other spellings or inflections",
         help_text="Exclude typos")
     morphtype = models.PositiveIntegerField(choices=Adposition.MorphType.choices(), verbose_name="Morphological type")
