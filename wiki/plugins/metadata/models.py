@@ -650,16 +650,16 @@ class ExampleRevision(MetadataRevision):
     class Meta:
         verbose_name = _('example revision')
 
-# You must register the model here
+# Models are registered in admin.py
 
-admin.site.register(Supersense)
-admin.site.register(SupersenseRevision)
-admin.site.register(Construal)
-admin.site.register(Language)
-admin.site.register(Corpus)
-admin.site.register(Adposition)
-admin.site.register(AdpositionRevision)
-admin.site.register(Usage)
-admin.site.register(UsageRevision)
-admin.site.register(Example)
-admin.site.register(ExampleRevision)
+#admin.site.register(Supersense)
+#admin.site.register(SupersenseRevision)
+#admin.site.register(Construal)
+#admin.site.register(Language)
+#admin.site.register(Corpus)
+#admin.site.register(Adposition)
+#admin.site.register(AdpositionRevision)
+#admin.site.register(Usage)
+#admin.site.register(UsageRevision)
+#admin.site.register(Example)
+#admin.site.register(ExampleRevision)

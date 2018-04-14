@@ -8,6 +8,7 @@ Once you've cloned the git repository, you'll need to install the __django-wiki_
     pip install wiki
     pip install django-categories
     pip install django-bitfield
+    pip install django-import-export
 
 Testing
 ===========
