@@ -256,7 +256,6 @@ class LanguageForm(ArticleMetadataForm):
                 'title': 'Lowercase letters and hyphens'
             }
         )
-
         if self.instance.id:
             MT = models.Adposition.MorphType
             self.fields['pre'].validators.append(morphtype_validator(self.instance,
@@ -287,6 +286,14 @@ class LanguageForm(ArticleMetadataForm):
         newarticle, newcategory = self.newArticle_ArticleCategory()
         m.article = newarticle
         m.category = newcategory
+
+        # issue #23: disallow language with no adposition or affix type
+        ps = [m.pre, m.post, m.circum]
+        ms = [m.separate_word, m.clitic_or_affix]
+        No = models.Language.Presence.none
+        if all([p==No for p in ps]) or all([p==No for p in ms]):
+            raise forms.ValidationError(ugettext('You need to choose at least one type of adposition or affix!'))
+
         if commit:
             m.save()
         return self.article_urlpath
