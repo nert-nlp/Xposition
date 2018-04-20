@@ -256,7 +256,6 @@ class LanguageForm(ArticleMetadataForm):
                 'title': 'Lowercase letters and hyphens'
             }
         )
-
         if self.instance.id:
             MT = models.Adposition.MorphType
             self.fields['pre'].validators.append(morphtype_validator(self.instance,

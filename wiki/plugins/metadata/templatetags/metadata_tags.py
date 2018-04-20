@@ -118,7 +118,7 @@ def _category_subtree(c):
     s += ' <small style="font-size: 50%;">{}<span style="color: #ccc;">~&gt;</span>{}</small>'.format(nAsRole, nAsFunction)
     #print(s)
     # issue #9: get rid of deleted articles in lists
-    children = c.children.all().filter(current_revision__metadatarevision__article_revision__deleted=False)
+    children = c.children.all() #.filter(current_revision__metadatarevision__article_revision__deleted=False)
     #print(children)
     if len(children):
         s += '\n<ul>'
@@ -132,9 +132,9 @@ def _category_subtree(c):
 def supersenses_display(context, top):
     """Display a list of supersenses recorded in the database."""
     try:
-        # issue #9: get rid of deleted articles in lists
         t = Supersense.objects.get(current_revision__metadatarevision__name=top)
-        t = t.filter(current_revision__metadatarevision__article_revision__deleted=False)
+		# address issue #33
+        #t = t.filter(current_revision__metadatarevision__article_revision__deleted=False)
         return mark_safe(_category_subtree(t.category))
     except Exception as ex:
         return 'NOT FOUND'
