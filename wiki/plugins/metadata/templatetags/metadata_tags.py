@@ -118,7 +118,7 @@ def _category_subtree(c):
     s += ' <small style="font-size: 50%;">{}<span style="color: #ccc;">~&gt;</span>{}</small>'.format(nAsRole, nAsFunction)
     #print(s)
     # issue #9: get rid of deleted articles in lists
-    children = c.children.all().filter(current_revision__metadatarevision__article_revision__deleted=False)
+    children = c.children.all() #.filter(current_revision__metadatarevision__article_revision__deleted=False)
     #print(children)
     if len(children):
         s += '\n<ul>'
