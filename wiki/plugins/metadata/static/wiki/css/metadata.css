@@ -2,3 +2,23 @@
 ul.inline,ul.inline > li { display: inline-block; }
 ul.inline { padding: 0; }
 ul.inline > li { margin: 0px 5px; }
+
+/* Xposition macros: special styling */
+.supersense,a.supersense:hover {
+  color: #3c3;
+}
+.construal,a.construal:hover {
+  color: #a3f;
+}
+.adposition,a.adposition:hover {
+  font-weight: bold;
+  color: #d33;
+}
+.usage {
+  font-weight: bold;
+  color: #f93;
+}
+a.usage:hover { 
+  color: #fc6;
+  text-decoration: underline;
+}
