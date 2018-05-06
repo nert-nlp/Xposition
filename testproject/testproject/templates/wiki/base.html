@@ -4,6 +4,8 @@
 {# render.html should take care of this, but since it apparently isn't called for the metadata forms, we hack it here: #}
 {% block wiki_body %}
 <link rel="stylesheet" href="/static/wiki/css/metadata.css" />
+<link rel="shortcut icon" href="/media/wiki/images/X-icon.png"/>
+<meta property="og:image" content="/media/wiki/images/Xposition-logo.png"/>
 {{block.super}}
 {% endblock %}
 
