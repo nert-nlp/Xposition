@@ -3,7 +3,15 @@ ul.inline,ul.inline > li { display: inline-block; }
 ul.inline { padding: 0; }
 ul.inline > li { margin: 0px 5px; }
 
+@import url('https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700&subset=latin-ext');
+@import url('https://fonts.googleapis.com/css?family=Roboto+Condensed:400,400i,700');
+
+.wiki-article { font-family: 'Roboto', sans-serif; }
+
 /* Xposition macros: special styling */
+.example { font-family: 'Roboto Light', sans-serif; }
+.supersense,.construal { font-family: 'Roboto Condensed', sans-serif; }
+
 .supersense,a.supersense:hover {
   color: #3c3;
 }
