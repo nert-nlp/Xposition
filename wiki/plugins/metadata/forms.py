@@ -256,7 +256,6 @@ class LanguageForm(ArticleMetadataForm):
                 'title': 'Lowercase letters and hyphens'
             }
         )
-
         if self.instance.id:
             MT = models.Adposition.MorphType
             self.fields['pre'].validators.append(morphtype_validator(self.instance,
@@ -300,6 +299,7 @@ class LanguageForm(ArticleMetadataForm):
         model = models.Language
         exclude = ('article', 'deleted', 'current_revision', 'category')
         widgets = {f: forms.RadioSelect for f in {'pre','post','circum','separate_word','clitic_or_affix','case_for'}}
+
 
 class AdpositionForm(ArticleMetadataForm):
 
@@ -377,7 +377,12 @@ class AdpositionForm(ArticleMetadataForm):
 
     class Meta:
         model = models.AdpositionRevision
+<<<<<<< HEAD
         fields = ('lang', 'name', 'transliteration', 'other_forms', 'description', 'morphtype', 'transitivity', 'slug', 'obj_cases') #
+=======
+		# issue #4: transliteration field
+        fields = ('lang', 'name', 'transliteration', 'other_forms', 'description', 'morphtype', 'transitivity', 'slug', 'obj_cases')
+>>>>>>> master
         widgets = {f: forms.RadioSelect for f in {'morphtype', 'transitivity'}}
 
 
@@ -410,6 +415,7 @@ class ConstrualForm(ArticleMetadataForm):
     class Meta:
         model = models.Construal
         fields = ('role', 'function')
+
 
 class UsageForm(ArticleMetadataForm):
 
@@ -486,6 +492,7 @@ class UsageForm(ArticleMetadataForm):
         model = models.UsageRevision
         fields = ('adposition', 'obj_case', 'construal')
         widgets = {'obj_case': forms.RadioSelect}
+
 
 def MetaSidebarForm(article, request, *args, **kwargs):
     """

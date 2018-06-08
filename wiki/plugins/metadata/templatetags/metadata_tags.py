@@ -65,6 +65,9 @@ def langs_display(context):
     article = context['article']
     s = ''
     for lang in Language.with_nav_links().order_by('name'):
+        # issue #9: get rid of deleted articles in lists
+        if lang.article.current_revision.deleted:
+            continue
         langart = lang.article
         s += '<li'
         if context['article']==langart \
@@ -77,22 +80,33 @@ def langs_display(context):
 @register.simple_tag(takes_context=True)
 def adpositions_for_lang(context):
     article = context['article']
-    return Adposition.objects.filter(current_revision__metadatarevision__adpositionrevision__lang__article=article)
+    # issue #9: get rid of deleted articles in lists
+    a = Adposition.objects.filter(current_revision__metadatarevision__adpositionrevision__lang__article=article)
+    return a.filter(current_revision__metadatarevision__article_revision__deleted=False)
 
 @register.simple_tag(takes_context=True)
 def usages_for_lang(context):
     article = context['article']
-    return Usage.objects.filter(current_revision__metadatarevision__usagerevision__adposition__current_revision__metadatarevision__adpositionrevision__lang__article=article)
+    # issue #9: get rid of deleted articles in lists
+    u = Usage.objects.filter(current_revision__metadatarevision__usagerevision__adposition__current_revision__metadatarevision__adpositionrevision__lang__article=article)
+    u = u.filter(current_revision__metadatarevision__article_revision__deleted=False)
+    return u
 
 @register.simple_tag(takes_context=True)
 def usages_for_adp(context):
     article = context['article']
-    return Usage.objects.filter(current_revision__metadatarevision__usagerevision__adposition__article=article)
+    # issue #9: get rid of deleted articles in lists
+    u = Usage.objects.filter(current_revision__metadatarevision__usagerevision__adposition__article=article)
+    u = u.filter(current_revision__metadatarevision__article_revision__deleted=False)
+    return u
 
 @register.simple_tag(takes_context=True)
 def usages_for_construal(context):
     article = context['article']
-    return Usage.objects.filter(current_revision__metadatarevision__usagerevision__construal__article=article)
+    # issue #9: get rid of deleted articles in lists
+    u = Usage.objects.filter(current_revision__metadatarevision__usagerevision__construal__article=article)
+    u = u.filter(current_revision__metadatarevision__article_revision__deleted=False)
+    return u
 
 def _category_subtree(c):
     ss = c.supersense.all()[0]
@@ -103,7 +117,8 @@ def _category_subtree(c):
     nAsFunction = len(ss.rfs_with_function.all())
     s += ' <small style="font-size: 50%;">{}<span style="color: #ccc;">~&gt;</span>{}</small>'.format(nAsRole, nAsFunction)
     #print(s)
-    children = c.children.all()
+    # issue #9: get rid of deleted articles in lists
+    children = c.children.all() #.filter(current_revision__metadatarevision__article_revision__deleted=False)
     #print(children)
     if len(children):
         s += '\n<ul>'
@@ -118,6 +133,8 @@ def supersenses_display(context, top):
     """Display a list of supersenses recorded in the database."""
     try:
         t = Supersense.objects.get(current_revision__metadatarevision__name=top)
+		# address issue #33
+        #t = t.filter(current_revision__metadatarevision__article_revision__deleted=False)
         return mark_safe(_category_subtree(t.category))
     except Exception as ex:
         return 'NOT FOUND'
@@ -132,6 +149,8 @@ def construals_display(context, role=None, function=None, order_by='role' or 'fu
         cc = cc.filter(role__current_revision__metadatarevision__name=role)
     if function is not None:
         cc = cc.filter(function__current_revision__metadatarevision__name=function)
+    # issue #9: get rid of deleted articles in lists
+    cc = cc.filter(article__current_revision__deleted=False)
     for c in cc.order_by(order_by+'__current_revision__metadatarevision__name',
                          order_by2+'__current_revision__metadatarevision__name'):
         a = c.article

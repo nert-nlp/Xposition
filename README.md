@@ -1,6 +1,8 @@
 Installation
 ============
 
+Requires Python 3.6+
+
 Once you've cloned the git repository, you'll need to install the __django-wiki__ and __django-categories__ libraries (and their dependencies):
 
     pip install wiki
@@ -18,20 +20,38 @@ It comes with a prepopulated SQLite database.
 Running
 -------
 
-You should be able to immediately run it like this:
+There is a settings file called `unversioned.py` with secret information that is therefore not included in this repository. 
+It should go in `testproject/testproject/settings/` and set the variable `SECRET_KEY`.
+
+Then you should be able to run the server like this:
 
     python manage.py runserver
 
-The settings come in a package to administer several test scenarios. For simple purposes, simply edit `local.py`.
+If you are running on Windows, this may give an error about `wiki.plugins.categories`. This is because a Unix symlink is not interpreted propertly by Windows. In the `testproject` directory, remove `wiki` and replace it with a Windows symlink: `mklink /D wiki ..\wiki`
+
+When the server first starts, it should print a warning about outstanding migrations. Exit the server, then run
+
+    python manage.py migrate
+    
+to update the database to reflect the current schema required by the app.
+
+Configuring for development
+---------------------------
+
+Edit `testproject/testproject/settings/local.py` by commenting out the last line and uncommenting the line with
+
+```py
+from .dev import *
+```
 
 Login
 -----
 
 Django admin:
 
-Username: admin
-Password: admin
-=======
+  * Username: `admin`
+  * Password: `admin`
+
 # Xposition
 
 __Xposition__ (URL forthcoming) is a multilingual database of the semantics of adpositions (prepositions, postpositions) and case markers.

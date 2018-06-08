@@ -218,6 +218,8 @@ class Metadata(RevisionPlugin):
 
     class Meta():
         verbose_name = _('metadata')
+		# issue #10: alphabetize models
+        ordering = ['current_revision__metadatarevision__name']
 
 
 
@@ -281,6 +283,7 @@ class Supersense(Metadata):
     class Meta:
         verbose_name = _('supersense')
 
+
 class SupersenseRevision(MetadataRevision):
     class AnimacyType(MetaEnum):
         unspecified = 0
@@ -327,7 +330,8 @@ class Construal(SimpleMetadata):
     class Meta:
         verbose_name = _('construal')
         unique_together = ('role', 'function')
-
+		# issue #10: alphabetize models
+        ordering = ['role', 'function']
 
 class Case(MetaEnum):
     """Inventory of cases based on UniMorph <http://unimorph.org/>"""
@@ -540,7 +544,12 @@ class Adposition(Metadata):
 
 
     def field_names(self):
+<<<<<<< HEAD
         return {'name', 'transliteration', 'other_forms', 'description', 'lang', 'morphtype', 'transitivity', 'obj_cases'} 
+=======
+		# issue #4: transliteration field
+        return {'name', 'transliteration', 'other_forms', 'description', 'lang', 'morphtype', 'transitivity', 'obj_cases'}
+>>>>>>> master
 
     def __str__(self):
         if self.current_revision:
@@ -555,13 +564,20 @@ class Adposition(Metadata):
     class Meta:
         verbose_name = _('adposition')
 
+
 class AdpositionRevision(MetadataRevision):
 
     lang = models.ForeignKey(Language, related_name='adpositionrevisions', verbose_name='Language/dialect')
     # name = models.CharField(max_length=200, verbose_name='Lemma',
     #     help_text="Lowercase unless it would normally be capitalized in a dictionary")
+<<<<<<< HEAD
     transliteration = models.CharField(max_length=200, blank=True, verbose_name="Transliteration",
         help_text="Pronunciation written in alphabetic letters (optional)")
+=======
+	# issue #4: transliteration field
+    transliteration = models.CharField(max_length=200, blank=True, verbose_name="Transliteration",
+        help_text="Romanization/phonemic spelling")
+>>>>>>> master
     other_forms = models.CharField(max_length=200, blank=True, verbose_name="Other spellings or inflections",
         help_text="Exclude typos")
     morphtype = models.PositiveIntegerField(choices=Adposition.MorphType.choices(), verbose_name="Morphological type")
@@ -603,6 +619,7 @@ class Usage(Metadata):
     class Meta:
         verbose_name = _('usage')
 
+
 class UsageRevision(MetadataRevision):
 
     adposition = models.ForeignKey(Adposition, null=True, related_name='usages')
@@ -618,6 +635,8 @@ class UsageRevision(MetadataRevision):
 
     class Meta:
         verbose_name = _('usage revision')
+		# issue #10: alphabetize models
+        ordering = ['adposition', 'construal']
 
 
 class Example(models.Model):
