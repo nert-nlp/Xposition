@@ -274,6 +274,7 @@ class LanguageForm(ArticleMetadataForm):
             if isinstance(f.widget, (forms.RadioSelect,forms.CheckboxSelectMultiple)):
                 f.widget.attrs={'class': 'inline'}
             if isinstance(f.widget, forms.RadioSelect):
+                assert len(f.widget.choices)>0, 'f.widget.choices: ' + str(f.widget.choices)
                 if f.widget.choices[0][0]=='':
                     f.widget.choices = f.widget.choices[1:] # remove the empty default
 
@@ -348,6 +349,7 @@ class AdpositionForm(ArticleMetadataForm):
             if isinstance(f.widget, (forms.RadioSelect,forms.CheckboxSelectMultiple)):
                 f.widget.attrs={'class': 'inline'}
             if isinstance(f.widget, forms.RadioSelect):
+                assert len(f.widget.choices)>0, 'f.widget.choices: ' + str(f.widget.choices)
                 if f.widget.choices[0][0]=='':
                     f.widget.choices = f.widget.choices[1:] # remove the empty default
 
@@ -375,8 +377,9 @@ class AdpositionForm(ArticleMetadataForm):
 
     class Meta:
         model = models.AdpositionRevision
-		# issue #4: transliteration field
+        # issue #4: transliteration field
         fields = ('lang', 'name', 'transliteration', 'other_forms', 'description', 'morphtype', 'transitivity', 'slug', 'obj_cases')
+
         widgets = {f: forms.RadioSelect for f in {'morphtype', 'transitivity'}}
 
 
