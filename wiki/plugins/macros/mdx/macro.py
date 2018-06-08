@@ -115,7 +115,7 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
             short = prep.split('/')[-1]
             if '`' in args[0]:
                 return link(short, '/' + prep + '/' + construal.replace('`', "'"), cl if cl else 'usage')
-            elif '--' in args[0]:
+            elif '--' in args[1]:
                 return link(short, '/' + prep + '/' + construal, cl if cl else 'usage')
             else:
                 return link(short, '/' + prep + '/' + construal + '--' + construal, cl if cl else 'usage')
