@@ -111,7 +111,8 @@ def usages_for_construal(context):
 def _category_subtree(c):
     ss = c.supersense.all()[0]
     a = ss.article
-    s = '<li><a href="{url}">{rev}</a>'.format(url=a.get_absolute_url(), rev=a.current_revision.title)
+    #s = '<li><a href="{url}">{rev}</a>'.format(url=a.get_absolute_url(), rev=a.current_revision.title)
+    s = f'<li>{ss.metadata.html()}'
     # number of construals for the supersense
     nAsRole = len(ss.rfs_with_role.all())
     nAsFunction = len(ss.rfs_with_function.all())
@@ -153,6 +154,7 @@ def construals_display(context, role=None, function=None, order_by='role' or 'fu
     cc = cc.filter(article__current_revision__deleted=False)
     for c in cc.order_by(order_by+'__current_revision__metadatarevision__name',
                          order_by2+'__current_revision__metadatarevision__name'):
-        a = c.article
-        s += '<li><a href="{url}">{rev}</a></li>\n'.format(url=a.get_absolute_url(), rev=a.current_revision.title)
+        #a = c.article
+        #s += '<li><a href="{url}">{rev}</a></li>\n'.format(url=a.get_absolute_url(), rev=a.current_revision.title)
+        s += f'<li>{c.html()}</li>\n'
     return mark_safe(s)

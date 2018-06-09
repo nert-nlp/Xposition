@@ -76,7 +76,8 @@ class SimpleMetadata(ArticlePlugin):
             return 'construal_list.html'
 
     def html(self):
-        return '<a href="' + self.article.get_absolute_url() + '">' + str(self) + '</a>'
+        di = deepest_instance(self)
+        return '<a href="' + self.article.get_absolute_url() + '" class="' + type(di).__name__.lower() + '">' + str(self) + '</a>'
 
 @disable_signal_for_loaddata
 def on_article_revision_post_save(**kwargs):
@@ -107,7 +108,8 @@ class Metadata(RevisionPlugin):
 
     def html(self):
         if self.current_revision:
-            return self.current_revision.metadatarevision.html()
+            di = deepest_instance(self)
+            return self.current_revision.metadatarevision.html(container_type=type(di))
         return ''
 
     # def createNewRevision(self, request):
@@ -235,8 +237,11 @@ class MetadataRevision(RevisionPluginRevision):
     def __str__(self):
         return ('Metadata Revision: %s %d') % (self.name, self.revision_number)
 
-    def html(self):
-        return '<a href="' + self.plugin.article.get_absolute_url() + '">' + str(self.name) + '</a>'
+    def html(self, container_type=None):
+        kls = ''
+        if container_type:
+            kls = str(container_type.__name__).lower()
+        return '<a href="' + self.plugin.article.get_absolute_url() + '" class="' + kls + '">' + str(self.name) + '</a>'
 
     def validate_unique(self, exclude=None):
         """
