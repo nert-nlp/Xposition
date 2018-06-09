@@ -16,7 +16,7 @@
     <h4 id="adps">Adpositions ({{adpositions|length}})</h4>
     <ul>
       {% for p in adpositions %}
-      <li><a href="{{p.adposition.article.get_absolute_url}}">{{p.adposition}}</a></li>
+      <li><a href="{{p.adposition.article.get_absolute_url}}">{{p.adposition}}</a> {{p.current_revision.metadatarevision.adpositionrevision.transliteration}}</li>
       {% endfor %}
     </ul>
 
