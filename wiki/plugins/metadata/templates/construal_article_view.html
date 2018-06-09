@@ -16,7 +16,7 @@
     <h4 id="usages">Usages ({{usages|length}})</h4>
     <ul>
       {% for u in usages %}
-      <li><a href="{{u.usage.article.get_absolute_url}}">{{u.current_revision.metadatarevision.usagerevision.name}}</a></li>
+      <li>{{u.metadata.html|safe}}</li>
       {% endfor %}
     </ul>
 
