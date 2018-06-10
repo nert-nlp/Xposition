@@ -48,6 +48,8 @@ def metadata_display(context):
                     display += str(v)
             elif isinstance(fld, BitField):
                 display += ', '.join(case for case,allowed in v if allowed)
+            elif fld.name=='description' and hasattr(meta, 'descriptionhtml'):
+                display += meta.descriptionhtml()
             else:
                 display += str(v)
             display += '</td></tr>\n'
