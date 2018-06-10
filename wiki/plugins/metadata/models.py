@@ -6,6 +6,7 @@ from bitfield import BitField
 import copy, sys, re
 from enum import IntEnum
 from django.utils.encoding import force_text
+from django.utils.safestring import mark_safe
 from django.contrib.contenttypes.models import ContentType
 from functools import reduce
 from wiki.models import Article, ArticleRevision
@@ -13,6 +14,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ugettext
 from django.contrib import admin
 from django.db.models.signals import pre_save, post_save
+from wiki.core.markdown import article_markdown
 from wiki.decorators import disable_signal_for_loaddata
 from wiki.plugins.categories.models import ArticleCategory
 from wiki.models.pluginbase import ArticlePlugin, RevisionPlugin, RevisionPluginRevision
@@ -242,6 +244,9 @@ class MetadataRevision(RevisionPluginRevision):
         if container_type:
             kls = str(container_type.__name__).lower()
         return '<a href="' + self.plugin.article.get_absolute_url() + '" class="' + kls + '">' + str(self.name) + '</a>'
+
+    def descriptionhtml(self):
+        return mark_safe(article_markdown(self.description, self.article_revision.article))
 
     def validate_unique(self, exclude=None):
         """
