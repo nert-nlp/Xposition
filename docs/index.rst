@@ -3,19 +3,19 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-A wiki for Django!
-==================
+django-wiki documentation
+=========================
 
 .. toctree::
-   :caption: Contents
    :name: mastertoc
-   :maxdepth: 2
+   :maxdepth: 1
 
    installation
    release_notes
    plugins
    customization
    settings
+   development/index
    tips/index
 
 .. include:: ../README.rst

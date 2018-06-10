@@ -1,3 +1,63 @@
-*.pyc*
-.idea/
 testproject/testproject/settings/unversioned.py
+*.pyc
+build
+dist
+*.egg-info
+.eggs
+testproject/testproject/whoosh_index/
+testproject/testproject/xapian_index/
+
+tests/media
+
+# Ignore compiled version of source language
+src/wiki/locale/en/LC_MESSAGES/django.mo
+
+# Ignore Transifex managed msgids
+src/wiki/locale/*/LC_MESSAGES/django.po
+!src/wiki/locale/en/LC_MESSAGES/django.po
+
+# Ignore this folder which is created by tests
+wiki/attachments
+
+#PyCharm
+.idea
+
+# Test artifacts
+cache
+wiki/images
+
+#Docs
+docs/_build
+docs/_build/*
+docs/wiki.*
+docs/modules.rst
+
+# Test project
+testproject/testproject/settings/local.py
+testproject/testproject/media/*
+
+# Installer logs
+pip-log.txt
+
+# Unit test / coverage reports
+.coverage
+.tox
+.cache
+
+#Eclipse
+.project
+.pydevproject
+.settings
+
+#Virtualenv
+virtualenv
+.venv
+
+#Mr Developer
+.mr.developer.cfg
+
+# text editors
+*~
+*.swp
+
+__pycache__
