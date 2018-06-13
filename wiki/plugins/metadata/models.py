@@ -6,7 +6,6 @@ from bitfield import BitField
 import copy, sys, re
 from enum import IntEnum
 from django.utils.encoding import force_text
-from django.utils.safestring import mark_safe
 from django.contrib.contenttypes.models import ContentType
 from functools import reduce
 from wiki.models import Article, ArticleRevision
@@ -14,7 +13,6 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ugettext
 from django.contrib import admin
 from django.db.models.signals import pre_save, post_save
-from wiki.core.markdown import article_markdown
 from wiki.decorators import disable_signal_for_loaddata
 from wiki.plugins.categories.models import ArticleCategory
 from wiki.models.pluginbase import ArticlePlugin, RevisionPlugin, RevisionPluginRevision
@@ -78,8 +76,7 @@ class SimpleMetadata(ArticlePlugin):
             return 'construal_list.html'
 
     def html(self):
-        di = deepest_instance(self)
-        return '<a href="' + self.article.get_absolute_url() + '" class="' + type(di).__name__.lower() + '">' + str(self) + '</a>'
+        return '<a href="' + self.article.get_absolute_url() + '">' + str(self) + '</a>'
 
 @disable_signal_for_loaddata
 def on_article_revision_post_save(**kwargs):
@@ -110,8 +107,7 @@ class Metadata(RevisionPlugin):
 
     def html(self):
         if self.current_revision:
-            di = deepest_instance(self)
-            return self.current_revision.metadatarevision.html(container_type=type(di))
+            return self.current_revision.metadatarevision.html()
         return ''
 
     # def createNewRevision(self, request):
@@ -239,14 +235,8 @@ class MetadataRevision(RevisionPluginRevision):
     def __str__(self):
         return ('Metadata Revision: %s %d') % (self.name, self.revision_number)
 
-    def html(self, container_type=None):
-        kls = ''
-        if container_type:
-            kls = str(container_type.__name__).lower()
-        return '<a href="' + self.plugin.article.get_absolute_url() + '" class="' + kls + '">' + str(self.name) + '</a>'
-
-    def descriptionhtml(self):
-        return mark_safe(article_markdown(self.description, self.article_revision.article))
+    def html(self):
+        return '<a href="' + self.plugin.article.get_absolute_url() + '">' + str(self.name) + '</a>'
 
     def validate_unique(self, exclude=None):
         """
@@ -515,16 +505,6 @@ class Language(SimpleMetadata):
     class Meta:
         verbose_name = _('language')
 
-class Corpus(Metadata):
-
-    def __str__(self):
-        if self.current_revision:
-            return self.current_revision.metadatarevision.name
-        else:
-            return ugettext('Current revision not set!!')
-    class Meta:
-        verbose_name = _('corpus')
-
 class Adposition(Metadata):
 
     class MorphType(MetaEnum):
@@ -636,29 +616,123 @@ class UsageRevision(MetadataRevision):
 
     class Meta:
         verbose_name = _('usage revision')
-		# issue #10: alphabetize models
+        # issue #10: alphabetize models
         ordering = ['adposition', 'construal']
 
+# PTokenAnnotation fields:
+# adp/adp lemma (foreign key), construal (foreign key), usage (foreign key),
+# sentence (foreign key), case (optional), obj head, gov head,
+# gov-obj syntactic configuration, POS of adp, POS of gov, POS of obj,
+# Supersense of obj, Supersense of gov, list of subtokens (for mwe),
+# list of weak associations (for mwe), is_gold, annotator note?,
+# annotator grouping/cluster
+#
+# CorpusSentence fields:
+# Corpus (foreign key), sent id, lang, orthography, is_parallel, doc id,
+# offset within doc, sent text: original string, sent text: tokenized,
+# word glosses?, sentence gloss?, note?
+#
+# Corpus fields
+# Name, version, is_current, url, genre, lang(s), size?, stats?
 
-class Example(models.Model):
+
+
+
+class Corpus(models.Model):
+    # Name, version, is_current, url, genre, lang(s), size?, stats?
+    name = models.CharField(max_length=200, null=True, verbose_name="Corpus Name")
+    version = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Version", null=True)
+    url = models.URLField(max_length=200, blank=True, verbose_name="URL")
+    genre = models.CharField(max_length=200, blank=True, verbose_name="Corpus Genre")
+    description = models.CharField(max_length=200, blank=True, verbose_name="Description",
+        help_text="Include number of tokens and basic statistics")
+    languages = models.CharField(max_length=200, null=True, verbose_name="Language(s)")
+
+    @property
+    def template(self):
+        return "corpus_article_view.html"
+
+    class Meta:
+        verbose_name = _('corpus')
+        verbose_name_plural = _('corpora')
+        unique_together = [('name', 'version')]
+        ordering = ['name', 'version']
+
+
+class CorpusSentence(models.Model):
+    # Corpus (foreign key), sent id, lang, orthography, is_parallel, doc id,
+    # offset within doc, sent text: original string, sent text: tokenized,
+    # word glosses?, sentence gloss?, note?
+    corpus = models.ForeignKey(Corpus, null=True, related_name='corpus_sentences')
+    sent_id = models.CharField(max_length=200, null=True, verbose_name="Sentence ID")
+    language = models.ForeignKey(Language, blank=True, related_name='corpus_sentences')
+    orthography = models.CharField(max_length=200, blank=True, verbose_name="Orthography",
+        help_text="language-specific details such as style of transliteration")
+    is_parallel = models.BooleanField(default=False)
+    # parallel sentences
+    #parallel = models.ManyToManyField(CorpusSentence, blank=True, related_name='parallel')
+    doc_id = models.CharField(max_length=200, null=True, verbose_name="Document ID")
+    text = models.CharField(max_length=1000, null=True, verbose_name="Text")
+    # sent text tokenized?
+    word_gloss = models.CharField(max_length=200, blank=True, verbose_name="Word Gloss")
+    sent_gloss = models.CharField(max_length=200, blank=True, verbose_name="Sentence Gloss")
+    note = models.CharField(max_length=200, blank=True, verbose_name="Annotator Note")
+
+    @property
+    def template(self):
+        return "corpus_sentence_article_view.html"
+
+    class Meta:
+        verbose_name = _('corpus sentence')
+        unique_together = [('corpus', 'sent_id')]
+        ordering = ['corpus', 'sent_id']
+
+
+class PTokenAnnotation(models.Model):
+    # adp/adp lemma (foreign key), construal (foreign key), usage (foreign key),
+    # sentence (foreign key), case (optional), obj head, gov head,
+    # gov-obj syntactic configuration, POS of adp, POS of gov, POS of obj,
+    # Supersense of obj, Supersense of gov, list of subtokens (for mwe),
+    # list of weak associations (for mwe), is_gold, annotator note?,
+    # annotator grouping/cluster
+    token_start = models.PositiveIntegerField(null=True, verbose_name='Token Start (Inclusive)')
+    token_end = models.PositiveIntegerField(null=True, verbose_name='Token End (Exclusive)')
+    adposition = models.ForeignKey(Adposition, null=True, related_name='adposition')
+    construal = models.ForeignKey(Construal, null=True, related_name='construal')
+    usage = models.ForeignKey(Usage, null=True, related_name='usage')
+    sentence = models.ForeignKey(CorpusSentence, null=True, related_name='sentence')
+    obj_case = models.PositiveIntegerField(choices=Case.choices(), blank=True)
+
+    obj_head = models.CharField(max_length=200, blank=True, verbose_name="Object Head")
+    gov_head = models.CharField(max_length=200, blank=True, verbose_name="Governor Head")
+    gov_obj_syntax = models.CharField(max_length=200, blank=True, verbose_name="Governor-Object Syntax")
+
+    adp_pos = models.CharField(max_length=200, blank=True, verbose_name="Adposition Part of Speech")
+    gov_pos = models.CharField(max_length=200, blank=True, verbose_name="Governor Part of Speech")
+    obj_pos = models.CharField(max_length=200, blank=True, verbose_name="Object Part of Speech")
+
+    gov_supersense = models.CharField(max_length=200, blank=True, verbose_name="Governor Supersense")
+    obj_supersense = models.CharField(max_length=200, blank=True, verbose_name="Object Supersense")
+
+    is_gold = models.BooleanField(default=False)
+    note = models.CharField(max_length=200, blank=True, verbose_name="Annotator Note")
+    annotator_group = models.CharField(max_length=200, blank=True, verbose_name="Annotator Group")
+
+    # list of subtokens (for mwe)
+    #subtokens = models.ManyToManyField(Adposition, blank=True, related_name='MWE subtokens')
 
     def __str__(self):
-        if self.current_revision:
-            return self.current_revision.metadatarevision.name
-        else:
-            return ugettext('Current revision not set!!')
-    class Meta:
-        verbose_name = _('example')
-
-class ExampleRevision(MetadataRevision):
-    exampleXML = models.CharField(max_length=200)
-    usage = models.ForeignKey(Construal, null=True, related_name='examples')
-
-    def __str__(self):
-        return ('Example Revision: %s %d') % (self.name, self.revision_number)
+        return str(self.adposition) + ' : ' + str(self.sentence)
 
     class Meta:
-        verbose_name = _('example revision')
+        verbose_name = _('adposition token annotation')
+        unique_together = ('sentence', 'token_start', 'token_end')
+        # issue #10: alphabetize models
+        ordering = ['sentence', 'token_start']
+
+
+
+
 
 # You must register the model here
 
@@ -666,10 +740,10 @@ admin.site.register(Supersense)
 admin.site.register(SupersenseRevision)
 admin.site.register(Construal)
 admin.site.register(Language)
-admin.site.register(Corpus)
 admin.site.register(Adposition)
 admin.site.register(AdpositionRevision)
 admin.site.register(Usage)
 admin.site.register(UsageRevision)
-admin.site.register(Example)
-admin.site.register(ExampleRevision)
+admin.site.register(Corpus)
+admin.site.register(CorpusSentence)
+admin.site.register(PTokenAnnotation)
