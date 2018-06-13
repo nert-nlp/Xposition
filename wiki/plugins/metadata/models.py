@@ -515,15 +515,6 @@ class Language(SimpleMetadata):
     class Meta:
         verbose_name = _('language')
 
-class Corpus(Metadata):
-
-    def __str__(self):
-        if self.current_revision:
-            return self.current_revision.metadatarevision.name
-        else:
-            return ugettext('Current revision not set!!')
-    class Meta:
-        verbose_name = _('corpus')
 
 class Adposition(Metadata):
 
@@ -640,25 +631,6 @@ class UsageRevision(MetadataRevision):
         ordering = ['adposition', 'construal']
 
 
-class Example(models.Model):
-
-    def __str__(self):
-        if self.current_revision:
-            return self.current_revision.metadatarevision.name
-        else:
-            return ugettext('Current revision not set!!')
-    class Meta:
-        verbose_name = _('example')
-
-class ExampleRevision(MetadataRevision):
-    exampleXML = models.CharField(max_length=200)
-    usage = models.ForeignKey(Construal, null=True, related_name='examples')
-
-    def __str__(self):
-        return ('Example Revision: %s %d') % (self.name, self.revision_number)
-
-    class Meta:
-        verbose_name = _('example revision')
 
 # You must register the model here
 
@@ -666,10 +638,7 @@ admin.site.register(Supersense)
 admin.site.register(SupersenseRevision)
 admin.site.register(Construal)
 admin.site.register(Language)
-admin.site.register(Corpus)
 admin.site.register(Adposition)
 admin.site.register(AdpositionRevision)
 admin.site.register(Usage)
 admin.site.register(UsageRevision)
-admin.site.register(Example)
-admin.site.register(ExampleRevision)
