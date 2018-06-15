@@ -6,6 +6,7 @@ from bitfield import BitField
 import copy, sys, re
 from enum import IntEnum
 from django.utils.encoding import force_text
+from django.utils.safestring import mark_safe
 from django.contrib.contenttypes.models import ContentType
 from functools import reduce
 from wiki.models import Article, ArticleRevision
@@ -13,6 +14,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.translation import ugettext
 from django.contrib import admin
 from django.db.models.signals import pre_save, post_save
+from wiki.core.markdown import article_markdown
 from wiki.decorators import disable_signal_for_loaddata
 from wiki.plugins.categories.models import ArticleCategory
 from wiki.models.pluginbase import ArticlePlugin, RevisionPlugin, RevisionPluginRevision
@@ -76,7 +78,8 @@ class SimpleMetadata(ArticlePlugin):
             return 'construal_list.html'
 
     def html(self):
-        return '<a href="' + self.article.get_absolute_url() + '">' + str(self) + '</a>'
+        di = deepest_instance(self)
+        return '<a href="' + self.article.get_absolute_url() + '" class="' + type(di).__name__.lower() + '">' + str(self) + '</a>'
 
 @disable_signal_for_loaddata
 def on_article_revision_post_save(**kwargs):
@@ -107,7 +110,8 @@ class Metadata(RevisionPlugin):
 
     def html(self):
         if self.current_revision:
-            return self.current_revision.metadatarevision.html()
+            di = deepest_instance(self)
+            return self.current_revision.metadatarevision.html(container_type=type(di))
         return ''
 
     # def createNewRevision(self, request):
@@ -235,8 +239,14 @@ class MetadataRevision(RevisionPluginRevision):
     def __str__(self):
         return ('Metadata Revision: %s %d') % (self.name, self.revision_number)
 
-    def html(self):
-        return '<a href="' + self.plugin.article.get_absolute_url() + '">' + str(self.name) + '</a>'
+    def html(self, container_type=None):
+        kls = ''
+        if container_type:
+            kls = str(container_type.__name__).lower()
+        return '<a href="' + self.plugin.article.get_absolute_url() + '" class="' + kls + '">' + str(self.name) + '</a>'
+
+    def descriptionhtml(self):
+        return mark_safe(article_markdown(self.description, self.article_revision.article))
 
     def validate_unique(self, exclude=None):
         """
@@ -505,6 +515,8 @@ class Language(SimpleMetadata):
     class Meta:
         verbose_name = _('language')
 
+
+
 class Adposition(Metadata):
 
     class MorphType(MetaEnum):
@@ -616,8 +628,11 @@ class UsageRevision(MetadataRevision):
 
     class Meta:
         verbose_name = _('usage revision')
-        # issue #10: alphabetize models
+		# issue #10: alphabetize models
         ordering = ['adposition', 'construal']
+
+
+
 
 # PTokenAnnotation fields:
 # adp/adp lemma (foreign key), construal (foreign key), usage (foreign key),
