@@ -1,3 +1,6 @@
+/* make more horizontal space in navbar */
+.nav > li > a { padding-left: 10px; padding-right: 10px; }
+
 /* for horizontal radio buttons */
 ul.inline,ul.inline > li { display: inline-block; }
 ul.inline { padding: 0; }
