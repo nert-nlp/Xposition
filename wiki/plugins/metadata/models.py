@@ -688,10 +688,11 @@ class CorpusSentence(models.Model):
     #parallel = models.ManyToManyField(CorpusSentence, blank=True, related_name='parallel')
     doc_id = models.CharField(max_length=200, null=True, verbose_name="Document ID")
     text = models.CharField(max_length=1000, null=True, verbose_name="Text")
-    # sent text tokenized?
+    tokens = models.CharField(max_length=1000, null=True, verbose_name="Text")
     word_gloss = models.CharField(max_length=200, blank=True, verbose_name="Word Gloss")
     sent_gloss = models.CharField(max_length=200, blank=True, verbose_name="Sentence Gloss")
     note = models.CharField(max_length=200, blank=True, verbose_name="Annotator Note")
+    mwe_markup = models.CharField(max_length=200, blank=True, verbose_name="MWE Markup")
 
     @property
     def template(self):
@@ -710,8 +711,7 @@ class PTokenAnnotation(models.Model):
     # Supersense of obj, Supersense of gov, list of subtokens (for mwe),
     # list of weak associations (for mwe), is_gold, annotator note?,
     # annotator grouping/cluster
-    token_start = models.PositiveIntegerField(null=True, verbose_name='Token Start (Inclusive)')
-    token_end = models.PositiveIntegerField(null=True, verbose_name='Token End (Exclusive)')
+    token_indices = models.CharField(max_length=200, blank=True, verbose_name="Token Indices")
     adposition = models.ForeignKey(Adposition, null=True, related_name='adposition')
     construal = models.ForeignKey(Construal, null=True, related_name='construal')
     usage = models.ForeignKey(Usage, null=True, related_name='usage')
@@ -731,7 +731,8 @@ class PTokenAnnotation(models.Model):
 
     is_gold = models.BooleanField(default=False)
     note = models.CharField(max_length=200, blank=True, verbose_name="Annotator Note")
-    annotator_group = models.CharField(max_length=200, blank=True, verbose_name="Annotator Group")
+    annotator_cluster = models.CharField(max_length=200, blank=True, verbose_name="Annotator Cluster",
+                                       help_text='Informal Label for Grouping Similar Tokens')
 
     # list of subtokens (for mwe)
     #subtokens = models.ManyToManyField(Adposition, blank=True, related_name='MWE subtokens')
