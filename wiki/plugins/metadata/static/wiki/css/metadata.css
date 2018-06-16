@@ -15,6 +15,9 @@ ul.inline > li { margin: 0px 5px; }
 .example { font-family: 'Roboto Light', sans-serif; }
 .supersense,.construal { font-family: 'Roboto Condensed', sans-serif; }
 
+.lead .supersense,.lead .construal,.lead .adposition,.lead .usage {
+  text-shadow: 1px 1px #eee;
+}
 .supersense,a.supersense:hover {
   color: #3c3;
 }
@@ -32,4 +35,37 @@ ul.inline > li { margin: 0px 5px; }
 a.usage:hover { 
   color: #fc6;
   text-decoration: underline;
+}
+
+/* Tree list, adapted from https://two-wrongs.com/draw-a-tree-structure-with-only-css 
+   Set class="clt" on the parent element
+*/
+.clt, .clt ul, .clt li {
+     position: relative;
+}
+ul > li.clt { list-style: none; }
+
+.clt ul {
+    list-style: none;
+    padding-left: 32px;
+}
+.clt li::before, .clt li::after {
+    content: "";
+    position: absolute;
+    left: -12px;
+}
+.clt li::before {
+    border-top: 1px solid #ccc;
+    top: .75em;
+    width: 8px;
+    height: 0;
+}
+.clt li::after {
+    border-left: 1px solid #ccc;
+    height: 100%;
+    width: 0px;
+    top: 2px;
+}
+.clt ul > li:last-child::after {
+    height: .7em;
 }

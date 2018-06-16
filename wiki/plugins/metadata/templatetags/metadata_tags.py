@@ -110,11 +110,11 @@ def usages_for_construal(context):
     u = u.filter(current_revision__metadatarevision__article_revision__deleted=False)
     return u
 
-def _category_subtree(c):
+def _category_subtree(c, recursive=False):
     ss = c.supersense.all()[0]
     a = ss.article
     #s = '<li><a href="{url}">{rev}</a>'.format(url=a.get_absolute_url(), rev=a.current_revision.title)
-    s = f'<li>{ss.metadata.html()}'
+    s = f'<li class="clt">{ss.metadata.html()}' if not recursive else f'<li>{ss.metadata.html()}'
     # number of construals for the supersense
     nAsRole = len(ss.rfs_with_role.all())
     nAsFunction = len(ss.rfs_with_function.all())
@@ -126,7 +126,7 @@ def _category_subtree(c):
     if len(children):
         s += '\n<ul>'
         for child in children:
-            s += _category_subtree(child)
+            s += _category_subtree(child, recursive=True)
         s += '\n</ul>'
     s += '</li>'
     return s
