@@ -115,8 +115,8 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
             short = prep.split('/')[-1]
             if '`' in args[0]:
                 return link(short, '/' + prep + '/' + construal.replace('`', "'"), cl if cl else 'usage')
-            elif '--' in args[1]:
-                return link(short, '/' + prep + '/' + construal, cl if cl else 'usage')
+            elif '--' in construal:
+                return link(short.replace('--','&#x219d;'), '/' + prep + '/' + construal, cl if cl else 'usage')
             else:
                 return link(short, '/' + prep + '/' + construal + '--' + construal, cl if cl else 'usage')
         return link(args[0].split('/')[-1], '/' + args[0], cl if cl else 'adposition')
@@ -135,7 +135,7 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
         if '`' in args[0]:
             return link(args[0], '/' + args[0].replace('`', "'"), cl if cl else 'misc')
         elif '--' in args[0]:
-            return link(args[0], '/' + args[0], cl if cl else 'construal')
+            return link(args[0].replace('--','&#x219d;'), '/' + args[0], cl if cl else 'construal')
         else:
             return link(args[0], '/' + args[0], cl if cl else 'supersense')
     # meta data
