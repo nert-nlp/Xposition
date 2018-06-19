@@ -730,7 +730,6 @@ class PTokenAnnotation(models.Model):
     obj_supersense = models.CharField(max_length=200, blank=True, verbose_name="Object Supersense")
 
     is_gold = models.BooleanField(default=False)
-    note = models.CharField(max_length=200, blank=True, verbose_name="Annotator Note")
     annotator_cluster = models.CharField(max_length=200, blank=True, verbose_name="Annotator Cluster",
                                        help_text='Informal Label for Grouping Similar Tokens')
 
