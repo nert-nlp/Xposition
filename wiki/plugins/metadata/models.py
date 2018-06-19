@@ -688,7 +688,7 @@ class CorpusSentence(models.Model):
     #parallel = models.ManyToManyField(CorpusSentence, blank=True, related_name='parallel')
     doc_id = models.CharField(max_length=200, null=True, verbose_name="Document ID")
     text = models.CharField(max_length=1000, null=True, verbose_name="Text")
-    tokens = models.CharField(max_length=1000, null=True, verbose_name="Text")
+    tokens = models.CharField(max_length=1000, null=True, verbose_name="Tokens")
     word_gloss = models.CharField(max_length=200, blank=True, verbose_name="Word Gloss")
     sent_gloss = models.CharField(max_length=200, blank=True, verbose_name="Sentence Gloss")
     note = models.CharField(max_length=200, blank=True, verbose_name="Annotator Note")
