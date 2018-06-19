@@ -10,7 +10,7 @@ ptoken_header = ['token_indices', 'adposition_name', 'construal_name', 'corpus_n
                  'obj_supersense', 'is_gold', 'annotator_cluster']
 
 
-# corpus
+# corpus sent
 corpus_name = 'streusle'
 corpus_version = '4.1'
 sent_id = ''
