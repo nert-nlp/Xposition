@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'wiki.plugins.categories',
     'wiki.plugins.categories.editor',
     'wiki.plugins.metadata',
+    'import_export',
 ]
 
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
