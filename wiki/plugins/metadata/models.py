@@ -741,9 +741,9 @@ class PTokenAnnotation(models.Model):
 
     class Meta:
         verbose_name = _('adposition token annotation')
-        unique_together = ('sentence', 'token_start', 'token_end')
+        unique_together = ('sentence', 'token_indices')
         # issue #10: alphabetize models
-        ordering = ['sentence', 'token_start']
+        ordering = ['sentence', 'token_indices']
 
 
 
