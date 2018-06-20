@@ -9,41 +9,45 @@ ptoken_header = ['token_indices', 'adposition_name', 'language_name', 'construal
                  'obj_case', 'obj_head', 'gov_head', 'gov_obj_syntax', 'adp_pos', 'gov_pos', 'obj_pos', 'gov_supersense',
                  'obj_supersense', 'is_gold', 'annotator_cluster']
 
+default_str = ' '
+construal_list = set()
+adposition_list = set()
+usage_list = set()
 
 # corpus sent
 corpus_name = 'streusle'
 corpus_version = '4.1'
-sent_id = ' '
+sent_id = default_str
 language_name = 'English'
-orthography = ' '
+orthography = default_str
 is_parallel = 'False'
-doc_id = ' '
-text = ' '
-tokens = ' '
-word_gloss = ' '
-sent_gloss = ' '
-note = ' '
-mwe_markup = ' '
+doc_id = default_str
+text = default_str
+tokens = default_str
+word_gloss = default_str
+sent_gloss = default_str
+note = default_str
+mwe_markup = default_str
 
 
 # ptoken
-token_indices = ' '
-adposition_name = ' '
-construal_name = ' '
+token_indices = default_str
+adposition_name = default_str
+construal_name = default_str
 corpus_name = 'streusle'
 corpus_version = '4.1'
-sent_id = ' '
-obj_case = ' '
-obj_head = ' '
-gov_head = ' '
-gov_obj_syntax = ' '
-adp_pos = ' '
-gov_pos = ' '
-obj_pos = ' '
-gov_supersense = ' '
-obj_supersense = ' '
+sent_id = default_str
+obj_case = default_str
+obj_head = default_str
+gov_head = default_str
+gov_obj_syntax = default_str
+adp_pos = default_str
+gov_pos = default_str
+obj_pos = default_str
+gov_supersense = default_str
+obj_supersense = default_str
 is_gold = 'True'
-annotator_cluster = ' '
+annotator_cluster = default_str
 
 
 
@@ -59,13 +63,13 @@ def add_ptoken(f):
 
 
 def ss(sent, n):
-    supersense = ' '
+    supersense = default_str
     for ws in [sent['swes'],sent['smwes']]:
         for tok in ws:
             if n in ws[tok]['toknums']:
                 supersense = ws[tok]['ss']
     if supersense==None:
-        supersense=' '
+        supersense=default_str
     return supersense
 
 with open(file, encoding='utf8') as f:
@@ -80,32 +84,47 @@ with open(file, encoding='utf8') as f:
                 doc_id = sent['sent_id'].split('-')[0]+'-'+sent['sent_id'].split('-')[1]
                 text = sent['text'].replace('"',r'\"')
                 tokens = ', '.join(["'"+x['word'].replace("'",r"\'").replace('"',r'\"')+"'" for x in sent['toks']])
-                note = sent['note'] if 'note' in sent else ' '
+                note = sent['note'] if 'note' in sent else default_str
                 mwe_markup = sent['mwe']
 
                 add_corp_sent(cs)
+                for words in [sent['swes'],sent['smwes'],sent['wmwes']]:
+                    for i in words:
+                        tok = words[i]
+                        if tok['lexcat'] in ['P','PRON.POSS','POSS']:
+                            # used to check NoneType
+                            govobj = tok['heuristic_relation']
+                            hasobj = type(govobj['obj']) is int
+                            hasgov = type(govobj['gov']) is int
 
-                for i in sent['swes']:
-                    tok = sent['swes'][i]
-                    if tok['lexcat'] in ['P','PRON.POSS','POSS']:
-                        # used to check NoneType
-                        govobj = tok['heuristic_relation']
-                        hasobj = type(govobj['obj']) is int
-                        hasgov = type(govobj['gov']) is int
+                            # assign fields
+                            token_indices = ', '.join([str(x) for x in tok['toknums']])
+                            adposition_name = tok['lexlemma']
+                            construal_name = '??' if tok['ss'] == '??' else tok['ss'].replace('p.','')+'--'+tok['ss2'].replace('p.','')
+                            obj_case = 'Accusative' if not tok['lexcat']=='PRON.POSS' else 'Genitive'
+                            obj_head = govobj['objlemma'] if hasobj else default_str
+                            gov_head = govobj['govlemma'] if hasgov else default_str
+                            gov_obj_syntax = govobj['config']
+                            adp_pos = sent['toks'][tok['toknums'][0] - 1]['upos']
+                            gov_pos = sent['toks'][govobj['gov'] - 1]['upos'] if hasgov else default_str
+                            obj_pos = sent['toks'][govobj['obj'] - 1]['upos'] if hasobj else default_str
+                            gov_supersense = ss(sent, govobj['gov']) if hasgov else default_str
+                            obj_supersense = ss(sent, govobj['obj']) if hasobj else default_str
+                            annotator_cluster = tok['annotator_cluster'] if 'annotator_cluster' in tok else default_str
+                            add_ptoken(ptok)
 
-                        # assign fields
-                        token_indices = ', '.join([str(x) for x in tok['toknums']])
-                        adposition_name = tok['lexlemma']
-                        construal_name = '??' if tok['ss'] == '??' else tok['ss']+'--'+tok['ss2']
-                        obj_case = 'Accusative' if not tok['lexcat']=='PRON.POSS' else 'Genitive'
-                        obj_head = govobj['objlemma'] if hasobj else ' '
-                        gov_head = govobj['govlemma'] if hasgov else ' '
-                        gov_obj_syntax = govobj['config']
-                        adp_pos = sent['toks'][tok['toknums'][0] - 1]['upos']
-                        gov_pos = sent['toks'][govobj['gov'] - 1]['upos'] if hasgov else ' '
-                        obj_pos = sent['toks'][govobj['obj'] - 1]['upos'] if hasobj else ' '
-                        gov_supersense = ss(sent, govobj['gov']) if hasgov else ' '
-                        obj_supersense = ss(sent, govobj['obj']) if hasobj else ' '
-                        annotator_cluster = tok['annotator_cluster'] if 'annotator_cluster' in tok else ' '
-                        add_ptoken(ptok)
+                            adposition_list.add(adposition_name)
+                            construal_list.add(construal_name)
+                            usage_list.add(adposition_name+':'+construal_name)
+
+with open('adpositions.tsv', 'w') as f:
+    for a in adposition_list:
+        f.write(a+'\n')
+with open('construals.tsv', 'w') as f:
+    for c in construal_list:
+        f.write(c + '\n')
+with open('usages.tsv', 'w') as f:
+    for u in usage_list:
+        f.write(u + '\n')
+
 
