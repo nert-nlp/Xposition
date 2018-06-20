@@ -7,6 +7,76 @@ from mptt.admin import MPTTModelAdmin
 
 from . import editors, models
 
+# import_export django models
+from .plugins.metadata import models as ms
+from import_export.admin import ImportExportModelAdmin
+from import_export import resources
+from import_export import fields
+from import_export.widgets import ForeignKeyWidget
+
+# from plugins.metadeta import models
+
+class CorpusSentenceResource(resources.ModelResource):
+    corpus = fields.Field(
+        column_name='corpus_name',
+        attribute='corpus',
+        widget=ForeignKeyWidget(ms.Corpus, 'name'))
+
+    language = fields.Field(
+        column_name='language_name',
+        attribute='language',
+        widget=ForeignKeyWidget(ms.Language, 'name'))
+
+
+    class Meta:
+        fields = ('corpus', 'sent_id', 'language', 'orthography', 'is_parallel', 'doc_id',
+                  'text', 'tokens', 'word_gloss', 'sent_gloss', 'note', 'mwe_markup')
+
+
+class PTokenAnnotationResource(resources.ModelResource):
+    corpus = fields.Field(
+        column_name='corpus_name',
+        attribute='corpus',
+        widget=ForeignKeyWidget(ms.Corpus, 'name'))
+
+    adposition = fields.Field(
+        column_name='adposition_name',
+        attribute='adposition',
+        widget=ForeignKeyWidget(ms.Adposition, 'name'))
+
+    construal = fields.Field(
+        column_name='construal_name',
+        attribute='construal',
+        widget=ForeignKeyWidget(ms.Construal, 'name'))
+
+    sentence = fields.Field(
+        column_name='sent_id',
+        attribute='sentence',
+        widget=ForeignKeyWidget(ms.CorpusSentence, 'sent_id'))
+
+    # usage = fields.Field(
+    #     column_name='construal',
+    #     attribute='usage',
+    #     widget=ForeignKeyWidget(Usage, 'usage'))
+
+    class Meta:
+        fields = ('token_indices', 'adposition', 'construal', 'corpus', 'sentence',
+                 'obj_case', 'obj_head', 'gov_head', 'gov_obj_syntax', 'adp_pos', 'gov_pos', 'obj_pos', 'gov_supersense',
+                 'obj_supersense', 'is_gold', 'annotator_cluster')
+        # fields = ('token_indices', 'adposition', 'construal', 'usage', 'corpus', 'sentence',
+        #           'obj_case', 'obj_head', 'gov_head', 'gov_obj_syntax', 'adp_pos', 'gov_pos', 'obj_pos',
+        #           'gov_supersense',
+        #           'obj_supersense', 'is_gold', 'annotator_cluster')
+
+
+class CorpusSentenceAdmin(ImportExportModelAdmin):
+    resource_class = CorpusSentenceResource
+
+class PTokenAnnotationAdmin(ImportExportModelAdmin):
+    resource_class = PTokenAnnotationResource
+
+
+
 # Django 1.9 deprecation of contenttypes.generic
 try:
     from django.contrib.contenttypes.admin import GenericTabularInline
