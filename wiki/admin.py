@@ -27,16 +27,16 @@ class CorpusSentenceResource(resources.ModelResource):
         attribute='language',
         widget=ForeignKeyWidget(ms.Language, 'name'))
 
-    sent_id = fields.Field(widget=widgets.CharWidget())
-    orthography = fields.Field(widget=widgets.CharWidget())
-    is_parallel = fields.Field(widget=widgets.BooleanWidget())
-    doc_id = fields.Field(widget=widgets.CharWidget())
-    text = fields.Field(widget=widgets.CharWidget())
-    tokens = fields.Field(widget=widgets.CharWidget())
-    word_gloss = fields.Field(widget=widgets.CharWidget())
-    sent_gloss = fields.Field(widget=widgets.CharWidget())
-    note = fields.Field(widget=widgets.CharWidget())
-    mwe_markup = fields.Field(widget=widgets.CharWidget())
+    sent_id = fields.Field(attribute='sent_id',widget=widgets.CharWidget())
+    orthography = fields.Field(attribute='sent_id',widget=widgets.CharWidget())
+    is_parallel = fields.Field(attribute='is_parallel',widget=widgets.BooleanWidget())
+    doc_id = fields.Field(attribute='doc_id',widget=widgets.CharWidget())
+    text = fields.Field(attribute='text',widget=widgets.CharWidget())
+    tokens = fields.Field(attribute='tokens',widget=widgets.CharWidget())
+    word_gloss = fields.Field(attribute='word_gloss',widget=widgets.CharWidget())
+    sent_gloss = fields.Field(attribute='sent_gloss',widget=widgets.CharWidget())
+    note = fields.Field(attribute='note',widget=widgets.CharWidget())
+    mwe_markup = fields.Field(attribute='mwe_markup',widget=widgets.CharWidget())
 
 
 
@@ -48,18 +48,18 @@ class CorpusSentenceResource(resources.ModelResource):
 
 
 class PTokenAnnotationResource(resources.ModelResource):
-    token_indices = fields.Field(widget=widgets.CharWidget())
-    obj_case = fields.Field(widget=widgets.CharWidget())
-    obj_head = fields.Field(widget=widgets.CharWidget())
-    gov_head = fields.Field(widget=widgets.CharWidget())
-    gov_obj_syntax = fields.Field(widget=widgets.CharWidget())
-    adp_pos = fields.Field(widget=widgets.CharWidget())
-    gov_pos = fields.Field(widget=widgets.CharWidget())
-    obj_pos = fields.Field(widget=widgets.CharWidget())
-    gov_supersense = fields.Field(widget=widgets.CharWidget())
-    obj_supersense = fields.Field(widget=widgets.CharWidget())
-    is_gold = fields.Field(widget=widgets.BooleanWidget())
-    annotator_cluster = fields.Field(widget=widgets.CharWidget())
+    token_indices = fields.Field(attribute='token_indices',widget=widgets.CharWidget())
+    obj_case = fields.Field(attribute='obj_case',widget=widgets.CharWidget())
+    obj_head = fields.Field(attribute='obj_head',widget=widgets.CharWidget())
+    gov_head = fields.Field(attribute='gov_head',widget=widgets.CharWidget())
+    gov_obj_syntax = fields.Field(attribute='gov_obj_syntax',widget=widgets.CharWidget())
+    adp_pos = fields.Field(attribute='adp_pos',widget=widgets.CharWidget())
+    gov_pos = fields.Field(attribute='gov_pos',widget=widgets.CharWidget())
+    obj_pos = fields.Field(attribute='obj_pos',widget=widgets.CharWidget())
+    gov_supersense = fields.Field(attribute='gov_supersense',widget=widgets.CharWidget())
+    obj_supersense = fields.Field(attribute='obj_supersense',widget=widgets.CharWidget())
+    is_gold = fields.Field(attribute='is_gold',widget=widgets.BooleanWidget())
+    annotator_cluster = fields.Field(attribute='annotator_cluster',widget=widgets.CharWidget())
 
     corpus = fields.Field(
         column_name='corpus_name',
