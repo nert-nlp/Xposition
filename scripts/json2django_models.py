@@ -5,7 +5,7 @@ file = r'C:\Users\Austin\Desktop\streusle.go.notes.json'
 sent_header = ['corpus_name', 'corpus_version', 'sent_id', 'language_name', 'orthography', 'is_parallel', 'doc_id',
                'text', 'tokens', 'word_gloss', 'sent_gloss', 'note', 'mwe_markup']
 
-ptoken_header = ['token_indices', 'adposition_name', 'construal_name', 'corpus_name', 'corpus_version', 'sent_id',
+ptoken_header = ['token_indices', 'adposition_name', 'language_name', 'construal_name', 'corpus_name', 'corpus_version', 'sent_id',
                  'obj_case', 'obj_head', 'gov_head', 'gov_obj_syntax', 'adp_pos', 'gov_pos', 'obj_pos', 'gov_supersense',
                  'obj_supersense', 'is_gold', 'annotator_cluster']
 
@@ -53,7 +53,7 @@ def add_corp_sent(f):
 
 
 def add_ptoken(f):
-    f.write('\t'.join([token_indices, adposition_name, construal_name, corpus_name, corpus_version, sent_id,
+    f.write('\t'.join([token_indices, adposition_name, language_name, construal_name, corpus_name, corpus_version, sent_id,
                  obj_case, obj_head, gov_head, gov_obj_syntax, adp_pos, gov_pos, obj_pos, gov_supersense,
                  obj_supersense, is_gold, annotator_cluster]) + '\n')
 

@@ -22,17 +22,24 @@ class CorpusForeignKeyWidget(ForeignKeyWidget):
             name=row["corpus_name"],
             version=row["corpus_version"]
         )
+class SentenceForeignKeyWidget(ForeignKeyWidget):
+    def get_queryset(self, value, row):
+        return self.model.objects.filter(
+            corpus__name=row["corpus_name"],
+            corpus__version=row["corpus_version"],
+            sent_id=row["sent_id"]
+        )
 class AdpositionForeignKeyWidget(ForeignKeyWidget):
     def get_queryset(self, value, row):
         return self.model.objects.filter(
-            current_revision__metadatarevision__language__name=row["language_name"],
-            name=row["adposition_name"]
+            current_revision__metadatarevision__adpositionrevision__lang__name=row["language_name"],
+            current_revision__metadatarevision__adpositionrevision__name=row["adposition_name"]
         )
 class UsageForeignKeyWidget(ForeignKeyWidget):
     def get_queryset(self, value, row):
         return self.model.objects.filter(
-            current_revision__metadatarevision__adposition__name=row["adposition_name"],
-            current_revision__metadatarevision__construal__name=row["construal_version"]
+            current_revision__metadatarevision__usagerevision__adposition__current_revision__metadatarevision__adpositionrevision__name=row["adposition_name"],
+            current_revision__metadatarevision__usagerevision__construal__name=row["construal_version"]
         )
 
 class CorpusSentenceResource(resources.ModelResource):
@@ -88,7 +95,7 @@ class PTokenAnnotationResource(resources.ModelResource):
     adposition = fields.Field(
         column_name='adposition_name',
         attribute='adposition',
-        widget=AdpositionForeignKeyWidget(ms.Adposition, 'name'))
+        widget=AdpositionForeignKeyWidget(ms.Adposition, 'current_revision__metadatarevision__adpositionrevision__name'))
 
     construal = fields.Field(
         column_name='construal_name',
@@ -98,20 +105,19 @@ class PTokenAnnotationResource(resources.ModelResource):
     sentence = fields.Field(
         column_name='sent_id',
         attribute='sentence',
-        widget=ForeignKeyWidget(ms.CorpusSentence, 'sent_id'))
+        widget=SentenceForeignKeyWidget(ms.CorpusSentence, 'sent_id'))
 
     usage = fields.Field(
         column_name='construal',
         attribute='usage',
-        widget=UsageForeignKeyWidget(ms.Usage, 'usage'))
+        widget=UsageForeignKeyWidget(ms.Usage, 'current_revision__metadatarevision__usagerevision__construal__name'))
 
     class Meta:
         model = ms.PTokenAnnotation
-        import_id_fields = ('sent_id','token_indices')
+        import_id_fields = ('sentence','token_indices')
         fields = ('token_indices', 'adposition', 'construal', 'usage', 'corpus', 'sentence',
                   'obj_case', 'obj_head', 'gov_head', 'gov_obj_syntax', 'adp_pos', 'gov_pos', 'obj_pos',
-                  'gov_supersense',
-                  'obj_supersense', 'is_gold', 'annotator_cluster')
+                  'gov_supersense', 'obj_supersense', 'is_gold', 'annotator_cluster')
 
 
 class CorpusSentenceAdmin(ImportExportModelAdmin):
