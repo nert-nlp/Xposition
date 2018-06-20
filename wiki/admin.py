@@ -41,6 +41,7 @@ class CorpusSentenceResource(resources.ModelResource):
 
 
     class Meta:
+        import_id_fields = ('sent_id',)
         fields = ('corpus', 'sent_id', 'language', 'orthography', 'is_parallel', 'doc_id',
                   'text', 'tokens', 'word_gloss', 'sent_gloss', 'note', 'mwe_markup')
 
@@ -85,6 +86,7 @@ class PTokenAnnotationResource(resources.ModelResource):
     #     widget=ForeignKeyWidget(Usage, 'usage'))
 
     class Meta:
+        import_id_fields = ('sent_id','token_indices')
         fields = ('token_indices', 'adposition', 'construal', 'corpus', 'sentence',
                  'obj_case', 'obj_head', 'gov_head', 'gov_obj_syntax', 'adp_pos', 'gov_pos', 'obj_pos', 'gov_supersense',
                  'obj_supersense', 'is_gold', 'annotator_cluster')
