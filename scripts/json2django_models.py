@@ -78,8 +78,8 @@ with open(file, encoding='utf8') as f:
                 # assign fields
                 sent_id = sent['sent_id']
                 doc_id = sent['sent_id'].split('-')[0]+'-'+sent['sent_id'].split('-')[1]
-                text = sent['text']
-                tokens = ', '.join(["'"+x['word'].replace("'",r"\'")+"'" for x in sent['toks']])
+                text = sent['text'].replace('"',r'\"')
+                tokens = ', '.join(["'"+x['word'].replace("'",r"\'").replace('"',r'\"')+"'" for x in sent['toks']])
                 note = sent['note'] if 'note' in sent else ' '
                 mwe_markup = sent['mwe']
 
