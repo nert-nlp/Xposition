@@ -16,11 +16,30 @@ from import_export import widgets
 from import_export.widgets import ForeignKeyWidget
 
 
+class CorpusForeignKeyWidget(ForeignKeyWidget):
+    def get_queryset(self, value, row):
+        return self.model.objects.filter(
+            name=row["corpus_name"],
+            version=row["corpus_version"]
+        )
+class AdpositionForeignKeyWidget(ForeignKeyWidget):
+    def get_queryset(self, value, row):
+        return self.model.objects.filter(
+            current_revision__metadatarevision__language__name=row["language_name"],
+            name=row["adposition_name"]
+        )
+class UsageForeignKeyWidget(ForeignKeyWidget):
+    def get_queryset(self, value, row):
+        return self.model.objects.filter(
+            current_revision__metadatarevision__adposition__name=row["adposition_name"],
+            current_revision__metadatarevision__construal__name=row["construal_version"]
+        )
+
 class CorpusSentenceResource(resources.ModelResource):
     corpus = fields.Field(
         column_name='corpus_name',
         attribute='corpus',
-        widget=ForeignKeyWidget(ms.Corpus, 'name'))
+        widget=CorpusForeignKeyWidget(ms.Corpus, 'name'))
 
     language = fields.Field(
         column_name='language_name',
@@ -28,7 +47,7 @@ class CorpusSentenceResource(resources.ModelResource):
         widget=ForeignKeyWidget(ms.Language, 'name'))
 
     sent_id = fields.Field(attribute='sent_id',widget=widgets.CharWidget())
-    orthography = fields.Field(attribute='sent_id',widget=widgets.CharWidget())
+    orthography = fields.Field(attribute='orthography',widget=widgets.CharWidget())
     is_parallel = fields.Field(attribute='is_parallel',widget=widgets.BooleanWidget())
     doc_id = fields.Field(attribute='doc_id',widget=widgets.CharWidget())
     text = fields.Field(attribute='text',widget=widgets.CharWidget())
@@ -37,14 +56,14 @@ class CorpusSentenceResource(resources.ModelResource):
     sent_gloss = fields.Field(attribute='sent_gloss',widget=widgets.CharWidget())
     note = fields.Field(attribute='note',widget=widgets.CharWidget())
     mwe_markup = fields.Field(attribute='mwe_markup',widget=widgets.CharWidget())
-
-
+    #
+    #
 
     class Meta:
         model = ms.CorpusSentence
         import_id_fields = ('sent_id',)
         fields = ('corpus', 'sent_id', 'language', 'orthography', 'is_parallel', 'doc_id',
-                  'text', 'tokens', 'word_gloss', 'sent_gloss', 'note', 'mwe_markup')
+                   'text', 'tokens', 'word_gloss', 'sent_gloss', 'note', 'mwe_markup')
 
 
 class PTokenAnnotationResource(resources.ModelResource):
@@ -64,12 +83,12 @@ class PTokenAnnotationResource(resources.ModelResource):
     corpus = fields.Field(
         column_name='corpus_name',
         attribute='corpus',
-        widget=ForeignKeyWidget(ms.Corpus, 'name'))
+        widget=CorpusForeignKeyWidget(ms.Corpus, 'name'))
 
     adposition = fields.Field(
         column_name='adposition_name',
         attribute='adposition',
-        widget=ForeignKeyWidget(ms.Adposition, 'name'))
+        widget=AdpositionForeignKeyWidget(ms.Adposition, 'name'))
 
     construal = fields.Field(
         column_name='construal_name',
@@ -81,21 +100,18 @@ class PTokenAnnotationResource(resources.ModelResource):
         attribute='sentence',
         widget=ForeignKeyWidget(ms.CorpusSentence, 'sent_id'))
 
-    # usage = fields.Field(
-    #     column_name='construal',
-    #     attribute='usage',
-    #     widget=ForeignKeyWidget(Usage, 'usage'))
+    usage = fields.Field(
+        column_name='construal',
+        attribute='usage',
+        widget=UsageForeignKeyWidget(ms.Usage, 'usage'))
 
     class Meta:
         model = ms.PTokenAnnotation
         import_id_fields = ('sent_id','token_indices')
-        fields = ('token_indices', 'adposition', 'construal', 'corpus', 'sentence',
-                 'obj_case', 'obj_head', 'gov_head', 'gov_obj_syntax', 'adp_pos', 'gov_pos', 'obj_pos', 'gov_supersense',
-                 'obj_supersense', 'is_gold', 'annotator_cluster')
-        # fields = ('token_indices', 'adposition', 'construal', 'usage', 'corpus', 'sentence',
-        #           'obj_case', 'obj_head', 'gov_head', 'gov_obj_syntax', 'adp_pos', 'gov_pos', 'obj_pos',
-        #           'gov_supersense',
-        #           'obj_supersense', 'is_gold', 'annotator_cluster')
+        fields = ('token_indices', 'adposition', 'construal', 'usage', 'corpus', 'sentence',
+                  'obj_case', 'obj_head', 'gov_head', 'gov_obj_syntax', 'adp_pos', 'gov_pos', 'obj_pos',
+                  'gov_supersense',
+                  'obj_supersense', 'is_gold', 'annotator_cluster')
 
 
 class CorpusSentenceAdmin(ImportExportModelAdmin):
