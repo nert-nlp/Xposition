@@ -12,9 +12,9 @@ from .plugins.metadata import models as ms
 from import_export.admin import ImportExportModelAdmin
 from import_export import resources
 from import_export import fields
+from import_export import widgets
 from import_export.widgets import ForeignKeyWidget
 
-# from plugins.metadeta import models
 
 class CorpusSentenceResource(resources.ModelResource):
     corpus = fields.Field(
@@ -27,6 +27,18 @@ class CorpusSentenceResource(resources.ModelResource):
         attribute='language',
         widget=ForeignKeyWidget(ms.Language, 'name'))
 
+    sent_id = fields.Field(widget=widgets.CharWidget())
+    orthography = fields.Field(widget=widgets.CharWidget())
+    is_parallel = fields.Field(widget=widgets.BooleanWidget())
+    doc_id = fields.Field(widget=widgets.CharWidget())
+    text = fields.Field(widget=widgets.CharWidget())
+    tokens = fields.Field(widget=widgets.CharWidget())
+    word_gloss = fields.Field(widget=widgets.CharWidget())
+    sent_gloss = fields.Field(widget=widgets.CharWidget())
+    note = fields.Field(widget=widgets.CharWidget())
+    mwe_markup = fields.Field(widget=widgets.CharWidget())
+
+
 
     class Meta:
         fields = ('corpus', 'sent_id', 'language', 'orthography', 'is_parallel', 'doc_id',
@@ -34,6 +46,19 @@ class CorpusSentenceResource(resources.ModelResource):
 
 
 class PTokenAnnotationResource(resources.ModelResource):
+    token_indices = fields.Field(widget=widgets.CharWidget())
+    obj_case = fields.Field(widget=widgets.CharWidget())
+    obj_head = fields.Field(widget=widgets.CharWidget())
+    gov_head = fields.Field(widget=widgets.CharWidget())
+    gov_obj_syntax = fields.Field(widget=widgets.CharWidget())
+    adp_pos = fields.Field(widget=widgets.CharWidget())
+    gov_pos = fields.Field(widget=widgets.CharWidget())
+    obj_pos = fields.Field(widget=widgets.CharWidget())
+    gov_supersense = fields.Field(widget=widgets.CharWidget())
+    obj_supersense = fields.Field(widget=widgets.CharWidget())
+    is_gold = fields.Field(widget=widgets.BooleanWidget())
+    annotator_cluster = fields.Field(widget=widgets.CharWidget())
+
     corpus = fields.Field(
         column_name='corpus_name',
         attribute='corpus',
@@ -172,3 +197,5 @@ class URLPathAdmin(MPTTModelAdmin):
 admin.site.register(models.URLPath, URLPathAdmin)
 admin.site.register(models.Article, ArticleAdmin)
 admin.site.register(models.ArticleRevision, ArticleRevisionAdmin)
+admin.site.register(ms.CorpusSentence, CorpusSentenceAdmin)
+admin.site.register(ms.PTokenAnnotation, PTokenAnnotationAdmin)

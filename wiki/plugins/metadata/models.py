@@ -26,9 +26,6 @@ from django.core.files.storage import get_storage_class
 
 from django.utils.translation import ugettext_lazy as _
 
-from wiki.admin import CorpusSentenceAdmin
-from wiki.admin import PTokenAnnotationAdmin
-
 
 def deepest_instance(x):
     """
@@ -764,5 +761,3 @@ admin.site.register(AdpositionRevision)
 admin.site.register(Usage)
 admin.site.register(UsageRevision)
 admin.site.register(Corpus)
-admin.site.register(CorpusSentence, CorpusSentenceAdmin)
-admin.site.register(PTokenAnnotation, PTokenAnnotationAdmin)
