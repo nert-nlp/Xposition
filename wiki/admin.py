@@ -35,21 +35,28 @@ class AdpositionForeignKeyWidget(ForeignKeyWidget):
             current_revision__metadatarevision__adpositionrevision__lang__name=row["language_name"],
             current_revision__metadatarevision__adpositionrevision__name=row["adposition_name"]
         )
+class ConstrualForeignKeyWidget(ForeignKeyWidget):
+    def get_queryset(self, value, row):
+        return self.model.objects.filter(
+            role__current_revision__metadatarevision__supersenserevision__name=row["role_name"],
+            function__current_revision__metadatarevision__supersenserevision__name=row["function_name"]
+        )
 class UsageForeignKeyWidget(ForeignKeyWidget):
     def get_queryset(self, value, row):
         return self.model.objects.filter(
             current_revision__metadatarevision__usagerevision__adposition__current_revision__metadatarevision__adpositionrevision__name=row["adposition_name"],
-            current_revision__metadatarevision__usagerevision__construal__name=row["construal_version"]
+            current_revision__metadatarevision__usagerevision__construal__role__current_revision__metadatarevision__supersenserevision__name=row["role_name"],
+            current_revision__metadatarevision__usagerevision__construal__function__current_revision__metadatarevision__supersenserevision__name=row["function_name"]
         )
 
 class CorpusSentenceResource(resources.ModelResource):
     corpus = fields.Field(
-        column_name='corpus_name',
+        column_name='corpus',
         attribute='corpus',
         widget=CorpusForeignKeyWidget(ms.Corpus, 'name'))
 
     language = fields.Field(
-        column_name='language_name',
+        column_name='language',
         attribute='language',
         widget=ForeignKeyWidget(ms.Language, 'name'))
 
@@ -91,29 +98,29 @@ class PTokenAnnotationResource(resources.ModelResource):
         widget=IntegerWidget())
 
     corpus = fields.Field(
-        column_name='corpus_name',
+        column_name='corpus',
         attribute='corpus',
         widget=CorpusForeignKeyWidget(ms.Corpus, 'name'))
 
     adposition = fields.Field(
-        column_name='adposition_name',
+        column_name='adposition',
         attribute='adposition',
         widget=AdpositionForeignKeyWidget(ms.Adposition, 'current_revision__metadatarevision__adpositionrevision__name'))
 
     construal = fields.Field(
-        column_name='construal_name',
+        column_name='construal',
         attribute='construal',
-        widget=ForeignKeyWidget(ms.Construal, 'name'))
+        widget=ConstrualForeignKeyWidget(ms.Construal, 'role__current_revision__metadatarevision__supersenserevision__name'))
 
     sentence = fields.Field(
-        column_name='sent_id',
+        column_name='sentence',
         attribute='sentence',
         widget=SentenceForeignKeyWidget(ms.CorpusSentence, 'sent_id'))
 
     usage = fields.Field(
-        column_name='construal',
+        column_name='usage',
         attribute='usage',
-        widget=UsageForeignKeyWidget(ms.Usage, 'current_revision__metadatarevision__usagerevision__construal__name'))
+        widget=UsageForeignKeyWidget(ms.Usage, 'current_revision__metadatarevision__usagerevision__construal__role__current_revision__metadatarevision__supersenserevision__name'))
 
     class Meta:
         model = ms.PTokenAnnotation
@@ -139,15 +146,16 @@ class ConstrualResource(resources.ModelResource):
         fields = ('role','function')
 
 class UsageRevisionResource(resources.ModelResource):
+    # ToDo handle revision creation
     adposition = fields.Field(
         column_name='adposition_name',
         attribute='adposition',
         widget=AdpositionForeignKeyWidget(ms.Adposition,'current_revision__metadatarevision__adpositionrevision__name'))
 
     construal = fields.Field(
-        column_name='construal_name',
+        column_name='construal',
         attribute='construal',
-        widget=ForeignKeyWidget(ms.Construal, 'name'))
+        widget=ConstrualForeignKeyWidget(ms.Construal, 'role__current_revision__metadatarevision__supersenserevision__name'))
 
     obj_case = fields.Field(
         column_name='obj_case',
@@ -156,15 +164,49 @@ class UsageRevisionResource(resources.ModelResource):
 
     class Meta:
         model = ms.UsageRevision
-        import_id_fields = ('adposition','name')
-        fields = ('adposition','name')
+        import_id_fields = ('adposition','construal')
+        fields = ('adposition','construal','obj_case')
 
+
+class SupersenseRevisionResource(resources.ModelResource):
+    #ToDo handle revision creation
+    name = fields.Field(attribute='name', widget=widgets.CharWidget())
+    description = fields.Field(attribute='description', widget=widgets.CharWidget())
+
+    class Meta:
+        model = ms.SupersenseRevision
+        import_id_fields = ('name','description')
+        fields = ('name','description')
+
+class AdpositionRevisionResource(resources.ModelResource):
+    # ToDo handle revision creation
+    name = fields.Field(attribute='name', widget=widgets.CharWidget())
+
+    lang = fields.Field(
+        column_name='language',
+        attribute='lang',
+        widget=ForeignKeyWidget(ms.Language, 'name'))
+
+    morphtype = fields.Field(attribute='name', widget=widgets.IntegerWidget())
+    transitivity = fields.Field(attribute='name', widget=widgets.IntegerWidget())
+    #ToDo obj_cases = fields.Field(attribute='name', widget=widgets.BitFieldWidget())
+
+    class Meta:
+        model = ms.SupersenseRevision
+        import_id_fields = ('name','lang')
+        fields = ('name','lang')
 
 class CorpusSentenceAdmin(ImportExportModelAdmin):
     resource_class = CorpusSentenceResource
 
 class PTokenAnnotationAdmin(ImportExportModelAdmin):
     resource_class = PTokenAnnotationResource
+
+class AdpositionRevisionAdmin(ImportExportModelAdmin):
+    resource_class = AdpositionRevisionResource
+
+class SupersenseRevisionAdmin(ImportExportModelAdmin):
+    resource_class = SupersenseRevisionResource
 
 class ConstrualAdmin(ImportExportModelAdmin):
     resource_class = ConstrualResource
