@@ -14,6 +14,9 @@ construal_list = set()
 adposition_list = set()
 usage_list = set()
 
+GENITIVE = 2**9
+ACCUSATIVE = 2**2
+
 # corpus sent
 corpus_name = 'streusle'
 corpus_version = '4.1'
@@ -101,7 +104,7 @@ with open(file, encoding='utf8') as f:
                             token_indices = ', '.join([str(x) for x in tok['toknums']])
                             adposition_name = tok['lexlemma']
                             construal_name = '??' if tok['ss'] == '??' else tok['ss'].replace('p.','')+'--'+tok['ss2'].replace('p.','')
-                            obj_case = 'Accusative' if not tok['lexcat']=='PRON.POSS' else 'Genitive'
+                            obj_case = str(ACCUSATIVE) if not tok['lexcat']=='PRON.POSS' else str(GENITIVE)
                             obj_head = govobj['objlemma'] if hasobj else default_str
                             gov_head = govobj['govlemma'] if hasgov else default_str
                             gov_obj_syntax = govobj['config']

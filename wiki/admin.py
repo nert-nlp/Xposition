@@ -13,7 +13,7 @@ from import_export.admin import ImportExportModelAdmin
 from import_export import resources
 from import_export import fields
 from import_export import widgets
-from import_export.widgets import ForeignKeyWidget
+from import_export.widgets import ForeignKeyWidget, IntegerWidget
 
 
 class CorpusForeignKeyWidget(ForeignKeyWidget):
@@ -63,8 +63,7 @@ class CorpusSentenceResource(resources.ModelResource):
     sent_gloss = fields.Field(attribute='sent_gloss',widget=widgets.CharWidget())
     note = fields.Field(attribute='note',widget=widgets.CharWidget())
     mwe_markup = fields.Field(attribute='mwe_markup',widget=widgets.CharWidget())
-    #
-    #
+
 
     class Meta:
         model = ms.CorpusSentence
@@ -75,7 +74,6 @@ class CorpusSentenceResource(resources.ModelResource):
 
 class PTokenAnnotationResource(resources.ModelResource):
     token_indices = fields.Field(attribute='token_indices',widget=widgets.CharWidget())
-    obj_case = fields.Field(attribute='obj_case',widget=widgets.CharWidget())
     obj_head = fields.Field(attribute='obj_head',widget=widgets.CharWidget())
     gov_head = fields.Field(attribute='gov_head',widget=widgets.CharWidget())
     gov_obj_syntax = fields.Field(attribute='gov_obj_syntax',widget=widgets.CharWidget())
@@ -86,6 +84,11 @@ class PTokenAnnotationResource(resources.ModelResource):
     obj_supersense = fields.Field(attribute='obj_supersense',widget=widgets.CharWidget())
     is_gold = fields.Field(attribute='is_gold',widget=widgets.BooleanWidget())
     annotator_cluster = fields.Field(attribute='annotator_cluster',widget=widgets.CharWidget())
+
+    obj_case = fields.Field(
+        column_name='obj_case',
+        attribute='obj_case',
+        widget=IntegerWidget())
 
     corpus = fields.Field(
         column_name='corpus_name',
@@ -120,13 +123,47 @@ class PTokenAnnotationResource(resources.ModelResource):
                   'gov_supersense', 'obj_supersense', 'is_gold', 'annotator_cluster')
 
 
+class ConstrualResource(resources.ModelResource):
+    name = fields.Field(attribute='name', widget=widgets.CharWidget())
+
+    class Meta:
+        model = ms.Construal
+        import_id_fields = ('name',)
+        fields = ('name')
+
+class UsageRevisionResource(resources.ModelResource):
+    adposition = fields.Field(
+        column_name='adposition_name',
+        attribute='adposition',
+        widget=AdpositionForeignKeyWidget(ms.Adposition,'current_revision__metadatarevision__adpositionrevision__name'))
+
+    construal = fields.Field(
+        column_name='construal_name',
+        attribute='construal',
+        widget=ForeignKeyWidget(ms.Construal, 'name'))
+
+    obj_case = fields.Field(
+        column_name='obj_case',
+        attribute='obj_case',
+        widget=IntegerWidget())
+
+    class Meta:
+        model = ms.UsageRevision
+        import_id_fields = ('adposition','name')
+        fields = ('adposition','name')
+
+
 class CorpusSentenceAdmin(ImportExportModelAdmin):
     resource_class = CorpusSentenceResource
 
 class PTokenAnnotationAdmin(ImportExportModelAdmin):
     resource_class = PTokenAnnotationResource
 
+class ConstrualAdmin(ImportExportModelAdmin):
+    resource_class = ConstrualResource
 
+class UsageRevisionAdmin(ImportExportModelAdmin):
+    resource_class = UsageRevisionResource
 
 # Django 1.9 deprecation of contenttypes.generic
 try:
