@@ -124,12 +124,19 @@ class PTokenAnnotationResource(resources.ModelResource):
 
 
 class ConstrualResource(resources.ModelResource):
-    name = fields.Field(attribute='name', widget=widgets.CharWidget())
+    role = fields.Field(
+        column_name='role',
+        attribute='role',
+        widget=ForeignKeyWidget(ms.Supersense,'current_revision__metadatarevision__supersenserevision__name'))
+    function = fields.Field(
+        column_name='function',
+        attribute='function',
+        widget=ForeignKeyWidget(ms.Supersense,'current_revision__metadatarevision__supersenserevision__name'))
 
     class Meta:
         model = ms.Construal
-        import_id_fields = ('name',)
-        fields = ('name')
+        import_id_fields = ('role','function')
+        fields = ('role','function')
 
 class UsageRevisionResource(resources.ModelResource):
     adposition = fields.Field(
@@ -262,3 +269,5 @@ admin.site.register(models.Article, ArticleAdmin)
 admin.site.register(models.ArticleRevision, ArticleRevisionAdmin)
 admin.site.register(ms.CorpusSentence, CorpusSentenceAdmin)
 admin.site.register(ms.PTokenAnnotation, PTokenAnnotationAdmin)
+admin.site.register(ms.Construal, ConstrualAdmin)
+admin.site.register(ms.UsageRevision, UsageRevisionAdmin)

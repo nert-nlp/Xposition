@@ -760,10 +760,10 @@ class PTokenAnnotation(models.Model):
 
 admin.site.register(Supersense)
 admin.site.register(SupersenseRevision)
-admin.site.register(Construal)
+# admin.site.register(Construal)
 admin.site.register(Language)
 admin.site.register(Adposition)
 admin.site.register(AdpositionRevision)
 admin.site.register(Usage)
-admin.site.register(UsageRevision)
+# admin.site.register(UsageRevision)
 admin.site.register(Corpus)

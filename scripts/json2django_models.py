@@ -124,8 +124,9 @@ with open('adpositions.tsv', 'w') as f:
     for a in adposition_list:
         f.write(a+'\n')
 with open('construals.tsv', 'w') as f:
+    f.write('role\tfunction' + '\n')
     for c in construal_list:
-        f.write(c + '\n')
+        f.write(c.replace('--','\t') + '\n')
 with open('usages.tsv', 'w') as f:
     for u in usage_list:
         f.write(u + '\n')
