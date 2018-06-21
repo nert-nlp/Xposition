@@ -5,9 +5,9 @@ file = r'C:\Users\Austin\Desktop\streusle.go.notes.json'
 sent_header = ['corpus_name', 'corpus_version', 'sent_id', 'language_name', 'orthography', 'is_parallel', 'doc_id',
                'text', 'tokens', 'word_gloss', 'sent_gloss', 'note', 'mwe_markup']
 
-ptoken_header = ['token_indices', 'adposition_name', 'language_name', 'construal_name', 'corpus_name', 'corpus_version', 'sent_id',
+ptoken_header = ['token_indices', 'adposition_name', 'language_name', 'role_name', 'function_name', 'corpus_name', 'corpus_version', 'sent_id',
                  'obj_case', 'obj_head', 'gov_head', 'gov_obj_syntax', 'adp_pos', 'gov_pos', 'obj_pos', 'gov_supersense',
-                 'obj_supersense', 'is_gold', 'annotator_cluster']
+                 'obj_supersense', 'is_gold', 'annotator_cluster','is_transitive']
 
 default_str = ' '
 construal_list = set()
@@ -36,7 +36,8 @@ mwe_markup = default_str
 # ptoken
 token_indices = default_str
 adposition_name = default_str
-construal_name = default_str
+role_name = default_str
+function_name = default_str
 corpus_name = 'streusle'
 corpus_version = '4.1'
 sent_id = default_str
@@ -51,6 +52,7 @@ gov_supersense = default_str
 obj_supersense = default_str
 is_gold = 'True'
 annotator_cluster = default_str
+is_transitive = 'True'
 
 
 
@@ -60,9 +62,9 @@ def add_corp_sent(f):
 
 
 def add_ptoken(f):
-    f.write('\t'.join([token_indices, adposition_name, language_name, construal_name, corpus_name, corpus_version, sent_id,
+    f.write('\t'.join([token_indices, adposition_name, language_name, role_name, function_name, corpus_name, corpus_version, sent_id,
                  obj_case, obj_head, gov_head, gov_obj_syntax, adp_pos, gov_pos, obj_pos, gov_supersense,
-                 obj_supersense, is_gold, annotator_cluster]) + '\n')
+                 obj_supersense, is_gold, annotator_cluster, is_transitive]) + '\n')
 
 
 def ss(sent, n):
@@ -103,7 +105,8 @@ with open(file, encoding='utf8') as f:
                             # assign fields
                             token_indices = ', '.join([str(x) for x in tok['toknums']])
                             adposition_name = tok['lexlemma']
-                            construal_name = '??' if tok['ss'] == '??' else tok['ss'].replace('p.','')+'--'+tok['ss2'].replace('p.','')
+                            role_name = tok['ss'].replace('p.','')
+                            function_name = '??' if tok['ss'] == '??' else tok['ss2'].replace('p.', '')
                             obj_case = str(ACCUSATIVE) if not tok['lexcat']=='PRON.POSS' else str(GENITIVE)
                             obj_head = govobj['objlemma'] if hasobj else default_str
                             gov_head = govobj['govlemma'] if hasgov else default_str
@@ -114,11 +117,12 @@ with open(file, encoding='utf8') as f:
                             gov_supersense = ss(sent, govobj['gov']) if hasgov else default_str
                             obj_supersense = ss(sent, govobj['obj']) if hasobj else default_str
                             annotator_cluster = tok['annotator_cluster'] if 'annotator_cluster' in tok else default_str
+                            is_transitive = str(hasobj)
                             add_ptoken(ptok)
 
                             adposition_list.add(adposition_name)
-                            construal_list.add(construal_name)
-                            usage_list.add(adposition_name+':'+construal_name)
+                            construal_list.add(role_name+'--'+function_name)
+                            usage_list.add(adposition_name+':'+role_name+'--'+function_name)
 
 with open('adpositions.tsv', 'w') as f:
     for a in adposition_list:
