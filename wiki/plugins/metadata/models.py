@@ -736,10 +736,11 @@ class PTokenAnnotation(models.Model):
     gov_supersense = models.CharField(max_length=200, blank=True, verbose_name="Governor Supersense")
     obj_supersense = models.CharField(max_length=200, blank=True, verbose_name="Object Supersense")
 
-    is_gold = models.BooleanField(default=False)
+    is_gold = models.BooleanField(default=False, verbose_name="Gold Annotation?")
     annotator_cluster = models.CharField(max_length=200, blank=True, verbose_name="Annotator Cluster",
                                        help_text='Informal Label for Grouping Similar Tokens')
-
+    is_transitive = models.BooleanField(default=True, verbose_name="Transitive?",
+                                       help_text='Does the adposition take an object?')
     # list of subtokens (for mwe)
     #subtokens = models.ManyToManyField(Adposition, blank=True, related_name='MWE subtokens')
 
