@@ -13,8 +13,9 @@ from import_export.admin import ImportExportModelAdmin
 from import_export import resources
 from import_export import fields
 from import_export import widgets
-from import_export.widgets import ForeignKeyWidget, IntegerWidget
-
+from import_export.widgets import ForeignKeyWidget, IntegerWidget, Widget
+from .plugins.categories.models import ArticleCategory
+from .models import URLPath
 
 class CorpusForeignKeyWidget(ForeignKeyWidget):
     def get_queryset(self, value, row):
@@ -48,6 +49,50 @@ class UsageForeignKeyWidget(ForeignKeyWidget):
             current_revision__metadatarevision__usagerevision__construal__role__current_revision__metadatarevision__supersenserevision__name=row["role_name"],
             current_revision__metadatarevision__usagerevision__construal__function__current_revision__metadatarevision__supersenserevision__name=row["function_name"]
         )
+
+class ObjCaseWidget(Widget):
+    def clean(self, value, row=None, *args, **kwargs):
+        return ms.Case[value]
+
+class MorphTypeWidget(Widget):
+    def clean(self, value, row=None, *args, **kwargs):
+        return ms.Adposition.MorphType[value]
+
+#ToDo make BitField object for Adposition cases
+class CaseBitFieldWidget(Widget):
+    def clean(self, value, row=None, *args, **kwargs):
+        return 2**ms.Case[value]
+
+
+def newArticle_ArticleCategory(name=None, parent=None, slug=None):
+
+    article = ...
+    request = ...
+    # code taken from wiki/plugins/metadat/forms.py
+    article_urlpath = URLPath.create_article(
+        parent=parent or URLPath.root(),
+        slug=slug,
+        title=name,
+        content=name,
+        user_message=" ",
+        user=request.user,
+        article_kwargs={'owner': request.user,
+                        'group': article.group,
+                        'group_read': article.group_read,
+                        'group_write': article.group_write,
+                        'other_read': article.other_read,
+                        'other_write': article.other_write,
+                        })
+    newarticle = models.Article.objects.get(urlpath=article_urlpath)
+    newcategory = ArticleCategory(slug=name,
+                                  name=name,
+                                  description=' ',
+                                  parent=parent)
+    newcategory.article = newarticle
+    newcategory.save()
+    return newarticle, newcategory
+
+
 
 class CorpusSentenceResource(resources.ModelResource):
     corpus = fields.Field(
@@ -95,7 +140,7 @@ class PTokenAnnotationResource(resources.ModelResource):
     obj_case = fields.Field(
         column_name='obj_case',
         attribute='obj_case',
-        widget=IntegerWidget())
+        widget=ObjCaseWidget())
 
     corpus = fields.Field(
         column_name='corpus',
@@ -146,7 +191,6 @@ class ConstrualResource(resources.ModelResource):
         fields = ('role','function')
 
 class UsageRevisionResource(resources.ModelResource):
-    # ToDo handle revision creation
     adposition = fields.Field(
         column_name='adposition_name',
         attribute='adposition',
@@ -160,7 +204,46 @@ class UsageRevisionResource(resources.ModelResource):
     obj_case = fields.Field(
         column_name='obj_case',
         attribute='obj_case',
-        widget=IntegerWidget())
+        widget=ObjCaseWidget())
+
+    # ToDo handle revision creation
+    def init_instance(row=None, **kwargs):
+        m = super(UsageRevisionResource).init_instance(row, kwargs)
+        # TODO
+        article = ...
+        request = ...
+        # code taken from wiki/plugins/metadata/forms.py
+        if len(m.obj_case.choices)<2:
+            case = None
+        else:
+            case = ms.Case.shortname(m.obj_case)
+        caseSlug = '<'+case+'>' if case else ''
+        construalSlug = m.construal.article.urlpath_set.all()[0].slug
+        name = UsageRevisionResource.get_usage_name(ms.deepest_instance(m.adposition.current_revision).name,
+                                   str(m.construal),
+                                   case)
+        newarticle, newcategory = newArticle_ArticleCategory(parent=article.urlpath_set.all()[0],
+                                                                  name=name,
+                                                                  slug=caseSlug + construalSlug)
+        # associate the article with the SupersenseRevision
+        m.article = newarticle
+        m.name = name
+
+        # create the Supersense, add the article, category, and revision
+        u = ms.Usage()
+        u.article = newarticle
+        u.category = newcategory
+        u.add_revision(m, request, article_revision=newarticle.current_revision, save=True) # cannot delay saving the new adposition revision
+
+        m.save()
+        u.save()
+
+        return m
+
+    def get_usage_name(cls, adp_name, construal_name, case=None):
+        """Provide 'case' only if it is potentially ambiguous for this adposition"""
+        casespec = '<'+case+'>' if case else ''
+        return adp_name + casespec + ': ' + construal_name
 
     class Meta:
         model = ms.UsageRevision
@@ -169,9 +252,33 @@ class UsageRevisionResource(resources.ModelResource):
 
 
 class SupersenseRevisionResource(resources.ModelResource):
-    #ToDo handle revision creation
     name = fields.Field(attribute='name', widget=widgets.CharWidget())
     description = fields.Field(attribute='description', widget=widgets.CharWidget())
+    slug = fields.Field(attribute='slug', widget=widgets.CharWidget())
+
+    # ToDo handle revision creation
+    def init_instance(row=None, **kwargs):
+        m = super(SupersenseRevisionResource).init_instance(row, kwargs)
+        # TODO
+        article = ...
+        request = ...
+        # code taken from wiki/plugins/metadata/forms.py
+        newarticle, newcategory = newArticle_ArticleCategory(m.name, None, m.slug)
+        # associate the article with the SupersenseRevision
+        m.article = newarticle
+
+        # create the Supersense, add the article, category, and revision
+        supersense = ms.Supersense()
+        supersense.article = newarticle
+        supersense.category = newcategory
+        supersense.category.parent = None
+
+        supersense.add_revision(m, request, article_revision=newarticle.current_revision,
+                                save=True)  # cannot delay saving the new supersense revision
+
+        m.save()
+        supersense.save()
+        return m
 
     class Meta:
         model = ms.SupersenseRevision
@@ -179,7 +286,6 @@ class SupersenseRevisionResource(resources.ModelResource):
         fields = ('name','description')
 
 class AdpositionRevisionResource(resources.ModelResource):
-    # ToDo handle revision creation
     name = fields.Field(attribute='name', widget=widgets.CharWidget())
 
     lang = fields.Field(
@@ -187,9 +293,31 @@ class AdpositionRevisionResource(resources.ModelResource):
         attribute='lang',
         widget=ForeignKeyWidget(ms.Language, 'name'))
 
-    morphtype = fields.Field(attribute='name', widget=widgets.IntegerWidget())
-    transitivity = fields.Field(attribute='name', widget=widgets.IntegerWidget())
-    #ToDo obj_cases = fields.Field(attribute='name', widget=widgets.BitFieldWidget())
+    morphtype = fields.Field(attribute='name', widget=MorphTypeWidget())
+    transitivity = fields.Field(attribute='name', widget=widgets.BooleanWidget())
+    #ToDo obj_cases = fields.Field(attribute='name', widget=CaseBitFieldWidget())
+
+    # ToDo handle revision creation
+    def init_instance(row=None, **kwargs):
+        m = super(AdpositionRevisionResource).init_instance(row, kwargs)
+        # TODO
+        article = ...
+        request = ...
+        # code taken from wiki/plugins/metadata/forms.py
+        newarticle, newcategory = newArticle_ArticleCategory(parent=article.urlpath_set.all()[0])
+        # associate the article with the SupersenseRevision
+        m.article = newarticle
+
+        # create the Supersense, add the article, category, and revision
+        p = ms.Adposition()
+        p.article = newarticle
+        p.category = newcategory
+        p.add_revision(m, self.request, article_revision=newarticle.current_revision,
+                       save=True)  # cannot delay saving the new adposition revision
+
+        m.save()
+        p.save()
+        return m
 
     class Meta:
         model = ms.SupersenseRevision
@@ -313,3 +441,5 @@ admin.site.register(ms.CorpusSentence, CorpusSentenceAdmin)
 admin.site.register(ms.PTokenAnnotation, PTokenAnnotationAdmin)
 admin.site.register(ms.Construal, ConstrualAdmin)
 admin.site.register(ms.UsageRevision, UsageRevisionAdmin)
+admin.site.register(ms.AdpositionRevision, AdpositionRevisionAdmin)
+admin.site.register(ms.SupersenseRevision, SupersenseRevisionAdmin)
