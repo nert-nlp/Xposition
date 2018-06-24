@@ -1,5 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
+import import_export
 from django import forms
 from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _
@@ -15,7 +16,10 @@ from import_export import fields
 from import_export import widgets
 from import_export.widgets import ForeignKeyWidget, IntegerWidget, Widget
 from .plugins.categories.models import ArticleCategory
-from .models import URLPath
+from .models import URLPath, Article
+from django.contrib.auth.models import User
+
+Admin_request = None
 
 class CorpusForeignKeyWidget(ForeignKeyWidget):
     def get_queryset(self, value, row):
@@ -58,16 +62,9 @@ class MorphTypeWidget(Widget):
     def clean(self, value, row=None, *args, **kwargs):
         return ms.Adposition.MorphType[value]
 
-#ToDo make BitField object for Adposition cases
-class CaseBitFieldWidget(Widget):
-    def clean(self, value, row=None, *args, **kwargs):
-        return 2**ms.Case[value]
+def newArticle_ArticleCategory(article=None, name=None, parent=None, slug=None):
+    user = User.objects.get(username='admin')
 
-
-def newArticle_ArticleCategory(name=None, parent=None, slug=None):
-
-    article = ...
-    request = ...
     # code taken from wiki/plugins/metadat/forms.py
     article_urlpath = URLPath.create_article(
         parent=parent or URLPath.root(),
@@ -75,8 +72,8 @@ def newArticle_ArticleCategory(name=None, parent=None, slug=None):
         title=name,
         content=name,
         user_message=" ",
-        user=request.user,
-        article_kwargs={'owner': request.user,
+        user=user,
+        article_kwargs={'owner': user,
                         'group': article.group,
                         'group_read': article.group_read,
                         'group_write': article.group_write,
@@ -190,7 +187,86 @@ class ConstrualResource(resources.ModelResource):
         import_id_fields = ('role','function')
         fields = ('role','function')
 
-class UsageRevisionResource(resources.ModelResource):
+
+class SupersenseRevisionResource(import_export.resources.ModelResource):
+    name = fields.Field(attribute='name', widget=widgets.CharWidget())
+    description = fields.Field(attribute='description', widget=widgets.CharWidget())
+    slug = fields.Field(attribute='slug', widget=widgets.CharWidget())
+    revision_number = fields.Field(attribute='revision_number', widget=widgets.IntegerWidget())
+
+    # handle revision creation
+    def after_save_instance(self, instance, using_transactions, dry_run):
+        m = instance
+
+        article = Article.objects.get(name='Locus')
+        user = User.objects.get(username='admin')
+        # code taken from wiki/plugins/metadata/forms.py
+        newarticle, newcategory = newArticle_ArticleCategory(article, m.name, None, m.slug)
+        # associate the article with the SupersenseRevision
+        m.article = newarticle
+
+        # create the Supersense, add the article, category, and revision
+        supersense = ms.Supersense()
+        supersense.article = newarticle
+        supersense.category = newcategory
+        supersense.category.parent = None
+        supersense.add_revision(m, Admin_request, article_revision=newarticle.current_revision,
+                                save=True)  # cannot delay saving the new supersense revision
+
+        m.save()
+        supersense.save()
+        return m
+
+    class Meta:
+        model = ms.SupersenseRevision
+        import_id_fields = ('name','description')
+        fields = ('name','description')
+
+class AdpositionRevisionResource(import_export.resources.ModelResource):
+    def __init__(self, request=None):
+        super().__init__()
+        self.request = request
+
+    name = fields.Field(attribute='name', widget=widgets.CharWidget())
+
+    lang = fields.Field(
+        column_name='language',
+        attribute='lang',
+        widget=ForeignKeyWidget(ms.Language, 'name'))
+
+    morphtype = fields.Field(attribute='morphtype', widget=MorphTypeWidget())
+    transitivity = fields.Field(attribute='transitivity', widget=widgets.BooleanWidget())
+    obj_cases = fields.Field(attribute='obj_case', widget=ObjCaseWidget())
+
+    # handle revision creation
+    def after_save_instance(self, instance, using_transactions, dry_run):
+        m = instance
+
+        article = Article.objects.get(name='in', lang__name='en')
+        user = User.objects.get(username='admin')
+        # code taken from wiki/plugins/metadata/forms.py
+        newarticle, newcategory = newArticle_ArticleCategory(article,  m.name, article.urlpath_set.all()[0], m.slug)
+        # associate the article with the AdpositionRevision
+        m.article = newarticle
+
+        # create the Adposition, add the article, category, and revision
+        p = ms.Adposition()
+        p.article = newarticle
+        p.category = newcategory
+        p.add_revision(m, Admin_request, article_revision=newarticle.current_revision,
+                       save=True)  # cannot delay saving the new adposition revision
+
+        m.save()
+        p.save()
+        return m
+
+    class Meta:
+        model = ms.SupersenseRevision
+        import_id_fields = ('name','lang')
+        fields = ('name','lang')
+
+
+class UsageRevisionResource(import_export.resources.ModelResource):
     adposition = fields.Field(
         column_name='adposition_name',
         attribute='adposition',
@@ -206,12 +282,16 @@ class UsageRevisionResource(resources.ModelResource):
         attribute='obj_case',
         widget=ObjCaseWidget())
 
-    # ToDo handle revision creation
-    def init_instance(row=None, **kwargs):
-        m = super(UsageRevisionResource).init_instance(row, kwargs)
-        # TODO
-        article = ...
-        request = ...
+    # handle revision creation
+    def after_save_instance(self, instance, using_transactions, dry_run):
+        m = instance
+
+        article = Article.objects.get(adposition__current_revision__metadatarevision__adpositionrevision__name='in',
+            construal__role__current_revision__metadatarevision__supersenserevision__name='Locus',
+            construal__function__current_revision__metadatarevision__supersenserevision__name='Locus')
+
+        user = User.objects.get(username='admin')
+        
         # code taken from wiki/plugins/metadata/forms.py
         if len(m.obj_case.choices)<2:
             case = None
@@ -222,7 +302,7 @@ class UsageRevisionResource(resources.ModelResource):
         name = UsageRevisionResource.get_usage_name(ms.deepest_instance(m.adposition.current_revision).name,
                                    str(m.construal),
                                    case)
-        newarticle, newcategory = newArticle_ArticleCategory(parent=article.urlpath_set.all()[0],
+        newarticle, newcategory = newArticle_ArticleCategory(article, parent=article.urlpath_set.all()[0],
                                                                   name=name,
                                                                   slug=caseSlug + construalSlug)
         # associate the article with the SupersenseRevision
@@ -233,7 +313,7 @@ class UsageRevisionResource(resources.ModelResource):
         u = ms.Usage()
         u.article = newarticle
         u.category = newcategory
-        u.add_revision(m, request, article_revision=newarticle.current_revision, save=True) # cannot delay saving the new adposition revision
+        u.add_revision(m, Admin_request, article_revision=newarticle.current_revision, save=True) # cannot delay saving the new adposition revision
 
         m.save()
         u.save()
@@ -251,79 +331,6 @@ class UsageRevisionResource(resources.ModelResource):
         fields = ('adposition','construal','obj_case')
 
 
-class SupersenseRevisionResource(resources.ModelResource):
-    name = fields.Field(attribute='name', widget=widgets.CharWidget())
-    description = fields.Field(attribute='description', widget=widgets.CharWidget())
-    slug = fields.Field(attribute='slug', widget=widgets.CharWidget())
-
-    # ToDo handle revision creation
-    def init_instance(row=None, **kwargs):
-        m = super(SupersenseRevisionResource).init_instance(row, kwargs)
-        # TODO
-        article = ...
-        request = ...
-        # code taken from wiki/plugins/metadata/forms.py
-        newarticle, newcategory = newArticle_ArticleCategory(m.name, None, m.slug)
-        # associate the article with the SupersenseRevision
-        m.article = newarticle
-
-        # create the Supersense, add the article, category, and revision
-        supersense = ms.Supersense()
-        supersense.article = newarticle
-        supersense.category = newcategory
-        supersense.category.parent = None
-
-        supersense.add_revision(m, request, article_revision=newarticle.current_revision,
-                                save=True)  # cannot delay saving the new supersense revision
-
-        m.save()
-        supersense.save()
-        return m
-
-    class Meta:
-        model = ms.SupersenseRevision
-        import_id_fields = ('name','description')
-        fields = ('name','description')
-
-class AdpositionRevisionResource(resources.ModelResource):
-    name = fields.Field(attribute='name', widget=widgets.CharWidget())
-
-    lang = fields.Field(
-        column_name='language',
-        attribute='lang',
-        widget=ForeignKeyWidget(ms.Language, 'name'))
-
-    morphtype = fields.Field(attribute='name', widget=MorphTypeWidget())
-    transitivity = fields.Field(attribute='name', widget=widgets.BooleanWidget())
-    #ToDo obj_cases = fields.Field(attribute='name', widget=CaseBitFieldWidget())
-
-    # ToDo handle revision creation
-    def init_instance(row=None, **kwargs):
-        m = super(AdpositionRevisionResource).init_instance(row, kwargs)
-        # TODO
-        article = ...
-        request = ...
-        # code taken from wiki/plugins/metadata/forms.py
-        newarticle, newcategory = newArticle_ArticleCategory(parent=article.urlpath_set.all()[0])
-        # associate the article with the SupersenseRevision
-        m.article = newarticle
-
-        # create the Supersense, add the article, category, and revision
-        p = ms.Adposition()
-        p.article = newarticle
-        p.category = newcategory
-        p.add_revision(m, self.request, article_revision=newarticle.current_revision,
-                       save=True)  # cannot delay saving the new adposition revision
-
-        m.save()
-        p.save()
-        return m
-
-    class Meta:
-        model = ms.SupersenseRevision
-        import_id_fields = ('name','lang')
-        fields = ('name','lang')
-
 class CorpusSentenceAdmin(ImportExportModelAdmin):
     resource_class = CorpusSentenceResource
 
@@ -331,16 +338,37 @@ class PTokenAnnotationAdmin(ImportExportModelAdmin):
     resource_class = PTokenAnnotationResource
 
 class AdpositionRevisionAdmin(ImportExportModelAdmin):
+
     resource_class = AdpositionRevisionResource
+    # from https://stackoverflow.com/questions/727928/django-admin-how-to-access-the-request-object-in-admin-py-for-list-display-met
+    def get_queryset(self, request):
+        global Admin_request
+        qs = super(AdpositionRevisionAdmin, self).get_queryset(request)
+        Admin_request = request
+        return qs
 
 class SupersenseRevisionAdmin(ImportExportModelAdmin):
     resource_class = SupersenseRevisionResource
+    # from https://stackoverflow.com/questions/727928/django-admin-how-to-access-the-request-object-in-admin-py-for-list-display-met
+    def get_queryset(self, request):
+        global Admin_request
+        qs = super(SupersenseRevisionAdmin, self).get_queryset(request)
+        Admin_request = request
+        return qs
+
+class UsageRevisionAdmin(ImportExportModelAdmin):
+    resource_class = UsageRevisionResource
+    # from https://stackoverflow.com/questions/727928/django-admin-how-to-access-the-request-object-in-admin-py-for-list-display-met
+    def get_queryset(self, request):
+        global Admin_request
+        qs = super(UsageRevisionAdmin, self).get_queryset(request)
+        Admin_request = request
+        return qs
 
 class ConstrualAdmin(ImportExportModelAdmin):
     resource_class = ConstrualResource
 
-class UsageRevisionAdmin(ImportExportModelAdmin):
-    resource_class = UsageRevisionResource
+
 
 # Django 1.9 deprecation of contenttypes.generic
 try:

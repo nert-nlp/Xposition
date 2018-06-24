@@ -13,9 +13,8 @@ default_str = ' '
 construal_list = set()
 adposition_list = set()
 usage_list = set()
+supersense_list = set()
 
-GENITIVE = 2**9
-ACCUSATIVE = 2**2
 
 # corpus sent
 corpus_name = 'streusle'
@@ -107,7 +106,7 @@ with open(file, encoding='utf8') as f:
                             adposition_name = tok['lexlemma']
                             role_name = tok['ss'].replace('p.','')
                             function_name = '??' if tok['ss'] == '??' else tok['ss2'].replace('p.', '')
-                            obj_case = str(ACCUSATIVE) if not tok['lexcat']=='PRON.POSS' else str(GENITIVE)
+                            obj_case = 'ACCUSATIVE' if not tok['lexcat']=='PRON.POSS' else 'GENITIVE'
                             obj_head = govobj['objlemma'] if hasobj else default_str
                             gov_head = govobj['govlemma'] if hasgov else default_str
                             gov_obj_syntax = govobj['config']
@@ -120,19 +119,29 @@ with open(file, encoding='utf8') as f:
                             is_transitive = str(hasobj)
                             add_ptoken(ptok)
 
-                            adposition_list.add(adposition_name)
+                            morphtype = 'standalone_preposition' if not tok['lexlemma']=="'s" else 'suffix'
+
+                            adposition_list.add((adposition_name,language_name,morphtype,is_transitive,obj_case,'0'))
                             construal_list.add(role_name+'--'+function_name)
-                            usage_list.add(adposition_name+':'+role_name+'--'+function_name)
+                            usage_list.add((adposition_name,role_name,function_name,obj_case,'0'))
+                            supersense_list.add(role_name)
+                            supersense_list.add(function_name)
 
 with open('adpositions.tsv', 'w') as f:
+    f.write('name\tlanguage_name\tmorphtype\ttransitivity\tobj_case\trevision_number' + '\n')
     for a in adposition_list:
-        f.write(a+'\n')
+        f.write('\t'.join(a)+'\n')
 with open('construals.tsv', 'w') as f:
     f.write('role\tfunction' + '\n')
     for c in construal_list:
         f.write(c.replace('--','\t') + '\n')
 with open('usages.tsv', 'w') as f:
+    f.write('adposition_name\trole_name\tfunction_name\tobj_case\trevision_number' + '\n')
     for u in usage_list:
-        f.write(u + '\n')
+        f.write('\t'.join(u)+'\n')
+with open('supersenses.tsv', 'w') as f:
+    f.write('name\tdescription\tslug\trevision_number' + '\n')
+    for s in supersense_list:
+        f.write(s+'\t'+' '+'\t'+s+'0\n')
 
 
