@@ -170,7 +170,7 @@ with open(file, encoding='utf8') as f:
                             adposition_list.add(
                                 (adposition_name, language_name, morphtype, obj_case))
                             construal_list.add(role_name + '--' + function_name)
-                            usage_list.add((adposition_name, role_name, function_name, obj_case, '0'))
+                            usage_list.add((adposition_name, role_name, function_name, obj_case))
                             supersense_list.add(role_name)
                             supersense_list.add(function_name)
 adp_transitivity = {}
@@ -189,10 +189,10 @@ with open('construals.tsv', 'w') as f:
     for c in construal_list:
         f.write(c.replace('--', '\t') + '\n')
 with open('usages.tsv', 'w') as f:
-    f.write('adposition_name\trole_name\tfunction_name\tobj_case\trevision_number' + '\n')
+    f.write('adposition_name\trole_name\tfunction_name\tobj_case' + '\n')
     for u in usage_list:
         f.write('\t'.join(u) + '\n')
 with open('supersenses.tsv', 'w') as f:
-    f.write('supersense_name\tdescription\tslug\trevision_number' + '\n')
+    f.write('supersense_name' + '\n')
     for s in supersense_list:
-        f.write(s + '\t' + ' ' + '\t' + s + '0\n')
+        f.write(s  + '\n')

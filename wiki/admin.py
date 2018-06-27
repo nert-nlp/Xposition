@@ -39,34 +39,6 @@ class SentenceForeignKeyWidget(ForeignKeyWidget):
         )
 
 
-# class AdpositionForeignKeyWidget(ForeignKeyWidget):
-#     def get_queryset(self, value, row):
-#         return self.model.objects.filter(
-#             current_revision__metadatarevision__adpositionrevision__lang__name=row["language_name"],
-#             current_revision__metadatarevision__adpositionrevision__name=row["adposition_name"]
-#         )
-#
-#
-# class ConstrualForeignKeyWidget(ForeignKeyWidget):
-#     def get_queryset(self, value, row):
-#         return self.model.objects.filter(
-#             role__current_revision__metadatarevision__supersenserevision__name=row["role_name"],
-#             function__current_revision__metadatarevision__supersenserevision__name=row["function_name"]
-#         )
-#
-#
-# class UsageForeignKeyWidget(ForeignKeyWidget):
-#     def get_queryset(self, value, row):
-#         return self.model.objects.filter(
-#             current_revision__metadatarevision__usagerevision__adposition__current_revision__metadatarevision__adpositionrevision__name=
-#             row["adposition_name"],
-#             current_revision__metadatarevision__usagerevision__construal__role__current_revision__metadatarevision__supersenserevision__name=
-#             row["role_name"],
-#             current_revision__metadatarevision__usagerevision__construal__function__current_revision__metadatarevision__supersenserevision__name=
-#             row["function_name"]
-#         )
-
-
 class ObjCaseWidget(Widget):
     def clean(self, value, row=None, *args, **kwargs):
         return ms.Case[value]
@@ -81,32 +53,42 @@ class TransitivityWidget(Widget):
         return ms.Adposition.Transitivity[value]
 
 
-def newArticle_ArticleCategory(article=None, name=None, parent=None, slug=None):
+class MyFunctions:
     user = User.objects.get(username='admin')
+    request = Admin_request
 
-    # code taken from wiki/plugins/metadat/forms.py
-    article_urlpath = URLPath.create_article(
-        parent=parent or URLPath.root(),
-        slug=slug,
-        title=name,
-        content=name,
-        user_message=" ",
-        user=user,
-        article_kwargs={'owner': user,
-                        'group': article.group,
-                        'group_read': article.group_read,
-                        'group_write': article.group_write,
-                        'other_read': article.other_read,
-                        'other_write': article.other_write,
-                        })
-    newarticle = models.Article.objects.get(urlpath=article_urlpath)
-    newcategory = ArticleCategory(slug=name,
-                                  name=name,
-                                  description=' ',
-                                  parent=parent)
-    newcategory.article = newarticle
-    newcategory.save()
-    return newarticle, newcategory
+    def newArticle(self, article=None, name=None, slug=None, parent=None):
+        article_urlpath = URLPath.create_article(
+            parent=parent or URLPath.root(),
+            slug=slug,
+            title=name,
+            content=name,
+            user_message=" ",
+            user=self.request.user,
+            article_kwargs={'owner': self.user,
+                            'group': article.group,
+                            'group_read': article.group_read,
+                            'group_write': article.group_write,
+                            'other_read': article.other_read,
+                            'other_write': article.other_write,
+                            })
+        newarticle = models.Article.objects.get(urlpath=article_urlpath)
+        return newarticle
+
+
+
+    def newArticle_ArticleCategory(self, article=None, name=None, parent=None, slug=None):
+        newarticle = self.newArticle(article=article,
+                                     name=name,
+                                     slug=slug or name,
+                                     parent=parent)
+        newcategory = ArticleCategory(slug=name,
+                                      name=name,
+                                      description=name,
+                                      parent=parent.category if parent else None)
+        newcategory.article = newarticle
+        newcategory.save()
+        return newarticle, newcategory
 
 
 class CorpusSentenceResource(resources.ModelResource):
@@ -157,11 +139,6 @@ class PTokenAnnotationResource(resources.ModelResource):
         attribute='obj_case',
         widget=ObjCaseWidget())
 
-    # corpus = fields.Field(
-    #     column_name='corpus',
-    #     attribute='corpus',
-    #     widget=CorpusForeignKeyWidget(ms.Corpus, 'name'))
-
     adposition = fields.Field(
         column_name='adposition_id',
         attribute='adposition',
@@ -207,20 +184,17 @@ class ConstrualResource(resources.ModelResource):
         fields = ('role', 'function')
 
 
-class SupersenseRevisionResource(import_export.resources.ModelResource):
-    name = fields.Field(attribute='name', widget=widgets.CharWidget())
-    description = fields.Field(attribute='description', widget=widgets.CharWidget())
-    slug = fields.Field(attribute='slug', widget=widgets.CharWidget())
-    revision_number = fields.Field(attribute='revision_number', widget=widgets.IntegerWidget())
+class SupersenseRevisionResource(resources.ModelResource):
+
+    name = fields.Field(attribute='name', column_name='supersense_name', widget=widgets.CharWidget())
 
     # handle revision creation
-    def after_save_instance(self, instance, using_transactions, dry_run):
+    def before_save_instance(self, instance, using_transactions, dry_run):
         m = instance
 
         article = Article.objects.get(name='Locus')
-        user = User.objects.get(username='admin')
         # code taken from wiki/plugins/metadata/forms.py
-        newarticle, newcategory = newArticle_ArticleCategory(article, m.name, None, m.slug)
+        newarticle, newcategory = MyFunctions.newArticle_ArticleCategory(article, m.name, None, m.name)
         # associate the article with the SupersenseRevision
         m.article = newarticle
 
@@ -229,7 +203,7 @@ class SupersenseRevisionResource(import_export.resources.ModelResource):
         supersense.article = newarticle
         supersense.category = newcategory
         supersense.category.parent = None
-        supersense.add_revision(m, None, article_revision=newarticle.current_revision,
+        supersense.add_revision(m, Admin_request, article_revision=newarticle.current_revision,
                                 save=True)  # cannot delay saving the new supersense revision
 
         m.save()
@@ -238,13 +212,13 @@ class SupersenseRevisionResource(import_export.resources.ModelResource):
 
     class Meta:
         model = ms.SupersenseRevision
-        import_id_fields = ('name', 'description')
-        fields = ('name', 'description')
+        import_id_fields = ('name')
+        fields = ('name')
 
 
 class AdpositionRevisionResource(import_export.resources.ModelResource):
 
-    name = fields.Field(column_name='adposition_name', attribute='name', widget=widgets.CharWidget())
+    # name = fields.Field(column_name='adposition_name', attribute='name', widget=widgets.CharWidget())
 
     lang = fields.Field(
         column_name='language_name',
@@ -256,13 +230,13 @@ class AdpositionRevisionResource(import_export.resources.ModelResource):
     obj_cases = fields.Field(attribute='obj_case', widget=ObjCaseWidget())
 
     # handle revision creation
-    def after_save_instance(self, instance, using_transactions, dry_run):
+    def save_instance(self, instance, using_transactions, dry_run):
         m = instance
 
         article = Article.objects.get(name='in', lang__name='en')
         user = User.objects.get(username='admin')
         # code taken from wiki/plugins/metadata/forms.py
-        newarticle, newcategory = newArticle_ArticleCategory(article, m.name, article.urlpath_set.all()[0], m.slug)
+        newarticle, newcategory = MyFunctions.newArticle_ArticleCategory(article, m.name, article.urlpath_set.all()[0], m.slug)
         # associate the article with the AdpositionRevision
         m.article = newarticle
 
@@ -279,8 +253,8 @@ class AdpositionRevisionResource(import_export.resources.ModelResource):
 
     class Meta:
         model = ms.AdpositionRevision
-        import_id_fields = ('name', 'lang')
-        fields = ('name', 'lang')
+        import_id_fields = ('lang',)#('name', 'lang')
+        fields = ('lang', 'morphtype', 'obj_case', 'transitivity')
 
 
 class UsageRevisionResource(import_export.resources.ModelResource):
@@ -300,7 +274,7 @@ class UsageRevisionResource(import_export.resources.ModelResource):
         widget=ObjCaseWidget())
 
     # handle revision creation
-    def after_save_instance(self, instance, using_transactions, dry_run):
+    def before_save_instance(self, instance, using_transactions, dry_run):
         m = instance
 
         article = Article.objects.get(adposition__current_revision__metadatarevision__adpositionrevision__name='in',
@@ -319,7 +293,7 @@ class UsageRevisionResource(import_export.resources.ModelResource):
         name = UsageRevisionResource.get_usage_name(ms.deepest_instance(m.adposition.current_revision).name,
                                                     str(m.construal),
                                                     case)
-        newarticle, newcategory = newArticle_ArticleCategory(article, parent=article.urlpath_set.all()[0],
+        newarticle, newcategory = MyFunctions.newArticle_ArticleCategory(article, parent=article.urlpath_set.all()[0],
                                                              name=name,
                                                              slug=caseSlug + construalSlug)
         # associate the article with the SupersenseRevision
