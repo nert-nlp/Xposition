@@ -18,9 +18,9 @@ from import_export.widgets import ForeignKeyWidget, IntegerWidget, Widget
 from .plugins.categories.models import ArticleCategory
 from .models import URLPath, Article
 from django.contrib.auth.models import User
+from .plugins.metadata.models import deepest_instance
 
 Admin_request = None
-
 
 class CorpusForeignKeyWidget(ForeignKeyWidget):
     def get_queryset(self, value, row):
@@ -55,7 +55,11 @@ class TransitivityWidget(Widget):
 
 class MyFunctions:
     user = User.objects.get(username='admin')
-    request = Admin_request
+
+
+    def __init__(self, request):
+        self.request = request
+
 
     def newArticle(self, article=None, name=None, slug=None, parent=None):
         article_urlpath = URLPath.create_article(
@@ -64,7 +68,7 @@ class MyFunctions:
             title=name,
             content=name,
             user_message=" ",
-            user=self.request.user,
+            user=self.user,
             article_kwargs={'owner': self.user,
                             'group': article.group,
                             'group_read': article.group_read,
@@ -170,13 +174,30 @@ class PTokenAnnotationResource(resources.ModelResource):
 
 class ConstrualResource(resources.ModelResource):
     role = fields.Field(
-        column_name='role_name',
+        column_name='role_id',
         attribute='role',
-        widget=ForeignKeyWidget(ms.Supersense, 'current_revision__metadatarevision__supersenserevision__name'))
+        widget=ForeignKeyWidget(ms.Supersense))
     function = fields.Field(
-        column_name='function_name',
+        column_name='function_id',
         attribute='function',
-        widget=ForeignKeyWidget(ms.Supersense, 'current_revision__metadatarevision__supersenserevision__name'))
+        widget=ForeignKeyWidget(ms.Supersense))
+
+    def save_instance(self, instance, using_transactions=True, dry_run=False):
+        m = instance
+        article = Article.objects.get(current_revision__title='Locus--Locus')
+
+        role_name = deepest_instance(m.role.current_revision).name
+        function_name = deepest_instance(m.function.current_revision).name
+        name = self.get_construal_slug(role_name, function_name)
+        # slug will be the same as name
+        newarticle, newcategory = MyFunctions(Admin_request).newArticle_ArticleCategory(name=name, slug=name, article=article, parent=None)
+        m.article = newarticle
+        m.category = newcategory
+        m.save()
+
+    def get_construal_slug(cls, role_name, function_name):
+        return role_name + '--' + function_name
+
 
     class Meta:
         model = ms.Construal
@@ -186,15 +207,15 @@ class ConstrualResource(resources.ModelResource):
 
 class SupersenseRevisionResource(resources.ModelResource):
 
-    name = fields.Field(attribute='name', column_name='supersense_name', widget=widgets.CharWidget())
+    name = fields.Field(attribute='Zname', column_name='supersense_name', widget=widgets.CharWidget())
 
     # handle revision creation
-    def before_save_instance(self, instance, using_transactions, dry_run):
+    def save_instance(self, instance, using_transactions=True, dry_run=False):
         m = instance
 
         article = Article.objects.get(name='Locus')
         # code taken from wiki/plugins/metadata/forms.py
-        newarticle, newcategory = MyFunctions.newArticle_ArticleCategory(article, m.name, None, m.name)
+        newarticle, newcategory = MyFunctions(Admin_request).newArticle_ArticleCategory(article, m.name, None, m.name)
         # associate the article with the SupersenseRevision
         m.article = newarticle
 
@@ -230,13 +251,12 @@ class AdpositionRevisionResource(import_export.resources.ModelResource):
     obj_cases = fields.Field(attribute='obj_case', widget=ObjCaseWidget())
 
     # handle revision creation
-    def save_instance(self, instance, using_transactions, dry_run):
+    def save_instance(self, instance, using_transactions=True, dry_run=False):
         m = instance
 
         article = Article.objects.get(name='in', lang__name='en')
-        user = User.objects.get(username='admin')
         # code taken from wiki/plugins/metadata/forms.py
-        newarticle, newcategory = MyFunctions.newArticle_ArticleCategory(article, m.name, article.urlpath_set.all()[0], m.slug)
+        newarticle, newcategory = MyFunctions(Admin_request).newArticle_ArticleCategory(article, m.name, article.urlpath_set.all()[0], m.slug)
         # associate the article with the AdpositionRevision
         m.article = newarticle
 
@@ -274,7 +294,7 @@ class UsageRevisionResource(import_export.resources.ModelResource):
         widget=ObjCaseWidget())
 
     # handle revision creation
-    def before_save_instance(self, instance, using_transactions, dry_run):
+    def save_instance(self, instance, using_transactions=True, dry_run=False):
         m = instance
 
         article = Article.objects.get(adposition__current_revision__metadatarevision__adpositionrevision__name='in',
@@ -293,7 +313,7 @@ class UsageRevisionResource(import_export.resources.ModelResource):
         name = UsageRevisionResource.get_usage_name(ms.deepest_instance(m.adposition.current_revision).name,
                                                     str(m.construal),
                                                     case)
-        newarticle, newcategory = MyFunctions.newArticle_ArticleCategory(article, parent=article.urlpath_set.all()[0],
+        newarticle, newcategory = MyFunctions(Admin_request).newArticle_ArticleCategory(article, parent=article.urlpath_set.all()[0],
                                                              name=name,
                                                              slug=caseSlug + construalSlug)
         # associate the article with the SupersenseRevision

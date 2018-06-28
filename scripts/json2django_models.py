@@ -93,6 +93,15 @@ def clean_us(adposition_name, role_name, function_name):
         return str(0)
     return str(x[0].pk)
 
+def clean_ss(name):
+    x = ms.Supersense.objects.filter(
+        current_revision__metadatarevision__supersenserevision__name=name
+        )
+    if not x:
+        # print('Missing Supersense: ', adposition_name, role_name, function_name)
+        return str(0)
+    return str(x[0].pk)
+
 def add_corp_sent(f):
     f.write('\t'.join([corpus_name, corpus_version, sent_id, language_name, orthography, is_parallel, doc_id,
                        text, tokens, word_gloss, sent_gloss, note, mwe_markup]) + '\n')
@@ -169,7 +178,7 @@ with open(file, encoding='utf8') as f:
                                 adp_intrans.add(adposition_name)
                             adposition_list.add(
                                 (adposition_name, language_name, morphtype, obj_case))
-                            construal_list.add(role_name + '--' + function_name)
+                            construal_list.add((role_name,function_name,clean_ss(role_name), clean_ss(function_name)))
                             usage_list.add((adposition_name, role_name, function_name, obj_case))
                             supersense_list.add(role_name)
                             supersense_list.add(function_name)
@@ -185,9 +194,9 @@ with open('adpositions.tsv', 'w') as f:
     for a in adposition_list:
         f.write('\t'.join(a) +'\t'+adp_transitivity[a[0]]+'\n')
 with open('construals.tsv', 'w') as f:
-    f.write('role_name\tfunction_name' + '\n')
+    f.write('role_name\tfunction_name\trole_id\tfunction_id' + '\n')
     for c in construal_list:
-        f.write(c.replace('--', '\t') + '\n')
+        f.write('\t'.join(c) + '\n')
 with open('usages.tsv', 'w') as f:
     f.write('adposition_name\trole_name\tfunction_name\tobj_case' + '\n')
     for u in usage_list:
