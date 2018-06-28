@@ -265,7 +265,7 @@ class AdpositionRevisionResource(import_export.resources.ModelResource):
     def save_instance(self, instance, using_transactions=True, dry_run=False):
         m = instance
 
-        ex_article = Article.objects.get(current_revision__title='for')
+        ex_article = Article.objects.get(current_revision__title='at')
         lang_article = ms.Language.objects.get(name=m.lang.name).article
 
         if ms.Adposition.objects.filter(current_revision__metadatarevision__adpositionrevision__lang__name=m.lang.name,
@@ -276,8 +276,7 @@ class AdpositionRevisionResource(import_export.resources.ModelResource):
         newarticle, newcategory = MyFunctions(Admin_request).newArticle_ArticleCategory(name=m.name,
                                                                                         ex_article=ex_article,
                                                                                         parent=lang_article.urlpath_set.all()[0],
-                                                                                        slug='/' + lang_article.urlpath_set.all()[0].path
-                                                                                             + m.name)
+                                                                                        slug=m.name)
         # associate the article with the SupersenseRevision
         m.article = newarticle
 
