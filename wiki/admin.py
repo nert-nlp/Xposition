@@ -1,6 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
 import import_export
+from bitfield import BitField
 from django import forms
 from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _
@@ -43,6 +44,11 @@ class ObjCaseWidget(Widget):
     def clean(self, value, row=None, *args, **kwargs):
         return ms.Case[value]
 
+class ObjCasesWidget(Widget):
+    def clean(self, value, row=None, *args, **kwargs):
+        x = BitField(flags=ms.Case.choices(), default=False)
+        x.flags[ms.Case[value]] = True
+        return x
 
 class MorphTypeWidget(Widget):
     def clean(self, value, row=None, *args, **kwargs):
@@ -61,7 +67,7 @@ class MyFunctions:
         self.request = request
 
 
-    def newArticle(self, article=None, name=None, slug=None, parent=None):
+    def newArticle(self, ex_article=None, name=None, slug=None, parent=None):
         article_urlpath = URLPath.create_article(
             parent=parent or URLPath.root(),
             slug=slug,
@@ -70,26 +76,26 @@ class MyFunctions:
             user_message=" ",
             user=self.user,
             article_kwargs={'owner': self.user,
-                            'group': article.group,
-                            'group_read': article.group_read,
-                            'group_write': article.group_write,
-                            'other_read': article.other_read,
-                            'other_write': article.other_write,
+                            'group': ex_article.group,
+                            'group_read': ex_article.group_read,
+                            'group_write': ex_article.group_write,
+                            'other_read': ex_article.other_read,
+                            'other_write': ex_article.other_write,
                             })
         newarticle = models.Article.objects.get(urlpath=article_urlpath)
         return newarticle
 
 
 
-    def newArticle_ArticleCategory(self, article=None, name=None, parent=None, slug=None):
-        newarticle = self.newArticle(article=article,
+    def newArticle_ArticleCategory(self, ex_article=None, name=None, parent=None, slug=None):
+        newarticle = self.newArticle(ex_article=ex_article,
                                      name=name,
                                      slug=slug or name,
                                      parent=parent)
         newcategory = ArticleCategory(slug=name,
                                       name=name,
-                                      description=name,
-                                      parent=parent.category if parent else None)
+                                      description='[created by import]',
+                                      parent=models.Article.objects.get(urlpath=parent).category if parent else None)
         newcategory.article = newarticle
         newcategory.save()
         return newarticle, newcategory
@@ -207,15 +213,18 @@ class ConstrualResource(resources.ModelResource):
 
 class SupersenseRevisionResource(resources.ModelResource):
 
-    name = fields.Field(attribute='Zname', column_name='supersense_name', widget=widgets.CharWidget())
+    name = fields.Field(attribute='name', column_name='supersense_name', widget=widgets.CharWidget())
 
     # handle revision creation
     def save_instance(self, instance, using_transactions=True, dry_run=False):
         m = instance
+        if ms.Supersense.objects.filter(current_revision__metadatarevision__supersenserevision__name=m.name):
+            return
 
-        article = Article.objects.get(name='Locus')
+        ex_article = Article.objects.get(current_revision__title='Locus')
+
         # code taken from wiki/plugins/metadata/forms.py
-        newarticle, newcategory = MyFunctions(Admin_request).newArticle_ArticleCategory(article, m.name, None, m.name)
+        newarticle, newcategory = MyFunctions(Admin_request).newArticle_ArticleCategory(name=m.name,ex_article=ex_article)
         # associate the article with the SupersenseRevision
         m.article = newarticle
 
@@ -223,23 +232,25 @@ class SupersenseRevisionResource(resources.ModelResource):
         supersense = ms.Supersense()
         supersense.article = newarticle
         supersense.category = newcategory
-        supersense.category.parent = None
+        if m.parent:
+            supersense.category.parent = m.parent.category  # the parent category is stored both on the revision and on the Supersense.category
+        else:
+            supersense.category.parent = None
         supersense.add_revision(m, Admin_request, article_revision=newarticle.current_revision,
                                 save=True)  # cannot delay saving the new supersense revision
 
         m.save()
         supersense.save()
-        return m
 
     class Meta:
         model = ms.SupersenseRevision
-        import_id_fields = ('name')
-        fields = ('name')
+        import_id_fields = ('name',)
+        fields = ('name',)
 
 
 class AdpositionRevisionResource(import_export.resources.ModelResource):
 
-    # name = fields.Field(column_name='adposition_name', attribute='name', widget=widgets.CharWidget())
+    name = fields.Field(column_name='adposition_name', attribute='name', widget=widgets.CharWidget())
 
     lang = fields.Field(
         column_name='language_name',
@@ -248,33 +259,43 @@ class AdpositionRevisionResource(import_export.resources.ModelResource):
 
     morphtype = fields.Field(attribute='morphtype', widget=MorphTypeWidget())
     transitivity = fields.Field(attribute='transitivity', widget=TransitivityWidget())
-    obj_cases = fields.Field(attribute='obj_case', widget=ObjCaseWidget())
+    # obj_cases = fields.Field(column_name='obj_case', attribute='obj_cases', widget=ObjCasesWidget())
 
     # handle revision creation
     def save_instance(self, instance, using_transactions=True, dry_run=False):
         m = instance
 
-        article = Article.objects.get(name='in', lang__name='en')
+        ex_article = Article.objects.get(current_revision__title='for')
+        lang_article = ms.Language.objects.get(name=m.lang.name).article
+
+        if ms.Adposition.objects.filter(current_revision__metadatarevision__adpositionrevision__lang__name=m.lang.name,
+                                 current_revision__metadatarevision__adpositionrevision__name=m.name):
+            return
+
         # code taken from wiki/plugins/metadata/forms.py
-        newarticle, newcategory = MyFunctions(Admin_request).newArticle_ArticleCategory(article, m.name, article.urlpath_set.all()[0], m.slug)
-        # associate the article with the AdpositionRevision
+        newarticle, newcategory = MyFunctions(Admin_request).newArticle_ArticleCategory(name=m.name,
+                                                                                        ex_article=ex_article,
+                                                                                        parent=lang_article.urlpath_set.all()[0],
+                                                                                        slug='/' + lang_article.urlpath_set.all()[0].path
+                                                                                             + m.name)
+        # associate the article with the SupersenseRevision
         m.article = newarticle
 
-        # create the Adposition, add the article, category, and revision
+        # create the Supersense, add the article, category, and revision
         p = ms.Adposition()
         p.article = newarticle
         p.category = newcategory
         p.add_revision(m, Admin_request, article_revision=newarticle.current_revision,
                        save=True)  # cannot delay saving the new adposition revision
 
+
         m.save()
         p.save()
-        return m
 
     class Meta:
         model = ms.AdpositionRevision
-        import_id_fields = ('lang',)#('name', 'lang')
-        fields = ('lang', 'morphtype', 'obj_case', 'transitivity')
+        import_id_fields = ('name', 'lang',)#('name', 'lang')
+        fields = ('name', 'lang', 'morphtype', 'transitivity')
 
 
 class UsageRevisionResource(import_export.resources.ModelResource):

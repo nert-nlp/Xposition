@@ -152,7 +152,7 @@ with open(file, encoding='utf8') as f:
 
                             # assign fields
                             token_indices = ', '.join([str(x) for x in tok['toknums']])
-                            adposition_name = tok['lexlemma']
+                            adposition_name = tok['lexlemma'].replace(' ','_')
                             role_name = tok['ss'].replace('p.', '')
                             function_name = '??' if tok['ss'] == '??' else tok['ss2'].replace('p.', '')
                             obj_case = 'Accusative' if not tok['lexcat'] == 'PRON.POSS' else 'Genitive'
