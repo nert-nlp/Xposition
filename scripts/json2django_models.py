@@ -5,7 +5,7 @@ os.chdir('..\scripts')
 
 from wiki.plugins.metadata import models as ms
 
-file = r'C:\Users\Austin\Desktop\streusle.go.notes.json'
+file = 'streusle.go.notes.json'
 
 sent_header = ['corpus_name', 'corpus_version', 'sent_id', 'language_name', 'orthography', 'is_parallel', 'doc_id',
                'text', 'tokens', 'word_gloss', 'sent_gloss', 'note', 'mwe_markup']
@@ -64,43 +64,49 @@ adposition_id = default_str
 construal_id = default_str
 usage_id = default_str
 
+adp_memo = {}
+for adp in ms.Adposition.objects.all():
+    adp_memo[(adp.current_revision.metadatarevision.adpositionrevision.name,
+              adp.current_revision.metadatarevision.adpositionrevision.lang.name)] = str(adp.pk)
+    # print(adp.current_revision.metadatarevision.adpositionrevision.name)
+ss_memo = {}
+for ss in ms.Supersense.objects.all():
+    x = ss.current_revision.metadatarevision.supersenserevision.name
+    ss_memo[x] = str(ss.pk)
+con_memo = {}
+for c in ms.Construal.objects.all():
+    con_memo[(c.role.current_revision.metadatarevision.supersenserevision.name,
+              c.function.current_revision.metadatarevision.supersenserevision.name)] = str(c.pk)
+us_memo = {}
+for u in ms.Usage.objects.all():
+    us_memo[(u.current_revision.metadatarevision.usagerevision.adposition.current_revision.metadatarevision.adpositionrevision.name,
+             u.current_revision.metadatarevision.usagerevision.construal.role.current_revision.metadatarevision.supersenserevision.name,
+             u.current_revision.metadatarevision.usagerevision.construal.function.current_revision.metadatarevision.supersenserevision.name)] \
+        = str(u.pk)
 
 def clean_adp(language_name, adposition_name):
-    x = ms.Adposition.objects.filter(current_revision__metadatarevision__adpositionrevision__lang__name__iexact=language_name,
-                                 current_revision__metadatarevision__adpositionrevision__name__iexact=adposition_name)
-    if not x:
-        # print('Missing Adposition: ',adposition_name)
+    if (adposition_name,language_name) in adp_memo:
+        return adp_memo[(adposition_name,language_name)]
+    else:
         return str(0)
-    return str(x[0].pk)
-
 
 def clean_con(role_name, function_name):
-    x = ms.Construal.objects.filter(role__current_revision__metadatarevision__supersenserevision__name=role_name,
-                                       function__current_revision__metadatarevision__supersenserevision__name=function_name)
-    if not x:
-        # print('Missing Construal: ', role_name, function_name)
+    if (role_name, function_name) in con_memo:
+        return con_memo[(role_name, function_name)]
+    else:
         return str(0)
-    return str(x[0].pk)
 
 def clean_us(adposition_name, role_name, function_name):
-    x = ms.Usage.objects.filter(
-        current_revision__metadatarevision__usagerevision__adposition__current_revision__metadatarevision__adpositionrevision__name=adposition_name,
-        current_revision__metadatarevision__usagerevision__construal__role__current_revision__metadatarevision__supersenserevision__name=role_name,
-        current_revision__metadatarevision__usagerevision__construal__function__current_revision__metadatarevision__supersenserevision__name=function_name
-        )
-    if not x:
-        # print('Missing Usage: ', adposition_name, role_name, function_name)
+    if (adposition_name, role_name, function_name) in us_memo:
+        return us_memo[(adposition_name, role_name, function_name)]
+    else:
         return str(0)
-    return str(x[0].pk)
 
 def clean_ss(name):
-    x = ms.Supersense.objects.filter(
-        current_revision__metadatarevision__supersenserevision__name=name
-        )
-    if not x:
-        # print('Missing Supersense: ', adposition_name, role_name, function_name)
+    if name in ss_memo:
+        return ss_memo[name]
+    else:
         return str(0)
-    return str(x[0].pk)
 
 def add_corp_sent(f):
     f.write('\t'.join([corpus_name, corpus_version, sent_id, language_name, orthography, is_parallel, doc_id,
@@ -114,7 +120,7 @@ def add_ptoken(f):
          obj_supersense, is_gold, annotator_cluster, is_transitive, adposition_id, construal_id, usage_id]) + '\n')
 
 
-def ss(sent, n):
+def get_ss(sent, n):
     supersense = default_str
     for ws in [sent['swes'], sent['smwes']]:
         for tok in ws:
@@ -124,6 +130,7 @@ def ss(sent, n):
         supersense = default_str
     return supersense
 
+num_lines = len([line for line in open(file, encoding='utf8') if '"sent_id"' in line])
 
 with open(file, encoding='utf8') as f:
     with open('corpus_sents.tsv', 'w', encoding='utf8') as cs:
@@ -131,7 +138,9 @@ with open(file, encoding='utf8') as f:
             cs.write('\t'.join(sent_header) + '\n')
             ptok.write('\t'.join(ptoken_header) + '\n')
             data = json.load(f)
-            for sent in data:
+            for i,sent in enumerate(data):
+                #if i%(num_lines/100) == 0:
+                # print(str(i),'/',str(num_lines),' '+str(100*i/num_lines)+'%')
                 # assign fields
                 sent_id = sent['sent_id']
                 doc_id = sent['sent_id'].split('-')[0] + '-' + sent['sent_id'].split('-')[1]
@@ -162,8 +171,8 @@ with open(file, encoding='utf8') as f:
                             adp_pos = sent['toks'][tok['toknums'][0] - 1]['upos']
                             gov_pos = sent['toks'][govobj['gov'] - 1]['upos'] if hasgov else default_str
                             obj_pos = sent['toks'][govobj['obj'] - 1]['upos'] if hasobj else default_str
-                            gov_supersense = ss(sent, govobj['gov']) if hasgov else default_str
-                            obj_supersense = ss(sent, govobj['obj']) if hasobj else default_str
+                            gov_supersense = get_ss(sent, govobj['gov']) if hasgov else default_str
+                            obj_supersense = get_ss(sent, govobj['obj']) if hasobj else default_str
                             annotator_cluster = tok['annotator_cluster'] if 'annotator_cluster' in tok else default_str
                             is_transitive = '1' if hasobj else '0'
                             adposition_id = clean_adp(language_name, adposition_name)
@@ -179,7 +188,7 @@ with open(file, encoding='utf8') as f:
                             adposition_list.add(
                                 (adposition_name, language_name, morphtype, obj_case))
                             construal_list.add((role_name,function_name,clean_ss(role_name), clean_ss(function_name)))
-                            usage_list.add((adposition_name, role_name, function_name, obj_case))
+                            usage_list.add((adposition_name, role_name, function_name, obj_case, adposition_id, construal_id))
                             supersense_list.add(role_name)
                             supersense_list.add(function_name)
 adp_transitivity = {}
@@ -189,7 +198,7 @@ for a in adposition_list:
                             else 'always_transitive' if adp in adp_trans \
                             else 'always_intransitive'
 
-with open('adpositions.tsv', 'w') as f:
+with open('adposition_revisions.tsv', 'w') as f:
     f.write('adposition_name\tlanguage_name\tmorphtype\tobj_case\ttransitivity' + '\n')
     for a in adposition_list:
         f.write('\t'.join(a) +'\t'+adp_transitivity[a[0]]+'\n')
@@ -197,11 +206,11 @@ with open('construals.tsv', 'w') as f:
     f.write('role_name\tfunction_name\trole_id\tfunction_id' + '\n')
     for c in construal_list:
         f.write('\t'.join(c) + '\n')
-with open('usages.tsv', 'w') as f:
-    f.write('adposition_name\trole_name\tfunction_name\tobj_case' + '\n')
+with open('usage_revisions.tsv', 'w') as f:
+    f.write('adposition_name\trole_name\tfunction_name\tobj_case\tadposition_id\tconstrual_id' + '\n')
     for u in usage_list:
         f.write('\t'.join(u) + '\n')
-with open('supersenses.tsv', 'w') as f:
+with open('supersense_revisions.tsv', 'w') as f:
     f.write('supersense_name' + '\n')
     for s in supersense_list:
         f.write(s  + '\n')

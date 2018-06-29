@@ -11,6 +11,10 @@ python manage.py shell
 import json
 exec(open(r'..\scripts\json2django_models.py').read())
 ```
-You can run it once to import `AdpositionRevision`s, `SupersenseRevision`s, `UsageRevision`s and `Construal`s.
-You should run it a second time before you import `CorpusSentence`s and `PTokenAnnotation`s. That way the script can 
-access the `Adposition`, `Supersense`, etc. ids.
+Step 0) Put file streusle.go.notes.json in scripts directory.
+Step 1) Run it once to import `AdpositionRevision`s, `SupersenseRevision`s, and `CorpusSentence`s.
+     1a) The file for `CorpusSentence`s must be converted to an Excel worksheet
+Step 2) Run again for `Construal`s.
+Step 3) Run againg for `UsageRevision`s.
+Step 4) Run againg for `PTokenAnnotation`s
+That way the script can access the ids for foreign keys: `Adposition`, `Supersense`, etc.
