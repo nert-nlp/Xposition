@@ -188,9 +188,11 @@ class ConstrualResource(resources.ModelResource):
         attribute='function',
         widget=ForeignKeyWidget(ms.Supersense))
 
+    ex_article = Article.objects.get(current_revision__title='Locus--Locus')
+
     def save_instance(self, instance, using_transactions=True, dry_run=False):
         m = instance
-        ex_article = Article.objects.get(current_revision__title='Locus--Locus')
+
         if ms.Construal.objects.filter(role=m.role,function=m.function):
             return
 
@@ -200,7 +202,7 @@ class ConstrualResource(resources.ModelResource):
         # slug will be the same as name
         newarticle, newcategory = ArticleMetadataFormFunctions(ADMIN_REQUEST).newArticle_ArticleCategory(name=name,
                                                                                                          slug=name,
-                                                                                                         ex_article=ex_article,
+                                                                                                         ex_article=self.ex_article,
                                                                                                          parent=None)
         m.article = newarticle
         m.category = newcategory
@@ -220,16 +222,18 @@ class SupersenseRevisionResource(resources.ModelResource):
 
     name = fields.Field(attribute='name', column_name='supersense_name', widget=widgets.CharWidget())
 
+    ex_article = Article.objects.get(current_revision__title='Locus')
+
     # handle revision creation
     def save_instance(self, instance, using_transactions=True, dry_run=False):
         m = instance
         if ms.Supersense.objects.filter(current_revision__metadatarevision__supersenserevision__name=m.name):
             return
 
-        ex_article = Article.objects.get(current_revision__title='Locus')
 
         # code taken from wiki/plugins/metadata/forms.py
-        newarticle, newcategory = ArticleMetadataFormFunctions(ADMIN_REQUEST).newArticle_ArticleCategory(name=m.name,ex_article=ex_article)
+        newarticle, newcategory = ArticleMetadataFormFunctions(ADMIN_REQUEST).newArticle_ArticleCategory(name=m.name,
+                                                                                                         ex_article=self.ex_article)
         # associate the article with the SupersenseRevision
         m.article = newarticle
 
@@ -266,11 +270,13 @@ class AdpositionRevisionResource(import_export.resources.ModelResource):
     transitivity = fields.Field(attribute='transitivity', widget=TransitivityWidget())
     # obj_cases = fields.Field(column_name='obj_case', attribute='obj_cases', widget=ObjCasesWidget())
 
+    ex_article = Article.objects.get(current_revision__title='at')
+
     # handle revision creation
     def save_instance(self, instance, using_transactions=True, dry_run=False):
         m = instance
 
-        ex_article = Article.objects.get(current_revision__title='at')
+
         lang_article = ms.Language.objects.get(name=m.lang.name).article
 
         if ms.Adposition.objects.filter(current_revision__metadatarevision__adpositionrevision__lang__name=m.lang.name,
@@ -279,7 +285,7 @@ class AdpositionRevisionResource(import_export.resources.ModelResource):
 
         # code taken from wiki/plugins/metadata/forms.py
         newarticle, newcategory = ArticleMetadataFormFunctions(ADMIN_REQUEST).newArticle_ArticleCategory(name=m.name,
-                                                                                        ex_article=ex_article,
+                                                                                        ex_article=self.ex_article,
                                                                                         parent=lang_article.urlpath_set.all()[0],
                                                                                         slug=m.name)
         # associate the article with the SupersenseRevision
@@ -326,11 +332,11 @@ class UsageRevisionResource(import_export.resources.ModelResource):
     # handle revision creation
     def save_instance(self, instance, using_transactions=True, dry_run=False):
         m = instance
-        # if ms.Usage.objects.filter(current_revision__metadatarevision__usagerevision__adposition=
-        #                             m.adposition,
-        #                            current_revision__metadatarevision__usagerevision__construal=
-        #                             m.construal):
-        #     return
+        if ms.Usage.objects.filter(current_revision__metadatarevision__usagerevision__adposition=
+                                    m.adposition,
+                                   current_revision__metadatarevision__usagerevision__construal=
+                                    m.construal):
+            return
 
 
         adp_article = m.adposition.article

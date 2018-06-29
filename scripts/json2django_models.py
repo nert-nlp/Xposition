@@ -164,7 +164,7 @@ with open(file, encoding='utf8') as f:
                             adposition_name = tok['lexlemma'].replace(' ','_')
                             role_name = tok['ss'].replace('p.', '')
                             function_name = '??' if tok['ss'] == '??' else tok['ss2'].replace('p.', '')
-                            obj_case = 'Accusative' if not tok['lexcat'] == 'PRON.POSS' else 'Genitive'
+                            obj_case = 'Accusative' if not tok['lexcat'] in ['PRON.POSS','POSS'] else 'Genitive'
                             obj_head = govobj['objlemma'] if hasobj else default_str
                             gov_head = govobj['govlemma'] if hasgov else default_str
                             gov_obj_syntax = govobj['config']

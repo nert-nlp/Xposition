@@ -12,6 +12,8 @@ import json
 exec(open(r'..\scripts\json2django_models.py').read())
 ```
 Step 0) Put file streusle.go.notes.json in scripts directory.
+     0a) Get the file streusle.json from github.com/nert-gu/streusle
+     0b) Run govobj.py and annotator_notes.py to get streusle.go.notes.json
 Step 1) Run it once to import `AdpositionRevision`s, `SupersenseRevision`s, and `CorpusSentence`s.
      1a) The file for `CorpusSentence`s must be converted to an Excel worksheet
 Step 2) Run again for `Construal`s.
