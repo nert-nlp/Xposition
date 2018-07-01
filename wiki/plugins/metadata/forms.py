@@ -487,6 +487,31 @@ class UsageForm(ArticleMetadataForm):
         fields = ('adposition', 'obj_case', 'construal')
         widgets = {'obj_case': forms.RadioSelect}
 
+class CorpusForm(ArticleMetadataForm):
+
+    def __init__(self, article, request, *args, **kwargs):
+        super(CorpusForm, self).__init__(article, request, *args, **kwargs)
+
+    def edit(self, m, commit=True):
+        if commit:
+            m.save()
+        return m.article.urlpath_set.all()[0]
+
+    def new(self, m, commit=True):
+        newarticle, newcategory = self.newArticle_ArticleCategory()
+        m.article = newarticle
+        m.category = newcategory
+        if commit:
+            m.save()
+        return self.article_urlpath
+
+    class Meta:
+        model = models.Corpus
+
+        fields = ('name', 'version', 'url', 'genre', 'description', 'languages')
+
+
+
 
 def MetaSidebarForm(article, request, *args, **kwargs):
     """

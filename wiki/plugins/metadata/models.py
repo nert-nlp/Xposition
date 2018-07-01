@@ -694,7 +694,7 @@ class UsageRevision(MetadataRevision):
 # Name, version, is_current, url, genre, lang(s), size?, stats?
 
 
-class Corpus(models.Model):
+class Corpus(SimpleMetadata):
     # Name, version, is_current, url, genre, lang(s), size?, stats?
     name = models.CharField(max_length=200, null=True, verbose_name="Corpus Name")
     version = models.CharField(max_length=200, null=True, verbose_name="Version")

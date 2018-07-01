@@ -15,4 +15,6 @@ urlpatterns = [
   url(r'^createconstrual/$', views.ConstrualView.as_view(), name='metadata_create_construal'),
   url(r'^createsupersense/$', views.SupersenseView.as_view(), name='metadata_create_supersense'),
   url(r'^editsupersense/$', views.SupersenseView.as_view(edit=True), name='metadata_edit_supersense'),
+  url(r'^createcorpus/$', views.CorpusView.as_view(), name='metadata_create_corpus'),
+  url(r'^editcorpus/$', views.CorpusView.as_view(edit=True), name='metadata_edit_corpus'),
 ]
