@@ -12,7 +12,7 @@ sent_header = ['corpus_name', 'corpus_version', 'sent_id', 'language_name', 'ort
 
 ptoken_header = ['token_indices', 'adposition_name', 'language_name', 'role_name', 'function_name', 'corpus_name',
                  'corpus_version', 'sent_id',
-                 'obj_case', 'obj_head', 'gov_head', 'gov_obj_syntax', 'adp_pos', 'gov_pos', 'obj_pos',
+                 'obj_case', 'obj_head', 'gov_head', 'gov_obj_syntax', 'gov_head_index', 'obj_head_index', 'is_typo', 'is_abbr', 'adp_pos', 'gov_pos', 'obj_pos',
                  'gov_supersense',
                  'obj_supersense', 'is_gold', 'annotator_cluster', 'is_transitive', 'adposition_id', 'construal_id',
                  'usage_id']
@@ -63,6 +63,10 @@ is_transitive = '1'
 adposition_id = default_str
 construal_id = default_str
 usage_id = default_str
+gov_head_index = default_str
+obj_head_index = default_str
+is_typo = '0'
+is_abbr = '0'
 
 adp_memo = {}
 for adp in ms.Adposition.objects.all():
@@ -109,15 +113,11 @@ def clean_ss(name):
         return str(0)
 
 def add_corp_sent(f):
-    f.write('\t'.join([corpus_name, corpus_version, sent_id, language_name, orthography, is_parallel, doc_id,
-                       text, tokens, word_gloss, sent_gloss, note, mwe_markup]) + '\n')
+    f.write('\t'.join([globals()[s] for s in sent_header]) + '\n')
 
 
 def add_ptoken(f):
-    f.write('\t'.join(
-        [token_indices, adposition_name, language_name, role_name, function_name, corpus_name, corpus_version, sent_id,
-         obj_case, obj_head, gov_head, gov_obj_syntax, adp_pos, gov_pos, obj_pos, gov_supersense,
-         obj_supersense, is_gold, annotator_cluster, is_transitive, adposition_id, construal_id, usage_id]) + '\n')
+    f.write('\t'.join([globals()[s] for s in ptoken_header]) + '\n')
 
 
 def get_ss(sent, n):
@@ -150,37 +150,44 @@ with open(file, encoding='utf8') as f:
                 mwe_markup = sent['mwe']
 
                 add_corp_sent(cs)
+
                 for words in [sent['swes'], sent['smwes'], sent['wmwes']]:
                     for i in words:
-                        tok = words[i]
-                        if tok['lexcat'] in ['P', 'PRON.POSS', 'POSS']:
+                        if words[i]['lexcat'] in ['P', 'PRON.POSS', 'POSS']:
+                            tok_sem = words[i]                                   # token semantic features
+                            tok_morph = sent['toks'][tok_sem['toknums'][0] - 1]  # token morphological/syntactic features
                             # used to check NoneType
-                            govobj = tok['heuristic_relation']
+                            govobj = tok_sem['heuristic_relation']
                             hasobj = type(govobj['obj']) is int
                             hasgov = type(govobj['gov']) is int
 
                             # assign fields
-                            token_indices = ', '.join([str(x) for x in tok['toknums']])
-                            adposition_name = tok['lexlemma'].replace(' ','_')
-                            role_name = tok['ss'].replace('p.', '')
-                            function_name = '??' if tok['ss'] == '??' else tok['ss2'].replace('p.', '')
-                            obj_case = 'Accusative' if not tok['lexcat'] in ['PRON.POSS','POSS'] else 'Genitive'
+                            token_indices = ', '.join([str(x) for x in tok_sem['toknums']])
+                            adposition_name = tok_sem['lexlemma'].replace(' ','_')
+                            role_name = tok_sem['ss'].replace('p.', '')
+                            function_name = '??' if tok_sem['ss'] == '??' else tok_sem['ss2'].replace('p.', '')
+                            obj_case = 'Accusative' if not tok_sem['lexcat'] in ['PRON.POSS','POSS'] else 'Genitive'
                             obj_head = govobj['objlemma'] if hasobj else default_str
                             gov_head = govobj['govlemma'] if hasgov else default_str
                             gov_obj_syntax = govobj['config']
-                            adp_pos = sent['toks'][tok['toknums'][0] - 1]['upos']
+                            adp_pos = tok_morph['upos']
                             gov_pos = sent['toks'][govobj['gov'] - 1]['upos'] if hasgov else default_str
                             obj_pos = sent['toks'][govobj['obj'] - 1]['upos'] if hasobj else default_str
                             gov_supersense = get_ss(sent, govobj['gov']) if hasgov else default_str
                             obj_supersense = get_ss(sent, govobj['obj']) if hasobj else default_str
-                            annotator_cluster = tok['annotator_cluster'] if 'annotator_cluster' in tok else default_str
+                            annotator_cluster = tok_sem['annotator_cluster'] if 'annotator_cluster' in tok_sem else default_str
                             is_transitive = '1' if hasobj else '0'
                             adposition_id = clean_adp(language_name, adposition_name)
                             construal_id = clean_con(role_name, function_name)
                             usage_id = clean_us(adposition_name, role_name, function_name)
+                            gov_head_index = str(govobj['gov']) if hasgov else default_str
+                            obj_head_index = str(govobj['obj']) if hasobj else default_str
+                            if 'feats' in tok_morph and tok_morph['feats']:
+                                is_typo = '1' if 'Typo=Yes' in tok_morph['feats'] else '0'
+                                is_abbr = '1' if 'Abbr=Yes' in tok_morph['feats'] else '0'
                             add_ptoken(ptok)
 
-                            morphtype = 'standalone_preposition' if not tok['lexlemma'] == "'s" else 'suffix'
+                            morphtype = 'standalone_preposition' if not tok_sem['lexlemma'] == "'s" else 'suffix'
                             if hasobj:
                                 adp_trans.add(adposition_name)
                             else:

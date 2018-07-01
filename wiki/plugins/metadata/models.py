@@ -19,6 +19,7 @@ from wiki.core.markdown import article_markdown
 from wiki.decorators import disable_signal_for_loaddata
 from wiki.plugins.categories.models import ArticleCategory
 from wiki.models.pluginbase import ArticlePlugin, RevisionPlugin, RevisionPluginRevision
+
 try:
     from django.contrib.contenttypes.fields import GenericForeignKey
 except ImportError:
@@ -40,7 +41,7 @@ def deepest_instance(x):
     """
     inst = x
     typ = type(x)
-    #s = str(inst)
+    # s = str(inst)
     while inst:
         # list the subclasses of 'typ' which are instantiated as attributes of 'inst'
         sub = [cls for cls in typ.__subclasses__() if hasattr(inst, cls.__name__.lower())]
@@ -49,30 +50,35 @@ def deepest_instance(x):
         typ = sub[0]
         # dot into the corresponding attribute of the instance
         inst = getattr(inst, typ.__name__.lower())
-        #s += '.' + y.__name__.lower()
+        # s += '.' + y.__name__.lower()
     return inst
+
 
 class MetaEnum(IntEnum):
     """Base class for an enum defining choices for an integer model field."""
+
     @classmethod
     def choices(cls):
         """For use with e.g. PositiveIntegerField"""
         return [(m.value, m.name.replace('_', ' ')) for m in cls]
+
     @classmethod
     def flags(cls):
         """For use with BitField"""
         return [(m.name, m.name.replace('_', ' ')) for m in cls]
+
 
 # These are the different metadata models. Extend from the base metadata class if you want to add a
 # new metadata type. Make sure to register your model below.
 
 class SimpleMetadata(ArticlePlugin):
     """Metadata without revision tracking."""
+
     @property
     def template(self):
         a = self.article
         u = dir(a)
-        if deepest_instance(self)!=self:
+        if deepest_instance(self) != self:
             return deepest_instance(self).template
         elif self.article.urlpath_set.filter(slug='supersenses'):
             return 'supersense_list.html'
@@ -81,14 +87,18 @@ class SimpleMetadata(ArticlePlugin):
 
     def html(self):
         di = deepest_instance(self)
-        return mark_safe('<a href="' + self.article.get_absolute_url() + '" class="' + type(di).__name__.lower() + '">' + str(self) + '</a>')
+        return mark_safe(
+            '<a href="' + self.article.get_absolute_url() + '" class="' + type(di).__name__.lower() + '">' + str(
+                self) + '</a>')
+
 
 @disable_signal_for_loaddata
 def on_article_revision_post_save(**kwargs):
     article = kwargs['instance']
     articleplugins = [deepest_instance(z) for z in article.articleplugin_set.all()]
-    metadata = [z for z in articleplugins if isinstance(z, Metadata)]   # not SimpleMetadata, because it won't have revisions to link to!
-    assert 0<=len(metadata)<=1
+    metadata = [z for z in articleplugins if
+                isinstance(z, Metadata)]  # not SimpleMetadata, because it won't have revisions to link to!
+    assert 0 <= len(metadata) <= 1
     if metadata:
         metadata = metadata[0]
         article_current_revision = article.current_revision
@@ -100,7 +110,9 @@ def on_article_revision_post_save(**kwargs):
             metadata.link_current_to_article_revision(article_revision=article_current_revision, commit=True)
             x = deepest_instance(metadata.current_revision)
 
+
 post_save.connect(on_article_revision_post_save, Article)
+
 
 class Metadata(RevisionPlugin):
 
@@ -162,8 +174,8 @@ class Metadata(RevisionPlugin):
         revision.deleted = False
         fields = self.field_names()
         for fld in fields:
-            if fld in changes and changes[fld]==getattr(curr, fld):
-                del changes[fld]    # actually no change to this field
+            if fld in changes and changes[fld] == getattr(curr, fld):
+                del changes[fld]  # actually no change to this field
             if fld not in changes:
                 setattr(revision, fld, copy.deepcopy(getattr(curr, fld)))
             else:
@@ -171,7 +183,7 @@ class Metadata(RevisionPlugin):
 
         keydiff = changes.keys() & fields
         if keydiff:
-            hchanges = {}   # human-readable (old,new) pairs for log message
+            hchanges = {}  # human-readable (old,new) pairs for log message
             for f in keydiff:
                 # raw values
                 old = getattr(deepest_instance(self.current_revision), f)
@@ -184,7 +196,7 @@ class Metadata(RevisionPlugin):
                     new = choices[int(new)]
                 hchanges[f] = (old, new)
             revision.set_from_request(request)
-            revision.automatic_log = ' • '.join(f'{f.title()}: {old} → {new}' for f,(old,new) in hchanges.items())
+            revision.automatic_log = ' • '.join(f'{f.title()}: {old} → {new}' for f, (old, new) in hchanges.items())
         if keydiff or article_revision:
             self.add_revision(revision, request, article_revision=article_revision, save=commit)
         return self
@@ -219,15 +231,13 @@ class Metadata(RevisionPlugin):
 
     @property
     def template(self):
-        if deepest_instance(self)!=self:
+        if deepest_instance(self) != self:
             return deepest_instance(self).template
 
     class Meta():
         verbose_name = _('metadata')
-		# issue #10: alphabetize models
+        # issue #10: alphabetize models
         ordering = ['current_revision__metadatarevision__name']
-
-
 
 
 class MetadataRevision(RevisionPluginRevision):
@@ -245,7 +255,8 @@ class MetadataRevision(RevisionPluginRevision):
         kls = ''
         if container_type:
             kls = str(container_type.__name__).lower()
-        return mark_safe('<a href="' + self.plugin.article.get_absolute_url() + '" class="' + kls + '">' + str(self.name) + '</a>')
+        return mark_safe(
+            '<a href="' + self.plugin.article.get_absolute_url() + '" class="' + kls + '">' + str(self.name) + '</a>')
 
     def descriptionhtml(self):
         return mark_safe(article_markdown(self.description, self.article_revision.article))
@@ -267,7 +278,7 @@ class MetadataRevision(RevisionPluginRevision):
             if errors:
                 raise ValidationError(errors)
             # undo our temporary revision_number
-            if self.revision_number==0:
+            if self.revision_number == 0:
                 self.revision_number = None
 
         return super(MetadataRevision, self).validate_unique(exclude=exclude)
@@ -315,7 +326,7 @@ class SupersenseRevision(MetadataRevision):
 
     @property
     def supersense(self):
-        return Supersense.objects.get(current_revision = self)
+        return Supersense.objects.get(current_revision=self)
 
     """ # TODO: this is actually a field in ArticlePlugin. let's make sure to set it!
     @property
@@ -328,12 +339,11 @@ class SupersenseRevision(MetadataRevision):
 
 
 class Construal(SimpleMetadata):
-
     role = models.ForeignKey(Supersense, null=True, related_name='rfs_with_role')
     function = models.ForeignKey(Supersense, null=True, related_name='rfs_with_function')
 
     def __str__(self):
-        return str(self.role)+' ~> '+str(self.function)
+        return str(self.role) + ' ~> ' + str(self.function)
 
     def html(self):
         return super(Construal, self).html().replace(' ~> ', '&#x219d;')
@@ -345,8 +355,9 @@ class Construal(SimpleMetadata):
     class Meta:
         verbose_name = _('construal')
         unique_together = ('role', 'function')
-		# issue #10: alphabetize models
+        # issue #10: alphabetize models
         ordering = ['role', 'function']
+
 
 class Case(MetaEnum):
     """Inventory of cases based on UniMorph <http://unimorph.org/>"""
@@ -354,57 +365,59 @@ class Case(MetaEnum):
 
     # Core cases
     # Nominative-Accusative alignment
-    Nominative = NOM = 2**1
-    Accusative = ACC = 2**2
+    Nominative = NOM = 2 ** 1
+    Accusative = ACC = 2 ** 2
     # Ergative-Absolutive alignment
-    Ergative = ERG = 2**3
-    Absolutive = ABS = 2**4
+    Ergative = ERG = 2 ** 3
+    Absolutive = ABS = 2 ** 4
     # Tripartite alignment
-    NominativeSOnly = NOMS = 2**5
+    NominativeSOnly = NOMS = 2 ** 5
 
     # Non-core, non-local cases
-    Dative = DAT = 2**6
-    Benefactive = BEN = 2**7
-    Purposive = PRP = 2**8
-    Genitive = GEN = 2**9
-    Relative = REL = 2**10
-    Partitive = PRT = 2**11
-    Instrumental = INS = 2**12
-    Comitative = COM = 2**13
-    Vocative = VOC = 2**14
-    Comparative = COMPV = 2**15
-    Equative = EQTV = 2**16
-    Privative = PRIV = 2**17
-    Proprietive = PROPR = 2**18
-    Aversive = AVR = 2**19
-    Formal = FRML = 2**20
-    Translative = TRANS = 2**21
-    EssiveModal = BYWAY = 2**22
+    Dative = DAT = 2 ** 6
+    Benefactive = BEN = 2 ** 7
+    Purposive = PRP = 2 ** 8
+    Genitive = GEN = 2 ** 9
+    Relative = REL = 2 ** 10
+    Partitive = PRT = 2 ** 11
+    Instrumental = INS = 2 ** 12
+    Comitative = COM = 2 ** 13
+    Vocative = VOC = 2 ** 14
+    Comparative = COMPV = 2 ** 15
+    Equative = EQTV = 2 ** 16
+    Privative = PRIV = 2 ** 17
+    Proprietive = PROPR = 2 ** 18
+    Aversive = AVR = 2 ** 19
+    Formal = FRML = 2 ** 20
+    Translative = TRANS = 2 ** 21
+    EssiveModal = BYWAY = 2 ** 22
 
     # Local cases
     # excluding Place cases
     # Distal
-    Distal = REM = 2**23
-    Proximate = PROX = 2**24
+    Distal = REM = 2 ** 23
+    Proximate = PROX = 2 ** 24
     # Motion
-    Essive = ESS = 2**25
-    Allative = ALL = 2**26
-    Ablative = ABL = 2**27
+    Essive = ESS = 2 ** 25
+    Allative = ALL = 2 ** 26
+    Ablative = ABL = 2 ** 27
     # Aspect
-    Approximative = APPRX = 2**28
-    Terminative = TERM = 2**29
+    Approximative = APPRX = 2 ** 28
+    Terminative = TERM = 2 ** 29
 
     @classmethod
     def longname(cls, val):
         return val.name
+
     @classmethod
     def shortname(cls, val):
         val = cls(val)
-        return [k for k,v in cls.__members__.items() if v is val and k.isupper()][0]
+        return [k for k, v in cls.__members__.items() if v is val and k.isupper()][0]
 
 
 lang_code_validator = RegexValidator(r'^[a-z]+(-?[a-z]+)*$',
-    message="Language code should consist of lowercase ASCII strings separated by hyphens")
+                                     message="Language code should consist of lowercase ASCII strings separated by hyphens")
+
 
 class Language(SimpleMetadata):
     """
@@ -416,12 +429,12 @@ class Language(SimpleMetadata):
     """
 
     name = models.CharField(max_length=200,
-        help_text="Basic name, e.g. <tt>English</tt>")
+                            help_text="Basic name, e.g. <tt>English</tt>")
 
     slug = models.CharField(max_length=20, unique=True,
-        help_text="Short (typically 2-character ISO) code for the language/dialect, "
-                  "such as <tt>en</tt> for English and <tt>en-us</tt> for American English.",
-        validators=[lang_code_validator])
+                            help_text="Short (typically 2-character ISO) code for the language/dialect, "
+                                      "such as <tt>en</tt> for English and <tt>en-us</tt> for American English.",
+                            validators=[lang_code_validator])
 
     category = models.ForeignKey(ArticleCategory, null=False, related_name='language')
 
@@ -429,9 +442,9 @@ class Language(SimpleMetadata):
     other_names = models.CharField(max_length=200, blank=True, verbose_name="Other names for the language/dialect")
 
     wals_url = models.URLField(max_length=200, blank=True, verbose_name="WALS URL",
-    help_text="World Atlas of Linguistic Structures entry listed on "
-              "<a href='http://wals.info/languoid'>this page</a>, e.g. "
-              "<tt>http://wals.info/languoid/lect/wals_code_heb</tt>")
+                               help_text="World Atlas of Linguistic Structures entry listed on "
+                                         "<a href='http://wals.info/languoid'>this page</a>, e.g. "
+                                         "<tt>http://wals.info/languoid/lect/wals_code_heb</tt>")
 
     # Writing direction: LTR or RTL?
     rtl = models.BooleanField(default=False, verbose_name="Right-to-left language?")
@@ -448,24 +461,29 @@ class Language(SimpleMetadata):
         some = 2
         primary_or_sole_type = 3
 
-    pre = models.PositiveIntegerField(choices=Presence.choices(), verbose_name="Prepositions/case prefixes or proclitics?")
-    post = models.PositiveIntegerField(choices=Presence.choices(), verbose_name="Postpositions/case suffixes or enclitics?")
+    pre = models.PositiveIntegerField(choices=Presence.choices(),
+                                      verbose_name="Prepositions/case prefixes or proclitics?")
+    post = models.PositiveIntegerField(choices=Presence.choices(),
+                                       verbose_name="Postpositions/case suffixes or enclitics?")
     circum = models.PositiveIntegerField(choices=Presence.choices(), verbose_name="Circumpositions/case circumfixes?")
-    separate_word = models.PositiveIntegerField(choices=Presence.choices(), verbose_name="Adpositions/overt case markers can be separate words?")
-    clitic_or_affix = models.PositiveIntegerField(choices=Presence.choices(), verbose_name="Adpositions/overt case markers can be clitics or affixes?")
+    separate_word = models.PositiveIntegerField(choices=Presence.choices(),
+                                                verbose_name="Adpositions/overt case markers can be separate words?")
+    clitic_or_affix = models.PositiveIntegerField(choices=Presence.choices(),
+                                                  verbose_name="Adpositions/overt case markers can be clitics or affixes?")
 
     # Maybe also: Does adposition/case morpheme ever encode other features,
     # like definiteness? Is there differential case marking?
     # Do all adpositions assign the same case? Which kinds of adpositions inflect e.g. for pronouns?
 
-    #exclude_supersenses = models.ManyToManyField(Supersense, related_name="not_in_language", blank=True)
+    # exclude_supersenses = models.ManyToManyField(Supersense, related_name="not_in_language", blank=True)
 
     class CaseSystemType(MetaEnum):
         none = 1
         pronominal = 2
         nominal = 3
 
-    case_for = models.PositiveIntegerField(choices=CaseSystemType.choices(), verbose_name="Does the language have (affixal) case on nouns and pronouns, just pronouns, or neither?")
+    case_for = models.PositiveIntegerField(choices=CaseSystemType.choices(),
+                                           verbose_name="Does the language have (affixal) case on nouns and pronouns, just pronouns, or neither?")
     cases = BitField(flags=Case.flags(), verbose_name="All cases present in the language")
     pobj_cases = BitField(flags=Case.flags(), verbose_name="All cases that ever apply to an adpositional object")
 
@@ -481,25 +499,25 @@ class Language(SimpleMetadata):
         default = None
         NONE = self.Presence.none
 
-        if self.separate_word!=NONE:
-            if self.pre!=NONE: options.append(Adposition.MorphType.from_properties('separate_word','pre'))
-            if self.post!=NONE: options.append(Adposition.MorphType.from_properties('separate_word','post'))
-            if self.circum!=NONE: options.append(Adposition.MorphType.from_properties('separate_word','circum'))
-        if self.clitic_or_affix!=NONE:
-            if self.pre!=NONE: options.append(Adposition.MorphType.from_properties('clitic_or_affix','pre'))
-            if self.post!=NONE: options.append(Adposition.MorphType.from_properties('clitic_or_affix','post'))
-            if self.circum!=NONE: options.append(Adposition.MorphType.from_properties('clitic_or_affix','circum'))
+        if self.separate_word != NONE:
+            if self.pre != NONE: options.append(Adposition.MorphType.from_properties('separate_word', 'pre'))
+            if self.post != NONE: options.append(Adposition.MorphType.from_properties('separate_word', 'post'))
+            if self.circum != NONE: options.append(Adposition.MorphType.from_properties('separate_word', 'circum'))
+        if self.clitic_or_affix != NONE:
+            if self.pre != NONE: options.append(Adposition.MorphType.from_properties('clitic_or_affix', 'pre'))
+            if self.post != NONE: options.append(Adposition.MorphType.from_properties('clitic_or_affix', 'post'))
+            if self.circum != NONE: options.append(Adposition.MorphType.from_properties('clitic_or_affix', 'circum'))
 
-        if self.separate_word>self.clitic_or_affix:
+        if self.separate_word > self.clitic_or_affix:
             default_attachment = 'separate_word'
-        elif self.separate_word<self.clitic_or_affix:
+        elif self.separate_word < self.clitic_or_affix:
             default_attachment = 'clitic_or_affix'
         else:
             default_attachment = None
 
         default_position = max({'pre': self.pre, 'post': self.post, 'circum': self.circum}.items(), key=lambda x: x[1])
-        if sum(1 for x in {self.pre,self.post,self.circum} if x==default_position[1])>1:
-            default_position = None # e.g., two "some" values but no "primary or sole" value
+        if sum(1 for x in {self.pre, self.post, self.circum} if x == default_position[1]) > 1:
+            default_position = None  # e.g., two "some" values but no "primary or sole" value
         else:
             default_position = default_position[0]
 
@@ -514,16 +532,14 @@ class Language(SimpleMetadata):
 
     @classmethod
     def editurl(cls, urlpath):
-        #return "_plugin/metadata/editlang"
+        # return "_plugin/metadata/editlang"
         return reverse('wiki:metadata_edit_language', args=[urlpath])
 
     class Meta:
         verbose_name = _('language')
 
 
-
 class Adposition(Metadata):
-
     class MorphType(MetaEnum):
         standalone_preposition = 1
         standalone_postposition = 2
@@ -534,25 +550,25 @@ class Adposition(Metadata):
 
         @classmethod
         def from_properties(cls, attachment=None, position=None):
-            props2type = {('separate_word','pre'): cls.standalone_preposition,
-                          ('separate_word','post'): cls.standalone_postposition,
-                          ('separate_word','circum'): cls.standalone_circumposition,
-                          ('clitic_or_affix','pre'): cls.prefix,
-                          ('clitic_or_affix','post'): cls.suffix,
-                          ('clitic_or_affix','circum'): cls.circumfix}
+            props2type = {('separate_word', 'pre'): cls.standalone_preposition,
+                          ('separate_word', 'post'): cls.standalone_postposition,
+                          ('separate_word', 'circum'): cls.standalone_circumposition,
+                          ('clitic_or_affix', 'pre'): cls.prefix,
+                          ('clitic_or_affix', 'post'): cls.suffix,
+                          ('clitic_or_affix', 'circum'): cls.circumfix}
             if attachment is None or position is None:
                 return props2type
-            return props2type[attachment,position]
+            return props2type[attachment, position]
 
     class Transitivity(MetaEnum):
         always_intransitive = 0
         sometimes_transitive = 1
         always_transitive = 2
 
-
     def field_names(self):
-		# issue #4: transliteration field
-        return {'name', 'transliteration', 'other_forms', 'description', 'lang', 'morphtype', 'transitivity', 'obj_cases'}
+        # issue #4: transliteration field
+        return {'name', 'transliteration', 'other_forms', 'description', 'lang', 'morphtype', 'transitivity',
+                'obj_cases'}
 
     def __str__(self):
         if self.current_revision:
@@ -569,15 +585,14 @@ class Adposition(Metadata):
 
 
 class AdpositionRevision(MetadataRevision):
-
     lang = models.ForeignKey(Language, related_name='adpositionrevisions', verbose_name='Language/dialect')
     # name = models.CharField(max_length=200, verbose_name='Lemma',
     #     help_text="Lowercase unless it would normally be capitalized in a dictionary")
-	# issue #4: transliteration field
+    # issue #4: transliteration field
     transliteration = models.CharField(max_length=200, blank=True, verbose_name="Transliteration",
-        help_text="Romanization/phonemic spelling")
+                                       help_text="Romanization/phonemic spelling")
     other_forms = models.CharField(max_length=200, blank=True, verbose_name="Other spellings or inflections",
-        help_text="Exclude typos")
+                                   help_text="Exclude typos")
     morphtype = models.PositiveIntegerField(choices=Adposition.MorphType.choices(), verbose_name="Morphological type")
     transitivity = models.PositiveIntegerField(choices=Adposition.Transitivity.choices())
     obj_cases = BitField(flags=Case.flags(), verbose_name="Possible cases of the object")
@@ -589,15 +604,16 @@ class AdpositionRevision(MetadataRevision):
 
     @classmethod
     def editurl(cls, urlpath):
-        #return "_plugin/metadata/editp"
+        # return "_plugin/metadata/editp"
         return reverse('wiki:metadata_edit_adposition', args=[urlpath])
 
     @property
     def adposition(self):
-        return Adposition.objects.get(current_revision = self)
+        return Adposition.objects.get(current_revision=self)
 
     class Meta:
         verbose_name = _('adposition revision')
+
 
 class Usage(Metadata):
 
@@ -619,7 +635,6 @@ class Usage(Metadata):
 
 
 class UsageRevision(MetadataRevision):
-
     adposition = models.ForeignKey(Adposition, null=True, related_name='usages')
     obj_case = models.PositiveIntegerField(choices=Case.choices(), null=True)
     construal = models.ForeignKey(Construal, null=True, related_name='usages')
@@ -630,15 +645,14 @@ class UsageRevision(MetadataRevision):
         return ('Usage Revision: %s %d') % (self.name, self.revision_number)
 
     def html(self, container_type=None):
-        content = (self.adposition.html() + ': ' + self.construal.html()).replace('<a ','<span ').replace('</a>','</span>')
-        return mark_safe(super(UsageRevision,self).html(container_type=container_type).replace(self.name, content))
+        content = (self.adposition.html() + ': ' + self.construal.html()).replace('<a ', '<span ').replace('</a>',
+                                                                                                           '</span>')
+        return mark_safe(super(UsageRevision, self).html(container_type=container_type).replace(self.name, content))
 
     class Meta:
         verbose_name = _('usage revision')
-		# issue #10: alphabetize models
+        # issue #10: alphabetize models
         ordering = ['adposition', 'construal']
-
-
 
 
 # PTokenAnnotation fields:
@@ -658,8 +672,6 @@ class UsageRevision(MetadataRevision):
 # Name, version, is_current, url, genre, lang(s), size?, stats?
 
 
-
-
 class Corpus(models.Model):
     # Name, version, is_current, url, genre, lang(s), size?, stats?
     name = models.CharField(max_length=200, null=True, verbose_name="Corpus Name")
@@ -667,11 +679,11 @@ class Corpus(models.Model):
     url = models.URLField(max_length=200, blank=True, verbose_name="URL")
     genre = models.CharField(max_length=200, blank=True, verbose_name="Corpus Genre")
     description = models.CharField(max_length=200, blank=True, verbose_name="Description",
-        help_text="Include number of tokens and basic statistics")
+                                   help_text="Include number of tokens and basic statistics")
     languages = models.CharField(max_length=200, null=True, verbose_name="Language(s)")
 
     def __str__(self):
-        return self.name+self.version
+        return self.name + self.version
 
     @property
     def template(self):
@@ -692,10 +704,10 @@ class CorpusSentence(models.Model):
     sent_id = models.CharField(max_length=200, null=True, verbose_name="Sentence ID")
     language = models.ForeignKey(Language, blank=True, related_name='corpus_sentences')
     orthography = models.CharField(max_length=200, blank=True, verbose_name="Orthography",
-        help_text="language-specific details such as style of transliteration")
+                                   help_text="language-specific details such as style of transliteration")
     is_parallel = models.BooleanField(default=False)
     # parallel sentences
-    #parallel = models.ManyToManyField(CorpusSentence, blank=True, related_name='parallel')
+    # parallel = models.ManyToManyField(CorpusSentence, blank=True, related_name='parallel')
     doc_id = models.CharField(max_length=200, null=True, verbose_name="Document ID")
     text = models.CharField(max_length=1000, null=True, verbose_name="Text")
     tokens = models.CharField(max_length=1000, null=True, verbose_name="Tokens")
@@ -725,15 +737,17 @@ class PTokenAnnotation(models.Model):
     # list of weak associations (for mwe), is_gold, annotator note?,
     # annotator grouping/cluster
     token_indices = models.CharField(max_length=200, blank=True, verbose_name="Token Indices")
-    adposition = models.ForeignKey(Adposition, null=True, related_name='adposition')
-    construal = models.ForeignKey(Construal, null=True, related_name='construal')
-    usage = models.ForeignKey(Usage, null=True, related_name='usage')
-    sentence = models.ForeignKey(CorpusSentence, null=True, related_name='sentence')
+    adposition = models.ForeignKey(Adposition, null=True)
+    construal = models.ForeignKey(Construal, null=True)
+    usage = models.ForeignKey(Usage, null=True)
+    sentence = models.ForeignKey(CorpusSentence, null=True)
     obj_case = models.PositiveIntegerField(choices=Case.choices(), blank=True)
 
-    obj_head = models.CharField(max_length=200, blank=True, verbose_name="Object Head")
-    gov_head = models.CharField(max_length=200, blank=True, verbose_name="Governor Head")
-    gov_obj_syntax = models.CharField(max_length=200, blank=True, verbose_name="Governor-Object Syntax")
+    obj_head = models.CharField(max_length=200, null=True, verbose_name="Object Head")
+    gov_head = models.CharField(max_length=200, null=True, verbose_name="Governor Head")
+    gov_obj_syntax = models.CharField(max_length=200, null=True, verbose_name="Governor-Object Syntax")
+    gov_head_index = models.PositiveIntegerField(null=True, verbose_name="Governor Index")
+    obj_head_index  = models.PositiveIntegerField(null=True, verbose_name="Object Index")
 
     adp_pos = models.CharField(max_length=200, blank=True, verbose_name="Adposition Part of Speech")
     gov_pos = models.CharField(max_length=200, blank=True, verbose_name="Governor Part of Speech")
@@ -744,11 +758,13 @@ class PTokenAnnotation(models.Model):
 
     is_gold = models.BooleanField(default=False, verbose_name="Gold Annotation?")
     annotator_cluster = models.CharField(max_length=200, blank=True, verbose_name="Annotator Cluster",
-                                       help_text='Informal Label for Grouping Similar Tokens')
+                                         help_text='Informal Label for Grouping Similar Tokens')
     is_transitive = models.BooleanField(default=True, verbose_name="Transitive?",
-                                       help_text='Does the adposition take an object?')
+                                        help_text='Does the adposition take an object?')
+    is_typo  = models.BooleanField(default=False, verbose_name="Typo?")
+    is_abbr  = models.BooleanField(default=False, verbose_name="Abbreviation?")
     # list of subtokens (for mwe)
-    #subtokens = models.ManyToManyField(Adposition, blank=True, related_name='MWE subtokens')
+    # subtokens = models.ManyToManyField(Adposition, blank=True, related_name='MWE subtokens')
 
     def __str__(self):
         return str(self.adposition) + ' : ' + str(self.sentence)
@@ -758,9 +774,6 @@ class PTokenAnnotation(models.Model):
         unique_together = ('sentence', 'token_indices')
         # issue #10: alphabetize models
         ordering = ['sentence', 'token_indices']
-
-
-
 
 
 # You must register the model here

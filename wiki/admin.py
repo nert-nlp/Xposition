@@ -143,6 +143,10 @@ class PTokenAnnotationResource(resources.ModelResource):
     is_gold = fields.Field(attribute='is_gold', widget=widgets.BooleanWidget())
     annotator_cluster = fields.Field(attribute='annotator_cluster', widget=widgets.CharWidget())
     is_transitive = fields.Field(attribute='is_transitive', widget=widgets.BooleanWidget())
+    gov_head_index = fields.Field(attribute='gov_head_index', widget=widgets.IntegerWidget())
+    obj_head_index = fields.Field(attribute='obj_head_index', widget=widgets.IntegerWidget())
+    is_typo = fields.Field(attribute='is_typo', widget=widgets.BooleanWidget())
+    is_abbr = fields.Field(attribute='is_abbr', widget=widgets.BooleanWidget())
 
     obj_case = fields.Field(
         column_name='obj_case',
@@ -175,7 +179,8 @@ class PTokenAnnotationResource(resources.ModelResource):
         import_id_fields = ('sentence', 'token_indices')
         fields = ('token_indices', 'adposition', 'construal', 'usage', 'sentence',
                   'obj_case', 'obj_head', 'gov_head', 'gov_obj_syntax', 'adp_pos', 'gov_pos', 'obj_pos',
-                  'gov_supersense', 'obj_supersense', 'is_gold', 'annotator_cluster', 'is_transitive')
+                  'gov_supersense', 'obj_supersense', 'is_gold', 'annotator_cluster', 'is_transitive',
+                  'gov_head_index', 'obj_head_index', 'is_typo', 'is_abbr')
 
 
 class ConstrualResource(resources.ModelResource):
