@@ -11,6 +11,7 @@ from django.contrib.contenttypes.models import ContentType
 from functools import reduce
 from wiki.models import Article, ArticleRevision
 from django.utils.translation import ugettext_lazy as _
+from django.utils.safestring import mark_safe
 from django.utils.translation import ugettext
 from django.contrib import admin
 from django.db.models.signals import pre_save, post_save
@@ -80,7 +81,7 @@ class SimpleMetadata(ArticlePlugin):
 
     def html(self):
         di = deepest_instance(self)
-        return '<a href="' + self.article.get_absolute_url() + '" class="' + type(di).__name__.lower() + '">' + str(self) + '</a>'
+        return mark_safe('<a href="' + self.article.get_absolute_url() + '" class="' + type(di).__name__.lower() + '">' + str(self) + '</a>')
 
 @disable_signal_for_loaddata
 def on_article_revision_post_save(**kwargs):
@@ -112,7 +113,7 @@ class Metadata(RevisionPlugin):
     def html(self):
         if self.current_revision:
             di = deepest_instance(self)
-            return self.current_revision.metadatarevision.html(container_type=type(di))
+            return deepest_instance(self.current_revision).html(container_type=type(di))
         return ''
 
     # def createNewRevision(self, request):
@@ -244,7 +245,7 @@ class MetadataRevision(RevisionPluginRevision):
         kls = ''
         if container_type:
             kls = str(container_type.__name__).lower()
-        return '<a href="' + self.plugin.article.get_absolute_url() + '" class="' + kls + '">' + str(self.name) + '</a>'
+        return mark_safe('<a href="' + self.plugin.article.get_absolute_url() + '" class="' + kls + '">' + str(self.name) + '</a>')
 
     def descriptionhtml(self):
         return mark_safe(article_markdown(self.description, self.article_revision.article))
@@ -333,6 +334,9 @@ class Construal(SimpleMetadata):
 
     def __str__(self):
         return str(self.role)+' ~> '+str(self.function)
+
+    def html(self):
+        return super(Construal, self).html().replace(' ~> ', '&#x219d;')
 
     @property
     def template(self):
@@ -625,7 +629,9 @@ class UsageRevision(MetadataRevision):
     def __str__(self):
         return ('Usage Revision: %s %d') % (self.name, self.revision_number)
 
-
+    def html(self, container_type=None):
+        content = (self.adposition.html() + ': ' + self.construal.html()).replace('<a ','<span ').replace('</a>','</span>')
+        return mark_safe(super(UsageRevision,self).html(container_type=container_type).replace(self.name, content))
 
     class Meta:
         verbose_name = _('usage revision')

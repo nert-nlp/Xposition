@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+#coding=utf-8
+>>>>>>> master
 """
 This code is for importing our Preposition Supersense v2 guidelines
 into our new Xposition website/wiki
@@ -164,11 +168,20 @@ def convert(ifile, ofile):
         data = replace_circumfixes(data, r'\\emph{', '<i>', '</i>')
         data = replace_circumfixes(data, r'\\uline{', '<u>', '</u>')
         data = replace_circumfixes(data, r'\\texttt{', '`', '`')
+<<<<<<< HEAD
         data = re.sub(r'``',"\"", data)
         data = re.sub(r'`', "'", data)
         data = re.sub(r"''", "\"", data)
         data = re.sub(r"---", "—", data)
         data = re.sub(r"[.]\\ ", ".", data)
+=======
+        data = re.sub(r'``',"“", data)
+        data = re.sub(r'`', "‘", data)
+        data = re.sub(r"''", "”", data)
+        data = re.sub(r"'", "’", data)
+        data = re.sub(r"---", "—", data)
+        data = re.sub(r"[.]\\ ", ". ", data)    # e.g. "etc.\ " in LaTeX within a sentence to ensure it is followed by a normal-size space
+>>>>>>> master
 
         # math
         data = re.sub(r"~~", " ", data)
@@ -188,10 +201,16 @@ def convert(ifile, ofile):
         data = replace_circumfixes(data, r'\\sst{', '<i>', '</i>')
         data = replace_circumfixes(data, r'\\lbl{', '<i>', '</i>')
         data = replace_circumfixes(data, r'\\pex{', '<i>', '</i>')
+<<<<<<< HEAD
         data = replace_circumfixes(data, r'\\choices{', r'<u>', r'</u>')
         data = re.sub(r"\\\\", "</u>/<u>", data)
         data = replace_circumfixes(data, r'\\url{', '', '')
         data = re.sub(r'\\psstX{Part/Portion}{Part/Portion}', " [[Part/Portion]] ", data)
+=======
+        data = replace_circumfixes(data, r'\\choices{', r'<u class="ex-choice">', r'</u>')
+        data = re.sub(r"\\\\", '</u>/<u class="ex-choice">', data)
+        data = replace_circumfixes(data, r'\\url{', '', '')
+>>>>>>> master
         data = re.sub(r"\\end{history}", "}", data)
         data = replace_circumfixes(data, r'\\begin{history}', '\n<!-- ', ' -->')
         data = replace_circumfixes(data, r'\\futureversion{', '\n<!-- ', ' -->')

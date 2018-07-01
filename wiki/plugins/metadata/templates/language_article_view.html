@@ -16,7 +16,7 @@
     <h4 id="adps">Adpositions ({{adpositions|length}})</h4>
     <ul>
       {% for p in adpositions %}
-      <li>{{p.metadata.html|safe}} {{p.current_revision.metadatarevision.adpositionrevision.transliteration}}</li>
+      <li>{{p.metadata.html}} {{p.current_revision.metadatarevision.adpositionrevision.transliteration}}</li>
       {% endfor %}
     </ul>
 
@@ -24,7 +24,7 @@
     <h4 id="usages">Usages ({{usages|length}})</h4>
     <ul>
       {% for u in usages %}
-      <li>{{u.metadata.html|safe}}</li>
+      <li>{{u.metadata.html}}</li>
       {% endfor %}
     </ul>
 
