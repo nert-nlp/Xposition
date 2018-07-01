@@ -103,7 +103,7 @@ class ArticleMetadataFormFunctions:
 
 class CorpusSentenceResource(resources.ModelResource):
     corpus = fields.Field(
-        column_name='corpus',
+        column_name='corpus_name',
         attribute='corpus',
         widget=CorpusForeignKeyWidget(ms.Corpus, 'name'))
 
@@ -188,9 +188,10 @@ class ConstrualResource(resources.ModelResource):
         attribute='function',
         widget=ForeignKeyWidget(ms.Supersense))
 
-    ex_article = Article.objects.get(current_revision__title='Locus--Locus')
 
     def save_instance(self, instance, using_transactions=True, dry_run=False):
+        ex_article = Article.objects.get(current_revision__title='Locus--Locus')
+
         m = instance
 
         if ms.Construal.objects.filter(role=m.role,function=m.function):
@@ -202,7 +203,7 @@ class ConstrualResource(resources.ModelResource):
         # slug will be the same as name
         newarticle, newcategory = ArticleMetadataFormFunctions(ADMIN_REQUEST).newArticle_ArticleCategory(name=name,
                                                                                                          slug=name,
-                                                                                                         ex_article=self.ex_article,
+                                                                                                         ex_article=ex_article,
                                                                                                          parent=None)
         m.article = newarticle
         m.category = newcategory
@@ -222,10 +223,10 @@ class SupersenseRevisionResource(resources.ModelResource):
 
     name = fields.Field(attribute='name', column_name='supersense_name', widget=widgets.CharWidget())
 
-    ex_article = Article.objects.get(current_revision__title='Locus')
-
     # handle revision creation
     def save_instance(self, instance, using_transactions=True, dry_run=False):
+        ex_article = Article.objects.get(current_revision__title='Locus')
+
         m = instance
         if ms.Supersense.objects.filter(current_revision__metadatarevision__supersenserevision__name=m.name):
             return
@@ -233,7 +234,7 @@ class SupersenseRevisionResource(resources.ModelResource):
 
         # code taken from wiki/plugins/metadata/forms.py
         newarticle, newcategory = ArticleMetadataFormFunctions(ADMIN_REQUEST).newArticle_ArticleCategory(name=m.name,
-                                                                                                         ex_article=self.ex_article)
+                                                                                                         ex_article=ex_article)
         # associate the article with the SupersenseRevision
         m.article = newarticle
 
@@ -270,10 +271,10 @@ class AdpositionRevisionResource(import_export.resources.ModelResource):
     transitivity = fields.Field(attribute='transitivity', widget=TransitivityWidget())
     # obj_cases = fields.Field(column_name='obj_case', attribute='obj_cases', widget=ObjCasesWidget())
 
-    ex_article = Article.objects.get(current_revision__title='at')
-
     # handle revision creation
     def save_instance(self, instance, using_transactions=True, dry_run=False):
+        ex_article = Article.objects.get(current_revision__title='at')
+
         m = instance
 
 
@@ -285,7 +286,7 @@ class AdpositionRevisionResource(import_export.resources.ModelResource):
 
         # code taken from wiki/plugins/metadata/forms.py
         newarticle, newcategory = ArticleMetadataFormFunctions(ADMIN_REQUEST).newArticle_ArticleCategory(name=m.name,
-                                                                                        ex_article=self.ex_article,
+                                                                                        ex_article=ex_article,
                                                                                         parent=lang_article.urlpath_set.all()[0],
                                                                                         slug=m.name)
         # associate the article with the SupersenseRevision
@@ -324,18 +325,21 @@ class UsageRevisionResource(import_export.resources.ModelResource):
         attribute='obj_case',
         widget=ObjCaseWidget())
 
-    ex_article = ms.Usage.objects.get(
-        current_revision__metadatarevision__usagerevision__adposition__current_revision__metadatarevision__adpositionrevision__name='at',
-        current_revision__metadatarevision__usagerevision__construal__role__current_revision__metadatarevision__supersenserevision__name='Locus',
-        current_revision__metadatarevision__usagerevision__construal__function__current_revision__metadatarevision__supersenserevision__name='Locus').article
-
+    ex_article = None
     # handle revision creation
     def save_instance(self, instance, using_transactions=True, dry_run=False):
+        if not self.ex_article:
+            self.ex_article = ms.Usage.objects.get(
+                current_revision__metadatarevision__usagerevision__adposition__current_revision__metadatarevision__adpositionrevision__name='at',
+                current_revision__metadatarevision__usagerevision__construal__role__current_revision__metadatarevision__supersenserevision__name='Locus',
+                current_revision__metadatarevision__usagerevision__construal__function__current_revision__metadatarevision__supersenserevision__name='Locus'
+            ).article
+
         m = instance
-        if ms.Usage.objects.filter(current_revision__metadatarevision__usagerevision__adposition=
-                                    m.adposition,
-                                   current_revision__metadatarevision__usagerevision__construal=
-                                    m.construal):
+        if ms.Usage.objects.filter(current_revision__metadatarevision__usagerevision__adposition__pk=
+                                    m.adposition.pk,
+                                   current_revision__metadatarevision__usagerevision__construal__pk=
+                                    m.construal.pk):
             return
 
 
@@ -376,7 +380,7 @@ class UsageRevisionResource(import_export.resources.ModelResource):
 
     class Meta:
         model = ms.UsageRevision
-        import_id_fields = ('adposition', 'construal')
+        import_id_fields = ('adposition', 'construal', 'obj_case')
         fields = ('adposition', 'construal', 'obj_case')
 
 

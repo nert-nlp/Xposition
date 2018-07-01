@@ -14,9 +14,10 @@ exec(open(r'..\scripts\json2django_models.py').read())
 Step 0) Put file streusle.go.notes.json in scripts directory.
      0a) Get the file streusle.json from github.com/nert-gu/streusle
      0b) Run govobj.py and annotator_notes.py to get streusle.go.notes.json
-Step 1) Run it once to import `AdpositionRevision`s, `SupersenseRevision`s, and `CorpusSentence`s.
-     1a) The file for `CorpusSentence`s must be converted to an Excel worksheet
-Step 2) Run again for `Construal`s.
-Step 3) Run againg for `UsageRevision`s.
-Step 4) Run againg for `PTokenAnnotation`s
+Step 1) Run the script once and then import `AdpositionRevision`s, `SupersenseRevision`s, and `CorpusSentence`s from admin.
+        (the files for `CorpusSentence` and `PTokenAnnotation` must be converted to an Excel worksheet)
+     1b) Create articles "English", "at", "Locus", "Locus--Locus", and "at: Locus--Locus" by hand.
+Step 2) Run again and then import `Construal`s (depends on `SupersenseRevision`) from admin.
+Step 3) Run again and then import `UsageRevision`s (depends on `Construal`) from admin.
+Step 4) Run again and then import `PTokenAnnotation`s (depends on `UsageRevision`) from admin.
 That way the script can access the ids for foreign keys: `Adposition`, `Supersense`, etc.
