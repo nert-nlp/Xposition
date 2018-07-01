@@ -28,6 +28,28 @@ from django.core.files.storage import get_storage_class
 
 from django.utils.translation import ugettext_lazy as _
 
+# SeparatedValuesField copied from https://stackoverflow.com/a/1113039
+class SeparatedValuesField(models.TextField):
+    # __metaclass__ = models.SubfieldBase
+
+    def __init__(self, *args, **kwargs):
+        self.token = ' '
+        super(SeparatedValuesField, self).__init__(*args, **kwargs)
+
+    def to_python(self, value):
+        if not value: return
+        if isinstance(value, list):
+            return value
+        return value.split(self.token)
+
+    def get_db_prep_value(self, value):
+        if not value: return
+        assert(isinstance(value, list) or isinstance(value, tuple))
+        return self.token.join([unicode(s) for s in value])
+
+    def value_to_string(self, obj):
+        value = self._get_val_from_obj(obj)
+        return self.get_db_prep_value(value)
 
 def deepest_instance(x):
     """
@@ -710,8 +732,8 @@ class CorpusSentence(models.Model):
     # parallel = models.ManyToManyField(CorpusSentence, blank=True, related_name='parallel')
     doc_id = models.CharField(max_length=200, null=True, verbose_name="Document ID")
     text = models.CharField(max_length=1000, null=True, verbose_name="Text")
-    tokens = models.CharField(max_length=1000, null=True, verbose_name="Tokens")
-    word_gloss = models.CharField(max_length=200, blank=True, verbose_name="Word Gloss")
+    tokens = SeparatedValuesField(max_length=1000, null=True, verbose_name="Tokens")
+    word_gloss = SeparatedValuesField(max_length=200, blank=True, verbose_name="Word Gloss")
     sent_gloss = models.CharField(max_length=200, blank=True, verbose_name="Sentence Gloss")
     note = models.CharField(max_length=200, blank=True, verbose_name="Annotator Note")
     mwe_markup = models.CharField(max_length=200, blank=True, verbose_name="MWE Markup")
@@ -736,7 +758,7 @@ class PTokenAnnotation(models.Model):
     # Supersense of obj, Supersense of gov, list of subtokens (for mwe),
     # list of weak associations (for mwe), is_gold, annotator note?,
     # annotator grouping/cluster
-    token_indices = models.CharField(max_length=200, blank=True, verbose_name="Token Indices")
+    token_indices = SeparatedValuesField(max_length=200, blank=True, verbose_name="Token Indices")
     adposition = models.ForeignKey(Adposition, null=True)
     construal = models.ForeignKey(Construal, null=True)
     usage = models.ForeignKey(Usage, null=True)

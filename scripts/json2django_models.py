@@ -162,7 +162,7 @@ with open(file, encoding='utf8') as f:
                             hasgov = type(govobj['gov']) is int
 
                             # assign fields
-                            token_indices = ', '.join([str(x) for x in tok_sem['toknums']])
+                            token_indices = ' '.join([str(x) for x in tok_sem['toknums']])
                             adposition_name = tok_sem['lexlemma'].replace(' ','_')
                             role_name = tok_sem['ss'].replace('p.', '')
                             function_name = '??' if tok_sem['ss'] == '??' else tok_sem['ss2'].replace('p.', '')
