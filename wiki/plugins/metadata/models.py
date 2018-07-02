@@ -595,6 +595,11 @@ class Adposition(Metadata):
 
     # issue #51, add standard aposition spelling variants here
     def normalize_adp(cls, adp='', language_name=''):
+        # for a in AdpositionRevision.objects.all():
+        #     if not a.other_forms or not (a.lang.name==language_name or a.lang.slug==language_name):
+        #         continue
+        #     if adp in a.other_forms:
+        #         return a.name
         if language_name in ['English', 'en']:
             if adp in ['my', 'our', 'his', 'her', 'their', 'your', "'s", 'whose', 'its']:
                 return "'s"
@@ -628,8 +633,8 @@ class AdpositionRevision(MetadataRevision):
     # issue #4: transliteration field
     transliteration = models.CharField(max_length=200, blank=True, verbose_name="Transliteration",
                                        help_text="Romanization/phonemic spelling")
-    other_forms = models.CharField(max_length=200, blank=True, verbose_name="Other spellings or inflections",
-                                   help_text="Exclude typos")
+    other_forms = SeparatedValuesField(max_length=200, blank=True, verbose_name="Other spellings or inflections",
+                                   help_text="Exclude typos, Separate by spaces")
     morphtype = models.PositiveIntegerField(choices=Adposition.MorphType.choices(), verbose_name="Morphological type")
     transitivity = models.PositiveIntegerField(choices=Adposition.Transitivity.choices())
     obj_cases = BitField(flags=Case.flags(), verbose_name="Possible cases of the object")
