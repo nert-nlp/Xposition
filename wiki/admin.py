@@ -20,6 +20,7 @@ from .plugins.categories.models import ArticleCategory
 from .models import URLPath, Article
 from django.contrib.auth.models import User
 from .plugins.metadata.models import deepest_instance
+from django.core.exceptions import ObjectDoesNotExist
 
 ADMIN_REQUEST = None
 
@@ -57,6 +58,15 @@ class MorphTypeWidget(Widget):
 class TransitivityWidget(Widget):
     def clean(self, value, row=None, *args, **kwargs):
         return ms.Adposition.Transitivity[value]
+
+class NullForeignKeyWidget(ForeignKeyWidget):
+    def clean(self, value, row=None, *args, **kwargs):
+        try:
+            x = super(NullForeignKeyWidget, self).clean(value, row, *args, **kwargs)
+        except ObjectDoesNotExist:
+            return None
+        return x
+
 
 
 class ArticleMetadataFormFunctions:
@@ -156,12 +166,12 @@ class PTokenAnnotationResource(resources.ModelResource):
     adposition = fields.Field(
         column_name='adposition_id',
         attribute='adposition',
-        widget=ForeignKeyWidget(ms.Adposition))
+        widget=NullForeignKeyWidget(ms.Adposition))
 
     construal = fields.Field(
         column_name='construal_id',
         attribute='construal',
-        widget=ForeignKeyWidget(ms.Construal))
+        widget=NullForeignKeyWidget(ms.Construal))
 
     sentence = fields.Field(
         column_name='sent_id',
@@ -172,7 +182,7 @@ class PTokenAnnotationResource(resources.ModelResource):
     usage = fields.Field(
         column_name='usage_id',
         attribute='usage',
-        widget=ForeignKeyWidget(ms.Usage))
+        widget=NullForeignKeyWidget(ms.Usage))
 
     class Meta:
         model = ms.PTokenAnnotation
@@ -187,11 +197,12 @@ class ConstrualResource(resources.ModelResource):
     role = fields.Field(
         column_name='role_id',
         attribute='role',
-        widget=ForeignKeyWidget(ms.Supersense))
+        widget=NullForeignKeyWidget(ms.Supersense))
     function = fields.Field(
         column_name='function_id',
         attribute='function',
-        widget=ForeignKeyWidget(ms.Supersense))
+        widget=NullForeignKeyWidget(ms.Supersense))
+    special = fields.Field(attribute='special', widget=widgets.CharWidget())
 
 
     def save_instance(self, instance, using_transactions=True, dry_run=False):
@@ -199,12 +210,14 @@ class ConstrualResource(resources.ModelResource):
 
         m = instance
 
-        if ms.Construal.objects.filter(role=m.role,function=m.function):
+        if not m.role and not m.function and ms.Construal.objects.filter(special=m.special):
+            return
+        if m.role and m.function and ms.Construal.objects.filter(role__pk=m.role.pk,function__pk=m.function.pk):
             return
 
-        role_name = deepest_instance(m.role.current_revision).name
-        function_name = deepest_instance(m.function.current_revision).name
-        name = self.get_construal_slug(role_name, function_name)
+        role_name = deepest_instance(m.role.current_revision).name if m.role else None
+        function_name = deepest_instance(m.function.current_revision).name if m.function else None
+        name = self.get_construal_slug(role_name, function_name, m.special)
         # slug will be the same as name
         newarticle, newcategory = ArticleMetadataFormFunctions(ADMIN_REQUEST).newArticle_ArticleCategory(name=name,
                                                                                                          slug=name,
@@ -214,14 +227,14 @@ class ConstrualResource(resources.ModelResource):
         m.category = newcategory
         m.save()
 
-    def get_construal_slug(cls, role_name, function_name):
-        return role_name + '--' + function_name
+    def get_construal_slug(cls, role_name, function_name, special):
+        return role_name + '--' + function_name if role_name and function_name else special
 
 
     class Meta:
         model = ms.Construal
-        import_id_fields = ('role', 'function')
-        fields = ('role', 'function')
+        import_id_fields = ('role', 'function', 'special')
+        fields = ('role', 'function', 'special')
 
 
 class SupersenseRevisionResource(resources.ModelResource):

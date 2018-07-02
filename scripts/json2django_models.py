@@ -10,14 +10,14 @@ file = 'streusle.go.notes.json'
 sent_header = ['corpus_name', 'corpus_version', 'sent_id', 'language_name', 'orthography', 'is_parallel', 'doc_id',
                'text', 'tokens', 'word_gloss', 'sent_gloss', 'note', 'mwe_markup']
 
-ptoken_header = ['token_indices', 'adposition_name', 'language_name', 'role_name', 'function_name', 'corpus_name',
+ptoken_header = ['token_indices', 'adposition_name', 'language_name', 'role_name', 'function_name', 'special', 'corpus_name',
                  'corpus_version', 'sent_id',
                  'obj_case', 'obj_head', 'gov_head', 'gov_obj_syntax', 'gov_head_index', 'obj_head_index', 'is_typo', 'is_abbr', 'adp_pos', 'gov_pos', 'obj_pos',
                  'gov_supersense',
                  'obj_supersense', 'is_gold', 'annotator_cluster', 'is_transitive', 'adposition_id', 'construal_id',
                  'usage_id']
 
-default_str = ' '
+DEFAULT_STR = ' '
 construal_list = set()
 adposition_list = set()
 usage_list = set()
@@ -28,43 +28,44 @@ adp_intrans = set()
 # corpus sent
 corpus_name = 'streusle'
 corpus_version = '4.1'
-sent_id = default_str
+sent_id = DEFAULT_STR
 language_name = 'English'
-orthography = default_str
+orthography = DEFAULT_STR
 is_parallel = '0'
-doc_id = default_str
-text = default_str
-tokens = default_str
-word_gloss = default_str
-sent_gloss = default_str
-note = default_str
-mwe_markup = default_str
+doc_id = DEFAULT_STR
+text = DEFAULT_STR
+tokens = DEFAULT_STR
+word_gloss = DEFAULT_STR
+sent_gloss = DEFAULT_STR
+note = DEFAULT_STR
+mwe_markup = DEFAULT_STR
 
 # ptoken
-token_indices = default_str
-adposition_name = default_str
-role_name = default_str
-function_name = default_str
+token_indices = DEFAULT_STR
+adposition_name = DEFAULT_STR
+role_name = DEFAULT_STR
+function_name = DEFAULT_STR
+special = DEFAULT_STR
 corpus_name = 'streusle'
 corpus_version = '4.1'
-sent_id = default_str
-obj_case = default_str
-obj_head = default_str
-gov_head = default_str
-gov_obj_syntax = default_str
-adp_pos = default_str
-gov_pos = default_str
-obj_pos = default_str
-gov_supersense = default_str
-obj_supersense = default_str
+sent_id = DEFAULT_STR
+obj_case = DEFAULT_STR
+obj_head = DEFAULT_STR
+gov_head = DEFAULT_STR
+gov_obj_syntax = DEFAULT_STR
+adp_pos = DEFAULT_STR
+gov_pos = DEFAULT_STR
+obj_pos = DEFAULT_STR
+gov_supersense = DEFAULT_STR
+obj_supersense = DEFAULT_STR
 is_gold = '1'
-annotator_cluster = default_str
+annotator_cluster = DEFAULT_STR
 is_transitive = '1'
-adposition_id = default_str
-construal_id = default_str
-usage_id = default_str
-gov_head_index = default_str
-obj_head_index = default_str
+adposition_id = DEFAULT_STR
+construal_id = DEFAULT_STR
+usage_id = DEFAULT_STR
+gov_head_index = DEFAULT_STR
+obj_head_index = DEFAULT_STR
 is_typo = '0'
 is_abbr = '0'
 
@@ -79,38 +80,38 @@ for ss in ms.Supersense.objects.all():
     ss_memo[x] = str(ss.pk)
 con_memo = {}
 for c in ms.Construal.objects.all():
-    con_memo[(c.role.current_revision.metadatarevision.supersenserevision.name,
-              c.function.current_revision.metadatarevision.supersenserevision.name)] = str(c.pk)
+    con_memo[(c.role.current_revision.metadatarevision.supersenserevision.name if c.role else DEFAULT_STR,
+              c.function.current_revision.metadatarevision.supersenserevision.name if c.function else DEFAULT_STR,
+              c.special if c.special else DEFAULT_STR)] = str(c.pk)
 us_memo = {}
 for u in ms.Usage.objects.all():
     us_memo[(u.current_revision.metadatarevision.usagerevision.adposition.current_revision.metadatarevision.adpositionrevision.name,
-             u.current_revision.metadatarevision.usagerevision.construal.role.current_revision.metadatarevision.supersenserevision.name,
-             u.current_revision.metadatarevision.usagerevision.construal.function.current_revision.metadatarevision.supersenserevision.name)] \
+             u.current_revision.metadatarevision.usagerevision.construal.pk)] \
         = str(u.pk)
 
 def clean_adp(language_name, adposition_name):
     if (adposition_name,language_name) in adp_memo:
         return adp_memo[(adposition_name,language_name)]
     else:
-        return str(0)
+        return DEFAULT_STR
 
-def clean_con(role_name, function_name):
-    if (role_name, function_name) in con_memo:
-        return con_memo[(role_name, function_name)]
+def clean_con(role_name, function_name, special):
+    if (role_name, function_name, special) in con_memo:
+        return con_memo[(role_name, function_name, special)]
     else:
-        return str(0)
+        return DEFAULT_STR
 
-def clean_us(adposition_name, role_name, function_name):
-    if (adposition_name, role_name, function_name) in us_memo:
-        return us_memo[(adposition_name, role_name, function_name)]
+def clean_us(adposition_name, construal_id):
+    if (adposition_name, construal_id) in us_memo:
+        return us_memo[(adposition_name, construal_id)]
     else:
-        return str(0)
+        return DEFAULT_STR
 
 def clean_ss(name):
     if name in ss_memo:
         return ss_memo[name]
     else:
-        return str(0)
+        return DEFAULT_STR
 
 def add_corp_sent(f):
     f.write('\t'.join([globals()[s] for s in sent_header]) + '\n')
@@ -121,13 +122,13 @@ def add_ptoken(f):
 
 
 def get_ss(sent, n):
-    supersense = default_str
+    supersense = DEFAULT_STR
     for ws in [sent['swes'], sent['smwes']]:
         for tok in ws:
             if n in ws[tok]['toknums']:
                 supersense = ws[tok]['ss']
     if supersense == None:
-        supersense = default_str
+        supersense = DEFAULT_STR
     return supersense
 
 num_lines = len([line for line in open(file, encoding='utf8') if '"sent_id"' in line])
@@ -146,7 +147,7 @@ with open(file, encoding='utf8') as f:
                 doc_id = sent['sent_id'].split('-')[0] + '-' + sent['sent_id'].split('-')[1]
                 text = sent['text'].replace('"', r'\"')
                 tokens = ' '.join([x['word'].replace("'", r"\'").replace('"', r'\"') for x in sent['toks']])
-                note = sent['note'] if 'note' in sent else default_str
+                note = sent['note'] if 'note' in sent else DEFAULT_STR
                 mwe_markup = sent['mwe']
 
                 add_corp_sent(cs)
@@ -164,24 +165,31 @@ with open(file, encoding='utf8') as f:
                             # assign fields
                             token_indices = ' '.join([str(x) for x in tok_sem['toknums']])
                             adposition_name = tok_sem['lexlemma'].replace(' ','_')
-                            role_name = tok_sem['ss'].replace('p.', '')
-                            function_name = '??' if tok_sem['ss'] == '??' else tok_sem['ss2'].replace('p.', '')
+                            if '?' in tok_sem['ss'] or '`' in tok_sem['ss']:
+                                role_name = DEFAULT_STR
+                                function_name = DEFAULT_STR
+                                special = tok_sem['ss']
+                            else:
+                                role_name = tok_sem['ss'].replace('p.', '')
+                                function_name = tok_sem['ss2'].replace('p.', '')
+                                special = DEFAULT_STR
                             obj_case = 'Accusative' if not tok_sem['lexcat'] in ['PRON.POSS','POSS'] else 'Genitive'
-                            obj_head = govobj['objlemma'] if hasobj else default_str
-                            gov_head = govobj['govlemma'] if hasgov else default_str
+                            obj_head = govobj['objlemma'] if hasobj else DEFAULT_STR
+                            gov_head = govobj['govlemma'] if hasgov else DEFAULT_STR
                             gov_obj_syntax = govobj['config']
                             adp_pos = tok_morph['upos']
-                            gov_pos = sent['toks'][govobj['gov'] - 1]['upos'] if hasgov else default_str
-                            obj_pos = sent['toks'][govobj['obj'] - 1]['upos'] if hasobj else default_str
-                            gov_supersense = get_ss(sent, govobj['gov']) if hasgov else default_str
-                            obj_supersense = get_ss(sent, govobj['obj']) if hasobj else default_str
-                            annotator_cluster = tok_sem['annotator_cluster'] if 'annotator_cluster' in tok_sem else default_str
+                            gov_pos = sent['toks'][govobj['gov'] - 1]['upos'] if hasgov else DEFAULT_STR
+                            obj_pos = sent['toks'][govobj['obj'] - 1]['upos'] if hasobj else DEFAULT_STR
+                            gov_supersense = get_ss(sent, govobj['gov']) if hasgov else DEFAULT_STR
+                            obj_supersense = get_ss(sent, govobj['obj']) if hasobj else DEFAULT_STR
+                            annotator_cluster = tok_sem['annotator_cluster'] if 'annotator_cluster' in tok_sem else DEFAULT_STR
                             is_transitive = '1' if hasobj else '0'
                             adposition_id = clean_adp(language_name, adposition_name)
-                            construal_id = clean_con(role_name, function_name)
-                            usage_id = clean_us(adposition_name, role_name, function_name)
-                            gov_head_index = str(govobj['gov']) if hasgov else default_str
-                            obj_head_index = str(govobj['obj']) if hasobj else default_str
+                            construal_id = clean_con(role_name, function_name, special)
+                            usage_id = clean_us(adposition_name, int(construal_id)) if not construal_id==DEFAULT_STR \
+                                else DEFAULT_STR
+                            gov_head_index = str(govobj['gov']) if hasgov else DEFAULT_STR
+                            obj_head_index = str(govobj['obj']) if hasobj else DEFAULT_STR
                             if 'feats' in tok_morph and tok_morph['feats']:
                                 is_typo = '1' if 'Typo=Yes' in tok_morph['feats'] else '0'
                                 is_abbr = '1' if 'Abbr=Yes' in tok_morph['feats'] else '0'
@@ -192,12 +200,13 @@ with open(file, encoding='utf8') as f:
                                 adp_trans.add(adposition_name)
                             else:
                                 adp_intrans.add(adposition_name)
-                            adposition_list.add(
-                                (adposition_name, language_name, morphtype, obj_case))
-                            construal_list.add((role_name,function_name,clean_ss(role_name), clean_ss(function_name)))
+                            adposition_list.add((adposition_name, language_name, morphtype, obj_case))
+                            construal_list.add((role_name,function_name,special,clean_ss(role_name), clean_ss(function_name)))
                             usage_list.add((adposition_name, role_name, function_name, obj_case, adposition_id, construal_id))
-                            supersense_list.add(role_name)
-                            supersense_list.add(function_name)
+                            if not '?' in role_name and not '`' in role_name and not role_name==' ':
+                                supersense_list.add(role_name)
+                            if not '?' in function_name and not '`' in function_name and not function_name==' ':
+                                supersense_list.add(function_name)
 adp_transitivity = {}
 for a in adposition_list:
     adp = a[0]
@@ -210,7 +219,7 @@ with open('adposition_revisions.tsv', 'w') as f:
     for a in adposition_list:
         f.write('\t'.join(a) +'\t'+adp_transitivity[a[0]]+'\n')
 with open('construals.tsv', 'w') as f:
-    f.write('role_name\tfunction_name\trole_id\tfunction_id' + '\n')
+    f.write('role_name\tfunction_name\tspecial\trole_id\tfunction_id' + '\n')
     for c in construal_list:
         f.write('\t'.join(c) + '\n')
 with open('usage_revisions.tsv', 'w') as f:

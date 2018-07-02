@@ -498,12 +498,18 @@ class CorpusForm(ArticleMetadataForm):
         return m.article.urlpath_set.all()[0]
 
     def new(self, m, commit=True):
-        newarticle, newcategory = self.newArticle_ArticleCategory()
+        name = m.name
+        version = m.version
+        name = self.get_corpus_slug(name, version)
+        newarticle, newcategory = self.newArticle_ArticleCategory(name=name)
         m.article = newarticle
         m.category = newcategory
         if commit:
             m.save()
         return self.article_urlpath
+
+    def get_corpus_slug(self, name, version):
+        return str(name)+str(version)
 
     class Meta:
         model = models.Corpus

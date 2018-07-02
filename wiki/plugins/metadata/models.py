@@ -38,14 +38,19 @@ class SeparatedValuesField(models.TextField):
 
     def to_python(self, value):
         if not value: return
+        if value==' ': return []
         if isinstance(value, list):
             return value
-        return value.split(self.token)
+        return str(value).split(self.token)
 
-    def get_db_prep_value(self, value):
+    def from_db_value(self, value, expression, connection, context):
+        return self.to_python(value)
+
+    def get_db_prep_value(self, value, connection=None, prepared=True, **kwargs):
         if not value: return
-        assert(isinstance(value, list) or isinstance(value, tuple))
-        return self.token.join([unicode(s) for s in value])
+        if not (isinstance(value, list) or isinstance(value, tuple)):
+            value = self.to_python(value)
+        return self.token.join([s for s in value]) # self.token.join([unicode(s) for s in value])
 
     def value_to_string(self, obj):
         value = self._get_val_from_obj(obj)
@@ -361,11 +366,12 @@ class SupersenseRevision(MetadataRevision):
 
 
 class Construal(SimpleMetadata):
-    role = models.ForeignKey(Supersense, null=True, related_name='rfs_with_role')
-    function = models.ForeignKey(Supersense, null=True, related_name='rfs_with_function')
+    role = models.ForeignKey(Supersense, null=True, blank=True, related_name='rfs_with_role')
+    function = models.ForeignKey(Supersense, null=True, blank=True, related_name='rfs_with_function')
+    special = models.CharField(max_length=200,  default='', null=True, blank=True)
 
     def __str__(self):
-        return str(self.role) + ' ~> ' + str(self.function)
+        return str(self.role) + ' ~> ' + str(self.function) if self.function and self.role else str(self.special)
 
     def html(self):
         return super(Construal, self).html().replace(' ~> ', '&#x219d;')
@@ -376,9 +382,9 @@ class Construal(SimpleMetadata):
 
     class Meta:
         verbose_name = _('construal')
-        unique_together = ('role', 'function')
+        unique_together = ('role', 'function', 'special')
         # issue #10: alphabetize models
-        ordering = ['role', 'function']
+        ordering = ['role', 'function', 'special']
 
 
 class Case(MetaEnum):
@@ -759,9 +765,9 @@ class PTokenAnnotation(models.Model):
     # list of weak associations (for mwe), is_gold, annotator note?,
     # annotator grouping/cluster
     token_indices = SeparatedValuesField(max_length=200, blank=True, verbose_name="Token Indices")
-    adposition = models.ForeignKey(Adposition, null=True)
-    construal = models.ForeignKey(Construal, null=True)
-    usage = models.ForeignKey(Usage, null=True)
+    adposition = models.ForeignKey(Adposition, null=True, blank=True)
+    construal = models.ForeignKey(Construal, null=True, blank=True, related_name='ptoken_with_construal')
+    usage = models.ForeignKey(Usage, null=True, blank=True)
     sentence = models.ForeignKey(CorpusSentence, null=True)
     obj_case = models.PositiveIntegerField(choices=Case.choices(), blank=True)
 
