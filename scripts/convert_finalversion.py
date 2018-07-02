@@ -1,7 +1,5 @@
 import re, os
 
-os.chdir(r'C:\Users\Austin\Desktop\Xposition\misc')
-
 dir = 'markdown'
 dir2 = 'markdown-final'
 
@@ -54,7 +52,7 @@ for file in os.listdir(dir):
                     line = line.replace(ss_link.group(0), '[ss '+ss+']')
                 # convert examples
                 for example in EXAMPLE_RE.finditer(line):
-                    ex = example.group('ex').replace('\'','\\\'')
+                    ex = example.group('ex').replace("'",r"\'").replace("\\","\\\\")
                     ex = ex.replace('"','')
                     ex = ex.replace('<i>','').replace('</i>','')
                     ex = ex.replace('</i>','')

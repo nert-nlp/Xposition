@@ -6,10 +6,11 @@ into our new Xposition website/wiki
 3/21/18 Austin Blodgett
 """
 import re, os
+# import django
+# os.chdir('..\scripts')
 
-os.chdir(r'C:\Users\Austin\Desktop\Xposition\misc')
-
-dir = 'markdown'
+dir1 = 'tex'
+dir2 = 'markdown'
 
 example_index = 1
 
@@ -87,15 +88,13 @@ def handle_ex(s):
     return s
 
 
-def convert(ifile, ofile):
+def convert(ifile, ofile, title):
     footnotes = []
 
     with open(ifile, 'r', encoding='utf8') as f:
         f = f.readlines()
-        #title = re.search(r'\\hier[ABCDE]def{(.*?)}', f[0]).group(1)
-        title = str(ifile)
 
-        # # handle junk line by line
+        # handle junk line by line
         for i, line in enumerate(f):
             if line.strip().startswith('%'):
                  f[i] = ''
@@ -108,18 +107,12 @@ def convert(ifile, ofile):
             if r'{xlist}' in f[i]:
                 f[i] = re.sub(r'\\begin{xlist}', '', f[i])
                 f[i] = re.sub(r'\\end{xlist}', '', f[i])
-                if re.search(r'\\rf{(.*?)}{(.*?)}', f[i]):
-                    print(ifile, re.search(r'\\rf{(.*?)}{(.*?)}', f[i]).group(0))
-                    print('\n'.join(f[i+1:i+4]))
-                if re.search(r'\\psst{(.*?)}', f[i]):
-                    print(ifile, re.search(r'\\psst{(.*?)}', f[i]).group(0))
-                    print('\n'.join(f[i + 1:i + 4]))
             if ' %' in f[i]:
                 f[i] = f[i][0:f[i].index(' %')]
             if f[i].strip() == '\ex':
                 f[i] = ''
             # take care of [] brackets
-            f[i] = re.sub(r'[ \[]\[', r'\[', f[i])
+            f[i] = re.sub(r'\[\[', r'\[', f[i])
             f[i] = re.sub(r'\][\s\]]', r'\]', f[i])
             # junk whitespace
             f[i] = re.sub(r'\r', r'', f[i])
@@ -131,7 +124,7 @@ def convert(ifile, ofile):
         data = replace_circumfixes(data, r'\\shortdef{', r'|', '|')
 
         # embold title of article
-        data = re.sub(r'\\psst{' + title + '}', r'**' + title + '**', data)
+        data = re.sub(r'\\psst{' + title + '}', '**' + title + '**', data)
 
         # handle \p{}
         data = replace_circumfixes(data, r'\\p{', ' [[en/', ']] ')
@@ -154,7 +147,7 @@ def convert(ifile, ofile):
         # add numbered list
         i = 1
         while re.search(r'\\item',  data):
-            data = re.sub(r'\\item',  str(i)+'.', data, count=1)
+            data = re.sub(r'\\item',  '##'+str(i)+'.', data, count=1)
             i += 1
         # handle paragraph
         data = replace_circumfixes(data, r'\\paragraph{', '- **', '**')
@@ -178,7 +171,7 @@ def convert(ifile, ofile):
         data = re.sub(r"~~", " ", data)
         data = re.sub(r"~", " ", data)
         data = re.sub(r"\\slash ", r"/", data)
-        data = re.sub(r"(?<=[A-Za-z])\\_(?=[A-Za-z])", "-", data)
+        # data = re.sub(r"(?<=[A-Za-z])\\_(?=[A-Za-z])", "-", data)
         data = re.sub(r"\\dots", "...", data)
         data = re.sub(r"\$\\rightarrow\$", "→", data)
         data = re.sub(r"\$\\nrightarrow\$", "↛", data)
@@ -240,18 +233,14 @@ def convert(ifile, ofile):
         # data = re.sub(r'\\label{(.*?)}', '', data)
 
     with open(ofile, 'w+', encoding='utf8') as f:
-        # i=0
-        # while re.search(r'\\[A-Za-z]+', data[i:]):
-        #     m = re.search(r'\\[A-Za-z]+', data[i:])
-        #     print(ifile, m.group(0))
-        #     i = m.end()
+
         f.write(data)
 
 
 
-for file in os.listdir('.'):
-    # print(file)
-    if not os.path.exists(dir):
-        os.makedirs(dir)
+for file in os.listdir(dir1):
+    print(file)
+    if not os.path.exists(dir2):
+        os.makedirs(dir2)
     if file.endswith('.tex'):
-        convert(file,os.path.join(dir,file.replace('.tex','.txt')))
+        convert(os.path.join(dir1,file),os.path.join(dir2,file.replace('.tex','.txt')), file.replace('.tex',''))
