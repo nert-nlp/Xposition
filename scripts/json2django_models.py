@@ -1,4 +1,4 @@
-import os, django
+import os, django, json
 os.chdir('..\scripts')
 # os.environ.setdefault("DJANGO_SETTINGS_MODULE", "testproject.testproject.settings")
 # django.setup()
@@ -165,7 +165,7 @@ with open(file, encoding='utf8') as f:
 
                             # assign fields
                             token_indices = ' '.join([str(x) for x in tok_sem['toknums']])
-                            adposition_name = tok_sem['lexlemma'].replace(' ','_')
+                            adposition_name = ms.Adposition.normalize_adp(cls=ms.Adposition,adp=tok_sem['lexlemma'], language_name=language_name).replace(' ','_')
                             if '?' in tok_sem['ss'] or '`' in tok_sem['ss']:
                                 role_name = DEFAULT_STR
                                 function_name = DEFAULT_STR

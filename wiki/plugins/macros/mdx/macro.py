@@ -8,6 +8,7 @@ from django.template.loader import render_to_string
 from django.utils.translation import ugettext as _
 from six import string_types
 from wiki.plugins.macros import settings
+from wiki.plugins.metadata import models
 
 # See:
 # http://stackoverflow.com/questions/430759/regex-for-managing-escaped-characters-for-items-like-string-literals
@@ -108,18 +109,20 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
 
     def p(self, *args):
         cl = None
+        prep = args[0]
+        short = prep.split('/')[-1]
+        prep = prep.replace(short, models.Adposition.normalize_adp(short, prep.split('/')[-2]))
         if len(args) >= 3:
             cl = args[2]
         if len(args) > 1 and not '-' == args[1]:
-            prep, construal = args[0], args[1]
-            short = prep.split('/')[-1]
-            if '`' in args[0]:
+            construal = args[1]
+            if '`' in construal:
                 return link(short, '/' + prep + '/' + construal.replace('`', "'"), cl if cl else 'usage')
             elif '--' in construal:
                 return link(short.replace('--','&#x219d;'), '/' + prep + '/' + construal, cl if cl else 'usage')
             else:
                 return link(short, '/' + prep + '/' + construal + '--' + construal, cl if cl else 'usage')
-        return link(args[0].split('/')[-1], '/' + args[0], cl if cl else 'adposition')
+        return link(short, '/' + prep, cl if cl else 'adposition')
     # meta data
     p.meta = dict(
         short_description=_('Link to Adposition, Usage'),
@@ -128,12 +131,39 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
         args={'prep': _('Name of adposition'), 'construal': _('Name of construal'), 'class': _('optional class')}
     )
 
+    def pspecial(self, *args):
+        cl = None
+        prep = args[0]
+        short = prep.split('/')[-1]
+        prep = prep.replace(short, models.Adposition.normalize_adp(short, prep.split('/')[-2]))
+        short = args[1]
+        if len(args) >= 4:
+            cl = args[3]
+        if len(args) > 2 and not '-' == args[2]:
+            construal = args[2]
+            if '`' in construal:
+                return link(short, '/' + prep + '/' + construal.replace('`', "'"), cl if cl else 'usage')
+            elif '--' in construal:
+                return link(short.replace('--', '&#x219d;'), '/' + prep + '/' + construal, cl if cl else 'usage')
+            else:
+                return link(short, '/' + prep + '/' + construal + '--' + construal, cl if cl else 'usage')
+        return link(short, '/' + prep, cl if cl else 'adposition')
+    # meta data
+    pspecial.meta = dict(
+        short_description=_('Link to Adposition, Usage'),
+        help_text=_('Create a link to a preposition or preposition-construal pair with special (nonstandard) spelling'),
+        example_code='[p en/in] or [p en/in Locus--Locus]',
+        args={'prep': _('Name of adposition'), 'special': _('Text to display'), 'construal': _('Name of construal'), 'class': _('optional class')}
+    )
+
+
+
     def ss(self, *args):
         cl = None
         if len(args) >= 2:
             cl = args[1]
-        if '`' in args[0]:
-            return link(args[0], '/' + args[0].replace('`', "'"), cl if cl else 'misc')
+        if "'" in args[0]:
+            return link(args[0], '/' + args[0].replace("'", "`"), cl if cl else 'misc')
         elif '--' in args[0]:
             return link(args[0].replace('--','&#x219d;'), '/' + args[0], cl if cl else 'construal')
         else:

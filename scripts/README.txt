@@ -8,7 +8,6 @@ To use json2django_models.py,
 ```
 cd <Xposition>\testproject
 python manage.py shell
-import json
 exec(open(r'..\scripts\json2django_models.py').read())
 ```
 Step 0) Put file streusle.go.notes.json in scripts directory.

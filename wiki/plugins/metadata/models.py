@@ -593,6 +593,15 @@ class Adposition(Metadata):
         sometimes_transitive = 1
         always_transitive = 2
 
+    # issue #51, add standard aposition spelling variants here
+    def normalize_adp(cls, adp, language_name):
+        if language_name in ['English', 'en']:
+            if adp in ['my', 'our', 'his', 'her', 'their', 'your', "'s", 'whose', 'its']:
+                return "'s"
+            if adp in ['toward', 'towards']:
+                return 'toward'
+        return adp
+
     def field_names(self):
         # issue #4: transliteration field
         return {'name', 'transliteration', 'other_forms', 'description', 'lang', 'morphtype', 'transitivity',

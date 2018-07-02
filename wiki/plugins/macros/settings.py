@@ -13,6 +13,7 @@ METHODS = getattr(
      'wikilink',
      'ex',
      'p',
+     'pspecial',
      'ss',
      'exref',
      ))
