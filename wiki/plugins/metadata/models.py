@@ -594,7 +594,7 @@ class Adposition(Metadata):
         always_transitive = 2
 
     # issue #51, add standard aposition spelling variants here
-    def normalize_adp(cls, adp, language_name):
+    def normalize_adp(cls, adp='', language_name=''):
         if language_name in ['English', 'en']:
             if adp in ['my', 'our', 'his', 'her', 'their', 'your', "'s", 'whose', 'its']:
                 return "'s"

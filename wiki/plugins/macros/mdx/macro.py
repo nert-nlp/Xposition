@@ -111,14 +111,16 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
         cl = None
         prep = args[0]
         short = prep.split('/')[-1]
-        prep = prep.replace(short, models.Adposition.normalize_adp(short, prep.split('/')[-2]))
+        prep = prep.replace(short, models.Adposition.normalize_adp(cls=models.Adposition,
+                                                                   adp=short,
+                                                                   language_name=prep.split('/')[-2]))
         if len(args) >= 3:
             cl = args[2]
         if len(args) > 1 and not '-' == args[1]:
             construal = args[1]
             if '`' in construal:
                 return link(short, '/' + prep + '/' + construal.replace('`', "'"), cl if cl else 'usage')
-            elif '--' in construal:
+            elif '--' in construal or "'" in construal or '?' in construal:
                 return link(short.replace('--','&#x219d;'), '/' + prep + '/' + construal, cl if cl else 'usage')
             else:
                 return link(short, '/' + prep + '/' + construal + '--' + construal, cl if cl else 'usage')
@@ -135,7 +137,9 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
         cl = None
         prep = args[0]
         short = prep.split('/')[-1]
-        prep = prep.replace(short, models.Adposition.normalize_adp(short, prep.split('/')[-2]))
+        prep = prep.replace(short, models.Adposition.normalize_adp(cls=models.Adposition,
+                                                                   adp=short,
+                                                                   language_name=prep.split('/')[-2]))
         short = args[1]
         if len(args) >= 4:
             cl = args[3]
@@ -143,7 +147,7 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
             construal = args[2]
             if '`' in construal:
                 return link(short, '/' + prep + '/' + construal.replace('`', "'"), cl if cl else 'usage')
-            elif '--' in construal:
+            elif '--' in construal or "'" in construal or '?' in construal:
                 return link(short.replace('--', '&#x219d;'), '/' + prep + '/' + construal, cl if cl else 'usage')
             else:
                 return link(short, '/' + prep + '/' + construal + '--' + construal, cl if cl else 'usage')

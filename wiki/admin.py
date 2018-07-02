@@ -207,7 +207,10 @@ class ConstrualResource(resources.ModelResource):
 
 
     def save_instance(self, instance, using_transactions=True, dry_run=False):
-        ex_article = Article.objects.get(current_revision__title='Locus--Locus')
+        try:
+            ex_article = Article.objects.get(current_revision__title='Locus--Locus')
+        except AttributeError:
+            raise Exception("Xposition Import: Please create Construal 'Locus--Locus' to use as a model!")
 
         m = instance
 
@@ -244,7 +247,10 @@ class SupersenseRevisionResource(resources.ModelResource):
 
     # handle revision creation
     def save_instance(self, instance, using_transactions=True, dry_run=False):
-        ex_article = Article.objects.get(current_revision__title='Locus')
+        try:
+            ex_article = Article.objects.get(current_revision__title='Locus')
+        except AttributeError:
+            raise Exception("Xposition Import: Please create Supersense 'Locus' to use as a model!")
 
         m = instance
         if ms.Supersense.objects.filter(current_revision__metadatarevision__supersenserevision__name=m.name):
@@ -292,8 +298,11 @@ class AdpositionRevisionResource(import_export.resources.ModelResource):
 
     # handle revision creation
     def save_instance(self, instance, using_transactions=True, dry_run=False):
-        ex_article = Article.objects.get(current_revision__title='at')
-
+        try:
+            ex_article = ms.Adposition.objects.get(current_revision__metadatarevision__adpositionrevision__lang__name='English',
+                                        current_revision__metadatarevision__adpositionrevision__name='at').article
+        except AttributeError:
+            raise Exception("Xposition Import: Please create Adposition 'at' to use as a model!")
         m = instance
 
 
@@ -352,6 +361,8 @@ class UsageRevisionResource(import_export.resources.ModelResource):
             x = [a for a in x if a.current_revision.metadatarevision.usagerevision.construal.role]
             x = [a for a in x if a.current_revision.metadatarevision.usagerevision.construal.role.current_revision.metadatarevision.supersenserevision.name=='Locus']
             x = [a for a in x if a.current_revision.metadatarevision.usagerevision.construal.function.current_revision.metadatarevision.supersenserevision.name == 'Locus']
+            if not x:
+                raise Exception("Xposition Import: Please create Usage 'at:Locus--Locus' to use as a model!")
             self.ex_article = x[0].article
 
         m = instance
