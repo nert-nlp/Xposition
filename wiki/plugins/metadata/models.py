@@ -791,6 +791,7 @@ class PTokenAnnotation(models.Model):
                                         help_text='Does the adposition take an object?')
     is_typo  = models.BooleanField(default=False, verbose_name="Typo?")
     is_abbr  = models.BooleanField(default=False, verbose_name="Abbreviation?")
+    mwe_subtokens = SeparatedValuesField(max_length=200, blank=True, verbose_name="MWE Subtokens")
     # list of subtokens (for mwe)
     # subtokens = models.ManyToManyField(Adposition, blank=True, related_name='MWE subtokens')
 

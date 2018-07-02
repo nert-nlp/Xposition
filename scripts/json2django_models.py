@@ -15,7 +15,7 @@ ptoken_header = ['token_indices', 'adposition_name', 'language_name', 'role_name
                  'obj_case', 'obj_head', 'gov_head', 'gov_obj_syntax', 'gov_head_index', 'obj_head_index', 'is_typo', 'is_abbr', 'adp_pos', 'gov_pos', 'obj_pos',
                  'gov_supersense',
                  'obj_supersense', 'is_gold', 'annotator_cluster', 'is_transitive', 'adposition_id', 'construal_id',
-                 'usage_id']
+                 'usage_id', 'mwe_subtokens']
 
 DEFAULT_STR = ' '
 construal_list = set()
@@ -68,6 +68,7 @@ gov_head_index = DEFAULT_STR
 obj_head_index = DEFAULT_STR
 is_typo = '0'
 is_abbr = '0'
+mwe_subtokens = DEFAULT_STR
 
 adp_memo = {}
 for adp in ms.Adposition.objects.all():
@@ -190,9 +191,7 @@ with open(file, encoding='utf8') as f:
                                 else DEFAULT_STR
                             gov_head_index = str(govobj['gov']) if hasgov else DEFAULT_STR
                             obj_head_index = str(govobj['obj']) if hasobj else DEFAULT_STR
-                            if 'feats' in tok_morph and tok_morph['feats']:
-                                is_typo = '1' if 'Typo=Yes' in tok_morph['feats'] else '0'
-                                is_abbr = '1' if 'Abbr=Yes' in tok_morph['feats'] else '0'
+                            mwe_subtokens = tok_sem['lexlemma']
                             add_ptoken(ptok)
 
                             morphtype = 'standalone_preposition' if not tok_sem['lexlemma'] == "'s" else 'suffix'
