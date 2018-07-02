@@ -348,11 +348,11 @@ class UsageRevisionResource(import_export.resources.ModelResource):
     # handle revision creation
     def save_instance(self, instance, using_transactions=True, dry_run=False):
         if not self.ex_article:
-            self.ex_article = ms.Usage.objects.get(
-                current_revision__metadatarevision__usagerevision__adposition__current_revision__metadatarevision__adpositionrevision__name='at',
-                current_revision__metadatarevision__usagerevision__construal__role__current_revision__metadatarevision__supersenserevision__name='Locus',
-                current_revision__metadatarevision__usagerevision__construal__function__current_revision__metadatarevision__supersenserevision__name='Locus'
-            ).article
+            x = ms.Usage.objects.filter(current_revision__metadatarevision__usagerevision__adposition__current_revision__metadatarevision__adpositionrevision__name='at')
+            x = [a for a in x if a.current_revision.metadatarevision.usagerevision.construal.role]
+            x = [a for a in x if a.current_revision.metadatarevision.usagerevision.construal.role.current_revision.metadatarevision.supersenserevision.name=='Locus']
+            x = [a for a in x if a.current_revision.metadatarevision.usagerevision.construal.function.current_revision.metadatarevision.supersenserevision.name == 'Locus']
+            self.ex_article = x[0].article
 
         m = instance
         if ms.Usage.objects.filter(current_revision__metadatarevision__usagerevision__adposition__pk=
