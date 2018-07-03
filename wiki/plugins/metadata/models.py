@@ -822,6 +822,20 @@ class PTokenAnnotation(models.Model):
     # list of subtokens (for mwe)
     # subtokens = models.ManyToManyField(Adposition, blank=True, related_name='MWE subtokens')
 
+    def main_token_indices(self):
+        x=[]
+        for i in self.token_indices:
+            # only add direct successor
+            if not x or i==x[-1]+1:
+                x.append(i)
+            else:
+                break
+        return x
+
+    def main_token_string(self):
+        return ' '.join(self.mwe_subtokens[:len(main_token_indices)])
+
+
     def __str__(self):
         return str(self.adposition) + ' : ' + str(self.sentence)
 
