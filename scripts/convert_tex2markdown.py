@@ -200,6 +200,8 @@ def convert(ifile, ofile, title):
 
         # handle footnotes, citations, references
         data = replace_circumfixes(data, r'\\footnote{', '<footnote1>', '</footnote1>')
+        data = re.sub(r'\\Citep', '\citep', data)
+        data = re.sub(r'\\Citet', '\citet', data)
         data = re.sub(r'\\citep\[', '\citep{', data)
         data = re.sub(r'\\citet\[', '\citet{', data)
         data = re.sub(r'\]{', ', ', data)
