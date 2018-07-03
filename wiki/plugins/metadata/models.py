@@ -633,7 +633,7 @@ class AdpositionRevision(MetadataRevision):
     # issue #4: transliteration field
     transliteration = models.CharField(max_length=200, blank=True, verbose_name="Transliteration",
                                        help_text="Romanization/phonemic spelling")
-    other_forms = SeparatedValuesField(max_length=200, blank=True, verbose_name="Other spellings or inflections",
+    other_forms = SeparatedValuesField(max_length=200, blank=True, null=True, verbose_name="Other spellings or inflections",
                                    help_text="Exclude typos, Separate by spaces")
     morphtype = models.PositiveIntegerField(choices=Adposition.MorphType.choices(), verbose_name="Morphological type")
     transitivity = models.PositiveIntegerField(choices=Adposition.Transitivity.choices())
