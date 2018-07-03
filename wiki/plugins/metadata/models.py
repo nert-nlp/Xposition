@@ -29,12 +29,12 @@ from django.core.files.storage import get_storage_class
 from django.utils.translation import ugettext_lazy as _
 
 # SeparatedValuesField copied from https://stackoverflow.com/a/1113039
-class SeparatedValuesField(models.TextField):
+class StringListField(models.TextField):
     # __metaclass__ = models.SubfieldBase
 
     def __init__(self, *args, **kwargs):
         self.token = ' '
-        super(SeparatedValuesField, self).__init__(*args, **kwargs)
+        super(StringListField, self).__init__(*args, **kwargs)
 
     def to_python(self, value):
         if not value: return
@@ -50,11 +50,23 @@ class SeparatedValuesField(models.TextField):
         if not value: return
         if not (isinstance(value, list) or isinstance(value, tuple)):
             value = self.to_python(value)
-        return self.token.join([s for s in value]) # self.token.join([unicode(s) for s in value])
+        return self.token.join([str(s) for s in value]) # self.token.join([unicode(s) for s in value])
 
     def value_to_string(self, obj):
         value = self._get_val_from_obj(obj)
         return self.get_db_prep_value(value)
+
+class SeparatedValuesField(StringListField):
+    ...
+
+class IntListField(StringListField):
+    def to_python(self, value):
+        if not value: return
+        if value==' ': return []
+        if isinstance(value, list):
+            return value
+        return [int(x) for x in str(value).split(self.token)]
+
 
 def deepest_instance(x):
     """
@@ -633,7 +645,7 @@ class AdpositionRevision(MetadataRevision):
     # issue #4: transliteration field
     transliteration = models.CharField(max_length=200, blank=True, verbose_name="Transliteration",
                                        help_text="Romanization/phonemic spelling")
-    other_forms = SeparatedValuesField(max_length=200, blank=True, null=True, verbose_name="Other spellings or inflections",
+    other_forms = StringListField(max_length=200, blank=True, null=True, verbose_name="Other spellings or inflections",
                                    help_text="Exclude typos, Separate by spaces")
     morphtype = models.PositiveIntegerField(choices=Adposition.MorphType.choices(), verbose_name="Morphological type")
     transitivity = models.PositiveIntegerField(choices=Adposition.Transitivity.choices())
@@ -752,8 +764,8 @@ class CorpusSentence(models.Model):
     # parallel = models.ManyToManyField(CorpusSentence, blank=True, related_name='parallel')
     doc_id = models.CharField(max_length=200, null=True, verbose_name="Document ID")
     text = models.CharField(max_length=1000, null=True, verbose_name="Text")
-    tokens = SeparatedValuesField(max_length=1000, null=True, verbose_name="Tokens")
-    word_gloss = SeparatedValuesField(max_length=200, blank=True, verbose_name="Word Gloss")
+    tokens = StringListField(max_length=1000, null=True, verbose_name="Tokens")
+    word_gloss = StringListField(max_length=200, blank=True, verbose_name="Word Gloss")
     sent_gloss = models.CharField(max_length=200, blank=True, verbose_name="Sentence Gloss")
     note = models.CharField(max_length=200, blank=True, verbose_name="Annotator Note")
     mwe_markup = models.CharField(max_length=200, blank=True, verbose_name="MWE Markup")
@@ -778,7 +790,7 @@ class PTokenAnnotation(models.Model):
     # Supersense of obj, Supersense of gov, list of subtokens (for mwe),
     # list of weak associations (for mwe), is_gold, annotator note?,
     # annotator grouping/cluster
-    token_indices = SeparatedValuesField(max_length=200, blank=True, verbose_name="Token Indices")
+    token_indices = IntListField(max_length=200, blank=True, verbose_name="Token Indices")
     adposition = models.ForeignKey(Adposition, null=True, blank=True)
     construal = models.ForeignKey(Construal, null=True, blank=True, related_name='ptoken_with_construal')
     usage = models.ForeignKey(Usage, null=True, blank=True)
@@ -805,7 +817,7 @@ class PTokenAnnotation(models.Model):
                                         help_text='Does the adposition take an object?')
     is_typo  = models.BooleanField(default=False, verbose_name="Typo?")
     is_abbr  = models.BooleanField(default=False, verbose_name="Abbreviation?")
-    mwe_subtokens = SeparatedValuesField(max_length=200, blank=True, verbose_name="MWE Subtokens")
+    mwe_subtokens = StringListField(max_length=200, blank=True, verbose_name="MWE Subtokens")
     # list of subtokens (for mwe)
     # subtokens = models.ManyToManyField(Adposition, blank=True, related_name='MWE subtokens')
 
