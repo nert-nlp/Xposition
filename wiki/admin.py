@@ -40,6 +40,11 @@ class SentenceForeignKeyWidget(ForeignKeyWidget):
             sent_id=row["sent_id"]
         )
 
+class ArticleForeignKeyWidget(ForeignKeyWidget):
+    def get_queryset(self, value, row):
+        return self.model.objects.filter(
+            urlpath=row["article"]
+        )
 
 class ObjCaseWidget(Widget):
     def clean(self, value, row=None, *args, **kwargs):
@@ -110,6 +115,40 @@ class ArticleMetadataFormFunctions:
         newcategory.save()
         return newarticle, newcategory
 
+class ArticleRevisionInstanceLoader(import_export.instance_loaders.ModelInstanceLoader):
+    def get_queryset(self):
+        x = super(ArticleRevisionInstanceLoader,self).get_queryset()
+        article = Article.objects.filter(articlerevision__article__pk=x[0].article.pk)[0]
+        x = x.filter(pk=article.current_revision.pk)
+        return x
+
+class ArticleRevisionResource(resources.ModelResource):
+    article = fields.Field(
+        column_name='article_id',
+        attribute='article',
+        widget=ForeignKeyWidget(Article))
+
+    content = fields.Field(attribute='content', widget=widgets.CharWidget())
+
+    title = fields.Field(attribute='title', widget=widgets.CharWidget())
+
+    def save_instance(self, instance, using_transactions=True, dry_run=False):
+        ss = ms.Supersense.objects.get(article__pk=instance.article.pk)
+
+        # from https://stackoverflow.com/a/33208227
+        instance.parent = instance  # Set the parent to itself
+        instance.pk = None
+        instance.save()
+
+        ss.link_current_to_article_revision(article_revision=instance, commit=True)
+        instance.article.current_revision = instance
+        instance.article.save()
+
+    class Meta:
+        model = ms.ArticleRevision
+        import_id_fields = ('article',)
+        fields = ('article', 'content')
+        instance_loader_class = ArticleRevisionInstanceLoader
 
 class CorpusSentenceResource(resources.ModelResource):
     corpus = fields.Field(
@@ -485,7 +524,8 @@ class ArticleRevisionForm(forms.ModelForm):
         self.fields['content'].widget = editor.get_admin_widget()
 
 
-class ArticleRevisionAdmin(admin.ModelAdmin):
+class ArticleRevisionAdmin(ImportExportModelAdmin):
+    resource_class = ArticleRevisionResource
     form = ArticleRevisionForm
     list_display = ('title', 'created', 'modified', 'user', 'ip_address')
 
