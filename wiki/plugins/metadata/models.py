@@ -56,6 +56,7 @@ class StringListField(models.TextField):
         value = self._get_val_from_obj(obj)
         return self.get_db_prep_value(value)
 
+# here for migrations
 class SeparatedValuesField(StringListField):
     ...
 
