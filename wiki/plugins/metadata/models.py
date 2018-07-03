@@ -833,7 +833,7 @@ class PTokenAnnotation(models.Model):
         return x
 
     def main_token_string(self):
-        return ' '.join(self.mwe_subtokens[:len(main_token_indices)])
+        return ' '.join(self.mwe_subtokens[:len(self.main_token_indices())])
 
 
     def __str__(self):
