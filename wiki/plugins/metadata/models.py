@@ -820,8 +820,8 @@ class PTokenAnnotation(models.Model):
     is_abbr  = models.BooleanField(default=False, verbose_name="Abbreviation?")
     mwe_subtokens = StringListField(max_length=200, blank=True, verbose_name="MWE Subtokens")
 
-    main_subtoken_indices = IntListField(max_length=200, blank=True, verbose_name="Main Subtoken Indices")
-    main_subtoken_string = StringListField(max_length=200, blank=True, verbose_name="Main Subtoken String")
+    main_subtoken_indices = IntListField(max_length=200, blank=True, null=True, verbose_name="Main Subtoken Indices")
+    main_subtoken_string = StringListField(max_length=200, blank=True, null=True, verbose_name="Main Subtoken String")
 
 
 
