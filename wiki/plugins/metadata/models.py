@@ -819,21 +819,10 @@ class PTokenAnnotation(models.Model):
     is_typo  = models.BooleanField(default=False, verbose_name="Typo?")
     is_abbr  = models.BooleanField(default=False, verbose_name="Abbreviation?")
     mwe_subtokens = StringListField(max_length=200, blank=True, verbose_name="MWE Subtokens")
-    # list of subtokens (for mwe)
-    # subtokens = models.ManyToManyField(Adposition, blank=True, related_name='MWE subtokens')
 
-    def main_token_indices(self):
-        x=[]
-        for i in self.token_indices:
-            # only add direct successor
-            if not x or i==x[-1]+1:
-                x.append(i)
-            else:
-                break
-        return x
+    main_subtoken_indices = IntListField(max_length=200, blank=True, verbose_name="Main Subtoken Indices")
+    main_subtoken_string = StringListField(max_length=200, blank=True, verbose_name="Main Subtoken String")
 
-    def main_token_string(self):
-        return ' '.join(self.mwe_subtokens[:len(self.main_token_indices())])
 
 
     def __str__(self):

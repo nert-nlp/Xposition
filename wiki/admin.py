@@ -197,6 +197,8 @@ class PTokenAnnotationResource(resources.ModelResource):
     is_typo = fields.Field(attribute='is_typo', widget=widgets.BooleanWidget())
     is_abbr = fields.Field(attribute='is_abbr', widget=widgets.BooleanWidget())
     mwe_subtokens = fields.Field(attribute='mwe_subtokens', widget=widgets.CharWidget())
+    main_subtoken_indices = fields.Field(attribute='main_subtoken_indices', widget=widgets.CharWidget())
+    main_subtoken_string = fields.Field(attribute='main_subtoken_string', widget=widgets.CharWidget())
 
     obj_case = fields.Field(
         column_name='obj_case',
@@ -230,7 +232,8 @@ class PTokenAnnotationResource(resources.ModelResource):
         fields = ('token_indices', 'adposition', 'construal', 'usage', 'sentence',
                   'obj_case', 'obj_head', 'gov_head', 'gov_obj_syntax', 'adp_pos', 'gov_pos', 'obj_pos',
                   'gov_supersense', 'obj_supersense', 'is_gold', 'annotator_cluster', 'is_transitive',
-                  'gov_head_index', 'obj_head_index', 'is_typo', 'is_abbr', 'mwe_subtokens')
+                  'gov_head_index', 'obj_head_index', 'is_typo', 'is_abbr', 'mwe_subtokens',
+                  'main_subtoken_indices', 'main_subtoken_string')
 
 
 class ConstrualResource(resources.ModelResource):

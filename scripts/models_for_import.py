@@ -16,7 +16,7 @@ ptoken_header = ['token_indices', 'adposition_name', 'language_name', 'role_name
                  'obj_case', 'obj_head', 'gov_head', 'gov_obj_syntax', 'gov_head_index', 'obj_head_index', 'is_typo', 'is_abbr', 'adp_pos', 'gov_pos', 'obj_pos',
                  'gov_supersense',
                  'obj_supersense', 'is_gold', 'annotator_cluster', 'is_transitive', 'adposition_id', 'construal_id',
-                 'usage_id', 'mwe_subtokens']
+                 'usage_id', 'mwe_subtokens', 'main_subtoken_indices', 'main_subtoken_string']
 
 DEFAULT_STR = ' '
 construal_list = set()
@@ -70,6 +70,8 @@ obj_head_index = DEFAULT_STR
 is_typo = '0'
 is_abbr = '0'
 mwe_subtokens = DEFAULT_STR
+main_subtoken_indices = DEFAULT_STR
+main_subtoken_string = DEFAULT_STR
 
 
 class GetIDs:
@@ -146,6 +148,19 @@ def get_ss(sent, n):
         supersense = DEFAULT_STR
     return supersense
 
+def main_indices(token_indices):
+    x = []
+    for i in token_indices:
+        # only add direct successor
+        if not x or i == x[-1] + 1:
+            x.append(i)
+        else:
+            break
+    return ' '.join([str(s) for s in x])
+
+def main_string(mwe_subtokens, token_indices):
+    return ' '.join(mwe_subtokens[:len(main_indices(token_indices).split())])
+
 ids = GetIDs()
 
 with open(file, encoding='utf8') as f:
@@ -201,6 +216,9 @@ with open(file, encoding='utf8') as f:
                     gov_head_index = str(govobj['gov']) if hasgov else DEFAULT_STR
                     obj_head_index = str(govobj['obj']) if hasobj else DEFAULT_STR
                     mwe_subtokens = tok_sem['lexlemma']
+                    main_subtoken_indices = main_indices(token_indices.split())
+                    main_subtoken_string = main_string(mwe_subtokens.split(), token_indices.split())
+
                     add_ptoken()
 
                     morphtype = 'standalone_preposition' if not tok_sem['lexlemma'] == "'s" else 'suffix'
