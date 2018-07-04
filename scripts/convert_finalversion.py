@@ -62,6 +62,14 @@ for file in os.listdir(dir):
                     ids[id] = id_index
                     line = line.replace(example.group(0), '- [ex '+'{0:03d}'.format(id_index)+' '+'\''+ex+'\''+']')
                     id_index += 1
+                # fix various junk
+                if re.match(r'^{?[0-9]*}?$', line.strip()):
+                    line = '\n'
+                line = line.replace(r'\_','_')
+                line = line.replace('{}','')
+                line = line.replace('](', '] (')
+                line = line.replace(r'\ex', '')
+                line = line.replace(r'    - [ex', '- [ex')
 
                 tmp_ss = None
                 new_text.append(line)

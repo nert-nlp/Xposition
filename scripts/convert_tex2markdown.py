@@ -147,7 +147,7 @@ def convert(ifile, ofile, title):
         # add numbered list
         i = 1
         while re.search(r'\\item',  data):
-            data = re.sub(r'\\item',  '##'+str(i)+'.', data, count=1)
+            data = re.sub(r'\\item',  '###'+str(i)+'.', data, count=1)
             i += 1
         # handle paragraph
         data = replace_circumfixes(data, r'\\paragraph{', '- **', '**')
@@ -233,6 +233,8 @@ def convert(ifile, ofile, title):
         data = re.sub(r"\n\s+\n", "\n\n", data)
         data = re.sub(r"\n\n+\n", "\n\n", data)
         # data = re.sub(r'\\label{(.*?)}', '', data)
+        data = data.replace('Part-Portion','PartPortion')
+        data = data.replace('Part/Portion', 'PartPortion')
 
     with open(ofile, 'w+', encoding='utf8') as f:
 
