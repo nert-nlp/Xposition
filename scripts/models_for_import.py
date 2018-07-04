@@ -148,18 +148,19 @@ def get_ss(sent, n):
         supersense = DEFAULT_STR
     return supersense
 
-def main_indices(token_indices):
+def main_indices(token_indices=''):
     x = []
-    for i in token_indices:
+    for i in token_indices.split():
         # only add direct successor
-        if not x or i == x[-1] + 1:
+        if not x or int(i) == int(x[-1]) + 1:
             x.append(i)
         else:
             break
-    return ' '.join([str(s) for s in x])
+    return ' '.join(x)
 
-def main_string(mwe_subtokens, token_indices):
-    return ' '.join(mwe_subtokens[:len(main_indices(token_indices).split())])
+def main_string(mwe_subtokens='', token_indices=''):
+    x = main_indices(token_indices).split()
+    return ' '.join(mwe_subtokens.split()[:len(x)])
 
 ids = GetIDs()
 
@@ -216,8 +217,8 @@ with open(file, encoding='utf8') as f:
                     gov_head_index = str(govobj['gov']) if hasgov else DEFAULT_STR
                     obj_head_index = str(govobj['obj']) if hasobj else DEFAULT_STR
                     mwe_subtokens = tok_sem['lexlemma']
-                    main_subtoken_indices = main_indices(token_indices.split())
-                    main_subtoken_string = main_string(mwe_subtokens.split(), token_indices.split())
+                    main_subtoken_indices = main_indices(token_indices)
+                    main_subtoken_string = main_string(mwe_subtokens, token_indices)
 
                     add_ptoken()
 
