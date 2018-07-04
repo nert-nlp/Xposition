@@ -10,14 +10,17 @@ ids = defaultdict(int)
 ids.setdefault(0)
 for a in ms.Article.objects.all():
     ids[str(a.urlpath_set.all()[0])[:-1]] = a.pk
-print(ids)
+# print(ids)
 
 articles = []
 
 for file in os.listdir(dir):
     if file.endswith('.txt'):
+        content = open(os.path.join(dir, file), 'r', encoding='utf8').read()
+        content = content.split('|')[-1]
+
         articles.append(
-            {'content':open(os.path.join(dir, file), 'r', encoding='utf8').read(),
+            {'content':content,
              'title':file.replace('.txt',''),
              'article_id':str(ids[file.replace('.txt','')])}
         )
