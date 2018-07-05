@@ -2,7 +2,7 @@ import re, os
 
 os.chdir(r'C:\Users\Austin\Desktop\Xposition')
 
-dir = 'markdown-final'
+dir = 'markdown-and-macros'
 dir2 = 'markdown-construals'
 
 NEW_SS_RE = re.compile('(- )?\[ss (?P<ss>[\w$`-]+)\]')

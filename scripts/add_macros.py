@@ -1,7 +1,7 @@
 import re, os
 
 dir = 'markdown'
-dir2 = 'markdown-final'
+dir2 = 'markdown-and-macros'
 
 P_RE = re.compile(r'\[([\w\\\'-])+\]\(/en/(?P<p>[\w\'\\-]+)\)')
 SS_RE = re.compile(r'\[[\w$`-]+\]\(/(?P<ss>[\w$`-]+)\)')

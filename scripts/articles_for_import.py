@@ -4,7 +4,7 @@ os.chdir('..\scripts')
 from collections import defaultdict
 from wiki.plugins.metadata import models as ms
 
-dir = 'markdown-final'
+dir = 'markdown-and-macros'
 
 ids = defaultdict(int)
 ids.setdefault(0)
