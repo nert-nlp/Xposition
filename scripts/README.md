@@ -20,15 +20,15 @@ exec(open(r'..\scripts\models_for_import.py').read())
 
 * Step 0) Put file streusle.go.notes.json in scripts directory.
 
-*  Get the file streusle.json from github.com/nert-gu/streusle
+	*  Get the file streusle.json from [STREUSLE](github.com/nert-gu/streusle)
 
-*  Run govobj.py and annotator_notes.py to get streusle.go.notes.json
+	*  Run govobj.py and annotator_notes.py to get streusle.go.notes.json
 
 * Step 1) Run the script once and then import `AdpositionRevision`s, `SupersenseRevision`s, and `CorpusSentence`s from admin.
 
-*  (the files for `CorpusSentence` and `PTokenAnnotation` must be converted to an Excel worksheet)
+	*  (the files for `CorpusSentence` and `PTokenAnnotation` must be converted to an Excel worksheet)
 
-* Create articles "English", "at", "Locus", "Locus--Locus", and "at: Locus--Locus" by hand.
+	* Create articles "English", "at", "Locus", "Locus--Locus", and "at: Locus--Locus" by hand.
 
 * Step 2) Run again and then import `Construal`s (depends on `SupersenseRevision`) from admin.
 
