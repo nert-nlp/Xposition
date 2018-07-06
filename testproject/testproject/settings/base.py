@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'sekizai',
     'sorl.thumbnail',
     'django_nyt',
+    'django_tables2',
     'wiki',
     'wiki.plugins.macros',
     'wiki.plugins.help',
