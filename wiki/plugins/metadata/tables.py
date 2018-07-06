@@ -1,4 +1,4 @@
-from django.utils.html import escape, format_html, mark_safe
+from django.utils.html import conditional_escape, format_html, mark_safe
 import django_tables2 as tables
 from .models import PTokenAnnotation
 
@@ -29,29 +29,30 @@ class PTokenAnnotationTable(tables.Table):
         return ' '.join(value[:record.main_subtoken_indices[0]-1])
 
     def render_lcontext(self, record, value):
-        tokens = [escape(x) for x in value[:record.main_subtoken_indices[0]-1]]
+        tokens = [format_html('<span title="{}">{}</span>', q+1, x) for q,x in enumerate(value[:record.main_subtoken_indices[0]-1])]
         spans_to_link = other_p_tokens_in_sentence(record)
         for (i,j),anno in sorted(spans_to_link.items(), reverse=True):
             if i<len(tokens):
                 assert j<=len(tokens)
                 exnum = anno.id+3000
                 displaystr = ' '.join(tokens[i:j])
-                tokens[i:j] = [format_html('<a href="/ex/{}" class="exnum">{}</a>', exnum, displaystr)]
+                tokens[i:j] = [format_html('<a href="/ex/{}" class="exnum">', exnum) + displaystr + '</a>']
         return mark_safe(' '.join(tokens))
 
     def value_target(self, record, value):
-        return ' '.join(value[record.main_subtoken_indices[0]-1:record.main_subtoken_indices[-1]])
+        tokens = value[record.main_subtoken_indices[0]-1:record.main_subtoken_indices[-1]]
+        return ' '.join(tokens)
 
     def render_target(self, record, value):
-        p = self.value_target(record, value)
-        return format_html('<a href="{}" class="usage">{}</a>', record.usage.current_revision.plugin.article.get_absolute_url(), p)
+        tokens = [format_html('<span title="{}">{}</span>', i+1, value[i]) for i in range(record.main_subtoken_indices[0]-1, record.main_subtoken_indices[-1])]
+        return mark_safe(format_html('<a href="{}" class="usage">', record.usage.current_revision.plugin.article.get_absolute_url()) + ' '.join(tokens) + '</a>')
     
     def value_rcontext(self, record, value):   # text only
         return ' '.join(value[record.main_subtoken_indices[-1]:])
     
     def render_rcontext(self, record, value):
         h = record.main_subtoken_indices[-1]    # beginning of right context
-        tokens = [escape(x) for x in value[h:]]
+        tokens = [format_html('<span title="{}">{}</span>', h+q+1, x) for q,x in enumerate(value[h:])]
         spans_to_link = other_p_tokens_in_sentence(record)
         for (i,j),anno in sorted(spans_to_link.items(), reverse=True):
             assert i-h<len(tokens)
@@ -59,7 +60,7 @@ class PTokenAnnotationTable(tables.Table):
                 assert j-h<=len(tokens)
                 exnum = anno.id+3000
                 displaystr = ' '.join(tokens[i-h:j-h])
-                tokens[i-h:j-h] = [format_html('<a href="/ex/{}" class="exnum">{}</a>', exnum, displaystr)]
+                tokens[i-h:j-h] = [format_html('<a href="/ex/{}" class="exnum">', exnum) + displaystr + '</a>']
         return mark_safe(' '.join(tokens))
     
     def render_role(self, value):
