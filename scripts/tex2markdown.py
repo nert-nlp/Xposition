@@ -12,7 +12,8 @@ import re, os
 dir1 = 'tex'
 dir2 = 'markdown'
 
-example_index = 1
+
+# example_index = 1
 
 def replace_circumfix(s, prefix, repl_prefix, repl_suffix):
     m = re.search(prefix,s)
@@ -41,7 +42,7 @@ def replace_circumfixes(s, prefix, repl_prefix, repl_suffix):
     return s
 
 def handle_ex(s):
-    global example_index
+    # global example_index
     s = re.sub(r",(\s)(\s)+", ", ", s, re.MULTILINE)
     s = re.sub(r"(?<=[a-z])(\s+)(?=[a-z])", " ", s, re.MULTILINE)
     s = re.sub(r"(?<=\S)([ \t]*)\\ex", "\n\\ex", s)
@@ -54,41 +55,41 @@ def handle_ex(s):
     match = re.compile(r'\\ex[ {]')
     while match.search(s):
         m = match.search(s)
-        ex_bookmark = '<a id="ex' + '{0:04d}'.format(example_index) + '"></a>'
+        # ex_bookmark = '<a id="ex' + '{0:04d}'.format(example_index) + '"></a>'
         if s[m.end()-1]=='{':
-            s = replace_circumfix(s, r'\\ex{', '- ' + ex_bookmark + '"<i>', '</i>"')
-            example_index += 1
+            s = replace_circumfix(s, r'\\ex{', '<ex>', '</ex>')
+            # example_index += 1
         else:
-            content = '- ' + ex_bookmark + '"<i>' + s[m.end():s.index('\n',m.end())+1].strip() + '</i>"'
+            content = '<ex>' + s[m.end():s.index('\n',m.end())+1].strip() + '</ex>'
             # if '\label' in content:
             #     label = re.search(r'\\label{(.*?)}', content).group(1)
             #     print(example_index,label)
             s = s[:m.start()]+content+'\n'+s[s.index('\n',m.end())+1:]
-            example_index += 1
+            # example_index += 1
 
     match = re.compile(r'\\sn[ {]')
     while match.search(s):
         m = match.search(s)
         if s[m.end() - 1] == '{':
-            s = replace_circumfix(s, r'\\sn{', '- "<i>', '</i>"')
-            example_index += 1
+            s = replace_circumfix(s, r'\\sn{', '<sn>', '</sn>')
+            # example_index += 1
         else:
-            content = '- "<i>' + s[m.end():s.index('\n',m.end())+1].strip() + '</i>"'
+            content = '<sn>' + s[m.end():s.index('\n',m.end())+1].strip() + '</sn>'
             s = s[:m.start()] + content + '\n' + s[s.index('\n', m.end()) + 1:]
-            example_index += 1
+            # example_index += 1
 
     # adjust indentation
-    if '1. ' in s:
-        s = re.sub(r"\n( *)- <a", "\n\n    - <a", s)
-        s = re.sub(r':(\n\s*)(\n\s*)+- <a', ':\n\n    - <a', s)
-    else:
-        s = re.sub(r"\n( *)- <a", "\n\n- <a", s)
-        s = re.sub(r':(\n\s*)(\n\s*)+- <a', ':\n\n- <a', s)
-
+    # if '1. ' in s:
+    #     s = re.sub(r"\n( *)- <a", "\n\n    - <a", s)
+    #     s = re.sub(r':(\n\s*)(\n\s*)+- <a', ':\n\n    - <a', s)
+    # else:
+    #     s = re.sub(r"\n( *)- <a", "\n\n- <a", s)
+    #     s = re.sub(r':(\n\s*)(\n\s*)+- <a', ':\n\n- <a', s)
     return s
 
 
 def convert(ifile, ofile, title):
+    list_num = 1
     footnotes = []
 
     with open(ifile, 'r', encoding='utf8') as f:
@@ -100,23 +101,36 @@ def convert(ifile, ofile, title):
                  f[i] = ''
             if '\multicolsep' in f[i]:
                 f[i] = ''
-            if '\label' in f[i]:
-                f[i] = re.sub(r'\\label{(.*?)}', '', f[i])
+            # if '\label' in f[i]:
+            #     f[i] = re.sub(r'\\label{(.*?)}', '', f[i])
             if '\\noindent' in f[i]:
                 f[i] = re.sub(r'\\noindent', '', f[i])
             if r'{xlist}' in f[i]:
                 f[i] = re.sub(r'\\begin{xlist}', '', f[i])
                 f[i] = re.sub(r'\\end{xlist}', '', f[i])
-            if ' %' in f[i]:
-                f[i] = f[i][0:f[i].index(' %')]
+            if re.search(r'(?<=[^\\])%', f[i]):
+                f[i] = f[i][:re.search(r'(?<=[^\\])%', f[i]).start()]
             if f[i].strip() == '\ex':
                 f[i] = ''
+            if re.search(r'\\ex(?=[^\w{])',f[i]):
+                f[i] = f[i].replace('\ex','<ex>').strip()+'</ex>'
             # take care of [] brackets
             f[i] = re.sub(r'\[\[', r'\[', f[i])
             f[i] = re.sub(r'\][\s\]]', r'\]', f[i])
             # junk whitespace
             f[i] = re.sub(r'\r', r'', f[i])
             f[i] = f[i].strip()+'\n'
+            # latex comments
+            if re.search(r'(?<=[^\\])#', f[i]):
+                f[i] = f[i][:re.search(r'(?<=[^\\])#', f[i]).start()]
+            # add numbered list
+            if r'\begin{itemize}' in f[i] or r'\begin{enumerate}' in f[i]:
+                list_num = 1
+            if r'\item' in f[i]:
+                f[i] = f[i].replace(r'\item', '###' + str(list_num) + '.')
+                list_num += 1
+
+
 
         data = ''.join(f[1:])
 
@@ -143,12 +157,8 @@ def convert(ifile, ofile, title):
             ref = re.search(r' \[\[(.*?)\]\] ', data).group(1)
             data = data.replace(' [[' + ref + ']] ', '[' + ref + '](/' + ref + ')')
         data = re.sub(r'\[en/', '[', data)
+        data = replace_circumfixes(data, r'\\label{', '<label>', '</label>')
 
-        # add numbered list
-        i = 1
-        while re.search(r'\\item',  data):
-            data = re.sub(r'\\item',  '###'+str(i)+'.', data, count=1)
-            i += 1
         # handle paragraph
         data = replace_circumfixes(data, r'\\paragraph{', '- **', '**')
 
@@ -186,8 +196,8 @@ def convert(ifile, ofile, title):
         data = replace_circumfixes(data, r'\\lbl{', '<i>', '</i>')
         data = replace_circumfixes(data, r'\\pex{', '<i>', '</i>')
 
-        data = replace_circumfixes(data, r'\\choices{', r'<u class="ex-choice">', r'</u>')
-        data = re.sub(r"\\\\", '</u>/<u class="ex-choice">', data)
+        data = replace_circumfixes(data, r'\\choices{', r'<choices>', r'</choices>')
+        # data = re.sub(r"\\\\", '</u>/<u class="ex-choice">', data)
         data = replace_circumfixes(data, r'\\url{', '', '')
 
         data = re.sub(r'\\psstX{Part/Portion}{Part/Portion}', " [[Part/Portion]] ", data)
@@ -199,18 +209,18 @@ def convert(ifile, ofile, title):
 
 
         # handle footnotes, citations, references
-        data = replace_circumfixes(data, r'\\footnote{', '<footnote1>', '</footnote1>')
+        data = replace_circumfixes(data, r'\\footnote{', '<footnote1>fn:', '</footnote1>')
         data = re.sub(r'\\Citep', '\citep', data)
         data = re.sub(r'\\Citet', '\citet', data)
         data = re.sub(r'\\citep\[', '\citep{', data)
         data = re.sub(r'\\citet\[', '\citet{', data)
         data = re.sub(r'\]{', ', ', data)
-        data = replace_circumfixes(data, r'\\citep{', '<footnote2>(', ')</footnote2>')
-        data = replace_circumfixes(data, r'\\citet{', '<footnote2>(', ')</footnote2>')
-        data = replace_circumfixes(data, r'\\cref{', '<footnote2>', '</footnote2>')
-        data = replace_circumfixes(data, r'\\ref{', '<footnote2>', '</footnote2>')
-        data = replace_circumfixes(data, r'\\exp{', '<footnote2>', '</footnote2>')
-        data = replace_circumfixes(data, r'\\Cref{', '<footnote2>', '</footnote2>')
+        data = replace_circumfixes(data, r'\\citep{', '<cite>', '</cite>')
+        data = replace_circumfixes(data, r'\\citet{', '<cite>', '</cite>')
+        data = replace_circumfixes(data, r'\\cref{', '<ref>', '</ref>')
+        data = replace_circumfixes(data, r'\\ref{', '<ref>', '</ref>')
+        data = replace_circumfixes(data, r'\\exp{', '<exp>', '</exp>')
+        data = replace_circumfixes(data, r'\\Cref{', '<ref>', '</ref>')
         j = 1
         for i in [1, 2]:
             m = re.compile('<footnote'+str(i)+'>(.*?)</footnote'+str(i)+'>', re.MULTILINE|re.DOTALL)
@@ -232,9 +242,22 @@ def convert(ifile, ofile, title):
         # whitespace
         data = re.sub(r"\n\s+\n", "\n\n", data)
         data = re.sub(r"\n\n+\n", "\n\n", data)
-        # data = re.sub(r'\\label{(.*?)}', '', data)
+
+        # fix various junk
+        data = re.sub(r'{[0-9]*}', '', data)
+        data = data.replace(r'\_', '_')
+        data = data.replace('{}', '')
+        data = data.replace('][', '')
+        data = re.sub('][(](?=[^/])', '] (', data)
+        # data = data.replace(r'\ex', '')
         data = data.replace('Part-Portion','PartPortion')
         data = data.replace('Part/Portion', 'PartPortion')
+        data = re.sub(r'</ex>\s*','</ex>\n\n',data)
+        data = re.sub(r'</sn>\s*', '</sn>\n\n', data)
+        while re.search('<ex><label>(?P<label>.*?)</label></ex>\s+<ex>',data):
+            x = re.search('<ex><label>(?P<label>.*?)</label></ex>\s+<ex>',data)
+            label = x.group('label')
+            data = data.replace(x.group(0),'<ex><label>'+label+'</label>')
 
     with open(ofile, 'w+', encoding='utf8') as f:
 
@@ -247,4 +270,6 @@ for file in os.listdir(dir1):
     if not os.path.exists(dir2):
         os.makedirs(dir2)
     if file.endswith('.tex'):
-        convert(os.path.join(dir1,file),os.path.join(dir2,file.replace('.tex','.txt')), file.replace('.tex',''))
+        convert(os.path.join(dir1,file),
+                os.path.join(dir2,file.replace('.tex','.txt')),
+                file.replace('.tex',''))
