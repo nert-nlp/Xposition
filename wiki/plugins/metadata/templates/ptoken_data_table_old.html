@@ -1,0 +1,65 @@
+{% load wiki_tags i18n sekizai_tags %}
+{% load metadata_tags %}
+{% load render_table from django_tables2 %}
+
+<h4 id="usages">Data ({{tokens.start_index}}–{{tokens.end_index}} of {{pag.count}})</h4>
+<div class="table-responsive" style="max-height: 50vh; overflow: auto;">
+{% render_table tokstable %}
+</div>
+
+<div class="table-responsive" style="max-height: 50vh; overflow: auto;">
+    <table class="ptokenannotation">
+      	<tr><th>ex#</th><th colspan="3">sentence</th><th>role</th><th class="construal-arrow">↝</th><th>function</th><th></th>
+      	<th>pos</th><th>gov</th><th>gpos</th><th>gss</th><th>obj</th><th>opos</th><th>oss</th><th>config</th><th>sent</th></tr>
+      	
+      {% for pt in tokens %}
+      	<tr><td class="exnum"><a href="/ex/{{pt.id|add:"3000"}}" {# pt.sentence.corpus.plugin.article.get_absolute_url #}
+      	title="{{pt.sentence.sent_id}} in {{pt.sentence.corpus}}">({{pt.id|add:"3000"}})</a></td><td class="lcontext">
+      	{% other_p_tokens_in_sentence pt as opts %}
+      	{% for st in pt.sentence.tokens %}
+      		{# all tokens of the adposition: pt.token_indices (ints), pt.mwe_subtokens (strings) #}
+      		{# first contiguous portion of the adposition: pt.main_subtoken_indices, pt.main_subtoken_string  #}
+      		
+      		{% with opt=opts|get_item:forloop.counter %}
+      		  {% spaceless %}	
+				{% if forloop.counter == pt.main_subtoken_indices.0 %}</td><td class="target"><a href="{{pt.usage.current_revision.plugin.article.get_absolute_url}}" class="usage">
+				{% elif opt and forloop.counter == opt.main_subtoken_indices.0 %}<a href="/ex/{{opt.id|add:"3000"}}" class="exnum">
+				{% endif %}
+			
+				{# truncate_contents_after_colon pt.usage.html as linkedtarget #}
+				{# if st.lower == pt.adposition.current_revision.metadatarevision.name.lower #}{# <span title="{{forloop.counter}}:{{[pt.adp_pos}}">{{linkedtarget|safe}}</span> #}
+			
+				<span title="{{forloop.counter}}">{{st}}</span>{# if forloop.counter not in pt.token_indices and pt.sentence.ptokenannotation_set.filter #}
+			
+				{% if forloop.counter == pt.main_subtoken_indices|last %}</a></td><td class="rcontext">
+				{% elif opt and forloop.counter == opt.main_subtoken_indices|last %}</a>
+				{% endif %}
+      		  {% endspaceless %}
+      		{% endwith %}
+      	{% endfor %}
+      	</td>
+      	<td class="role">{{pt.construal.role.html}}</td>
+      	<td class="construal"><a href="{{pt.construal.article.get_absolute_url}}" class="construal">{% if pt.construal.role and pt.construal.role == pt.construal.function %}={% elif pt.construal.role %}≠{% else %}{{pt.construal}}{% endif %}</a></td>
+      	<td class="function">{{pt.construal.function.html}}</td>
+      	<td class="note">{% if pt.annotator_cluster.strip %}<span title="{{pt.annotator_cluster.strip}}">ℹ</span>{% endif %}</td>
+      	<td>{{pt.adp_pos}}</td>
+      	<td>{{pt.gov_head}}</td><td>{{pt.gov_pos}}</td><td>{{pt.gov_supersense}}</td>
+      	<td>{{pt.obj_head}}</td><td>{{pt.obj_pos}}</td><td>{{pt.obj_supersense}}</td>
+      	<td class="config">{{pt.gov_obj_syntax}}</td>
+      	<!--<td class="genre">{{pt.sentence.corpus.genre}}</td>
+      	<td class="corpus"><a href="{{pt.sentence.corpus.plugin.article.get_absolute_url}}" class="corpus">{{pt.sentence.corpus}}</a></td>-->
+      	<td class="sentid"><a href="{{pt.sentence.corpus.plugin.article.get_absolute_url}}" class="corpussentence">{{pt.sentence.sent_id}}</a></td>
+      {% endfor %}
+    </tr>
+    </table>
+</div>
+<div class="col-md-3">
+		<p style="text-align: left">{% if tokens.has_previous %}<a href="?page={{tokens.previous_page_number}}&amp;perpage={{perpage}}">&laquo; Previous</a>{% endif %}</p>
+</div>
+<div class="col-md-6">
+		<p style="text-align: center">Page {{tokens.number}} <a href="?perpage=-1">(all)</a></p>
+</div>
+<div class="col-md-3">
+		<p style="text-align: right">{% if tokens.has_next %}<a href="?page={{tokens.next_page_number}}&amp;perpage={{perpage}}">Next &raquo;</a>{% endif %}</p>
+</div>
+</div>

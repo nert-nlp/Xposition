@@ -32,9 +32,9 @@ ul.inline > li { margin: 0px 5px; }
   color: #d3b;
 }
 .usage {
-  font-weight: bold;
   color: #f93;
 }
+.target .usage,.example .usage { font-weight: bold; }
 a.usage:hover { 
   color: #fc6;
   text-decoration: underline;
@@ -73,3 +73,17 @@ ul > li.clt { list-style: none; }
 .clt ul > li:last-child::after {
     height: .7em;
 }
+
+table.ptokenannotation { 
+  border: solid 1px #000;
+}
+table.ptokenannotation tr { border: solid 1px #777; }
+table.ptokenannotation th { text-align: center; background-color: #ddd; }
+table.ptokenannotation th.asc > a { text-decoration: underline #f93; }
+table.ptokenannotation th.desc > a { text-decoration: overline #f93; }
+table.ptokenannotation td,table.ptokenannotation th { padding: 3pt 3pt !important; }
+table.ptokenannotation td.construal,table.ptokenannotation th.construal { padding: 3pt !important; text-align: center; }
+table.ptokenannotation td.lcontext,table.ptokenannotation th.lcontext { text-align: right; padding: 3pt .5em 3pt 1em !important; min-width: 20em; }
+table.ptokenannotation td.target,table.ptokenannotation th.target { text-align: center; padding: 3pt .5em !important; }
+table.ptokenannotation td.rcontext,table.ptokenannotation th.rcontext { text-align: left; padding: 3pt 1em 3pt .5em !important; min-width: 20em; }
+

@@ -1,9 +1,13 @@
 from django import template
+from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
+from django.db.models import Q
 from django.utils.safestring import mark_safe
+from django_tables2 import RequestConfig
 from bitfield import BitField
 from wiki.models import Article, ArticleRevision
 from wiki.models.pluginbase import RevisionPlugin, RevisionPluginRevision
-from wiki.plugins.metadata.models import MetadataRevision, SimpleMetadata, Supersense, Construal, Language, Adposition, Usage, deepest_instance
+from wiki.plugins.metadata.models import MetadataRevision, SimpleMetadata, Supersense, Construal, Language, Adposition, Usage, PTokenAnnotation, deepest_instance
+from wiki.plugins.metadata.tables import PTokenAnnotationTable
 from wiki.plugins.categories.models import Category
 
 register = template.Library()
@@ -83,32 +87,111 @@ def langs_display(context):
 def adpositions_for_lang(context):
     article = context['article']
     # issue #9: get rid of deleted articles in lists
-    a = Adposition.objects.filter(current_revision__metadatarevision__adpositionrevision__lang__article=article)
-    return a.filter(current_revision__metadatarevision__article_revision__deleted=False)
+    a = Adposition.objects.filter(current_revision__metadatarevision__adpositionrevision__lang__article=article,
+        current_revision__metadatarevision__article_revision__deleted=False)
+    return a
 
 @register.simple_tag(takes_context=True)
 def usages_for_lang(context):
     article = context['article']
     # issue #9: get rid of deleted articles in lists
-    u = Usage.objects.filter(current_revision__metadatarevision__usagerevision__adposition__current_revision__metadatarevision__adpositionrevision__lang__article=article)
-    u = u.filter(current_revision__metadatarevision__article_revision__deleted=False)
+    u = Usage.objects.filter(current_revision__metadatarevision__usagerevision__adposition__current_revision__metadatarevision__adpositionrevision__lang__article=article,
+        current_revision__metadatarevision__article_revision__deleted=False)
     return u
 
 @register.simple_tag(takes_context=True)
 def usages_for_adp(context):
     article = context['article']
     # issue #9: get rid of deleted articles in lists
-    u = Usage.objects.filter(current_revision__metadatarevision__usagerevision__adposition__article=article)
-    u = u.filter(current_revision__metadatarevision__article_revision__deleted=False)
+    u = Usage.objects.filter(current_revision__metadatarevision__usagerevision__adposition__article=article,
+        current_revision__metadatarevision__article_revision__deleted=False)
     return u
 
 @register.simple_tag(takes_context=True)
 def usages_for_construal(context):
     article = context['article']
+    
+    
+    """ # using related_name sounds nice in principle, but actually looks pretty nasty
+    construal = deepest_instance(article.articleplugin_set.first())
+    urs = construal.usages.filter(article_revision__deleted=False)    # UsageRevision instances
+    u = [ur.plugin_set.first() for ur in urs] # Usage instances
+    """
+    
     # issue #9: get rid of deleted articles in lists
-    u = Usage.objects.filter(current_revision__metadatarevision__usagerevision__construal__article=article)
-    u = u.filter(current_revision__metadatarevision__article_revision__deleted=False)
+    u = Usage.objects.filter(current_revision__metadatarevision__usagerevision__construal__article=article, 
+        current_revision__metadatarevision__usagerevision__article_revision__deleted=False)
     return u
+
+def paginate(items, context):
+    request = context['request']
+    """"
+    perpage = request.GET.get('perpage', 25)
+    if int(perpage)<0: perpage = 10000 # practically no limit
+    page = request.GET.get('page', 1)
+    context['page'] = page
+    context['perpage'] = perpage
+    paginator = Paginator(items, perpage)
+    context['pag'] = paginator
+    """
+    table = PTokenAnnotationTable(items)
+    RequestConfig(request, paginate={'per_page': 25}).configure(table)
+    context['tokstable'] = table
+    return table
+
+@register.simple_tag(takes_context=True)
+def tokens_for_adposition(context):
+    article = context['article']
+    # issue #9: get rid of deleted articles in lists
+    t = PTokenAnnotation.objects.filter(adposition__article=article).order_by('sentence__sent_id')
+    return paginate(t, context)
+
+@register.simple_tag(takes_context=True)
+def tokens_for_construal(context):
+    article = context['article']
+    # issue #9: get rid of deleted articles in lists
+    t = PTokenAnnotation.objects.filter(construal__article=article).order_by('sentence__sent_id')
+    return paginate(t, context)
+
+@register.simple_tag(takes_context=True)
+def tokens_for_supersense(context):
+    article = context['article']
+    # issue #9: get rid of deleted articles in lists
+    t = PTokenAnnotation.objects.filter(Q(construal__role__article=article) | Q(construal__function__article=article)).order_by('sentence__sent_id')
+    return paginate(t, context)
+
+@register.simple_tag(takes_context=True)
+def tokens_for_usage(context):
+    article = context['article']
+    # issue #9: get rid of deleted articles in lists
+    t = PTokenAnnotation.objects.filter(usage__article=article).order_by('sentence__sent_id')
+    return paginate(t, context)
+
+@register.simple_tag(takes_context=False)
+def split(s):
+    return s.split(' ')
+
+@register.filter
+def get_item(dictionary, key):
+    return dictionary.get(key)
+
+@register.simple_tag(takes_context=False)
+def truncate_contents_after_colon(s):
+    i = s.index('>')+1
+    j = s.index('</', i)
+    c = s.index(':', i)
+    return s[:c] + s[j:]
+
+@register.simple_tag(takes_context=False)
+def other_p_tokens_in_sentence(pt):
+    others = pt.sentence.ptokenannotation_set.exclude(pk=pt.pk)
+    result = {}
+    for opt in others:
+        assert opt.main_subtoken_indices[0] not in result
+        assert opt.main_subtoken_indices[-1] not in result
+        result[opt.main_subtoken_indices[0]] = opt # open the link
+        result[opt.main_subtoken_indices[-1]] = opt    # close the link
+    return result
 
 def _category_subtree(c, recursive=False):
     ss = c.supersense.all()[0]
