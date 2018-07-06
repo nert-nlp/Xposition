@@ -173,7 +173,7 @@ for file in os.listdir(dir2):
                     cites = [c.strip() for c in cite.split(',')]
                     for i,c in enumerate(cites):
                         if c in CITATIONS:
-                            cites[i] = '['+CITATIONS[c]+'](/'+CITATIONS[c].replace(' ','_')+'/)'
+                            cites[i] = '['+CITATIONS[c]+'](/'+CITATIONS[c].replace(' ','_').replace(',','').replace('.','')+'/)'
                     line = line.replace(CITE_RE.search(line).group(0),'('+'; '.join(cites)+')')
                 # write ex refs
                 new_text.append(line)
