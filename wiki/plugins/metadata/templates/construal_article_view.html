@@ -21,9 +21,15 @@
     </ul>
 
     {% include "category_article_view.html" %}
+    
+    
   </div>
   <div class="col-md-3">
     {% metadata_display %}{# if there is metadata for the article, display it! #}
+  </div>
+  <div class="col-md-12">
+	{% tokens_for_construal as tokens %}
+    {% include "ptoken_data_table.html" %}
   </div>
 
 {% endblock %}
