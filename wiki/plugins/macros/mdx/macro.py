@@ -114,9 +114,8 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
         p = models.Adposition.normalize_adp(cls=models.Adposition,
                                             adp=short,
                                             language_name=prep.split('/')[-2])
-        if not p:
+        if p:
             prep = prep.replace(short, p)
-            short = short+'<not found>'
         if len(args) >= 3:
             cl = args[2]
         if len(args) > 1 and not '-' == args[1]:
@@ -143,9 +142,9 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
         p = models.Adposition.normalize_adp(cls=models.Adposition,
                                             adp=short,
                                             language_name=prep.split('/')[-2])
-        if not p:
+        if p:
             prep = prep.replace(short, p)
-        short = args[1] if p else args[1]+'<'+short+': not found>'
+        short = args[1]
         if len(args) >= 4:
             cl = args[3]
         if len(args) > 2 and not '-' == args[2]:
