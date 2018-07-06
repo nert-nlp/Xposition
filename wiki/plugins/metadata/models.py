@@ -608,17 +608,21 @@ class Adposition(Metadata):
 
     # issue #51, add standard aposition spelling variants here
     def normalize_adp(cls, adp='', language_name=''):
-        # for a in AdpositionRevision.objects.all():
-        #     if not a.other_forms or not (a.lang.name==language_name or a.lang.slug==language_name):
-        #         continue
-        #     if adp in a.other_forms:
-        #         return a.name
-        if language_name in ['English', 'en']:
-            if adp in ['my', 'our', 'his', 'her', 'their', 'your', "'s", 'whose', 'its']:
-                return "'s"
-            if adp in ['toward', 'towards']:
-                return 'toward'
-        return adp
+        for a in AdpositionRevision.objects.all():
+            if not (a.lang.name==language_name or a.lang.slug==language_name):
+                continue
+            if a.name == adp:
+                return adp
+            if not a.other_forms:
+                continue
+            if adp in a.other_forms:
+                return a.name
+        # if language_name in ['English', 'en']:
+        #     if adp in ['my', 'our', 'his', 'her', 'their', 'your', "'s", 'whose', 'its']:
+        #         return "'s"
+        #     if adp in ['toward', 'towards']:
+        #         return 'toward'
+        return None
 
     def field_names(self):
         # issue #4: transliteration field
@@ -738,7 +742,7 @@ class Corpus(SimpleMetadata):
     languages = models.CharField(max_length=200, null=True, verbose_name="Language(s)")
 
     def __str__(self):
-        return self.name + self.version
+        return self.name + ' ' + self.version
 
     @property
     def template(self):
