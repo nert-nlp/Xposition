@@ -1,7 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
 import import_export
-from bitfield import BitField
+import bitfield
 from django import forms
 from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _
@@ -52,9 +52,16 @@ class ObjCaseWidget(Widget):
 
 class ObjCasesWidget(Widget):
     def clean(self, value, row=None, *args, **kwargs):
-        x = BitField(flags=ms.Case.choices(), default=False)
-        x.flags[ms.Case[value]] = True
-        return x
+        # from https://github.com/disqus/django-bitfield/blob/faab1ff6f5e94122de0a333750285c1b4e2e5bdb/bitfield/forms.py
+        if not value:
+            return 0
+        # Assume an iterable which contains an item per flag that's enabled
+        result = bitfield.BitHandler(0, [k for v, k in ms.Case.choices()])
+        try:
+            setattr(result, value, True)
+        except AttributeError:
+            raise Exception('Unknown choice: %r' % (value,))
+        return int(result)
 
 class MorphTypeWidget(Widget):
     def clean(self, value, row=None, *args, **kwargs):
@@ -336,7 +343,7 @@ class AdpositionRevisionResource(import_export.resources.ModelResource):
 
     morphtype = fields.Field(attribute='morphtype', widget=MorphTypeWidget())
     transitivity = fields.Field(attribute='transitivity', widget=TransitivityWidget())
-    # obj_cases = fields.Field(column_name='obj_case', attribute='obj_cases', widget=ObjCasesWidget())
+    obj_cases = fields.Field(column_name='obj_case', attribute='obj_cases', widget=ObjCasesWidget())
 
     # handle revision creation
     def save_instance(self, instance, using_transactions=True, dry_run=False):
@@ -375,8 +382,8 @@ class AdpositionRevisionResource(import_export.resources.ModelResource):
 
     class Meta:
         model = ms.AdpositionRevision
-        import_id_fields = ('name', 'lang',)#('name', 'lang')
-        fields = ('name', 'lang', 'morphtype', 'transitivity')
+        import_id_fields = ('name', 'lang',)
+        fields = ('name', 'lang', 'morphtype', 'transitivity', 'obj_cases')
 
 
 class UsageRevisionResource(import_export.resources.ModelResource):
