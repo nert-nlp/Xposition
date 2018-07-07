@@ -19,6 +19,8 @@ from wiki.core.markdown import article_markdown
 from wiki.decorators import disable_signal_for_loaddata
 from wiki.plugins.categories.models import ArticleCategory
 from wiki.models.pluginbase import ArticlePlugin, RevisionPlugin, RevisionPluginRevision
+from django.core.exceptions import ObjectDoesNotExist
+
 
 try:
     from django.contrib.contenttypes.fields import GenericForeignKey
@@ -608,20 +610,20 @@ class Adposition(Metadata):
 
     # issue #51, add standard aposition spelling variants here
     def normalize_adp(cls, adp='', language_name=''):
-        for a in AdpositionRevision.objects.all():
-            if not (a.lang.name==language_name or a.lang.slug==language_name):
-                continue
-            if a.name == adp:
+        try:
+            a = AdpositionRevision.objects.get(name=adp)
+            if a.lang.name == language_name or a.lang.slug == language_name:
                 return adp
-            if not a.other_forms:
-                continue
-            if adp in a.other_forms:
-                return a.name
-        # if language_name in ['English', 'en']:
-        #     if adp in ['my', 'our', 'his', 'her', 'their', 'your', "'s", 'whose', 'its']:
-        #         return "'s"
-        #     if adp in ['toward', 'towards']:
-        #         return 'toward'
+            else:
+                raise ObjectDoesNotExist()
+        except ObjectDoesNotExist:
+            for a in AdpositionRevision.objects.all():
+                if not (a.lang.name==language_name or a.lang.slug==language_name):
+                    continue
+                if not a.other_forms:
+                    continue
+                if adp in a.other_forms:
+                    return a.name
         return None
 
     def field_names(self):

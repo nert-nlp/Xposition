@@ -1,7 +1,5 @@
 import re, os
 
-os.chdir(r'C:\Users\Austin\Desktop\Xposition')
-
 dir = 'markdown-and-macros'
 dir2 = 'markdown-construals'
 

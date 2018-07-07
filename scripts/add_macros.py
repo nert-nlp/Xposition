@@ -1,3 +1,4 @@
+# coding=utf-8
 import re, os
 
 dir = 'markdown'
@@ -56,17 +57,23 @@ class Examples:
             ls = [l.strip() for l in ls]
             repl = []
             for l in ls:
-                if l in self.ids:
-                    ss = self.id(l)[0]
-                    id = self.id(l)[1]
-                    if l.startswith('ex:'):
+                if l.startswith('ex:'):
+                    if l in self.ids:
+                        ss = self.id(l)[0]
+                        id = self.id(l)[1]
                         repl.append('[exref ' + str(id).zfill(3) + ' ' + ss + ']')
                     else:
-                        repl.append('[[' + ss + ']]')
-                        # print('fix label', ss, l)
+                        repl.append(l)
+                        print('fix label', title, l)
+                elif l.startswith('sec:') and l.replace('sec:','') in ['Species','Temporal','Path']:
+                    repl.append('[ss ' + l.replace('sec:','') + ']')
+                elif l.startswith('sec:') and l in self.ids:
+                    ss = self.id(l)[0]
+                    repl.append('[[ ' + ss + ']]')
                 else:
                     repl.append(l)
                     print('fix label', title, l)
+
             line = line.replace(ex_link.group(0),'('+', '.join(repl)+')')
         return line
 
@@ -88,7 +95,6 @@ for file in os.listdir(dir):
 
             examples.INDEX = 1
 
-            print(title)
             for line in f:
                 # fix Part/Portion
                 line = line.replace('Part/Portion', 'PartPortion')
@@ -129,12 +135,7 @@ for file in os.listdir(dir):
                 line = re.sub(r'<exp>.*?</exp>','',line)
                 if '###' in line and line.strip()[-1] not in ['.',':','?']:
                     line = line.strip()+' '
-                line.replace('<ex></ex>','')
-                # underlining
-                if '<choices>' in line:
-                    line = line.replace('<choices>','<u class="ex-choice">')
-                    line = line.replace(r'\\', '</u>/<u class="ex-choice">')
-                    line = line.replace('</choices>', '</u>')
+
 
                 tmp_ss = None
                 new_text.append(line)
@@ -173,8 +174,9 @@ for file in os.listdir(dir2):
                     cites = [c.strip() for c in cite.split(',')]
                     for i,c in enumerate(cites):
                         if c in CITATIONS:
-                            cites[i] = '['+CITATIONS[c]+'](/'+CITATIONS[c].replace(' ','_').replace(',','').replace('.','')+'/)'
+                            cites[i] = '['+CITATIONS[c]+'](/bib/'+CITATIONS[c].replace(' ','_').replace(',','').replace('.','')+'/)'
                     line = line.replace(CITE_RE.search(line).group(0),'('+'; '.join(cites)+')')
+                line =line.replace(r'<ex></ex>', '')
                 # write ex refs
                 new_text.append(line)
         with open(os.path.join(dir2, file), 'w', encoding='utf8') as f2:

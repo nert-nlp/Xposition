@@ -45,46 +45,40 @@ def handle_ex(s):
     # global example_index
     s = re.sub(r",(\s)(\s)+", ", ", s, re.MULTILINE)
     s = re.sub(r"(?<=[a-z])(\s+)(?=[a-z])", " ", s, re.MULTILINE)
-    s = re.sub(r"(?<=\S)([ \t]*)\\ex", "\n\\ex", s)
+    s = re.sub(r"(?<=\S)([ \t]*)\\ex", "\n\ex", s)
     s = re.sub(r'\\ex(?=\\)', r'\ex ', s)
     s = re.sub(r'\\ex\t', '\ex ', s)
     s = re.sub(r'\\sn(?=\\)', r'\sn ', s)
     s = re.sub(r'\\sn\t', '\sn ', s)
 
 
-    match = re.compile(r'\\ex[ {]')
+    match = re.compile(r'\\ex(?=\W)')
     while match.search(s):
         m = match.search(s)
-        # ex_bookmark = '<a id="ex' + '{0:04d}'.format(example_index) + '"></a>'
-        if s[m.end()-1]=='{':
+        if s[m.end()]=='{':
             s = replace_circumfix(s, r'\\ex{', '<ex>', '</ex>')
-            # example_index += 1
         else:
-            content = '<ex>' + s[m.end():s.index('\n',m.end())+1].strip() + '</ex>'
-            # if '\label' in content:
-            #     label = re.search(r'\\label{(.*?)}', content).group(1)
-            #     print(example_index,label)
-            s = s[:m.start()]+content+'\n'+s[s.index('\n',m.end())+1:]
-            # example_index += 1
+            start = m.end()
+            x = re.compile(r'(\\(ex|sn)|\\end)').search(s, pos=start)
+            x = x or re.compile(r'\n').search(s, pos=start)
+            end = x.start()
 
-    match = re.compile(r'\\sn[ {]')
+            content = '<ex>' + s[start:end].strip().replace('\n',' ') + '</ex>'
+            s = s[:m.start()]+content+'\n'+s[end:]
+
+    match = re.compile(r'\\sn(?=\W)')
     while match.search(s):
         m = match.search(s)
-        if s[m.end() - 1] == '{':
+        if s[m.end()] == '{':
             s = replace_circumfix(s, r'\\sn{', '<sn>', '</sn>')
-            # example_index += 1
         else:
-            content = '<sn>' + s[m.end():s.index('\n',m.end())+1].strip() + '</sn>'
-            s = s[:m.start()] + content + '\n' + s[s.index('\n', m.end()) + 1:]
-            # example_index += 1
+            start = m.end()
+            x = re.compile(r'(\\(ex|sn)|\\end|<ex>)').search(s, pos=start)
+            x = x or re.compile(r'\n').search(s, pos=start)
+            end = x.start()
+            content = '<sn>' + s[start:end].strip().replace('\n', ' ') + '</sn>'
+            s = s[:m.start()] + content + '\n' + s[end:]
 
-    # adjust indentation
-    # if '1. ' in s:
-    #     s = re.sub(r"\n( *)- <a", "\n\n    - <a", s)
-    #     s = re.sub(r':(\n\s*)(\n\s*)+- <a', ':\n\n    - <a', s)
-    # else:
-    #     s = re.sub(r"\n( *)- <a", "\n\n- <a", s)
-    #     s = re.sub(r':(\n\s*)(\n\s*)+- <a', ':\n\n- <a', s)
     return s
 
 
@@ -101,28 +95,24 @@ def convert(ifile, ofile, title):
                  f[i] = ''
             if '\multicolsep' in f[i]:
                 f[i] = ''
-            # if '\label' in f[i]:
-            #     f[i] = re.sub(r'\\label{(.*?)}', '', f[i])
             if '\\noindent' in f[i]:
                 f[i] = re.sub(r'\\noindent', '', f[i])
-            if r'{xlist}' in f[i]:
-                f[i] = re.sub(r'\\begin{xlist}', '', f[i])
-                f[i] = re.sub(r'\\end{xlist}', '', f[i])
+            # if r'{xlist}' in f[i]:
+            #     f[i] = re.sub(r'\\begin{xlist}', '', f[i])
+            #     f[i] = re.sub(r'\\end{xlist}', '', f[i])
+            # latex comments
             if re.search(r'(?<=[^\\])%', f[i]):
                 f[i] = f[i][:re.search(r'(?<=[^\\])%', f[i]).start()]
-            if f[i].strip() == '\ex':
-                f[i] = ''
-            if re.search(r'\\ex(?=[^\w{])',f[i]):
-                f[i] = f[i].replace('\ex','<ex>').strip()+'</ex>'
+            # if f[i].strip() == '\ex':
+            #     f[i] = ''
+            # if re.search(r'\\ex(?=[^\w{])',f[i]):
+            #     f[i] = f[i].replace('\ex','<ex>').strip()+'</ex>'
             # take care of [] brackets
             f[i] = re.sub(r'\[\[', r'\[', f[i])
             f[i] = re.sub(r'\][\s\]]', r'\]', f[i])
             # junk whitespace
             f[i] = re.sub(r'\r', r'', f[i])
             f[i] = f[i].strip()+'\n'
-            # latex comments
-            if re.search(r'(?<=[^\\])#', f[i]):
-                f[i] = f[i][:re.search(r'(?<=[^\\])#', f[i]).start()]
             # add numbered list
             if r'\begin{itemize}' in f[i] or r'\begin{enumerate}' in f[i]:
                 list_num = 1
@@ -136,6 +126,9 @@ def convert(ifile, ofile, title):
 
         # handle shortdef
         data = replace_circumfixes(data, r'\\shortdef{', r'|', '|')
+
+        # subsection
+        data = replace_circumfixes(data, r'\\subsection{', '##<b>', '</b>')
 
         # embold title of article
         data = re.sub(r'\\psst{' + title + '}', '**' + title + '**', data)
@@ -158,6 +151,12 @@ def convert(ifile, ofile, title):
             data = data.replace(' [[' + ref + ']] ', '[' + ref + '](/' + ref + ')')
         data = re.sub(r'\[en/', '[', data)
         data = replace_circumfixes(data, r'\\label{', '<label>', '</label>')
+
+        # special characters
+        data = data.replace(r'\backi', '[[`i]]')
+        data = data.replace(r'\backc', '[[`c]]')
+        data = data.replace(r'\backd', '[[`d]]')
+        data = data.replace(r'\backposs', '[[`$]]')
 
         # handle paragraph
         data = replace_circumfixes(data, r'\\paragraph{', '- **', '**')
@@ -190,6 +189,7 @@ def convert(ifile, ofile, title):
         data = re.sub(r"}}\$", '</sub>', data)
         data = re.sub(r"\$_{", '<sub>', data)
         data = re.sub(r"}\$", '</sub>', data)
+        data = re.sub(r"\backi", '</sub>', data)
 
         # misc labels
         data = replace_circumfixes(data, r'\\sst{', '<i>', '</i>')
@@ -197,7 +197,14 @@ def convert(ifile, ofile, title):
         data = replace_circumfixes(data, r'\\pex{', '<i>', '</i>')
 
         data = replace_circumfixes(data, r'\\choices{', r'<choices>', r'</choices>')
-        # data = re.sub(r"\\\\", '</u>/<u class="ex-choice">', data)
+        # underlining
+        while '<choices>' in data:
+            start = data.index('<choices>')
+            end = data.index('</choices>')
+            data = data[:start] + data[start:end].replace(r'\\', '</u>/<u>') + data[end:]
+            data = data.replace('<choices>', '<u>', 1)
+            data = data.replace('</choices>', '</u>', 1)
+
         data = replace_circumfixes(data, r'\\url{', '', '')
 
         data = re.sub(r'\\psstX{Part/Portion}{Part/Portion}', " [[Part/Portion]] ", data)
@@ -205,8 +212,6 @@ def convert(ifile, ofile, title):
         data = re.sub(r"\\end{history}", "}", data)
         data = replace_circumfixes(data, r'\\begin{history}', '\n<!-- ', ' -->')
         data = replace_circumfixes(data, r'\\futureversion{', '\n<!-- ', ' -->')
-        data = re.sub(r"\\(end|begin){(.*?)}", "", data)
-
 
         # handle footnotes, citations, references
         data = replace_circumfixes(data, r'\\footnote{', '<footnote1>fn:', '</footnote1>')
@@ -233,11 +238,13 @@ def convert(ifile, ofile, title):
         # add footnotes
         k = 1
         for foot in footnotes:
-            data += '\n[^'+str(k)+']: '+foot
+            data += '\n[^'+str(k)+']: '+foot.replace('fn:','')
             k += 1
 
         # handle examples
         data = handle_ex(data)
+
+        data = re.sub(r"\\(end|begin){(.*?)}", "", data)
 
         # whitespace
         data = re.sub(r"\n\s+\n", "\n\n", data)
