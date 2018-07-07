@@ -120,6 +120,17 @@ class CorpusView(ArticleMetadataView):
     form_class = forms.CorpusForm
     form_heading = 'Create Corpus'
 
+class CorpusSentenceView(TemplateView):
+    template_name = models.CorpusSentence.template
+
+    def sentence(self, request):
+        print('????????????')
+        return self.as_view()
+
+
+class PTokenView(TemplateView):
+    template_name = models.PTokenAnnotation.template
+
 
 class MetadataView(LoginRequiredMixin, ArticleMixin, TemplateView):
     template_name = "metadata.html"
