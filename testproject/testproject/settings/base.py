@@ -161,6 +161,7 @@ WIKI_ANONYMOUS_WRITE = True
 WIKI_ANONYMOUS_CREATE = False
 
 WIKI_URL_CASE_SENSITIVE = True
+WIKI_URL_CONFIG_CLASS = 'wiki.plugins.metadata.urls.XpositionURLPatterns'
 
 WIKI_MARKDOWN_HTML_WHITELIST = ['sub', 'sup', 'hr', 'u']
 

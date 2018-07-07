@@ -167,6 +167,13 @@ def tokens_for_usage(context):
     t = PTokenAnnotation.objects.filter(usage__article=article).order_by('sentence__sent_id')
     return paginate(t, context)
 
+@register.simple_tag(takes_context=True)
+def token_by_exnum(context):
+    exnum = int(context['exnum'])
+    # issue #9: get rid of deleted articles in lists
+    t = PTokenAnnotation.objects.filter(id=exnum-3000)
+    return paginate(t, context)
+
 @register.simple_tag(takes_context=False)
 def split(s):
     return s.split(' ')

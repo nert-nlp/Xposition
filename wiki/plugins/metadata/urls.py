@@ -1,8 +1,19 @@
 from __future__ import absolute_import, unicode_literals
 
 from django.conf.urls import include, url
+from wiki.urls import WikiURLPatterns
 import wiki.plugins.metadata.views as views
 
+class XpositionURLPatterns(WikiURLPatterns):
+    def get_root_urls(self):
+        # customize certain root URLs to override putting them under _plugin/metadata
+        root_url_patterns = [
+            url(r'^ex/(?P<exnum>\d+)/$', views.PTokenView.as_view(), name='ptoken_view'), #  /ex/3495/
+  #url(r'^corpussentence/$', views.CorpusSentenceView.as_view(), name='corpus_sentence_view'), #  /en/corpus/streusle4.1/reviews-001325-0003
+  #url('<str:lang>/corpus/<str:corpus>/<str:sent_id>/ex/<int:index>', views.PTokenView.as_view(), name='ptoken_view'),
+        ]
+        #assert False,root_url_patterns
+        return super(XpositionURLPatterns, self).get_root_urls() + root_url_patterns
 
 
 urlpatterns = [
@@ -19,6 +30,5 @@ urlpatterns = [
   url(r'^editsupersense/$', views.SupersenseView.as_view(edit=True), name='metadata_edit_supersense'),
   url(r'^createcorpus/$', views.CorpusView.as_view(), name='metadata_create_corpus'),
   url(r'^editcorpus/$', views.CorpusView.as_view(edit=True), name='metadata_edit_corpus'),
-  url(r'^corpussentence/$', views.CorpusView.as_view(), name='corpus_sentence_view'), #  /en/corpus/streusle4.1/reviews-001325-0003
-  #url('<str:lang>/corpus/<str:corpus>/<str:sent_id>/ex/<int:index>', views.PTokenView.as_view(), name='ptoken_view'),
+  
 ]
