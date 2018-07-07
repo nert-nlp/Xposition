@@ -1,0 +1,25 @@
+{% extends "wiki/article.html" %}
+{% load wiki_tags i18n sekizai_tags %}
+{% load metadata_tags %}
+
+{% block wiki_articletitle %}
+<i class="fa fa-files-o fa-2x" aria-hidden="true" style="opacity: .1; position: absolute; left: -80px;"></i>
+{{block.super}}
+{% endblock %}
+
+{% block wiki_contents_tab %}
+  <div class="col-md-9">
+    {% wiki_render article %}
+    TO DO
+    <div class="col-md-12">
+      {% include "category_article_view.html" %}
+    </div>
+  </div>
+
+
+  <div class="col-md-3">
+    {% metadata_display %}{# if there is metadata for the article, display it! #}
+  </div>
+
+
+{% endblock %}

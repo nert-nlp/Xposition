@@ -777,9 +777,12 @@ class CorpusSentence(models.Model):
     note = models.CharField(max_length=200, blank=True, verbose_name="Annotator Note")
     mwe_markup = models.CharField(max_length=200, blank=True, verbose_name="MWE Markup")
 
+    def html(self):
+        return super(CorpusSentence, self).html()
+
     @property
     def template(self):
-        return "corpus_sentence_article_view.html"
+        return "corpus_sentence_view.html"
 
     def __str__(self):
         return str(self.corpus) + ': ' + self.sent_id
@@ -829,6 +832,12 @@ class PTokenAnnotation(models.Model):
     main_subtoken_indices = IntListField(max_length=200, blank=True, null=True, verbose_name="Main Subtoken Indices")
     main_subtoken_string = StringListField(max_length=200, blank=True, null=True, verbose_name="Main Subtoken String")
 
+    def html(self):
+        return super(PTokenAnnotation, self).html()
+
+    @property
+    def template(self):
+        return "ptoken_view.html"
 
 
     def __str__(self):
