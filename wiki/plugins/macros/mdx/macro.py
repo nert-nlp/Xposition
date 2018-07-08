@@ -201,7 +201,7 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
     ex.meta = dict(
         short_description=_('Create an Example'),
         help_text=_('Create an example sentence with a linkable id'),
-        example_code='[ex 001 \'The cat [p en/under Locus] the table.\']',
+        example_code='[ex 001 "The cat [p en/under Locus] the table."]',
         args={'id': _('id of example'), 'sent': _('full sentence in single quotes'), 'label': _('string to display after ex. (if not id)')}
     )
 
