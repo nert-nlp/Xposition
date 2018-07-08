@@ -1,17 +1,21 @@
-{% extends "wiki/article.html" %}
+{% extends "wiki/base.html" %}
 {% load wiki_tags i18n sekizai_tags %}
 {% load metadata_tags %}
 
 {% block wiki_pagetitle %}({{exnum}}){% endblock %}
 
-{% block wiki_articletitle %}
-<i class="fa fa-files-o fa-2x" aria-hidden="true" style="opacity: .1; position: absolute; left: -80px;"></i>
-Annotation ({{exnum}})
-{% endblock %}
+{% block wiki_contents %}
 
-{% block wiki_contents_tab %}
-  <div class="col-md-12">
+  <div id="article-container">
+    <ul id="article-menu" class="nav nav-pills">
+		<li><h1 id="article-title"><i class="fa fa-files-o fa-2x" aria-hidden="true" style="opacity: .1; position: absolute; left: -80px;"></i>
+			Annotation ({{exnum}})</h1></li>
+	</ul>
+	
+	<div class="col-md-12">
 	{% token_by_exnum as tokens %}
-    {% include "ptoken_data_table_contents.html" %}
+	{% include "ptoken_data_table_contents.html" %}
+	</div>
+
   </div>
 {% endblock %}
