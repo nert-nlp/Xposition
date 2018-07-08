@@ -254,7 +254,7 @@ def convert(ifile, ofile, title):
         data = re.sub(r'{[0-9]*}', '', data)
         data = data.replace(r'\_', '_')
         data = data.replace('{}', '')
-        data = data.replace('][', '')
+        data = data.replace('][', '] [')
         data = re.sub('][(](?=[^/])', '] (', data)
         # data = data.replace(r'\ex', '')
         data = data.replace('Part-Portion','PartPortion')
