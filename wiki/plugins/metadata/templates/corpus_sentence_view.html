@@ -2,27 +2,57 @@
 {% load wiki_tags i18n sekizai_tags %}
 {% load metadata_tags %}
 
+{% block wiki_pagetitle %}{{sent_id}}{% endblock %}
+
 {% block wiki_articletitle %}
 <i class="fa fa-files-o fa-2x" aria-hidden="true" style="opacity: .1; position: absolute; left: -80px;"></i>
-{{block.super}}
+Sentence {{sent_id}}
 {% endblock %}
 
 {% block wiki_contents_tab %}
-  <div class="col-md-9">
-    {% wiki_render article %}
-    TO DO
-    {{lang}}
-    {{corpus}}
-    {{sent_id}}
-    <div class="col-md-12">
-      {% include "category_article_view.html" %}
-    </div>
-  </div>
-
-
-  <div class="col-md-3">
-    {% metadata_display %}{# if there is metadata for the article, display it! #}
-  </div>
-
-
+  {% tokens_by_sentid as tokens %}
+<div class="col-md-9">
+  <p class="lead" style="font-size: 200%; max-width: 30em;">
+  	{% all_p_tokens_in_sentence sentence as pts %}
+	{% for st in sentence.tokens %}
+		{# all tokens of the adposition: pt.token_indices (ints), pt.mwe_subtokens (strings) #}
+		{# first contiguous portion of the adposition: pt.main_subtoken_indices, pt.main_subtoken_string  #}
+		
+		{% with pt=pts|get_item:forloop.counter %}
+		  {% spaceless %}	
+			{% if pt and forloop.counter == pt.main_subtoken_indices.0 %}<a href="/ex/{{opt.id|add:"3000"}}" class="exnum">{% endif %}
+		
+			{% if pt %}<a href="{{pt.usage.current_revision.plugin.article.get_absolute_url}}" class="usage">{% endif %}
+			<span title="{{forloop.counter}}">{{st}}</span>
+			{% if pt %}</a>{% endif %}
+		
+			{% if pt and forloop.counter == pt.main_subtoken_indices|last %}</a><sub>{{pt.construal.html|safe}}</sub>{% endif %}
+		  {% endspaceless %}
+		{% endwith %}
+	{% endfor %}
+  </p>
+  <p class="sent-gloss">{{sentence.sent_gloss}}</p>
+  <p class="bg-info" style="padding: 10px">{{sentence.note}}</p>
+  
+    {% include "ptoken_data_table_contents.html" %}
+</div>
+<div class="col-md-3">
+    <h4 id="metadata">Metadata</h4>
+    <table class="metadata table">
+    <tr><th>language</th><td>{{sentence.language.html}}</td></tr>
+    <tr><th>corpus</th><td>{{sentence.corpus.html}}</td></tr>
+    <tr><th>genre</th><td>{{sentence.corpus.genre}}</td></tr>
+    <tr><th>document ID</th><td>{{sentence.doc_id}}</td></tr>
+    <tr><th>orthography</th><td>{{sentence.orthography}}</td></tr>
+    <tr><th>parallel?</th><td>{{sentence.is_parallel}}</td></tr>
+    <tr><th>raw text</th><td>{{sentence.text}}</td></tr>
+    <tr><th>tokenized</th><td>{{sentence.tokens|join:" "}}</td></tr>
+    <tr><th>MWE markup</th><td><tt>{{sentence.mwe_markup}}</tt></td></tr>
+    </table>
+</div>
+  
 {% endblock %}
+
+{#
+    word_gloss = StringListField(max_length=200, blank=True, verbose_name="Word Gloss")
+#}

@@ -170,8 +170,14 @@ def tokens_for_usage(context):
 @register.simple_tag(takes_context=True)
 def token_by_exnum(context):
     exnum = int(context['exnum'])
-    # issue #9: get rid of deleted articles in lists
     t = PTokenAnnotation.objects.filter(id=exnum-3000)
+    return paginate(t, context)
+
+@register.simple_tag(takes_context=True)
+def tokens_by_sentid(context):
+    sentid = context['sent_id']
+    t = PTokenAnnotation.objects.filter(sentence__sent_id=sentid).order_by('id')
+    context['sentence'] = t[0].sentence
     return paginate(t, context)
 
 @register.simple_tag(takes_context=False)
@@ -188,6 +194,17 @@ def truncate_contents_after_colon(s):
     j = s.index('</', i)
     c = s.index(':', i)
     return s[:c] + s[j:]
+
+@register.simple_tag(takes_context=False)
+def all_p_tokens_in_sentence(sentence):
+    pts = sentence.ptokenannotation_set.all()
+    result = {}
+    for pt in pts:
+        assert pt.main_subtoken_indices[0] not in result
+        assert pt.main_subtoken_indices[-1] not in result
+        result[pt.main_subtoken_indices[0]] = pt # open the link
+        result[pt.main_subtoken_indices[-1]] = pt    # close the link
+    return result
 
 @register.simple_tag(takes_context=False)
 def other_p_tokens_in_sentence(pt):
