@@ -425,7 +425,11 @@ class UsageRevisionResource(import_export.resources.ModelResource):
 
         adp_article = m.adposition.article
         # code taken from wiki/plugins/metadata/forms.py
-        if len(m.obj_case.choices())<2:
+        if len([key for key,set in m.adposition
+                                    .current_revision
+                                    .metadatarevision
+                                    .adpositionrevision
+                                    .obj_cases.iteritems() if set])<2:
             case = None
         else:
             case = ms.Case.shortname(m.obj_case)
