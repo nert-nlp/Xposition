@@ -177,6 +177,8 @@ def token_by_exnum(context):
 def tokens_by_sentid(context):
     sentid = context['sent_id']
     t = PTokenAnnotation.objects.filter(sentence__sent_id=sentid).order_by('id')
+    if not t:
+        raise Exception('Sent id "'+sentid+'" does not exist.')
     context['sentence'] = t[0].sentence
     return paginate(t, context)
 
