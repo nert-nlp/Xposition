@@ -36,11 +36,13 @@ for file in os.listdir(dir):
                 ss = tmp_ss if tmp_ss else default_ss
                 ss = ss if '--' in ss else ss+'--'+ss
                 for ex in EXAMPLE_RE.finditer(line):
+                    example = ex.group('ex')
+                    example = re.sub('\[\^[0-9]+\]','',example)
                     if ss not in construals:
                         construals[ss] = []
                     exref = '\'[exref '+ex.group('id')+' '+file.replace('.txt', '')+']\''
                     id = '{0:03d}'.format(len(construals[ss])+1)
-                    construals[ss].append('- [ex '+id+' '+ex.group('ex')+' '+exref+']\n\n')
+                    construals[ss].append('- [ex '+id+' '+example+' '+exref+']\n\n')
 
                 tmp_ss = None
 
