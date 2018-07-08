@@ -123,11 +123,6 @@ class CorpusView(ArticleMetadataView):
 class CorpusSentenceView(TemplateView):
     template_name = models.CorpusSentence.template
 
-    def sentence(self, request):
-        print('????????????')
-        return self.as_view()
-
-
 class PTokenView(TemplateView):
     template_name = models.PTokenAnnotation.template
 
