@@ -207,21 +207,74 @@ def convert(ifile, ofile, title):
 
         data = replace_circumfixes(data, r'\\url{', '', '')
 
-        data = re.sub(r'\\psstX{Part/Portion}{Part/Portion}', " [[Part/Portion]] ", data)
+        data = re.sub(r'\\psstX{Part/Portion}{Part/Portion}', " [[PartPortion]] ", data)
 
         data = re.sub(r"\\end{history}", "}", data)
         data = replace_circumfixes(data, r'\\begin{history}', '\n<!-- ', ' -->')
         data = replace_circumfixes(data, r'\\futureversion{', '\n<!-- ', ' -->')
 
-        # handle footnotes, citations, references
+        # add citations
+        CITATIONS = {
+            'bonial-18': 'Bonial et al., 2018',
+            'verbnet': 'Kipper et al., 2008',
+            'palmer-17': 'Palmer et al., 2017',
+            'chang-98': 'Chang et al., 1998',  # p. 230,
+            'cgel': 'Huddleston and Pullum, 2002',  # p. 1224,
+            'schmid-00': 'Schmid, 2000',
+            'yadurajan-01': 'Yadurajan, 2001',  # p. 7,
+            'pustejovsky-91': 'Pustejovsky, 1991',
+            'klein-94': 'Klein, 1994',  # pp. 154--157,
+            'talmy-96': 'Talmy, 1996',
+            'baldwin-06': 'Baldwin et al., 2006',
+            'amr': 'Banarescu et al., 2013',  # AMR;][,
+            'amr-guidelines': 'Banarescu et al., 2015',
+            'srikumar-13': 'Srikumar and Roth, 2013a',
+            'srikumar-13-inventory': 'Srikumar and Roth, 2013b'
+        }
+
+        data = re.sub(r'\\Citep', '\cite', data)
+        data = re.sub(r'\\Citet', '\cite', data)
+        data = re.sub(r'\\citep', '\cite', data)
+        data = re.sub(r'\\citet', '\cite', data)
+
+        CITE_RE1 = re.compile(r'\\cite\[(?P<op1>.*?)\]\[(?P<op2>.*?)\]{(?P<label>.+?)}')
+        CITE_RE2 = re.compile(r'\\cite\[(?P<op2>.*?)\]{(?P<label>.+?)}')
+        CITE_RE3 = re.compile(r'\\cite{(?P<label>.+?)}')
+        while CITE_RE1.search(data):
+            cite = CITE_RE1.search(data).group('label')
+            op1 = CITE_RE1.search(data).group('op1')
+            op2 = CITE_RE1.search(data).group('op2')
+            op1 = op1+' ' if op1 else ''
+            op2 = ', '+op2 if op2 else ''
+            cites = [c.strip() for c in cite.split(',')]
+            for i, c in enumerate(cites):
+                if c in CITATIONS:
+                    cites[i] = '[' + CITATIONS[c] + '](/bib/' + CITATIONS[c].replace(' ', '_').replace(',', '').replace(
+                        '.', '') + '/)'
+            data = data.replace(CITE_RE1.search(data).group(0), '(' + op1 + ', '.join(cites) + op2 +')')
+        while CITE_RE2.search(data):
+            cite = CITE_RE2.search(data).group('label')
+            op2 = CITE_RE2.search(data).group('op2')
+            op2 = ', '+op2 if op2 else ''
+            cites = [c.strip() for c in cite.split(',')]
+            for i, c in enumerate(cites):
+                if c in CITATIONS:
+                    cites[i] = '[' + CITATIONS[c] + '](/bib/' + CITATIONS[c].replace(' ', '_').replace(',', '').replace(
+                        '.', '') + '/)'
+            data = data.replace(CITE_RE2.search(data).group(0), '(' +', '.join(cites) + op2 +')')
+        while CITE_RE3.search(data):
+            cite = CITE_RE3.search(data).group('label')
+            cites = [c.strip() for c in cite.split(',')]
+            for i, c in enumerate(cites):
+                if c in CITATIONS:
+                    cites[i] = '[' + CITATIONS[c] + '](/bib/' + CITATIONS[c].replace(' ', '_').replace(',', '').replace(
+                        '.', '') + '/)'
+            data = data.replace(CITE_RE3.search(data).group(0), '(' +', '.join(cites) + ')')
+
+
+        # handle footnotes, references
         data = replace_circumfixes(data, r'\\footnote{', '<footnote1>fn:', '</footnote1>')
-        data = re.sub(r'\\Citep', '\citep', data)
-        data = re.sub(r'\\Citet', '\citet', data)
-        data = re.sub(r'\\citep\[', '\citep{', data)
-        data = re.sub(r'\\citet\[', '\citet{', data)
-        data = re.sub(r'\]{', ', ', data)
-        data = replace_circumfixes(data, r'\\citep{', '<cite>', '</cite>')
-        data = replace_circumfixes(data, r'\\citet{', '<cite>', '</cite>')
+        data = replace_circumfixes(data, r'\\cref{', '<ref>', '</ref>')
         data = replace_circumfixes(data, r'\\cref{', '<ref>', '</ref>')
         data = replace_circumfixes(data, r'\\ref{', '<ref>', '</ref>')
         data = replace_circumfixes(data, r'\\exp{', '<exp>', '</exp>')
@@ -236,6 +289,7 @@ def convert(ifile, ofile, title):
                 data = m.sub('[^' + str(j) + ']', data, count=1)
                 j += 1
         # add footnotes
+
         k = 1
         for foot in footnotes:
             data += '\n[^'+str(k)+']: '+foot.replace('fn:','')
@@ -254,7 +308,7 @@ def convert(ifile, ofile, title):
         data = re.sub(r'{[0-9]*}', '', data)
         data = data.replace(r'\_', '_')
         data = data.replace('{}', '')
-        data = data.replace('][', '] [')
+        # data = data.replace('][', '] [')
         data = re.sub('][(](?=[^/])', '] (', data)
         # data = data.replace(r'\ex', '')
         data = data.replace('Part-Portion','PartPortion')

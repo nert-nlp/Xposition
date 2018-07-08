@@ -13,7 +13,7 @@ ORDINARY_RE = re.compile('^(\[|\w).*$')
 EXAMPLE_RE = re.compile('<(ex|sn)>(?P<ex>.+?)</(ex|sn)>')
 LABEL_RE = re.compile('<label>(?P<label>.+?)</label>')
 REF_RE = re.compile('<(ref)>(?P<label>.+?)</(ref)>')
-CITE_RE = re.compile('<cite>(?P<label>.+?)</cite>')
+
 # EXP_RE = re.compile('<exp>(?P<label>.+?)</exp>')
 # SN_RE = re.compile('<sn>(?P<ex>.+?)</sn>')
 
@@ -143,23 +143,6 @@ for file in os.listdir(dir):
             with open(os.path.join(dir2, file), 'w+', encoding='utf8') as f2:
                 f2.write(''.join(new_text))
 
-CITATIONS = {
-    'bonial-18':'Bonial et al., 2018',
-    'verbnet':'Kipper et al., 2008',
-    'palmer-17':'Palmer et al., 2017',
-    'chang-98':'Chang et al., 1998',#p. 230,
-    'cgel':'Huddleston and Pullum, 2002',#p. 1224,
-    'schmid-00':'Schmid, 2000',
-    'yadurajan-01':'Yadurajan, 2001',#p. 7,
-    'pustejovsky-91':'Pustejovsky, 1991',
-    'klein-94':'Klein, 1994', #pp. 154--157,
-    'talmy-96':'Talmy, 1996',
-    'baldwin-06':'Baldwin et al., 2006',
-    'amr':'Banarescu et al., 2013', #AMR;][,
-    'amr-guidelines':'Banarescu et al., 2015',
-    'srikumar-13':'Srikumar and Roth, 2013a',
-    'srikumar-13-inventory':'Srikumar and Roth, 2013b'
-}
 
 for file in os.listdir(dir2):
     if file.endswith('.txt'):
@@ -168,14 +151,6 @@ for file in os.listdir(dir2):
             for i, line in enumerate(f):
                 # convert example refs
                 line = examples.convert_ex_ref(line, file.replace('.txt',''))
-                # add citations
-                if CITE_RE.search(line):
-                    cite = CITE_RE.search(line).group('label')
-                    cites = [c.strip() for c in cite.split(',')]
-                    for i,c in enumerate(cites):
-                        if c in CITATIONS:
-                            cites[i] = '['+CITATIONS[c]+'](/bib/'+CITATIONS[c].replace(' ','_').replace(',','').replace('.','')+'/)'
-                    line = line.replace(CITE_RE.search(line).group(0),'('+'; '.join(cites)+')')
                 line =line.replace(r'<ex></ex>', '')
                 # write ex refs
                 new_text.append(line)
