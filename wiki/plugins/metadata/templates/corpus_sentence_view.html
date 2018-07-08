@@ -32,7 +32,7 @@ Sentence {{sent_id}}
 	{% endfor %}
   </p>
   <p class="sent-gloss">{{sentence.sent_gloss}}</p>
-  <p class="bg-info" style="padding: 10px">{{sentence.note}}</p>
+  {% if sentence.note.strip %}<p class="bg-info" style="padding: 10px">{{sentence.note}}</p>{% endif %}
   
     {% include "ptoken_data_table_contents.html" %}
 </div>
