@@ -6,7 +6,7 @@ dir2 = 'markdown-construals'
 NEW_SS_RE = re.compile('(- )?\[ss (?P<ss>[\w$`-]+)\]')
 ALT_SE_RE = re.compile('\(\[ss (?P<ss>[\w$`-]+)\]\)')
 ORDINARY_RE = re.compile('^\s*[^-\s].*')
-EXAMPLE_RE = re.compile("\[ex (?P<id>\w+) (?P<ex>'.+')\]")
+EXAMPLE_RE = re.compile('\[ex (?P<id>\w+) (?P<ex>".+")\]')
 
 construals = {}
 
@@ -40,7 +40,7 @@ for file in os.listdir(dir):
                     example = re.sub('\[\^[0-9]+\]','',example)
                     if ss not in construals:
                         construals[ss] = []
-                    exref = '\'[exref '+ex.group('id')+' '+file.replace('.txt', '')+']\''
+                    exref = '"[exref '+ex.group('id')+' '+file.replace('.txt', '')+']"'
                     id = '{0:03d}'.format(len(construals[ss])+1)
                     construals[ss].append('- [ex '+id+' '+example+' '+exref+']\n\n')
 

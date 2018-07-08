@@ -12,7 +12,7 @@ from wiki.plugins.metadata import models
 
 # See:
 # http://stackoverflow.com/questions/430759/regex-for-managing-escaped-characters-for-items-like-string-literals
-re_sq_short = r"'([^'\\]*(?:\\.[^'\\]*)*)'"
+re_sq_short = r'"([^"\\]*(?:\\.[^"\\]*)*)"'
 
 MACRO_RE = re.compile(
     r"(\[(?P<macro>\w+)(?P<args>(\s(\w+:)?(%s|[\w'`&!%%+/$-]+))*)\])" %
@@ -55,9 +55,9 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
                             for arg in ARG_RE.finditer(args):
                                 value = arg.group('value')
                                 if isinstance(value, string_types):
-                                    # If value is enclosed with ': Remove and
+                                    # If value is enclosed with ": Remove and
                                     # remove escape sequences
-                                    if value.startswith("'") and len(value) > 2:
+                                    if value.startswith('"') and len(value) > 2:
                                         value = value[1:-1]
                                         value = value.replace("\\\\", "¤KEEPME¤")
                                         value = value.replace("\\", "")

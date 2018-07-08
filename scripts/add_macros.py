@@ -39,14 +39,14 @@ class Examples:
 
     def convert_example(self, line):
         for example in EXAMPLE_RE.finditer(line):
-            ex = example.group('ex').replace("'", r"\'").replace("\\", "\\\\").strip()
+            ex = example.group('ex').replace('"', r'\"').replace("\\", "\\\\").strip()
             if not re.search('\w',ex):
                 line = line.replace(example.group(0),'')
                 continue
             if not re.search(r'\[p \w\w/[\w\'’\\-]+ [\w$`-]+\]',ex):
                 line = line.replace(example.group(0), ex)
                 continue
-            line = line.replace(example.group(0), '- [ex ' + str(self.INDEX).zfill(3) + ' ' + '\'' + ex + '\'' + ']')
+            line = line.replace(example.group(0), '- [ex ' + str(self.INDEX).zfill(3) + ' ' + '"' + ex + '"' + ']')
             self.INDEX += 1
         return line
 
