@@ -36,7 +36,7 @@ class PTokenAnnotationTable(tables.Table):
             s += 'objhead '
         if s:
             s = s.strip()
-            s = f'class="{s}"'
+            s = f' class="{s}"'
         return s
 
     def render_lcontext(self, record, value):
