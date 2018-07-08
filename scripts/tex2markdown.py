@@ -97,16 +97,9 @@ def convert(ifile, ofile, title):
                 f[i] = ''
             if '\\noindent' in f[i]:
                 f[i] = re.sub(r'\\noindent', '', f[i])
-            # if r'{xlist}' in f[i]:
-            #     f[i] = re.sub(r'\\begin{xlist}', '', f[i])
-            #     f[i] = re.sub(r'\\end{xlist}', '', f[i])
             # latex comments
             if re.search(r'(?<=[^\\])%', f[i]):
                 f[i] = f[i][:re.search(r'(?<=[^\\])%', f[i]).start()]
-            # if f[i].strip() == '\ex':
-            #     f[i] = ''
-            # if re.search(r'\\ex(?=[^\w{])',f[i]):
-            #     f[i] = f[i].replace('\ex','<ex>').strip()+'</ex>'
             # take care of [] brackets
             f[i] = re.sub(r'\[\[', r'\[', f[i])
             f[i] = re.sub(r'\]\]', r'\]', f[i])
@@ -119,7 +112,10 @@ def convert(ifile, ofile, title):
             if r'\item' in f[i]:
                 f[i] = f[i].replace(r'\item', '###' + str(list_num) + '.')
                 list_num += 1
-
+            if '\\bibliography' in f[i]:
+                f[i] = ''
+            if '\\printindex' in f[i]:
+                f[i] = ''
 
 
         data = ''.join(f[1:])
@@ -129,6 +125,7 @@ def convert(ifile, ofile, title):
 
         # subsection
         data = replace_circumfixes(data, r'\\subsection{', '##<b>', '</b>')
+        data = replace_circumfixes(data, r'\\subsubsection{', '###<b>', '</b>')
 
         # embold title of article
         data = re.sub(r'\\psst{' + title + '}', '**' + title + '**', data)
@@ -189,7 +186,7 @@ def convert(ifile, ofile, title):
         data = re.sub(r"}}\$", '</sub>', data)
         data = re.sub(r"\$_{", '<sub>', data)
         data = re.sub(r"}\$", '</sub>', data)
-        data = re.sub(r"\backi", '</sub>', data)
+        data = replace_circumfixes(data, r'\\textsubscript{', '<sub>', '</sub>')
 
         # misc labels
         data = replace_circumfixes(data, r'\\sst{', '<i>', '</i>')
@@ -298,13 +295,22 @@ def convert(ifile, ofile, title):
         # handle examples
         data = handle_ex(data)
 
-        data = re.sub(r"\\(end|begin){(.*?)}", "", data)
+        # backspaces
+        data = data.replace("\\$", "$")
+        data = data.replace("\\#", "#")
+        data = data.replace("\\%", "%")
+        # data = data.replace(r"\\{}", " ")
+        data = data.replace('\{', '{')
+        data = data.replace('\}', '}')
+        data = data.replace("\\\\", "")
+        data = data.replace("\\", "")
 
         # whitespace
         data = re.sub(r"\n\s+\n", "\n\n", data)
         data = re.sub(r"\n\n+\n", "\n\n", data)
 
         # fix various junk
+        data = re.sub(r"\\(end|begin){(.*?)}", "", data)
         data = re.sub(r'{[0-9]*}', '', data)
         data = data.replace(r'\_', '_')
         data = data.replace('{}', '')

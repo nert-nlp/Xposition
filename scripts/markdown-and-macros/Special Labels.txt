@@ -1,0 +1,144 @@
+
+
+For annotating data, there needs to be a way to indicate that <i>none</i>
+of the adposition supersenses apply to a particular token.
+
+##<b>DISCOURSE ([[‘d]])</b>
+
+Discourse connectives and other markers that transition between ideas
+or convey speaker attitude/hedging/emphasis/attribution but do not belong
+to propositional content. Examples include:
+
+begin{exe}
+- [ex 001 "[p en/according_to Special_Labels]; <i>[p en/after Special_Labels]_all</i>, <i>[p en/of Special_Labels]_course</i>, <i>[p en/by Special_Labels]_the_way</i>; <i>[p en/for Special_Labels]_chrissake</i> (interjection); <i>[p en/above Special_Labels]_all</i>, <i>[p en/to Special_Labels]_boot</i>; <i>[p en/in Special_Labels]_other_words</i>, <i>[p en/on Special_Labels]_the_other_hand</i>; <i>[p en/in Special_Labels] my experience</i>, <i>[p en/in Special_Labels]_my_opinion</i>"]
+
+end{exe}
+
+This label also covers “additive focusing markers”
+([Huddleston and Pullum, 2002](/bib/Huddleston_and_Pullum_2002/), p. 592) with a meaning similar to ‘also’ or ‘too’,
+where an item is added to something already established in the discourse:
+begin{exe}
+begin{xlist}
+
+- [ex 002 "I shot the sheriff [p en/as Special_Labels]_well."]
+
+- [ex 003 "They serve coffee, and tea [p en/as Special_Labels]_well."]
+
+end{xlist}
+end{exe}
+It also covers topicalization markers:
+begin{exe}
+- [ex 004 "[p en/as_for Special_Labels]  the sheriff, well, I shot ’im."]
+
+end{exe}
+Finally, [[‘d]] applies to adpositions relating a metalinguistic mention of
+a speech act to the speech content itself—whether the adposition
+introduces this speech act mention, as in <ref>ex:toSumItUp</ref>,
+or links the discourse expression to a subordinate statement, as in <ref>ex:sumItUpWith</ref>.
+begin{exe}
+begin{xlist}
+
+- [ex 005 "[p en/to Special_Labels]  sum it up: It was a terrible experience."]
+
+- [ex 006 "I will sum it up [p en/with Special_Labels]: It was a terrible experience."]
+
+end{xlist}
+end{exe}
+
+##<b>COORDINATOR ([[‘c]])</b>
+
+Coordinating conjunctions and similar expressions where
+the two elements in the relation are semantically on an equal footing,
+rather than in a figure/ground relationship:
+begin{exe}
+- [ex 007 "They serve coffee [p en/as_well_as Special_Labels] tea. [‘They serve coffee and also tea’]"]
+
+end{exe}
+
+##<b>OTHER INFINITIVE ([[‘i]])</b>
+
+As described in <ref>sec:inf</ref>, infinitive clauses are analyzed with a supersense
+if and only if they serve as a purpose adjunct, or in certain purpose-related constructions
+(inherent purpose, action that costs money in a commercial scene,
+that which something is sufficient or excessive for).
+The special label [[‘i]] is reserved for all other uses of infinitival [p en/to],
+as well as [p en/for] whenever it introduces the subject of an infinitive clause.[^1]
+
+Infinitivals warranting [[‘i]] include:
+begin{exe}
+begin{xlist}
+
+- [ex 008 "I want [p en/to Special_Labels] meet you. [complement of control verb]"]
+
+- [ex 009 "I would_like [p en/to Special_Labels] try the fish. [<i>would_like</i> is a polite alternative to <i>want</i>]"]
+
+- [ex 010 "It seems [p en/to Special_Labels] be broken. [complement of raising verb]"]
+
+- [ex 011 "You have an opportunity [p en/to Special_Labels] succeed. [complement of noun]"]
+
+- [ex 012 "I’m ready [p en/to Special_Labels] leave. [complement of adjective]"]
+
+- [ex 013 "I’m glad [p en/to Special_Labels] hear you’re engaged! [complement of emotion adjective]"]
+
+- [ex 014 "You’re great/a pleasure [p en/to Special_Labels] work with. [complement of evaluative adjective or noun]"]
+
+- [ex 015 "These new keys are expensive [p en/to Special_Labels] copy. [tough-movement]"]
+
+- [ex 016 "My plan is [p en/to Special_Labels] eat at noon. [infinitival as NP]"]
+
+- [ex 017 "It’s impossible [p en/to Special_Labels] get an appointment. [infinitival as NP, with cleft]"]
+
+- [ex 018 "I know how [p en/to Special_Labels] lead. [complement of wh-word]"]
+
+- [ex 019 "I have nothing [p en/to Special_Labels] hide. [complement of indefinite pronoun]"]
+
+- [ex 020 "Do you have time [p en/to Special_Labels] help me? [with resource, not necessity]"]
+
+- [ex 021 "They took_the_time [p en/to Special_Labels] listen to my concerns. [complement of verbal idiom]"]
+
+end{xlist}end{exe}
+
+Multiword auxiliaries—such as quasi-modals <i>have_to</i> ‘must’, <i>ought_to</i> ‘should’, etc.,
+as well as <i>have_yet_to</i>—subsume the infinitival [p en/to], so no label on [p en/to] is required:
+begin{exe}
+You have_to choose a date.
+
+end{exe}
+
+Whenever [p en/for] introduces a subject of an infinitival clause, the [p en/for] token is labeled
+[[‘i]] (regardless of whether [p en/to] receives a semantic label; see <ref>sec:inf</ref>):
+begin{exe}
+begin{xlist}
+
+- [ex 022 "I need [[p en/for Special_Labels]<sub>[[‘i]]</sub> you [p en/to Special_Labels]<sub>[[‘i]]</sub> help me]."]
+
+- [ex 023 "I opened the door[p en/for Special_Labels]<sub>[[‘i]]</sub> Steve [p en/to Special_Labels]<sub> [[Purpose](/en/for](/en/for)<sub>[[‘i]]</sub> Steve [p en/to Special_Labels]<sub> [[Purpose)</sub> take out the trash]."]
+
+end{xlist}end{exe}
+
+##<b>OPAQUE POSSESSIVE SLOT IN IDIOM ([[‘$]])</b>
+
+Semantic supersenses are used where possible for genitive/possessive
+constructions, as discussed in <ref>sec:genitives</ref>.
+However, there are a few idioms which require a possessive pronoun
+that does not participate transparently in any semantic relation;
+these are designated with the special label [[‘$]]:
+begin{exe}
+begin{xlist}
+
+- [ex 024 "I am eating on_ [p en/my Special_Labels] _own today."]
+
+- [ex 025 "She tried [p en/her Special_Labels] best."]
+
+- [ex 026 "He’s not [p en/your Special_Labels] average baseball player."]
+
+- [ex 027 "Billy knows [p en/his Special_Labels] ABCs!"]
+
+end{xlist}end{exe}
+
+end{document}
+
+[^1]: Essentially,
+our position is that these uses of infinitivals are more like syntactically core elements
+(subject, object) than obliques, and thus should be excluded from semantic annotation
+under the present scheme.

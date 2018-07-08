@@ -154,6 +154,7 @@ for file in os.listdir(dir2):
                 line =line.replace(r'<ex></ex>', '')
                 # write ex refs
                 new_text.append(line)
-        with open(os.path.join(dir2, file), 'w', encoding='utf8') as f2:
-            f2.write(''.join(new_text))
+        if not ' ' in file: # ignore 'Special Constructions', ...
+            with open(os.path.join(dir2, file), 'w', encoding='utf8') as f2:
+                f2.write(''.join(new_text))
 

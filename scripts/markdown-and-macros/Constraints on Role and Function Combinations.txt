@@ -1,0 +1,102 @@
+
+
+The present scheme emerged out of extensive descriptive work with corpus data.
+Given the abundance of rare preposition usages, this document does not claim
+to cover every possible role/function combination for English,
+let alone other languages.
+Below are the few categorical restrictions that seem warranted for English.
+
+##<b>Supersenses that are purely abstract</b>
+
+[ss Participant], [ss Configuration], and [ss Temporal] are intended only to
+organize subtrees of the hierarchy, and not to be used directly.
+
+##<b>Supersenses that cannot serve as functions</b>
+
+**[ss Experiencer], [ss Stimulus], [ss Originator], [ss Recipient], [ss SocialRel], and [ss OrgRole]
+can only serve as scene roles in English.**
+Though scenes of perception, transfer, and interpersonal/organizational relationships
+are fundamental in language, they always seem to exploit construals from other domains
+(motion, causation, possession, and so forth), at least insofar as
+English preposition/case marking is concerned.
+
+For example, <ref>ex:RecGoal</ref> is clearly [ss Recipient] at the scene level—Sam
+acquires possession of the box—but also
+fits the criteria for [ss Goal] because Sam is an endpoint of motion
+(and [p en/to] frequently marks [ss Goal]s that are not [ss Recipient]s).
+<ref>ex:RecAgent</ref> and <ref>ex:RecPoss</ref> reflect [ss Recipient--Agent] and
+[ss Recipient--Gestalt] construals, respectively.
+begin{xexe}
+- [ex 001 "Give the box [p en/to Recipient--Goal] Sam. ([ss Recipient--Goal])"]
+
+- [ex 002 "the box received [p en/by Recipient--Agent] Sam ([ss Recipient--Agent])"]
+
+- [ex 003 "Sam[p en/'s Recipient--Gestalt] receipt of the box ([ss Recipient--Gestalt])"]
+
+end{xexe}
+Though the [ss Goal] construal is arguably the most canonical expression of [ss Recipient],
+there is no preposition with a primary meaning of [ss Recipient] independent of one of these other domains.
+
+**Additional constraints on functions arise in the context of specific
+constructions (<ref>sec:cxns</ref>).** For instance,
+begin{itemize}
+###1. the s-genitive requires either [ss Possessor] or [ss Gestalt] as its function (<ref>sec:genitives</ref>) ###2. passive [p en/by] requires [ss Agent] or [ss Causer] as its function (<ref>sec:passives</ref>) end{itemize}
+
+##<b>Supersenses that cannot serve as roles</b>
+
+In the present scheme, there are no supersenses that are restricted to serving as functions.
+
+##<b>No temporal-locational construals</b>
+
+**Temporal prepositions never occur with a function of [ss Locus], [ss Path], or [ss Extent].**
+
+Languages routinely borrow from spatial language to describe time,
+and spatial cognition may underlie temporal cognition (e.g., lakoff-80, nunez-06, casasanto-08).
+A liberal use of construal would treat <i>arriving [p en/in] the afternoon</i> as [ss Time--Locus],
+<i>sleeping [p en/through] the night</i> as [ss Duration--Path],
+<i>running [p en/for] 20 minutes</i> as [ss Duration--Extent], and so forth.
+However, for simplicity and practicality, we elect not to annotate [ss Locus], [ss Path], or [ss Extent]
+construals on ordinary temporal adpositions. Thus:
+begin{xexe}
+- [ex 004 "arriving [p en/in Time] the afternoon ([ss Time])"]
+
+- [ex 005 "sleeping [p en/through Duration] the night ([ss Duration])"]
+
+- [ex 006 "running [p en/for Duration] 20 minutes ([ss Duration])"]
+
+end{xexe}
+[ss Time--Direction] is possible, however, as are other atemporal functions:
+begin{xexe}
+- [ex 007 "Schedule the appointment [p en/for Time--Direction] Monday. ([ss Time--Direction])"]
+
+- [ex 008 "January [p en/of Time--Whole] last year ([ss Time--Whole])"]
+
+- [ex 009 "Will you attend Saturday[p en/'s Time--Gestalt] class? ([ss Time--Gestalt])"]
+
+- [ex 010 "It took a year[p en/'s Duration--Gestalt] work to finish the book. ([ss Duration--Gestalt])"]
+
+end{xexe}
+
+Note that the above is qualified to ‘ordinary temporal adpositions’.
+**When the first argument of a comparative construction is marked with [p en/as],
+the function is always [ss Extent], even if the scene role is temporal.**
+See <ref>sec:as-as</ref>.
+
+##<b>Construals where the function supersense is an ancestor or descendant of the role supersense</b>
+
+Ordinarily, if a construal holds between two (distinct) supersenses, these are from different branches of the hierarchy.
+In a few cases, however, one is the ancestor of the other.
+
+- **Role is ancestor of function.**
+begin{itemize}
+###1. Setting events or situations with a salient spatial metaphor are [ss Circumstance--Locus] or [ss Circumstance--Path].
+###2. Fictive motion (the extension of a normally dynamic preposition to a static spatial scene) can warrant [ss Locus--Goal] or [ss Locus--Source], as discussed under [ss Locus].
+###3. Complete contents of containers are [ss Characteristic--Stuff].
+end{itemize}
+
+- **Function is ancestor of role.**
+begin{itemize}
+###1. Some s-genitives are annotated as [ss Whole--Gestalt]: see <ref>sec:genitives</ref>.
+###2. When a locative PP is coerced to a goal, as with <i>put</i>, [ss Goal--Locus] is used.
+end{itemize}
+
