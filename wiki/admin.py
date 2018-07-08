@@ -40,12 +40,6 @@ class SentenceForeignKeyWidget(ForeignKeyWidget):
             sent_id=row["sent_id"]
         )
 
-class ArticleForeignKeyWidget(ForeignKeyWidget):
-    def get_queryset(self, value, row):
-        return self.model.objects.filter(
-            urlpath=row["article"]
-        )
-
 class ObjCaseWidget(Widget):
     def clean(self, value, row=None, *args, **kwargs):
         return ms.Case[value]
@@ -133,21 +127,28 @@ class ArticleRevisionResource(resources.ModelResource):
     article = fields.Field(
         column_name='article_id',
         attribute='article',
-        widget=ForeignKeyWidget(Article))
+        widget=NullForeignKeyWidget(Article))
 
     content = fields.Field(attribute='content', widget=widgets.CharWidget())
 
     title = fields.Field(attribute='title', widget=widgets.CharWidget())
 
+    def skip_row(self, instance, original):
+        try:
+            return not instance.article
+        except ObjectDoesNotExist:
+            return True
+
     def save_instance(self, instance, using_transactions=True, dry_run=False):
-        ss = ms.Supersense.objects.get(article__pk=instance.article.pk)
+
+        ss = ms.Supersense.objects.filter(article__pk=instance.article.pk)
 
         # from https://stackoverflow.com/a/33208227
         instance.parent = instance  # Set the parent to itself
         instance.pk = None
         instance.save()
-
-        ss.link_current_to_article_revision(article_revision=instance, commit=True)
+        if ss:
+            ss[0].link_current_to_article_revision(article_revision=instance, commit=True)
         instance.article.current_revision = instance
         instance.article.save()
 
