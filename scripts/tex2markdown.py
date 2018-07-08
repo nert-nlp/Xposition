@@ -131,6 +131,8 @@ def convert(ifile, ofile, title):
         data = re.sub(r'\\psst{' + title + '}', '**' + title + '**', data)
 
         # handle \p{}
+        data = replace_circumfixes(data, r'#\\p{', '#', '')
+        data = replace_circumfixes(data, r'\*\\p{', '*', '')
         data = replace_circumfixes(data, r'\\p{', ' [[en/', ']] ')
         # handle \p*{}{}
         data = replace_circumfixes(data, r'\\p\*{', '\\p1{', '](/en/\\p2')
