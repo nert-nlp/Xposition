@@ -86,4 +86,5 @@ table.ptokenannotation td.construal,table.ptokenannotation th.construal { paddin
 table.ptokenannotation td.lcontext,table.ptokenannotation th.lcontext { text-align: right; padding: 3pt .5em 3pt 1em !important; min-width: 20em; }
 table.ptokenannotation td.target,table.ptokenannotation th.target { text-align: center; padding: 3pt .5em !important; }
 table.ptokenannotation td.rcontext,table.ptokenannotation th.rcontext { text-align: left; padding: 3pt 1em 3pt .5em !important; min-width: 20em; }
-
+table.ptokenannotation .govhead { font-weight: bold; text-decoration: #3c3 underline; }
+table.ptokenannotation .objhead { font-weight: bold; text-decoration: #d3b dotted underline; }

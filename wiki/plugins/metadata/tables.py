@@ -28,8 +28,19 @@ class PTokenAnnotationTable(tables.Table):
     def value_lcontext(self, record, value):    # text only
         return ' '.join(value[:record.main_subtoken_indices[0]-1])
 
+    def _gohead(self, i, pt):
+        s = ''
+        if i==pt.gov_head_index:
+            s += 'govhead '
+        if i==pt.obj_head_index:
+            s += 'objhead '
+        if s:
+            s = s.strip()
+            s = f'class="{s}"'
+        return s
+
     def render_lcontext(self, record, value):
-        tokens = [format_html('<span title="{}">{}</span>', q+1, x) for q,x in enumerate(value[:record.main_subtoken_indices[0]-1])]
+        tokens = [format_html('<span title="{}"' + self._gohead(q+1,record) + '>{}</span>', q+1, x) for q,x in enumerate(value[:record.main_subtoken_indices[0]-1])]
         spans_to_link = other_p_tokens_in_sentence(record)
         for (i,j),anno in sorted(spans_to_link.items(), reverse=True):
             if i<len(tokens):
@@ -52,7 +63,7 @@ class PTokenAnnotationTable(tables.Table):
     
     def render_rcontext(self, record, value):
         h = record.main_subtoken_indices[-1]    # beginning of right context
-        tokens = [format_html('<span title="{}">{}</span>', h+q+1, x) for q,x in enumerate(value[h:])]
+        tokens = [format_html('<span title="{}"' + self._gohead(h+q+1,record) + '>{}</span>', h+q+1, x) for q,x in enumerate(value[h:])]
         spans_to_link = other_p_tokens_in_sentence(record)
         for (i,j),anno in sorted(spans_to_link.items(), reverse=True):
             assert i-h<len(tokens)
