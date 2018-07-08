@@ -109,7 +109,7 @@ def convert(ifile, ofile, title):
             #     f[i] = f[i].replace('\ex','<ex>').strip()+'</ex>'
             # take care of [] brackets
             f[i] = re.sub(r'\[\[', r'\[', f[i])
-            f[i] = re.sub(r'\][\s\]]', r'\]', f[i])
+            f[i] = re.sub(r'\]\]', r'\]', f[i])
             # junk whitespace
             f[i] = re.sub(r'\r', r'', f[i])
             f[i] = f[i].strip()+'\n'
