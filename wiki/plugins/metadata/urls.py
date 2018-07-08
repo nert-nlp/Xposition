@@ -9,7 +9,7 @@ class XpositionURLPatterns(WikiURLPatterns):
         # customize certain root URLs to override putting them under _plugin/metadata
         root_url_patterns = [
             url(r'^ex/(?P<exnum>\d+)/$', views.PTokenView.as_view(), name='ptoken_view'), #  /ex/3495/
-            url('^(?P<lang>[a-z][a-z](-[a-z]+)?)/(?P<corpus>[^/]+)/#/(?P<sent_id>[^/]+)/$', views.CorpusSentenceView.as_view(), name='corpus_sentence_view'), #  /en/corpus/streusle4.1/reviews-001325-0003
+            url('^(?P<lang>[a-z][a-z](-[a-z]+)?)/(?P<corpus>[^/]+)/~/(?P<sent_id>[^/]+)/$', views.CorpusSentenceView.as_view(), name='corpus_sentence_view'), #  /en/corpus/streusle4.1/reviews-001325-0003
         ]
         #assert False,root_url_patterns
         return super(XpositionURLPatterns, self).get_root_urls() + root_url_patterns
