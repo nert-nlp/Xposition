@@ -12,7 +12,7 @@ def other_p_tokens_in_sentence(pt):
     return result
 
 class PTokenAnnotationTable(tables.Table):
-    exid = tables.Column(accessor='id')
+    exid = tables.Column(accessor='id', verbose_name='Ex')
     lcontext = tables.Column(accessor='sentence.tokens', verbose_name='')
     target = tables.Column(accessor='sentence.tokens', verbose_name='P', order_by=('adposition', 'construal'))
     rcontext = tables.Column(accessor='sentence.tokens', verbose_name='')
@@ -22,9 +22,8 @@ class PTokenAnnotationTable(tables.Table):
     note = tables.Column(accessor='annotator_cluster', verbose_name='ℹ')
     sentid = tables.Column(accessor='sentence', verbose_name='Sent ID')
     
-    def render_exid(self, value):
-        displaynum = value+3000    # TODO: link
-        return format_html('<a href="/ex/{}" class="exnum">({})</a>', displaynum, displaynum)
+    def render_exid(self, record):
+        return record.html()
     
     def value_lcontext(self, record, value):    # text only
         return ' '.join(value[:record.main_subtoken_indices[0]-1])
@@ -46,9 +45,7 @@ class PTokenAnnotationTable(tables.Table):
         for (i,j),anno in sorted(spans_to_link.items(), reverse=True):
             if i<len(tokens):
                 assert j<=len(tokens)
-                exnum = anno.id+3000
-                displaystr = ' '.join(tokens[i:j])
-                tokens[i:j] = [format_html('<a href="/ex/{}" class="exnum">', exnum) + displaystr + '</a>']
+                tokens[i:j] = [anno.tokenhtml(offsets=True)]
         return mark_safe(' '.join(tokens))
 
     def value_target(self, record, value):
@@ -70,9 +67,7 @@ class PTokenAnnotationTable(tables.Table):
             assert i-h<len(tokens)
             if i>=h:
                 assert j-h<=len(tokens)
-                exnum = anno.id+3000
-                displaystr = ' '.join(tokens[i-h:j-h])
-                tokens[i-h:j-h] = [format_html('<a href="/ex/{}" class="exnum">', exnum) + displaystr + '</a>']
+                tokens[i-h:j-h] = [anno.tokenhtml(offsets=True)]
         return mark_safe(' '.join(tokens))
     
     def render_role(self, value):
@@ -101,8 +96,7 @@ class PTokenAnnotationTable(tables.Table):
         return value.sent_id
 
     def render_sentid(self, value):
-        sentid = self.value_sentid(value)
-        return format_html('<a href="{}/{}" class="corpussentence">{}</a>', value.corpus.article.get_absolute_url(), sentid, sentid)
+        return value.html()
 
     class Meta:
         model = PTokenAnnotation

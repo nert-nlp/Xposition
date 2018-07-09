@@ -1,6 +1,7 @@
 from django.core.exceptions import ValidationError
 from django.core.urlresolvers import reverse
 from django.core.validators import RegexValidator
+from django.utils.html import conditional_escape, format_html, mark_safe
 from django.db import models
 from bitfield import BitField
 import copy, sys, re
@@ -777,8 +778,11 @@ class CorpusSentence(models.Model):
     note = models.CharField(max_length=200, blank=True, verbose_name="Annotator Note")
     mwe_markup = models.CharField(max_length=200, blank=True, verbose_name="MWE Markup")
 
+    def get_absolute_url(self):
+        return reverse('wiki:corpus_sentence_view', args=[self.language.slug, self.corpus, self.sent_id])
+
     def html(self):
-        return super(CorpusSentence, self).html()
+        return format_html('<a href="{}" class="corpussentence">{}</a>', self.get_absolute_url(), self.sent_id)
 
     @property
     def template(self):
@@ -832,8 +836,28 @@ class PTokenAnnotation(models.Model):
     main_subtoken_indices = IntListField(max_length=200, blank=True, null=True, verbose_name="Main Subtoken Indices")
     main_subtoken_string = StringListField(max_length=200, blank=True, null=True, verbose_name="Main Subtoken String")
 
+    @property
+    def exnum(self):
+        """
+        Example number to display in parentheses. 
+        Starts from 3000 to avoid clashing with examples defined in articles 
+        or looking like a year in a citation.
+        """
+        return self.id + 3000
+
+    def get_absolute_url(self):
+        return reverse('wiki:ptoken_view', args=[self.exnum])
+
     def html(self):
-        return super(PTokenAnnotation, self).html()
+        """Linked example number in parentheses"""
+        return format_html('<a href="{}" class="exnum">({})</a>', self.get_absolute_url(), self.exnum)
+
+    def tokenhtml(self, offsets=False):
+        """Linked main token(s) (the contiguous part of the expression): actual tokens, not lemmas.
+        If offsets is True, specify token offsets as the title attribute of each word."""
+        i, j = self.main_subtoken_indices[0]-1, self.main_subtoken_indices[-1]
+        displaystr = ' '.join(format_html('<span title="{}">{}</span>', h, t) for h,t in enumerate(self.sentence.tokens[i:j], start=i+1))
+        return format_html('<a href="{}" class="exnum">' + displaystr + '</a>', self.get_absolute_url())
 
     @property
     def template(self):
