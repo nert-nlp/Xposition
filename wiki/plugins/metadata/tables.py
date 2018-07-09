@@ -19,6 +19,7 @@ class PTokenAnnotationTable(tables.Table):
     role = tables.Column(accessor='construal.role', verbose_name='Role')
     construal = tables.Column(accessor='construal', verbose_name='↝')
     function = tables.Column(accessor='construal.function', verbose_name='Function')
+    note = tables.Column(accessor='annotator_cluster', verbose_name='ℹ')
     sentid = tables.Column(accessor='sentence', verbose_name='Sent ID')
     
     def render_exid(self, value):
@@ -86,6 +87,16 @@ class PTokenAnnotationTable(tables.Table):
     def render_construal(self, value):
         return format_html('<a href="{}" class="construal">{}</a>', value.article.get_absolute_url(), self.value_construal(value))
     
+    def value_note(self, value):
+        return value.strip()
+    
+    def render_note(self, value):
+        v = self.value_note(value)
+        if v:
+            return format_html('<span title="{}" style="cursor: help">ℹ</span>', v)
+        else:
+            return ''
+    
     def value_sentid(self, value):  # text only
         return value.sent_id
 
@@ -97,6 +108,6 @@ class PTokenAnnotationTable(tables.Table):
         model = PTokenAnnotation
         #fields = ('id', 'adposition', 'construal', 'usage', 'sentence')
         fields = ('adp_pos', 'gov_head', 'gov_pos', 'gov_supersense', 'obj_head', 'obj_pos', 'obj_supersense', 'gov_obj_syntax', 'is_transitive')
-        sequence = ('exid', 'lcontext', 'target', 'rcontext', 'role', 'construal', 'function') # columns to prepose
+        sequence = ('exid', 'lcontext', 'target', 'rcontext', 'role', 'construal', 'function', 'note') # columns to prepose
         template_name = 'django_tables2/bootstrap.html'
         attrs = {'class': 'table ptokenannotation'}
