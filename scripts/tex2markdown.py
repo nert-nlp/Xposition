@@ -297,16 +297,6 @@ def convert(ifile, ofile, title):
         # handle examples
         data = handle_ex(data)
 
-        # backspaces
-        data = data.replace("\\$", "$")
-        data = data.replace("\\#", "#")
-        data = data.replace("\\%", "%")
-        # data = data.replace(r"\\{}", " ")
-        data = data.replace('\{', '{')
-        data = data.replace('\}', '}')
-        data = data.replace("\\\\", "")
-        data = data.replace("\\", "")
-
         # whitespace
         data = re.sub(r"\n\s+\n", "\n\n", data)
         data = re.sub(r"\n\n+\n", "\n\n", data)
@@ -327,6 +317,20 @@ def convert(ifile, ofile, title):
             x = re.search('<ex><label>(?P<label>.*?)</label></ex>\s+<ex>',data)
             label = x.group('label')
             data = data.replace(x.group(0),'<ex><label>'+label+'</label>')
+
+        # backspaces
+        data = data.replace("\\$", "$")
+        data = data.replace("\\#", "#")
+        data = data.replace("\\%", "%")
+        # data = data.replace(r"\\{}", " ")
+        data = data.replace('\{', '{')
+        data = data.replace('\}', '}')
+        data = data.replace("\\\\", "")
+        data = data.replace("\\", "")
+        # toward(s), out(_of), and off(_of)
+        data = data.replace('[toward(s)](/en/toward(s))', '[toward](/en/toward)/[towards](/en/towards)')
+        data = data.replace('[off(_of)](/en/off(_of))', '[off](/en/off)/[off_of](/en/off_of)')
+        data = data.replace('[out(_of)](/en/out(_of))', '[out](/en/out)/[out_of](/en/out_of)')
 
     with open(ofile, 'w+', encoding='utf8') as f:
 
