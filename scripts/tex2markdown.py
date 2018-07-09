@@ -329,7 +329,7 @@ def convert(ifile, ofile, title):
         data = data.replace(r'\{', '{')
         data = data.replace(r'\}', '}')
         data = data.replace("\\\\", " ")
-        data = data.replace("\\ ", "")
+        data = data.replace("\\ ", " ")
         data = data.replace("etc.\\", "etc.")
         data = data.replace("etc.)\\", "etc.)")
         # toward(s), out(_of), and off(_of)
