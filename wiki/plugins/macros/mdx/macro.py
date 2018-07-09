@@ -170,12 +170,10 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
         cl = None
         if len(args) >= 2:
             cl = args[1]
-        if "'" in args[0] or '`' in args[0]:
-            return link(args[0], '/' + args[0].replace("'", "`"), cl if cl else 'misc')
-        elif '--' in args[0]:
+        if '--' in args[0]:
             return link(args[0].replace('--','&#x219d;'), '/' + args[0], cl if cl else 'construal')
         else:
-            return link(args[0], '/' + args[0], cl if cl else 'supersense')
+            return link(args[0].replace('`','\`'), '/' + args[0].replace('`','%60'), cl if cl else 'supersense')
     # meta data
     ss.meta = dict(
         short_description=_('Link to Supersense or Construal'),
