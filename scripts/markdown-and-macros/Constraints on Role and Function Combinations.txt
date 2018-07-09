@@ -20,11 +20,11 @@ are fundamental in language, they always seem to exploit construals from other d
 (motion, causation, possession, and so forth), at least insofar as
 English preposition/case marking is concerned.
 
-For example, ([exref 001 Constraints_on_Role_and_Function_Combinations]) is clearly [ss Recipient] at the scene level—Sam
+For example, [exref 001 Constraints_on_Role_and_Function_Combinations] is clearly [ss Recipient] at the scene level—Sam
 acquires possession of the box—but also
 fits the criteria for [ss Goal] because Sam is an endpoint of motion
 (and [p en/to] frequently marks [ss Goal]s that are not [ss Recipient]s).
-([exref 002 Constraints_on_Role_and_Function_Combinations]) and ([exref 003 Constraints_on_Role_and_Function_Combinations]) reflect [ss Recipient--Agent] and
+[exref 002 Constraints_on_Role_and_Function_Combinations] and [exref 003 Constraints_on_Role_and_Function_Combinations] reflect [ss Recipient--Agent] and
 [ss Recipient--Gestalt] construals, respectively.
 
 - [ex 001 "Give the box [p en/to Recipient--Goal] Sam. ([ss Recipient--Goal])"]
@@ -37,9 +37,9 @@ Though the [ss Goal] construal is arguably the most canonical expression of [ss 
 there is no preposition with a primary meaning of [ss Recipient] independent of one of these other domains.
 
 **Additional constraints on functions arise in the context of specific
-constructions (([[ Special_Constructions]])).** For instance,
+constructions ([[ Special_Constructions]]).** For instance,
 
-###1. the s-genitive requires either [ss Possessor] or [ss Gestalt] as its function (([[ Special_Constructions]])) ###2. passive [p en/by] requires [ss Agent] or [ss Causer] as its function (([[ Special_Constructions]])) 
+###1. the s-genitive requires either [ss Possessor] or [ss Gestalt] as its function ([[ Special_Constructions]]) ###2. passive [p en/by] requires [ss Agent] or [ss Causer] as its function ([[ Special_Constructions]]) 
 
 ##Supersenses that cannot serve as roles
 
@@ -76,7 +76,7 @@ construals on ordinary temporal adpositions. Thus:
 Note that the above is qualified to ‘ordinary temporal adpositions’.
 **When the first argument of a comparative construction is marked with [p en/as],
 the function is always [ss Extent], even if the scene role is temporal.**
-See ([[ Special_Constructions]]).
+See [[ Special_Constructions]].
 
 ##Construals where the function supersense is an ancestor or descendant of the role supersense
 
@@ -92,7 +92,7 @@ In a few cases, however, one is the ancestor of the other.
 
 - **Function is ancestor of role.**
 
-###1. Some s-genitives are annotated as [ss Whole--Gestalt]: see ([[ Special_Constructions]]).
+###1. Some s-genitives are annotated as [ss Whole--Gestalt]: see [[ Special_Constructions]].
 ###2. When a locative PP is coerced to a goal, as with <i>put</i>, [ss Goal--Locus] is used.
 
 

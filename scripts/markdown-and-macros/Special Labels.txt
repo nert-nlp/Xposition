@@ -3,7 +3,7 @@
 For annotating data, there needs to be a way to indicate that <i>none</i>
 of the adposition supersenses apply to a particular token.
 
-##DISCOURSE ([[`d]])
+##DISCOURSE ([ss `d])
 
 Discourse connectives and other markers that transition between ideas
 or convey speaker attitude/hedging/emphasis/attribution but do not belong
@@ -26,10 +26,10 @@ It also covers topicalization markers:
 
 - [ex 004 "[p en/as_for Special_Labels] the sheriff, well, I shot ’im."]
 
-Finally, [[`d]] applies to adpositions relating a metalinguistic mention of
+Finally, [ss `d] applies to adpositions relating a metalinguistic mention of
 a speech act to the speech content itself—whether the adposition
-introduces this speech act mention, as in ([exref 005 Special_Labels]),
-or links the discourse expression to a subordinate statement, as in ([exref 006 Special_Labels]).
+introduces this speech act mention, as in [exref 005 Special_Labels],
+or links the discourse expression to a subordinate statement, as in [exref 006 Special_Labels].
 
 
 
@@ -37,7 +37,7 @@ or links the discourse expression to a subordinate statement, as in ([exref 006 
 
 - [ex 006 "I will sum it up [p en/with Special_Labels]: It was a terrible experience."]
 
-##COORDINATOR ([[`c]])
+##COORDINATOR ([ss `c])
 
 Coordinating conjunctions and similar expressions where
 the two elements in the relation are semantically on an equal footing,
@@ -45,16 +45,16 @@ rather than in a figure/ground relationship:
 
 - [ex 007 "They serve coffee [p en/as_well_as Special_Labels] tea. [‘They serve coffee and also tea’]"]
 
-##OTHER INFINITIVE ([[`i]])
+##OTHER INFINITIVE ([ss `i])
 
-As described in ([[ Special_Constructions]]), infinitive clauses are analyzed with a supersense
+As described in [[ Special_Constructions]], infinitive clauses are analyzed with a supersense
 if and only if they serve as a purpose adjunct, or in certain purpose-related constructions
 (inherent purpose, action that costs money in a commercial scene,
 that which something is sufficient or excessive for).
-The special label [[`i]] is reserved for all other uses of infinitival [p en/to],
+The special label [ss `i] is reserved for all other uses of infinitival [p en/to],
 as well as [p en/for] whenever it introduces the subject of an infinitive clause.[^1]
 
-Infinitivals warranting [[`i]] include:
+Infinitivals warranting [ss `i] include:
 
 
 
@@ -92,21 +92,21 @@ as well as <i>have_yet_to</i>—subsume the infinitival [p en/to], so no label o
 You have_to choose a date.
 
 Whenever [p en/for] introduces a subject of an infinitival clause, the [p en/for] token is labeled
-[[`i]] (regardless of whether [p en/to] receives a semantic label; see ([[ Special_Constructions]])):
+[ss `i] (regardless of whether [p en/to] receives a semantic label; see [[ Special_Constructions]]):
 
 
 
-- [ex 022 "I need [[p en/for Special_Labels]<sub>[[`i]]</sub> you [p en/to Special_Labels]<sub>[[`i]]</sub> help me]."]
+- [ex 022 "I need [[p en/for Special_Labels]<sub>[ss `i]</sub> you [p en/to Special_Labels]<sub>[ss `i]</sub> help me]."]
 
-- [ex 023 "I opened the door[p en/for Special_Labels]<sub>[[`i]]</sub> Steve [p en/to Special_Labels]<sub> [[Purpose](/en/for](/en/for)<sub>[[`i]]</sub> Steve [p en/to Special_Labels]<sub> [[Purpose)</sub> take out the trash]."]
+- [ex 023 "I opened the door[p en/for Special_Labels]<sub>[ss `i]</sub> Steve [p en/to Special_Labels]<sub> [[Purpose](/en/for](/en/for)<sub>[ss `i]</sub> Steve [p en/to Special_Labels]<sub> [[Purpose)</sub> take out the trash]."]
 
-##OPAQUE POSSESSIVE SLOT IN IDIOM ([[`$]])
+##OPAQUE POSSESSIVE SLOT IN IDIOM ([ss `$])
 
 Semantic supersenses are used where possible for genitive/possessive
-constructions, as discussed in ([[ Special_Constructions]]).
+constructions, as discussed in [[ Special_Constructions]].
 However, there are a few idioms which require a possessive pronoun
 that does not participate transparently in any semantic relation;
-these are designated with the special label [[`$]]:
+these are designated with the special label [ss `$]:
 
 
 

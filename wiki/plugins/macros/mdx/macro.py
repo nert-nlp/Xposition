@@ -121,7 +121,7 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
         if len(args) > 1 and not '-' == args[1]:
             construal = args[1]
             if '`' in construal:
-                return link(short, '/' + prep + '/' + construal.replace('`', "'"), cl if cl else 'usage')
+                return link(short, '/' + prep + '/' + construal, cl if cl else 'usage')
             elif '--' in construal or "'" in construal or '?' in construal:
                 return link(short.replace('--','&#x219d;'), '/' + prep + '/' + construal, cl if cl else 'usage')
             else:
@@ -150,7 +150,7 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
         if len(args) > 2 and not '-' == args[2]:
             construal = args[2]
             if '`' in construal:
-                return link(short, '/' + prep + '/' + construal.replace('`', "'"), cl if cl else 'usage')
+                return link(short, '/' + prep + '/' + construal, cl if cl else 'usage')
             elif '--' in construal or "'" in construal or '?' in construal:
                 return link(short.replace('--', '&#x219d;'), '/' + prep + '/' + construal, cl if cl else 'usage')
             else:
@@ -170,7 +170,7 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
         cl = None
         if len(args) >= 2:
             cl = args[1]
-        if "'" in args[0]:
+        if "'" in args[0] or '`' in args[0]:
             return link(args[0], '/' + args[0].replace("'", "`"), cl if cl else 'misc')
         elif '--' in args[0]:
             return link(args[0].replace('--','&#x219d;'), '/' + args[0], cl if cl else 'construal')

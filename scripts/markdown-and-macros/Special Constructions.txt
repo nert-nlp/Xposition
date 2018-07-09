@@ -5,8 +5,8 @@ This section discusses notable constructions that are not limited to a single su
 ##Genitives/Possessives
 
 (blodgett-18) detail the application of this scheme to English possessive constructions:
-the so-called **s-genitive**, as in ([exref 001 Special_Constructions]), and
-**of-genitive**, as in ([exref 003 Special_Constructions]):
+the so-called **s-genitive**, as in [exref 001 Special_Constructions], and
+**of-genitive**, as in [exref 003 Special_Constructions]:
 
 
 
@@ -28,7 +28,7 @@ the role occupied by the head noun rather than the case-marked noun.)
 
 The s-genitive and of-genitive are particularly associated with
 [ss Possessor] (which applies to a canonical form of possession)
-and the more general category [ss Gestalt]; both supersenses are illustrated above ([exref 001 Special_Constructions], [exref 003 Special_Constructions]).
+and the more general category [ss Gestalt]; both supersenses are illustrated above [exref 001 Special_Constructions], [exref 003 Special_Constructions].
 In addition, both genitive constructions can mark participant roles and other kinds of relations,
 including [ss Whole] and [ss SocialRel] relations.
 When the s-genitive is used, the <i>function</i> is always either [ss Gestalt] (most cases)
@@ -69,7 +69,7 @@ the choice of construction; important factors include the length and animacy of 
 In addition, [p en/of] participates in certain constructions that are not really possessives—e.g. <i>this sort [p en/of] sweater</i> ([ss Species]).
 
 Certain idioms require an s-genitive argument that does not participate in
-any transparent semantic relationship; for these, [[`$]] is used (([[ Special_Labels]])).
+any transparent semantic relationship; for these, [ss `$] is used ([[ Special_Labels]]).
 
 ##Passives
 
@@ -133,7 +133,7 @@ to reflect that it marks the degree on a scale:
 - [ex 029 "I’ve eaten (twice) [p en/as Approximator--Extent] much (food) as you. [amount of something]  ([ss Approximator--Extent])"]
 
 - **Second argument: [ss ComparisonRef].**
-See ([exref 022 Special_Constructions]) above.
+See [exref 022 Special_Constructions] above.
 
 ###Superlatives 
 [ss Whole] is used for the superset or gestalt licensed by a superlative:
@@ -169,10 +169,10 @@ as capable of marking a [ss Purpose].
 
 The following is an exhaustive list of semantic analyses that we consider for infinitivals:
 
-###1. **Purpose adjuncts**, generally adverbial, as in ([exref 031 Special_Constructions]).
+###1. **Purpose adjuncts**, generally adverbial, as in [exref 031 Special_Constructions].
 These are labeled [ss Purpose]. They can generally be paraphrased with [p en/in_order_to].
 
-###2. **Inherent purposes**, generally adnominal, as in ([exref 014 Purpose]), described under [ss Purpose].
+###2. **Inherent purposes**, generally adnominal, as in [exref 014 Purpose], described under [ss Purpose].
 These are labeled [ss Characteristic--Purpose].
 
 ###3. In a **commercial scene**, that which costs money; labeled [ss Theme--Purpose].
@@ -189,20 +189,20 @@ licenses an infinitival, labeled [ss ComparisonRef--Purpose].
 See discussion at [ss ComparisonRef].
 
 
-Infinitival tokens not covered by this list are labeled [[`i]] (([[ Special_Labels]])).
+Infinitival tokens not covered by this list are labeled [ss `i] ([[ Special_Labels]]).
 
 - **Infinitival with [p en/for]-subject.**
-In ([exref 031 Special_Constructions]), the infinitive clause has no local subject—rather,
+In [exref 031 Special_Constructions], the infinitive clause has no local subject—rather,
 an argument of the matrix clause doubles as the subject of the infinitive clause
 (control). However, a separate subject can be introduced with [p en/for],
 in which case [p en/for]+NP is treated as a dependent of the infinitive verb
-and labeled [[`i]]:
+and labeled [ss `i]:
 
 
 
-- [ex 037 "I opened the door [[p en/for Special_Constructions]<sub>[[`i]]</sub> Steve [p en/to Special_Constructions]<sub>[ss Purpose]</sub> take out the trash]."]
+- [ex 037 "I opened the door [[p en/for Special_Constructions]<sub>[ss `i]</sub> Steve [p en/to Special_Constructions]<sub>[ss Purpose]</sub> take out the trash]."]
 
-- [ex 038 "It cost $500 [[p en/for Special_Constructions]<sub>[[`i]]</sub> the mechanic [p en/to Special_Constructions]<sub>[ss Theme--Purpose]</sub> make the repairs]."]
+- [ex 038 "It cost $500 [[p en/for Special_Constructions]<sub>[ss `i]</sub> the mechanic [p en/to Special_Constructions]<sub>[ss Theme--Purpose]</sub> make the repairs]."]
 
 ##PP Idioms
 

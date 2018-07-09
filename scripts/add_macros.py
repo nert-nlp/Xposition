@@ -150,7 +150,12 @@ for file in os.listdir(dir2):
             for i, line in enumerate(f):
                 # convert example refs
                 line = examples.convert_ex_ref(line, file.replace('.txt',''))
+                # misc
                 line =line.replace(r'<ex></ex>', '')
+                while re.search(r'\[\[`[A-Za-z$]\]\]', line):
+                    x = re.search(r'\[\[(?P<ss>`[A-Za-z$])\]\]', line)
+                    line = line.replace(x.group(0), '[ss '+x.group('ss')+']')
+
                 # write ex refs
                 new_text.append(line)
         if True: #not ' ' in file:  # ignore 'Special Constructions', ...
