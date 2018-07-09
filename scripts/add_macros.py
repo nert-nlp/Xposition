@@ -74,7 +74,7 @@ class Examples:
                     repl.append(l)
                     print('fix label', title, l)
 
-            line = line.replace(ex_link.group(0),'('+', '.join(repl)+')')
+            line = line.replace(ex_link.group(0), ', '.join(repl))
         return line
 
 
