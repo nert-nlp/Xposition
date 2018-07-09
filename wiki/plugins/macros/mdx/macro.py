@@ -159,8 +159,8 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
     # meta data
     pspecial.meta = dict(
         short_description=_('Link to Adposition, Usage'),
-        help_text=_('Create a link to a preposition or preposition-construal pair with special (nonstandard) spelling'),
-        example_code='[p en/in] or [p en/in Locus--Locus]',
+        help_text=_('Create a link to a preposition or preposition-construal pair with special (nonstandard) spelling or noncanonical capitalization'),
+        example_code='[p In en/in] or [p In en/in Locus--Locus]',
         args={'prep': _('Name of adposition'), 'special': _('Text to display'), 'construal': _('Name of construal'), 'class': _('optional class')}
     )
 
@@ -202,7 +202,7 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
         short_description=_('Create an Example'),
         help_text=_('Create an example sentence with a linkable id'),
         example_code='[ex 001 "The cat [p en/under Locus] the table."]',
-        args={'id': _('id of example'), 'sent': _('full sentence in single quotes'), 'label': _('string to display after ex. (if not id)')}
+        args={'id': _('id of example'), 'sent': _('full sentence in double quotes'), 'label': _('string to display after ex. (if not id)')}
     )
 
 
