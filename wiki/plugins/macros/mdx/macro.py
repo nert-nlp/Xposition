@@ -196,7 +196,9 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
     )
 
     def ex(self, id, sent, label=None):
-        return f'<span id="{id}" class="example">{sent}&nbsp;<a href="#{id}" class="exlabel">{label or id}</a></span>'
+        if label:
+            return f'<span id="{id}" class="example">{sent}&nbsp;<span class="exlabel">{label}</span></span>'
+        return f'<span id="{id}" class="example">{sent}&nbsp;<a href="#{id}" class="exlabel">{id}</a></span>'
     # meta data
     ex.meta = dict(
         short_description=_('Create an Example'),
