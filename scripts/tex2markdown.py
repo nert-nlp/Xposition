@@ -50,6 +50,7 @@ def handle_ex(s):
     s = re.sub(r'\\ex\t', '\ex ', s)
     s = re.sub(r'\\sn(?=\\)', r'\sn ', s)
     s = re.sub(r'\\sn\t', '\sn ', s)
+    s = re.sub(r'\\exp{.*?}', r'\ex ', s)
 
 
     match = re.compile(r'\\ex(?=\W)')
@@ -124,8 +125,8 @@ def convert(ifile, ofile, title):
         data = replace_circumfixes(data, r'\\shortdef{', r'|', '|')
 
         # subsection
-        data = replace_circumfixes(data, r'\\subsection{', '##<b>', '</b>')
-        data = replace_circumfixes(data, r'\\subsubsection{', '###<b>', '</b>')
+        data = replace_circumfixes(data, r'\\subsection{', '##', '')
+        data = replace_circumfixes(data, r'\\subsubsection{', '###', '')
 
         # embold title of article
         data = re.sub(r'\\psst{' + title + '}', '**' + title + '**', data)
@@ -150,12 +151,6 @@ def convert(ifile, ofile, title):
             data = data.replace(' [[' + ref + ']] ', '[' + ref + '](/' + ref + ')')
         data = re.sub(r'\[en/', '[', data)
         data = replace_circumfixes(data, r'\\label{', '<label>', '</label>')
-
-        # special characters
-        data = data.replace(r'\backi', '[[`i]]')
-        data = data.replace(r'\backc', '[[`c]]')
-        data = data.replace(r'\backd', '[[`d]]')
-        data = data.replace(r'\backposs', '[[`$]]')
 
         # handle paragraph
         data = replace_circumfixes(data, r'\\paragraph{', '- **', '**')
@@ -189,11 +184,18 @@ def convert(ifile, ofile, title):
         data = re.sub(r"\$_{", '<sub>', data)
         data = re.sub(r"}\$", '</sub>', data)
         data = replace_circumfixes(data, r'\\textsubscript{', '<sub>', '</sub>')
+        data = replace_circumfixes(data, r'\\mbox{', '', '')
 
         # misc labels
         data = replace_circumfixes(data, r'\\sst{', '<i>', '</i>')
         data = replace_circumfixes(data, r'\\lbl{', '<i>', '</i>')
         data = replace_circumfixes(data, r'\\pex{', '<i>', '</i>')
+
+        # special characters
+        data = data.replace(r'\backi', '[[`i]]')
+        data = data.replace(r'\backc', '[[`c]]')
+        data = data.replace(r'\backd', '[[`d]]')
+        data = data.replace(r'\backposs', '[[`$]]')
 
         data = replace_circumfixes(data, r'\\choices{', r'<choices>', r'</choices>')
         # underlining
@@ -276,7 +278,7 @@ def convert(ifile, ofile, title):
         data = replace_circumfixes(data, r'\\cref{', '<ref>', '</ref>')
         data = replace_circumfixes(data, r'\\cref{', '<ref>', '</ref>')
         data = replace_circumfixes(data, r'\\ref{', '<ref>', '</ref>')
-        data = replace_circumfixes(data, r'\\exp{', '<exp>', '</exp>')
+        # data = replace_circumfixes(data, r'\\exp{', '<exp>', '</exp>')
         data = replace_circumfixes(data, r'\\Cref{', '<ref>', '</ref>')
         j = 1
         for i in [1, 2]:
@@ -300,6 +302,7 @@ def convert(ifile, ofile, title):
         # whitespace
         data = re.sub(r"\n\s+\n", "\n\n", data)
         data = re.sub(r"\n\n+\n", "\n\n", data)
+        data = re.sub(r" {2}", " ", data)
 
         # fix various junk
         data = re.sub(r"\\(end|begin){(.*?)}", "", data)
@@ -323,10 +326,12 @@ def convert(ifile, ofile, title):
         data = data.replace("\\#", "#")
         data = data.replace("\\%", "%")
         # data = data.replace(r"\\{}", " ")
-        data = data.replace('\{', '{')
-        data = data.replace('\}', '}')
-        data = data.replace("\\\\", "")
-        data = data.replace("\\", "")
+        data = data.replace(r'\{', '{')
+        data = data.replace(r'\}', '}')
+        data = data.replace("\\\\", " ")
+        data = data.replace("\\ ", "")
+        data = data.replace("etc.\\", "etc.")
+        data = data.replace("etc.)\\", "etc.)")
         # toward(s), out(_of), and off(_of)
         data = data.replace('[toward(s)](/en/toward(s))', '[toward](/en/toward)/[towards](/en/towards)')
         data = data.replace('[off(_of)](/en/off(_of))', '[off](/en/off)/[off_of](/en/off_of)')

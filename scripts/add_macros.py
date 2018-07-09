@@ -115,7 +115,7 @@ for file in os.listdir(dir):
                 for p_link in P_RE.finditer(line):
                     prep = p_link.group('p')
                     prep = re.sub('[’`]',"'",prep)
-                    if EXAMPLE_RE.search(line):
+                    if EXAMPLE_RE.search(line) and not ' ' in default_ss:
                         line = line.replace(p_link.group(0),'[p en/' + prep + ' ' + (tmp_ss if tmp_ss else default_ss) + ']')
                     else:
                         line = line.replace(p_link.group(0), '[p en/' + prep + ']')
@@ -132,16 +132,15 @@ for file in os.listdir(dir):
                 line = line.replace(r'    - [ex', '- [ex')
                 if re.match('[}{]',line.strip()):
                     line = '\n'
-                line = re.sub(r'<exp>.*?</exp>','',line)
                 if '###' in line and line.strip()[-1] not in ['.',':','?']:
                     line = line.strip()+' '
 
 
                 tmp_ss = None
                 new_text.append(line)
-
-            with open(os.path.join(dir2, file), 'w+', encoding='utf8') as f2:
-                f2.write(''.join(new_text))
+            if not ' ' in file:  # ignore 'Special Constructions', ...
+                with open(os.path.join(dir2, file), 'w+', encoding='utf8') as f2:
+                    f2.write(''.join(new_text))
 
 
 for file in os.listdir(dir2):
