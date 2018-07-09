@@ -106,7 +106,7 @@ def convert(ifile, ofile, title):
             f[i] = re.sub(r'\]\]', r'\]', f[i])
             # junk whitespace
             f[i] = re.sub(r'\r', r'', f[i])
-            f[i] = f[i].strip()+'\n'
+            f[i] = f[i].strip()+ ('\n' if '\n' in f[i] else '')
             # add numbered list
             if r'\begin{itemize}' in f[i] or r'\begin{enumerate}' in f[i]:
                 list_num = 1
