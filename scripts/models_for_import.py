@@ -27,7 +27,7 @@ adp_trans = set()
 adp_intrans = set()
 
 # corpus sent
-corpus_name = 'streusle'
+corpus_name = 'STREUSLE'
 corpus_version = '4.1'
 sent_id = DEFAULT_STR
 language_name = 'English'
@@ -47,7 +47,7 @@ adposition_name = DEFAULT_STR
 role_name = DEFAULT_STR
 function_name = DEFAULT_STR
 special = DEFAULT_STR
-corpus_name = 'streusle'
+corpus_name = 'STREUSLE'
 corpus_version = '4.1'
 sent_id = DEFAULT_STR
 obj_case = DEFAULT_STR
@@ -148,6 +148,17 @@ def get_ss(sent, n):
         supersense = DEFAULT_STR
     return supersense
 
+def get_adp(s, lang):
+    adp = ms.Adposition.normalize_adp(cls=ms.Adposition,
+                                adp=s,
+                                language_name=lang)
+    adp = adp or s
+    adp = adp.replace(' ', '_')
+    if adp in ['he', 'it', "it's", 'she', 'there', 'they', 'thier', 'ur', 'we', 'you']:
+        adp = "'s"
+    return adp
+
+
 def main_indices(token_indices=''):
     x = []
     for i in token_indices.split():
@@ -188,9 +199,7 @@ with open(file, encoding='utf8') as f:
 
                     # assign fields
                     token_indices = ' '.join([str(x) for x in tok_sem['toknums']])
-                    adposition_name = ms.Adposition.normalize_adp(cls=ms.Adposition,
-                                                                  adp=tok_sem['lexlemma'],
-                                                                  language_name=language_name).replace(' ', '_')
+                    adposition_name = get_adp(tok_sem['lexlemma'], language_name)
                     if '?' in tok_sem['ss'] or '`' in tok_sem['ss']:
                         role_name = DEFAULT_STR
                         function_name = DEFAULT_STR
@@ -222,7 +231,7 @@ with open(file, encoding='utf8') as f:
 
                     add_ptoken()
 
-                    morphtype = 'standalone_preposition' if not tok_sem['lexlemma'] == "'s" else 'suffix'
+                    morphtype = 'standalone_preposition' if not adposition_name == "'s" else 'suffix'
                     if hasobj:
                         adp_trans.add(adposition_name)
                     else:
