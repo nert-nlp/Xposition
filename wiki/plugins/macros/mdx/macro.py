@@ -185,7 +185,7 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
     )
 
     def exref(self, id, page):
-        return link('ex. ' + page + ' ' + id, '/' + page.replace('`', "'") + '/#' + id, 'exref')
+        return link(f'{page}#{id}', '/' + page.replace('`', "'") + '/#' + id, 'exref')
 
     # meta data
     exref.meta = dict(
