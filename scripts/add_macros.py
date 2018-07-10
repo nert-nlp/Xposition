@@ -5,7 +5,7 @@ dir = 'markdown'
 dir2 = 'markdown-and-macros'
 
 
-P_RE = re.compile(r'\[([\w\\\'’-])+\]\(/en/(?P<p>[\w\'’\\-]+)\)')
+P_RE = re.compile(r'\[(?P<text>([\w\\\'’-])+)\]\(/en/(?P<p>[\w\'’\\-]+)\)')
 SS_RE = re.compile(r'\[[\w$`-]+\]\(/(?P<ss>[\w$`-]+)\)')
 HEADER_RE = re.compile('^(\w)?.*'+SS_RE.pattern+'.*:$') # [PartPortion](/PartPortion) is used ...:
 ALT_SS_RE = re.compile('\('+SS_RE.pattern+'\)')
@@ -120,10 +120,22 @@ for file in os.listdir(dir):
                 for p_link in P_RE.finditer(line):
                     prep = p_link.group('p')
                     prep = re.sub('[’`]',"'",prep)
-                    if EXAMPLE_RE.search(line) and not ' ' in default_ss:
-                        line = line.replace(p_link.group(0),'[p en/' + prep + ' ' + (tmp_ss if tmp_ss else default_ss) + ']')
+                    text = p_link.group('text')
+                    text = re.sub('[’`]', "'", text)
+                    if text == prep:
+                        if EXAMPLE_RE.search(line) and not ' ' in default_ss:
+                            line = line.replace(p_link.group(0),
+                                                '[p en/' + prep + ' ' + (tmp_ss if tmp_ss else default_ss) + ']')
+                        else:
+                            line = line.replace(p_link.group(0), '[p en/' + prep + ']')
                     else:
-                        line = line.replace(p_link.group(0), '[p en/' + prep + ']')
+                        if EXAMPLE_RE.search(line) and not ' ' in default_ss:
+                            line = line.replace(p_link.group(0),
+                                                '[pspecial ' + text + ' en/' + prep + ' ' + (tmp_ss if tmp_ss else default_ss) + ']')
+                        else:
+                            line = line.replace(p_link.group(0), '[pspecial ' + text + ' en/' + prep + ']')
+
+
                 # convert ss
                 for ss_link in SS_RE.finditer(line):
                     ss = ss_link.group('ss')

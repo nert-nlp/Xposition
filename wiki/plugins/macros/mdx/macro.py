@@ -160,7 +160,7 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
     pspecial.meta = dict(
         short_description=_('Link to Adposition, Usage'),
         help_text=_('Create a link to a preposition or preposition-construal pair with special (nonstandard) spelling or noncanonical capitalization'),
-        example_code='[p In en/in] or [p In en/in Locus--Locus]',
+        example_code='[pspecial In en/in] or [pspecial In en/in Locus--Locus]',
         args={'prep': _('Name of adposition'), 'special': _('Text to display'), 'construal': _('Name of construal'), 'class': _('optional class')}
     )
 
