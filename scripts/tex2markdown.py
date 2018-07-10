@@ -332,6 +332,8 @@ def convert(ifile, ofile, title):
         data = data.replace(r'\}', '}')
         data = data.replace("\\\\", " ")
         data = data.replace("\\ ", " ")
+        data = data.replace("etc.\\", "etc.")
+        data = data.replace("etc.)\\", "etc.)")
 
         # whitespace
         data = re.sub(r"\n\s+\n", "\n\n", data)
