@@ -177,6 +177,10 @@ for file in os.listdir(dir2):
 
             for i, line in enumerate(f):
 
+                # fix whitespace
+                if new_text and line.strip() == '' and new_text[-1].strip() == '':
+                    new_text.pop()
+
                 # convert example refs
                 line = examples.convert_ex_ref(line, file.replace('.txt',''))
                 # misc
@@ -198,6 +202,8 @@ for file in os.listdir(dir2):
                     while True:
                         if index==-len(new_text) or new_text[index-1].strip()=='':
                             break
+                        if len(re.match('^\t*', new_text[index-1]).group())!=len(re.match('^\t*', new_text[index]).group()):
+                            break
                         index -= 1
                     header = new_text[index]
                     if not re.match('^[0-9-].*', header.strip()):
@@ -208,9 +214,6 @@ for file in os.listdir(dir2):
 
                 previous_depth = depth
 
-                # fix whitespace
-                if new_text and line.strip()=='' and new_text[-1].strip()=='':
-                    new_text.pop()
                 new_text.append(line)
 
 
