@@ -148,6 +148,9 @@ for file in os.listdir(dir):
                 if LABEL_RE.search(line):
                     examples.add_label_id(LABEL_RE.search(line).group('label'), title)
                     line = LABEL_RE.sub('', line)
+                    line = line.replace(r'<ex></ex>', '')
+                    if not re.search('\w',line):
+                        line = ''
                 # convert examples
                 line = examples.convert_example(line)
                 if re.match('[}{]',line.strip()):
@@ -169,23 +172,10 @@ for file in os.listdir(dir2):
             new_text = []
             depth = 0
             previous_depth = 0
+            # f = f.read()
+            # f = re.sub('\n\n*\n','\n\n', f)
 
             for i, line in enumerate(f):
-
-                depth = len(re.match('^\t*', line).group()) if line.strip() else depth
-                """ Current implementation does not support indents.
-                    This was an aesthetic decision. To implement indentation, uncomment
-                    the following lines of code and replace line 204
-                        new_text.append(line.replace('\t',''))
-                    with
-                        new_text.append(line)
-                    
-                """
-                if depth > previous_depth and not new_text[-1].strip():
-                    new_text.pop()
-                if depth > previous_depth and new_text:
-                    if not re.match('^[0-9-].*', new_text[-1].strip()):
-                        new_text[-1] = new_text[-1].replace(new_text[-1].strip(), '- '+new_text[-1].strip())
 
                 # convert example refs
                 line = examples.convert_ex_ref(line, file.replace('.txt',''))
@@ -197,10 +187,33 @@ for file in os.listdir(dir2):
 
                 line = line.replace('[p en/as]--[p en/as]', '[p en/as]—[p en/as]')
 
-                # write ex refs
+                # fix indentation
+                depth = len(re.match('^\t*', line).group()) if line.strip() else depth
+                while depth > previous_depth and new_text[-1].strip()=='':
+                    new_text.pop()
+                if depth > previous_depth and new_text:
+                    # find the earliest of the previous non-blank lines,
+                    # give it a list item markdown '-'
+                    index = -1
+                    while True:
+                        if index==-len(new_text) or new_text[index-1].strip()=='':
+                            break
+                        index -= 1
+                    header = new_text[index]
+                    if not re.match('^[0-9-].*', header.strip()):
+                        new_text[index] = header.replace(header.strip(), '- '+header.strip())
+                    while index < -1:
+                        new_text[index] = new_text[index].replace('\n',' ')
+                        index += 1
+
                 previous_depth = depth
-                # get rid of indents
+
+                # fix whitespace
+                if new_text and line.strip()=='' and new_text[-1].strip()=='':
+                    new_text.pop()
                 new_text.append(line)
+
+
         if not ' ' in file:  # ignore 'Special Constructions', ...
             with open(os.path.join(dir2, file), 'w', encoding='utf8') as f2:
                 f2.write(''.join(new_text))
