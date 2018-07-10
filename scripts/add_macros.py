@@ -38,6 +38,11 @@ class Examples:
         self.labels[(title, id)] = label
 
     def convert_example(self, line):
+        line = line.replace('_ ', r'\_ ')
+        line = line.replace(' _', r' \_')
+        line = line.replace(']_', r']\_')
+        line = line.replace('_[', r'\_[')
+
         for example in EXAMPLE_RE.finditer(line):
             ex = example.group('ex').replace('"', r'\"').replace("\\", "\\\\").strip()
             if not re.search('\w',ex):
@@ -138,7 +143,7 @@ for file in os.listdir(dir):
 
                 tmp_ss = None
                 new_text.append(line)
-            if True: #not ' ' in file:  # ignore 'Special Constructions', ...
+            if not ' ' in file:  # ignore 'Special Constructions', ...
                 with open(os.path.join(dir2, file), 'w+', encoding='utf8') as f2:
                     f2.write(''.join(new_text))
 
@@ -156,9 +161,11 @@ for file in os.listdir(dir2):
                     x = re.search(r'\[\[(?P<ss>`[A-Za-z$])\]\]', line)
                     line = line.replace(x.group(0), '[ss '+x.group('ss')+']')
 
+                line = line.replace('[p en/as]--[p en/as]', '[p en/as]—[p en/as]')
+
                 # write ex refs
                 new_text.append(line)
-        if True: #not ' ' in file:  # ignore 'Special Constructions', ...
+        if not ' ' in file:  # ignore 'Special Constructions', ...
             with open(os.path.join(dir2, file), 'w', encoding='utf8') as f2:
                 f2.write(''.join(new_text))
 
