@@ -137,25 +137,24 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
 
     def pspecial(self, *args):
         cl = None
-        prep = args[0]
-        short = prep.split('/')[-1]
+        text = args[0]
+        prep = args[1]
         p = models.Adposition.normalize_adp(cls=models.Adposition,
-                                            adp=short,
+                                            adp=prep.split('/')[-1],
                                             language_name=prep.split('/')[-2])
         if p:
-            prep = prep.replace(short, p)
-        short = args[1]
+            prep = prep.replace(prep.split('/')[-1], p)
         if len(args) >= 4:
             cl = args[3]
         if len(args) > 2 and not '-' == args[2]:
             construal = args[2]
             if '`' in construal:
-                return link(short, '/' + prep + '/' + construal, cl if cl else 'usage')
+                return link(text, '/' + prep + '/' + construal, cl if cl else 'usage')
             elif '--' in construal or "'" in construal or '?' in construal:
-                return link(short.replace('--', '&#x219d;'), '/' + prep + '/' + construal, cl if cl else 'usage')
+                return link(text.replace('--', '&#x219d;'), '/' + prep + '/' + construal, cl if cl else 'usage')
             else:
-                return link(short, '/' + prep + '/' + construal + '--' + construal, cl if cl else 'usage')
-        return link(short, '/' + prep, cl if cl else 'adposition')
+                return link(text, '/' + prep + '/' + construal + '--' + construal, cl if cl else 'usage')
+        return link(text, '/' + prep, cl if cl else 'adposition')
     # meta data
     pspecial.meta = dict(
         short_description=_('Link to Adposition, Usage'),

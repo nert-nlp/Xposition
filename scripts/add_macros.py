@@ -48,7 +48,7 @@ class Examples:
             if not re.search('\w',ex):
                 line = line.replace(example.group(0),'')
                 continue
-            if not re.search(r'\[p \w\w/[\w\'’\\-]+ [\w$`-]+\]',ex):
+            if not re.search(r'\[p(special [\w\'’\\-]+)? \w\w/[\w\'’\\-]+ [\w$`-]+\]',ex):
                 line = line.replace(example.group(0), ex)
                 continue
             line = line.replace(example.group(0), '- [ex ' + str(self.INDEX).zfill(3) + ' ' + '"' + ex + '"' + ']')
