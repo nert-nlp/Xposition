@@ -236,7 +236,7 @@ REVISIONS_PER_HOUR = getattr(django_settings, 'WIKI_REVISIONS_PER_HOUR', 60)
 REVISIONS_PER_MINUTES = getattr(
     django_settings,
     'WIKI_REVISIONS_PER_MINUTES',
-    5)
+    10)
 
 # Maximum allowed revisions per hour for any given user or IP
 REVISIONS_PER_HOUR_ANONYMOUS = getattr(
