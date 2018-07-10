@@ -110,7 +110,7 @@ for file in os.listdir(dir):
 
                 if HEADER_RE.match(line):
                     default_ss = SS_RE.search(line).group('ss')
-                    print(default_ss,line)
+                    # print(default_ss,line)
                 elif ORDINARY_RE.match(line) or depth < previous_depth:
                     default_ss = title
                     # print(default_ss, line)
@@ -169,7 +169,27 @@ for file in os.listdir(dir2):
     if file.endswith('.txt'):
         with open(os.path.join(dir2, file), 'r', encoding='utf8') as f:
             new_text = []
+            depth = 0
+            previous_depth = 0
+
             for i, line in enumerate(f):
+
+                depth = len(re.match('^\t*', line).group()) if line.strip() else depth
+                """ Current implementation does not support indents.
+                    This was an aesthetic decision. To implement indentation, uncomment
+                    the following lines of code and replace line 204
+                        new_text.append(line.replace('\t',''))
+                    with
+                        new_text.append(line)
+                    
+                """
+                #
+                # if depth > previous_depth and not new_text[-1].strip():
+                #     new_text.pop()
+                # if depth > previous_depth and new_text:
+                #     if not new_text[-1].strip().startswith('-'):
+                #         new_text[-1] = new_text[-1].replace(new_text[-1].strip(), '- '+new_text[-1].strip())
+
                 # convert example refs
                 line = examples.convert_ex_ref(line, file.replace('.txt',''))
                 # misc
@@ -181,7 +201,9 @@ for file in os.listdir(dir2):
                 line = line.replace('[p en/as]--[p en/as]', '[p en/as]—[p en/as]')
 
                 # write ex refs
-                new_text.append(line)
+                previous_depth = depth
+                # get rid of indents
+                new_text.append(line.replace('\t',''))
         if not ' ' in file:  # ignore 'Special Constructions', ...
             with open(os.path.join(dir2, file), 'w', encoding='utf8') as f2:
                 f2.write(''.join(new_text))
