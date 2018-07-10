@@ -90,6 +90,7 @@ def convert(ifile, ofile, title):
 
         # handle junk line by line
         for i, line in enumerate(f):
+            f[i] = f[i].replace('\t', ' ')
             if line.strip().startswith('%'):
                  f[i] = ''
             if '\multicolsep' in f[i]:
@@ -120,7 +121,7 @@ def convert(ifile, ofile, title):
                 f[i] = ''
             # junk whitespace
             f[i] = re.sub(r'\r', r'', f[i])
-            start = ''.join(['\t' for x in range(depth-1)])
+            start = ''.join(['\t' for x in range(depth-1)]) if i>0 and f[i-1]=='\n' else ''
             end = f[i][-1] if f[i] and f[i][-1] in [' ','\n'] else ''
             f[i] = start + f[i].strip() + end
             # keep track of sublist tabs
@@ -304,7 +305,7 @@ def convert(ifile, ofile, title):
 
         k = 1
         for foot in footnotes:
-            data += '\n[^'+str(k)+']: '+foot.replace('fn:','')
+            data += '\n[^'+str(k)+']: '+foot.replace('fn:','').replace('\n',' ').replace('\t','')
             k += 1
 
         # handle examples
