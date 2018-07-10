@@ -7,7 +7,7 @@ dir2 = 'markdown-and-macros'
 
 P_RE = re.compile(r'\[(?P<text>([\w\\\'’-])+)\]\(/en/(?P<p>[\w\'’\\-]+)\)')
 SS_RE = re.compile(r'\[[\w$`-]+\]\(/(?P<ss>[\w$`-]+)\)')
-HEADER_RE = re.compile('^(\w)?.*'+SS_RE.pattern+'.*:$') # [PartPortion](/PartPortion) is used ...:
+HEADER_RE = re.compile('^(<ex>)?.*'+SS_RE.pattern+'.*:(</ex>)?$') # [PartPortion](/PartPortion) is used ...:
 ALT_SS_RE = re.compile('\('+SS_RE.pattern+'\)')
 ORDINARY_RE = re.compile('^(\[|\w).*$')
 EXAMPLE_RE = re.compile('<(ex|sn)>(?P<ex>.+?)</(ex|sn)>')
@@ -97,6 +97,8 @@ for file in os.listdir(dir):
             title = file.replace('.txt', '').replace(' ','_')
             default_ss = title
             tmp_ss = None
+            previous_depth = 0
+            depth = 0
 
             examples.INDEX = 1
 
@@ -104,17 +106,19 @@ for file in os.listdir(dir):
                 # fix Part/Portion
                 line = line.replace('Part/Portion', 'PartPortion')
 
+                depth = len(re.match('^\t*', line).group()) if line.strip() else depth
+
                 if HEADER_RE.match(line):
                     default_ss = SS_RE.search(line).group('ss')
-                    # print(default_ss,line)
-                elif ORDINARY_RE.match(line):
+                    print(default_ss,line)
+                elif ORDINARY_RE.match(line) or depth < previous_depth:
                     default_ss = title
                     # print(default_ss, line)
                 elif ALT_SS_RE.search(line):
                     tmp_ss = ALT_SS_RE.search(line).group('ss')
                     # print(tmp_ss, line)
                 elif '**'+file.replace('.txt', '')+'**' in line:
-                    tmp_ss = file.replace('.txt', '')
+                    tmp_ss = title
                     # print(tmp_ss, line)
                 # convert p
                 for p_link in P_RE.finditer(line):
@@ -146,7 +150,6 @@ for file in os.listdir(dir):
                     line = LABEL_RE.sub('', line)
                 # convert examples
                 line = examples.convert_example(line)
-                line = line.replace(r'    - [ex', '- [ex')
                 if re.match('[}{]',line.strip()):
                     line = '\n'
                 if '###' in line and line.strip()[-1] not in ['.',':','?']:
@@ -154,6 +157,8 @@ for file in os.listdir(dir):
 
 
                 tmp_ss = None
+
+                previous_depth = depth
                 new_text.append(line)
             if not ' ' in file:  # ignore 'Special Constructions', ...
                 with open(os.path.join(dir2, file), 'w+', encoding='utf8') as f2:

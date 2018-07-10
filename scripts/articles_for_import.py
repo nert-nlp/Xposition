@@ -31,13 +31,13 @@ def write_json(dir, output):
             )
             if short:
                 # print(short)
-                short_descriptions.append(short)
+                short_descriptions.append('\n'+short)
 
     with open(output, 'w', encoding='utf8') as f:
         json.dump(articles,f)
     if short_descriptions:
-        with open('supersense_revisions.json', 'w', encoding='utf8') as f:
-            f.write('\n'.join(['short_descriptions']+short_descriptions))
+        with open('ss_short_descriptions.txt', 'w', encoding='utf8') as f:
+            f.write('\n\n'.join(short_descriptions))
 
 write_json(dir,'supersense_article_revisions.json')
 write_json(dir2, 'construal_article_revisions.json')
