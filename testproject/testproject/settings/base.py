@@ -167,3 +167,4 @@ SECURE_BROWSER_XSS_FILTER = True
 SESSION_COOKIE_SECURE = False   # setting to True breaks django-wiki login
 CSRF_COOKIE_SECURE = False  # setting to True breaks django-wiki login
 X_FRAME_OPTIONS = 'DENY'
+WIKI_REVISIONS_PER_MINUTES = 10
