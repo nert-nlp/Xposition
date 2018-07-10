@@ -114,7 +114,7 @@ for file in os.listdir(dir):
                 elif ORDINARY_RE.match(line) or depth < previous_depth:
                     default_ss = title
                     # print(default_ss, line)
-                elif ALT_SS_RE.search(line):
+                if ALT_SS_RE.search(line):
                     tmp_ss = ALT_SS_RE.search(line).group('ss')
                     # print(tmp_ss, line)
                 elif '**'+file.replace('.txt', '')+'**' in line:
@@ -152,8 +152,6 @@ for file in os.listdir(dir):
                 line = examples.convert_example(line)
                 if re.match('[}{]',line.strip()):
                     line = '\n'
-                if '###' in line and line.strip()[-1] not in ['.',':','?']:
-                    line = line.strip()+' '
 
 
                 tmp_ss = None
@@ -183,12 +181,11 @@ for file in os.listdir(dir2):
                         new_text.append(line)
                     
                 """
-                #
-                # if depth > previous_depth and not new_text[-1].strip():
-                #     new_text.pop()
-                # if depth > previous_depth and new_text:
-                #     if not new_text[-1].strip().startswith('-'):
-                #         new_text[-1] = new_text[-1].replace(new_text[-1].strip(), '- '+new_text[-1].strip())
+                if depth > previous_depth and not new_text[-1].strip():
+                    new_text.pop()
+                if depth > previous_depth and new_text:
+                    if not re.match('^[0-9-].*', new_text[-1].strip()):
+                        new_text[-1] = new_text[-1].replace(new_text[-1].strip(), '- '+new_text[-1].strip())
 
                 # convert example refs
                 line = examples.convert_ex_ref(line, file.replace('.txt',''))
@@ -203,7 +200,7 @@ for file in os.listdir(dir2):
                 # write ex refs
                 previous_depth = depth
                 # get rid of indents
-                new_text.append(line.replace('\t',''))
+                new_text.append(line)
         if not ' ' in file:  # ignore 'Special Constructions', ...
             with open(os.path.join(dir2, file), 'w', encoding='utf8') as f2:
                 f2.write(''.join(new_text))

@@ -106,7 +106,12 @@ def convert(ifile, ofile, title):
             if r'\begin{itemize}' in f[i] or r'\begin{enumerate}' in f[i]:
                 list_num = 1
             if r'\item' in f[i]:
-                f[i] = f[i].replace(r'\item', '###' + str(list_num) + '.')
+                f[i] = f[i].replace(r'\item', str(list_num) + '.')
+                # try to get it on one line
+                if f[i].strip()[-1] not in ['.',':','?']:
+                    end = f[i+1][-1] if f[i+1] and f[i+1][-1] in [' ', '\n'] else ''
+                    f[i] = f[i].replace('\n',' ') + f[i+1].strip() + end
+                    f[i+1] = ''
                 list_num += 1
             # junk
             if '\\bibliography' in f[i]:
@@ -119,9 +124,9 @@ def convert(ifile, ofile, title):
             end = f[i][-1] if f[i] and f[i][-1] in [' ','\n'] else ''
             f[i] = start + f[i].strip() + end
             # keep track of sublist tabs
-            if r'\begin{xlist}' in f[i] or r'\begin{exe}' in f[i]:
+            if re.search(r'\\begin{(xlist|exe|enumerate|itemize)}', f[i]):
                 depth +=1
-            if r'\end{xlist}' in f[i] or r'\end{exe}' in f[i]:
+            if re.search(r'\\end{(xlist|exe|enumerate|itemize)}', f[i]):
                 depth -=1
 
 
