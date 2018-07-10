@@ -740,7 +740,7 @@ class Corpus(SimpleMetadata):
     version = models.CharField(max_length=200, null=True, verbose_name="Version")
     url = models.URLField(max_length=200, blank=True, verbose_name="URL")
     genre = models.CharField(max_length=200, blank=True, verbose_name="Corpus Genre")
-    description = models.CharField(max_length=200, blank=True, verbose_name="Description",
+    description = models.CharField(max_length=300, blank=True, verbose_name="Description",
                                    help_text="Include number of tokens and basic statistics")
     languages = models.CharField(max_length=200, null=True, verbose_name="Language(s)")
 

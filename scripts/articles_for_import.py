@@ -16,20 +16,28 @@ def write_json(dir, output):
     # print(ids)
 
     articles = []
+    short_descriptions = []
 
     for file in os.listdir(dir):
         if file.endswith('.txt'):
-            content = open(os.path.join(dir, file), 'r', encoding='utf8').read()
-            content = content.split('|')[-1]
+            text = open(os.path.join(dir, file), 'r', encoding='utf8').read()
+            content = text.split('|')[-1]
+            short = text.split('|')[-2] if len(text.split('|'))>1 else ''
 
             articles.append(
                 {'content':content,
                  'title':file.replace('.txt',''),
                  'article_id':str(ids[file.replace('.txt','')])}
             )
+            if short:
+                # print(short)
+                short_descriptions.append(short)
 
     with open(output, 'w', encoding='utf8') as f:
         json.dump(articles,f)
+    if short_descriptions:
+        with open('supersense_revisions.json', 'w', encoding='utf8') as f:
+            f.write('\n'.join(['short_descriptions']+short_descriptions))
 
 write_json(dir,'supersense_article_revisions.json')
 write_json(dir2, 'construal_article_revisions.json')
