@@ -1,3 +1,6 @@
+@import url('https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700&subset=latin-ext');
+@import url('https://fonts.googleapis.com/css?family=Roboto+Condensed:400,400i,700');
+
 .construal-arrow { font-family: "Cambria Math","Arial Unicode MS",sans-serif; padding: 1px; }
 /* should contain "↝" U+219D */
 
@@ -8,9 +11,6 @@
 ul.inline,ul.inline > li { display: inline-block; }
 ul.inline { padding: 0; }
 ul.inline > li { margin: 0px 5px; }
-
-@import url('https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700&subset=latin-ext');
-@import url('https://fonts.googleapis.com/css?family=Roboto+Condensed:400,400i,700');
 
 .wiki-article { font-family: 'Roboto', sans-serif; }
 
