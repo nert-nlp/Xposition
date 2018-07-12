@@ -170,9 +170,17 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
         if len(args) >= 2:
             cl = args[1]
         if '--' in args[0]:
-            return link(args[0].replace('--','&#x219d;'), '/' + args[0], cl if cl else 'construal')
+            display = args[0].replace('--','&#x219d;')
+            cls = cl or 'construal'
+            if args[0]==self.markdown.article.current_revision.title:
+                return f'<span class="{cls} this-construal">{display}</span>'
+            return link(display, '/' + args[0], cl if cl else 'construal')
         else:
-            return link(args[0].replace('`','\`'), '/' + args[0].replace('`','%60'), cl if cl else 'supersense')
+            display = args[0].replace('`',r'\`')
+            cls = cl or 'supersense'
+            if args[0]==self.markdown.article.current_revision.title:
+                return f'<span class="{cls} this-supersense">{display}</span>'
+            return link(display, '/' + args[0].replace('`','%60'), cls)
     # meta data
     ss.meta = dict(
         short_description=_('Link to Supersense or Construal'),
