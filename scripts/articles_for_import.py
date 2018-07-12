@@ -21,8 +21,9 @@ def write_json(dir, output):
     for file in os.listdir(dir):
         if file.endswith('.txt'):
             text = open(os.path.join(dir, file), 'r', encoding='utf8').read()
-            content = text.split('|')[-1]
-            short = text.split('|')[-2] if len(text.split('|'))>1 else ''
+            SHORT_RE = re.compile('<short_description>(?P<desc>.+?)</short_description>', re.DOTALL)
+            content = SHORT_RE.sub('', text)
+            short = SHORT_RE.search(text).group() if SHORT_RE.search(text) else ''
 
             articles.append(
                 {'content':content,

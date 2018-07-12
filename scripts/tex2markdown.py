@@ -21,7 +21,7 @@ class ConvertLatexByLine:
         elif re.search(r'(?<=[^\\])%', line):
             line = line[:re.search(r'(?<=[^\\])%', line).start()]
         # junk
-        if 'multicol' in line or '\\bibliography' in line or '\\printindex' in line:
+        if '\multicol' in line or '\\bibliography' in line or '\\printindex' in line:
             line = ''
         elif r'\noindent' in line:
             line = line.replace(r'\noindent', '')
@@ -142,7 +142,7 @@ class ConvertLatexMultiline:
 
     def convert_basic(self, text):
         # handle shortdef
-        text = self.circum_replace(text=text, prefix=r'\\shortdef{', rprefix='|', rsuffix='|')
+        text = self.circum_replace(text=text, prefix=r'\\shortdef{', rprefix='<short_description>', rsuffix='</short_description>')
         # subsection
         text = self.circum_replace(text=text, prefix=r'\\subsection{', rprefix='##')
         text = self.circum_replace(text=text, prefix=r'\\subsubsection{', rprefix='###')
@@ -227,6 +227,9 @@ class ConvertLatexMultiline:
         text = re.sub(r"\\end{history}", "}", text)
         text = self.circum_replace(text=text, prefix=r'\\begin{history}', rprefix='\n<!-- ', rsuffix=' -->')
         text = self.circum_replace(text=text, prefix=r'\\futureversion{', rprefix='\n<!-- ', rsuffix=' -->')
+        #tables
+        text = re.sub(r'\\begin{multicols}{[0-9]}', '<table>', text)
+        text = re.sub(r'\\end{multicols}', '</table>', text)
 
         return text
 
@@ -266,7 +269,7 @@ class ConvertLatexMultiline:
                     text = self.circum_replace(text=text, prefix='\\'+ex+'{', rprefix='<'+ex+'>', rsuffix='</'+ex+'>', max=1)
                 else:
                     start = m.end()
-                    x = re.compile(r'(\t*\\(ex|sn)|\\end|\\begin|\t*- <ex>)').search(text, pos=start)
+                    x = re.compile(r'(\t*\\(ex|sn)|\\end|\\begin|\t*- <ex>|</?table>)').search(text, pos=start)
                     x = x or re.compile(r'\n').search(text, pos=start)
                     end = x.start()
 
@@ -285,9 +288,9 @@ class ConvertLatexMultiline:
             x = re.search(r'\\begin{.*?}</ex>', text)
             text = text.replace(x.group(), '</ex>\n'+x.group().replace('</ex>', ''))
         # get rid of \n in example
-        for x in re.finditer(r'<ex>.*?</ex>', text, re.DOTALL):
+        for x in re.finditer(r'<(ex|sn)>.*?</(ex|sn)>', text, re.DOTALL):
             if '\n' in x.group():
-                text = text.replace(x.group(), x.group().strip().replace('\n',' '))
+                text = text.replace(x.group(), x.group().replace('\n',' '))
         return text
 
     def convert_indentation(self, text):
@@ -393,6 +396,25 @@ class ConvertLatexMultiline:
             previous_depth = depth
         return text
 
+    def convert_tables(self, text):
+
+        for x in re.finditer('(\t*- )?<table>(?P<content>.*?)</table>(})?',text, re.DOTALL):
+
+            content = x.group('content').replace('\t', '')
+            content = re.sub('\n- ', '\n', content)
+            cells = [c for c in content.split('\n') if c.strip()]
+            rows = []
+            half = int(len(cells)/2)
+            for i in range(half):
+                rows.append(cells[i]+'|'+cells[i+half])
+            if not 'en/' in rows[0]:
+                rows.insert(1,'------------|------------')
+            else:
+                rows.insert(0, '1 | 2')
+                rows.insert(1, '------------|------------')
+            text = text.replace(x.group(),'\n'+'\n'.join(rows)+'\n')
+        return text
+
     def convert_last(self, text):
         # late stage junk
         text = re.sub(r'\n\s*(- )?{?[0-9]*}?\s*\n', '\n\n', text)
@@ -450,6 +472,7 @@ def convert_file(ifile, ofile, title):
         text = convert_multiline.convert_examples(text)
         text = convert_multiline.convert_indentation(text)
         text = convert_multiline.convert_sublist_spacing(text)
+        text = convert_multiline.convert_tables(text)
 
         # last conversions
         text = convert_multiline.convert_last(text)

@@ -7,11 +7,12 @@ dir2 = 'markdown-and-macros'
 
 P_RE = re.compile(r'\[(?P<text>([\w\\\'’-])+)\]\(/en/(?P<p>[\w\'’\\-]+)\)')
 SS_RE = re.compile(r'\[[\w$`-]+\]\(/(?P<ss>[\w$`-]+)\)')
-HEADER_RE1 = re.compile('^(- <ex>)?('+SS_RE.pattern+'.*):(</ex>)?$') # [PartPortion](/PartPortion) is used ...:
-HEADER_RE2 = re.compile('^(- <ex>)?(.*'+SS_RE.pattern+'):(</ex>)?$') # [PartPortion](/PartPortion) is used ...:
+HEADER_RE1 = re.compile('^(- )?(<(ex|sn)>)?('+SS_RE.pattern+'.*):(</(ex|sn)>)?$') # [PartPortion](/PartPortion) is used ...:
+HEADER_RE2 = re.compile('^(- )?(<(ex|sn)>)?(.*'+SS_RE.pattern+'):(</(ex|sn)>)?$') # [PartPortion](/PartPortion) is used ...:
+TABLE_HEADER_RE = re.compile('(<(ex|sn)>)?'+SS_RE.pattern+'(</(ex|sn)>)?\|')
 ALT_SS_RE = re.compile('\('+SS_RE.pattern+'\)')
 ORDINARY_RE = re.compile('^(\[|\w).*$')
-EXAMPLE_RE = re.compile('- <(ex|sn)>(?P<ex>.+?)</(ex|sn)>')
+EXAMPLE_RE = re.compile('<(ex|sn)>(?P<ex>.+?)</(ex|sn)>')
 LABEL_RE = re.compile('<label>(?P<label>.+?)</label>')
 REF_RE = re.compile('<(ref)>(?P<label>.+?)</(ref)>')
 
@@ -50,9 +51,9 @@ class Examples:
                 line = line.replace(example.group(0),'')
                 continue
             if not re.search(r'\[p(special [\w\'’\\-]+)? \w\w/[\w\'’\\-]+ [\w$`-]+\]',ex):
-                line = line.replace(example.group(0), '- '+ex)
+                line = line.replace(example.group(0), ex)
                 continue
-            line = line.replace(example.group(0), '- [ex ' + str(self.INDEX).zfill(3) + ' ' + '"' + ex + '"' + ']')
+            line = line.replace(example.group(0), '[ex ' + str(self.INDEX).zfill(3) + ' ' + '"' + ex + '"' + ']')
             self.INDEX += 1
         return line
 
@@ -97,6 +98,7 @@ for file in os.listdir(dir):
 
             title = file.replace('.txt', '').replace(' ','_')
             default_ss = title
+            table_ss = []
             tmp_ss = None
             previous_depth = 0
             depth = 0
@@ -112,6 +114,10 @@ for file in os.listdir(dir):
                 if HEADER_RE1.match(line) or HEADER_RE2.match(line):
                     default_ss = SS_RE.search(line).group('ss')
                     # print(default_ss,line)
+                elif TABLE_HEADER_RE.search(line):
+                    table_ss = []
+                    for ss in SS_RE.finditer(line):
+                        table_ss.append(ss.group('ss'))
                 elif ORDINARY_RE.match(line) or depth < previous_depth:
                     default_ss = title
                     # print(default_ss, line)
@@ -121,12 +127,15 @@ for file in os.listdir(dir):
                 elif '**'+file.replace('.txt', '')+'**' in line:
                     tmp_ss = title
                     # print(tmp_ss, line)
+
                 # convert p
                 for p_link in P_RE.finditer(line):
                     prep = p_link.group('p')
                     prep = re.sub('[’`]',"'",prep)
                     text = p_link.group('text')
                     text = re.sub('[’`]', "'", text)
+                    if '|' in line and len(table_ss) == 2:
+                        tmp_ss = table_ss[0 if p_link.start()<line.index('|') else 1]
                     if text == prep:
                         if EXAMPLE_RE.search(line) and not ' ' in default_ss:
                             line = line.replace(p_link.group(0),
