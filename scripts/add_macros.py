@@ -7,10 +7,11 @@ dir2 = 'markdown-and-macros'
 
 P_RE = re.compile(r'\[(?P<text>([\w\\\'’-])+)\]\(/en/(?P<p>[\w\'’\\-]+)\)')
 SS_RE = re.compile(r'\[[\w$`-]+\]\(/(?P<ss>[\w$`-]+)\)')
-HEADER_RE = re.compile('^(<ex>)?.*'+SS_RE.pattern+'.*:(</ex>)?$') # [PartPortion](/PartPortion) is used ...:
+HEADER_RE1 = re.compile('^(- <ex>)?('+SS_RE.pattern+'.*):(</ex>)?$') # [PartPortion](/PartPortion) is used ...:
+HEADER_RE2 = re.compile('^(- <ex>)?(.*'+SS_RE.pattern+'):(</ex>)?$') # [PartPortion](/PartPortion) is used ...:
 ALT_SS_RE = re.compile('\('+SS_RE.pattern+'\)')
 ORDINARY_RE = re.compile('^(\[|\w).*$')
-EXAMPLE_RE = re.compile('<(ex|sn)>(?P<ex>.+?)</(ex|sn)>')
+EXAMPLE_RE = re.compile('- <(ex|sn)>(?P<ex>.+?)</(ex|sn)>')
 LABEL_RE = re.compile('<label>(?P<label>.+?)</label>')
 REF_RE = re.compile('<(ref)>(?P<label>.+?)</(ref)>')
 
@@ -49,7 +50,7 @@ class Examples:
                 line = line.replace(example.group(0),'')
                 continue
             if not re.search(r'\[p(special [\w\'’\\-]+)? \w\w/[\w\'’\\-]+ [\w$`-]+\]',ex):
-                line = line.replace(example.group(0), ex)
+                line = line.replace(example.group(0), '- '+ex)
                 continue
             line = line.replace(example.group(0), '- [ex ' + str(self.INDEX).zfill(3) + ' ' + '"' + ex + '"' + ']')
             self.INDEX += 1
@@ -108,7 +109,7 @@ for file in os.listdir(dir):
 
                 depth = len(re.match('^\t*', line).group()) if line.strip() else depth
 
-                if HEADER_RE.match(line):
+                if HEADER_RE1.match(line) or HEADER_RE2.match(line):
                     default_ss = SS_RE.search(line).group('ss')
                     # print(default_ss,line)
                 elif ORDINARY_RE.match(line) or depth < previous_depth:
@@ -170,10 +171,6 @@ for file in os.listdir(dir2):
     if file.endswith('.txt'):
         with open(os.path.join(dir2, file), 'r', encoding='utf8') as f:
             new_text = []
-            depth = 0
-            previous_depth = 0
-            # f = f.read()
-            # f = re.sub('\n\n*\n','\n\n', f)
 
             for i, line in enumerate(f):
 
@@ -188,31 +185,6 @@ for file in os.listdir(dir2):
                 while re.search(r'\[\[`[A-Za-z$]\]\]', line):
                     x = re.search(r'\[\[(?P<ss>`[A-Za-z$])\]\]', line)
                     line = line.replace(x.group(0), '[ss '+x.group('ss')+']')
-
-                line = line.replace('[p en/as]--[p en/as]', '[p en/as]—[p en/as]')
-
-                # fix indentation
-                depth = len(re.match('^\t*', line).group()) if line.strip() else depth
-                while depth > previous_depth and new_text[-1].strip()=='':
-                    new_text.pop()
-                if depth > previous_depth and new_text:
-                    # find the earliest of the previous non-blank lines,
-                    # give it a list item markdown '-'
-                    index = -1
-                    while True:
-                        if index==-len(new_text) or new_text[index-1].strip()=='':
-                            break
-                        if len(re.match('^\t*', new_text[index-1]).group())!=len(re.match('^\t*', new_text[index]).group()):
-                            break
-                        index -= 1
-                    header = new_text[index]
-                    if not re.match('^[0-9-].*', header.strip()):
-                        new_text[index] = header.replace(header.strip(), '- '+header.strip())
-                    while index < -1:
-                        new_text[index] = new_text[index].replace('\n',' ')
-                        index += 1
-
-                previous_depth = depth
 
                 new_text.append(line)
 
