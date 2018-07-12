@@ -409,7 +409,7 @@ def convert_file(ifile, ofile, title):
         for line in lines:
             # embold title of article
             line = line.replace(r'\section{'+title+'}', '')
-            line = re.sub(r'\\psst{' + title + '}', '**' + title + '**', line)
+            # line = re.sub(r'\\psst{' + title + '}', '**' + title + '**', line)
             line = convert_line.delete_junk(line)
             line = convert_line.convert_lists(line)
             line = convert_line.convert_punctuation(line)
