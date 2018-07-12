@@ -80,7 +80,7 @@ def langs_display(context):
             or (hasattr(article, 'metadata') and getattr(context['article'].metadata, 'language', None)==lang) \
             or (hasattr(article.current_revision, 'metadata_revision') and getattr(deepest_instance(context['article'].current_revision.metadata_revision), 'lang', None)==lang):
             s += ' class="active"'
-        s += '><a href="' + langart.get_absolute_url() + '">' + lang.name + '</a></li>"'
+        s += '><a href="' + langart.get_absolute_url() + '">' + lang.name + '</a></li>'
     return mark_safe(s)
 
 @register.simple_tag(takes_context=True)

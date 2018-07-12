@@ -6,6 +6,7 @@
 
 /* make more horizontal space in navbar */
 .nav > li > a { padding-left: 10px; padding-right: 10px; }
+.navbar-fixed-top { margin-bottom: 0px; max-height: 50px; }
 
 /* for horizontal radio buttons */
 ul.inline,ul.inline > li { display: inline-block; }
@@ -25,7 +26,7 @@ li:hover > p > .example a.exlabel,
 li:hover > p > .example .exlabel > a { background-color: #999; color: #eee; border: solid 1px #999; border-radius: 10px; }
 a.exref { color: #aaa; }
 .supersense,.construal,.exref { font-family: 'Roboto Condensed','Cambria Math','Arial Unicode MS', sans-serif; }
-.this-supersense,.this-construal { font-weight: bold; }	/* Supersense or construal mentioned in its defining article */
+.this-supersense,.this-construal { font-weight: bold; color: #000 !important; }	/* Supersense or construal mentioned in its defining article */
 
 .lead .supersense,.lead .construal,.lead .adposition,.lead .usage {
   text-shadow: 1px 1px #eee;
@@ -97,3 +98,13 @@ table.ptokenannotation td.target,table.ptokenannotation th.target { text-align: 
 table.ptokenannotation td.rcontext,table.ptokenannotation th.rcontext { text-align: left; padding: 3pt 1em 3pt .5em !important; min-width: 20em; }
 table.ptokenannotation .govhead { font-weight: bold; text-decoration: #3c3 underline; }
 table.ptokenannotation .objhead { font-weight: bold; text-decoration: #d3b dotted underline; }
+
+/* Correct for floating top navbar for anchor navigation
+http://nicolasgallagher.com/jump-links-and-viewport-positioning/demo/#method-D */
+:target {
+    border-top: 50px solid transparent;
+    margin-top: -50px;
+    -webkit-background-clip: padding-box;
+    -moz-background-clip: padding;
+    background-clip: padding-box;
+}
