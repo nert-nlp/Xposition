@@ -313,6 +313,7 @@ class ConvertLatexMultiline:
         text = re.sub(r"\t*\\(end|begin){(.*?)}\n*", "", text)
         text = re.sub(r'\t*- <ex></ex>\n*', '', text)
 
+        # no jumps > 1
         previous_depth = 0
         depth = 0
         new_lines = []
@@ -320,11 +321,34 @@ class ConvertLatexMultiline:
         for line in lines:
             depth = len(re.match('^\t*', line).group()) if line.strip() else depth
             start = ''.join(['\t' for x in range(depth)])
+            # no jumps > 1
             if depth - previous_depth > 1:
-                start = ''.join(['\t' for x in range(previous_depth+1)])
+                start = ''.join(['\t' for x in range(previous_depth + 1)])
             end = line[-1] if line and line[-1] in [' ', '\n'] else ''
             line = start + line.strip() + end
             new_lines.append(line)
+            previous_depth = depth
+        text = ''.join(new_lines)
+
+        # flatten sublists of examples
+        previous_depth = 0
+        depth = 0
+        new_lines = []
+        flatten = False
+        lines = [l + '\n' for l in text.split('\n')]
+        for line in lines:
+            depth = len(re.match('^\t*', line).group()) if line.strip() else depth
+            start = ''.join(['\t' for x in range(depth)])
+            if depth > previous_depth and flatten:
+                start = ''.join(['\t' for x in range(previous_depth)])
+                depth = previous_depth
+            end = line[-1] if line and line[-1] in [' ', '\n'] else ''
+            line = start + line.strip() + end
+            new_lines.append(line)
+            if '<ex>' in line and 'en/' in line:
+                flatten = True
+            elif line.strip():
+                flatten = False
             previous_depth = depth
         text = ''.join(new_lines)
 
