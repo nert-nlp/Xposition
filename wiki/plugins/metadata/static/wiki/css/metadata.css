@@ -17,7 +17,7 @@ ul.inline > li { margin: 0px 5px; }
 
 /* Xposition macros: special styling */
 .example { font-family: 'Roboto Light', sans-serif; }
-.example a.exlabel,.example .exlabel > a { font-size: 10pt; color: #ddd; border: none; padding-left: 5px; padding-right: 5px; }
+.example a.exlabel,.example .exlabel > a { font-size: 10pt; color: #ddd; border: solid 1px transparent; padding-left: 5px; padding-right: 5px; }
 .example:hover a.exlabel,
 .example:hover .exlabel > a,
 li:hover > .example a.exlabel,
@@ -50,6 +50,8 @@ a.usage:hover {
   text-decoration: underline;
 }
 a.usage > .construal { font-weight: normal; }
+
+th:empty { display: none; }
 
 /* Tree list, adapted from https://two-wrongs.com/draw-a-tree-structure-with-only-css 
    Set class="clt" on the parent element
