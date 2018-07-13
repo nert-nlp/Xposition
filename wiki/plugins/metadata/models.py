@@ -745,7 +745,7 @@ class Corpus(SimpleMetadata):
     languages = models.CharField(max_length=200, null=True, verbose_name="Language(s)")
 
     def __str__(self):
-        return self.name + ' ' + self.version
+        return self.name.lower() + self.version
 
     @property
     def template(self):
