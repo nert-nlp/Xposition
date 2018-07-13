@@ -410,7 +410,7 @@ class ConvertLatexMultiline:
             if not 'en/' in rows[0]:
                 rows.insert(1,'------------|------------')
             else:
-                rows.insert(0, '1 | 2')
+                rows.insert(0, '| | |')
                 rows.insert(1, '------------|------------')
             text = text.replace(x.group(),'\n'+'\n'.join(rows)+'\n')
         return text
