@@ -270,6 +270,10 @@ class ConvertLatexMultiline:
         return text
 
     def convert_examples(self, text):
+        # flatten `\ex\begin{xlist}...\end{xlist}
+        for x in re.finditer(r'\\ex\\begin{xlist}(?P<content>.*?)\\end{xlist}', text, re.DOTALL):
+            text = text.replace(x.group(), x.group('content'))
+
         text = re.sub(r'\\ex(?=\\)', r'\ex ', text)
         text = re.sub(r'\\ex\t', '\ex ', text)
         text = re.sub(r'\\sn(?=\\)', r'\sn ', text)
@@ -324,11 +328,12 @@ class ConvertLatexMultiline:
             line = start + line.strip() + end
             new_lines.append(line)
         text = ''.join(new_lines)
+        # remove \begin{...} and \end{...}
         text = re.sub(r"\t*\\(end|begin){(.*?)}", "", text)
-        # text = re.sub(r'\t*- <ex></ex>\n*', '', text)
         for x in re.finditer('<label>(?P<label>.*?)</label>\s+(- )?<ex>', text):
             label = x.group('label')
             text = text.replace(x.group(), '<ex><label>' + label + '</label>')
+
 
         # no jumps > 1
         previous_depth = 0
