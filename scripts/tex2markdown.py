@@ -10,6 +10,10 @@ import re, os
 dir1 = 'tex'
 dir2 = 'markdown'
 
+P_RE = re.compile(r'\[(?P<text>([\w\\\'’-])+)\]\(/en/(?P<p>[\w\'’\\-]+)\)')
+SS_RE = re.compile(r'\[[\w$`-]+\]\(/([\w$`-]+)\)')
+
+
 class ConvertLatexByLine:
 
     list_num = 1
@@ -166,6 +170,21 @@ class ConvertLatexMultiline:
 
 
     def convert_custom(self, text):
+
+        # choices
+        text = self.circum_replace(text=text, prefix=r'\\choices{', rprefix=r'<choices>', rsuffix=r'</choices>')
+        # underlining
+        while '<choices>' in text:
+            start = text.index('<choices>')
+            end = text.index('</choices>')
+            content = text[start:end]
+            content = content.replace('/', r'\\')
+            content = content.replace(r'\\\\', r'\\')
+            content = content.replace(r'\\', '</u>/<u>')
+            text = text[:start] + content + text[end:]
+            text = text.replace('<choices>', '<u>', 1)
+            text = text.replace('</choices>', '</u>', 1)
+
         # handle \p{}
         text = self.circum_replace(text=text, prefix=r'#\\p{', rprefix='#')
         text = self.circum_replace(text=text, prefix=r'\*\\p{', rprefix='*')
@@ -193,16 +212,6 @@ class ConvertLatexMultiline:
         text = self.circum_replace(text=text, prefix=r'\\cref{', rprefix='<ref>', rsuffix='</ref>')
         text = self.circum_replace(text=text, prefix=r'\\ref{', rprefix='<ref>', rsuffix='</ref>')
         text = self.circum_replace(text=text, prefix=r'\\Cref{', rprefix='<ref>', rsuffix='</ref>')
-        
-        # choices
-        text = self.circum_replace(text=text, prefix=r'\\choices{', rprefix=r'<choices>', rsuffix=r'</choices>')
-        # underlining
-        while '<choices>' in text:
-            start = text.index('<choices>')
-            end = text.index('</choices>')
-            text = text[:start] + text[start:end].replace(r'\\', '</u>/<u>') + text[end:]
-            text = text.replace('<choices>', '<u>', 1)
-            text = text.replace('</choices>', '</u>', 1)
 
         # special characters
         text = text.replace(r'\backi', '[[`i]]')
@@ -287,9 +296,11 @@ class ConvertLatexMultiline:
         text = re.sub(r'</ex>\n*', '</ex>\n\n', text)
         text = re.sub(r'</sn>\n*', '</sn>\n\n', text)
         # get rid of \n in example
-        for x in re.finditer(r'<(ex|sn)>.*?</(ex|sn)>', text, re.DOTALL):
+        for x in re.finditer(r'<(ex|sn)>(?P<content>.*?)</(ex|sn)>', text, re.DOTALL):
             if '\n' in x.group():
                 text = text.replace(x.group(), x.group().replace('\n',' '))
+            if not P_RE.search(x.group()) or re.match('.*:(</(ex|sn)>)?$',x.group()):
+                text = text.replace(x.group(), x.group('content'))
         return text
 
     def convert_indentation(self, text):
@@ -349,7 +360,7 @@ class ConvertLatexMultiline:
             end = line[-1] if line and line[-1] in [' ', '\n'] else ''
             line = start + line.strip() + end
             new_lines.append(line)
-            if '<ex>' in line and 'en/' in line:
+            if '<ex>' in line and P_RE.search(line):
                 flatten = True
             elif line.strip():
                 flatten = False
@@ -418,10 +429,9 @@ class ConvertLatexMultiline:
             half = int(len(cells)/2)
             for i in range(half):
                 rows.append(cells[i]+'|'+cells[i+half])
-            if not 'en/' in rows[0]:
+            if not P_RE.search(rows[0]):
                 rows.insert(1,'------------|------------')
             else:
-                SS_RE = re.compile(r'\[[\w$`-]+\]\(/([\w$`-]+)\)')
                 y = re.search(r'((- )?(<(ex|sn)>)?(?P<ss>'+SS_RE.pattern+'):?(</(ex|sn)>)?\s*)' + re.escape(x.group()), text)
                 if y:
                     rows.insert(0, '|'+y.group('ss')+'|'+y.group('ss')+'|')

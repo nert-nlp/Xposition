@@ -44,8 +44,8 @@ class Examples:
     def convert_example(self, line):
         line = line.replace('_ ', r'\_ ')
         line = line.replace(' _', r' \_')
-        line = line.replace(']_', r']\_')
-        line = line.replace('_[', r'\_[')
+        line = re.sub(r']_(?=\w)', r']\_', line)
+        line = re.sub(r'(?<=\w)_\[', r'\_[', line)
 
         for example in EXAMPLE_RE.finditer(line):
             ex = example.group('ex').replace('"', r'\"').replace("\\", "\\\\").strip()
@@ -85,6 +85,16 @@ class Examples:
 
             line = line.replace(ex_link.group(0), ', '.join(repl))
         return line
+
+def check_brackets(text):
+    depth = 0
+    for ch in text[:-1]:
+        if ch == '[': depth+=1
+        elif ch == ']': depth-=1
+        if depth == 0: return False
+    if text[-1] == ']' and depth==1: return True
+    else: return False
+
 
 
 if not os.path.exists(dir2):
@@ -133,6 +143,7 @@ for file in os.listdir(dir):
                     table_ss = []
 
                 # convert p
+                ignore_usage = False
                 for p_link in P_RE.finditer(line):
                     prep = p_link.group('p')
                     prep = re.sub('[’`]',"'",prep)
@@ -145,19 +156,32 @@ for file in os.listdir(dir):
                             if p_link.start() < x.start():
                                 tmp_ss = x.group('ss')
                                 break
-                    if text == prep:
-                        if EXAMPLE_RE.search(line) and not ' ' in default_ss:
-                            line = line.replace(p_link.group(0),
-                                                '[p en/' + prep + ' ' + (tmp_ss if tmp_ss else default_ss) + ']')
-                        else:
-                            line = line.replace(p_link.group(0), '[p en/' + prep + ']')
+                    # no usage for prep in brackets
+                    for i,ch in enumerate(line):
+                        if not ch == '[': continue
+                        for j, ch2 in enumerate(line[i:]):
+                            if ch=='[' and ch2==']':
+                                start = i
+                                end = i+j
+                                x = line[start:end+1]
+                                p_copy = P_RE.search(line)
+                                if p_link.group() == p_copy.group() and p_copy.start()>start and p_copy.end()<end and check_brackets(x):
+                                    # print(title, x, p_copy.group())
+                                    ignore_usage = True
+                                    break
+                        if ignore_usage: break
+                    if ' ' in default_ss:
+                        ignore_usage = True
+                    pstart = '[p'
+                    if not text == prep:
+                        pstart = '[pspecial ' + text
+                    if EXAMPLE_RE.search(line) and not ignore_usage:
+                        line = line.replace(p_link.group(0),
+                                            pstart + ' en/' + prep + ' ' + (tmp_ss if tmp_ss else default_ss) + ']', 1)
                     else:
-                        if EXAMPLE_RE.search(line) and not ' ' in default_ss:
-                            line = line.replace(p_link.group(0),
-                                                '[pspecial ' + text + ' en/' + prep + ' ' + (tmp_ss if tmp_ss else default_ss) + ']')
-                        else:
-                            line = line.replace(p_link.group(0), '[pspecial ' + text + ' en/' + prep + ']')
+                        line = line.replace(p_link.group(0), pstart + ' en/' + prep + ']', 1)
 
+                    ignore_usage = False
 
                 # convert ss
                 for ss_link in SS_RE.finditer(line):
