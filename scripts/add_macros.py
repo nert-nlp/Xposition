@@ -127,6 +127,8 @@ for file in os.listdir(dir):
                 elif '**'+file.replace('.txt', '')+'**' in line:
                     tmp_ss = title
                     # print(tmp_ss, line)
+                if not '|' in line:
+                    table_ss = []
 
                 # convert p
                 for p_link in P_RE.finditer(line):

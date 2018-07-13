@@ -13,6 +13,7 @@ dir2 = 'markdown'
 class ConvertLatexByLine:
 
     list_num = 1
+    depth = 0
 
     def delete_junk(self, line):
         # latex comments
@@ -49,10 +50,15 @@ class ConvertLatexByLine:
 
     def convert_lists(self, line):
         # add numbered list
+        if re.search(r'\\begin{(xlist|exe|enumerate|itemize)}', line):
+            self.depth += len(re.findall(r'\\begin{(xlist|exe|enumerate|itemize)}', line))
+        if re.search(r'\\end{(xlist|exe|enumerate|itemize)}', line):
+            self.depth -= len(re.findall(r'\\end{(xlist|exe|enumerate|itemize)}', line))
         if r'\begin{itemize}' in line or r'\begin{enumerate}' in line:
             self.list_num = 1
         if r'\item' in line:
-            line = line.replace(r'\item', str(self.list_num) + '.')
+            start = '###' if self.depth<=1 else ''
+            line = line.replace(r'\item', start+str(self.list_num) + '.')
             self.list_num += 1
         return line
 
@@ -147,7 +153,7 @@ class ConvertLatexMultiline:
         text = self.circum_replace(text=text, prefix=r'\\subsection{', rprefix='##')
         text = self.circum_replace(text=text, prefix=r'\\subsubsection{', rprefix='###')
         # handle paragraph
-        text = self.circum_replace(text=text, prefix=r'\\paragraph{', rprefix='**', rsuffix='**\n\n')
+        text = self.circum_replace(text=text, prefix=r'\\paragraph{', rprefix='\n\n**', rsuffix='**\n\n')
         # handle bold, italics, quotes
         text = self.circum_replace(text=text, prefix=r'\\textbf{', rprefix='**', rsuffix='**')
         text = self.circum_replace(text=text, prefix=r'\\textit{', rprefix='<i>', rsuffix='</i>')
@@ -313,7 +319,7 @@ class ConvertLatexMultiline:
             line = start + line.strip() + end
             new_lines.append(line)
         text = ''.join(new_lines)
-        text = re.sub(r"\t*\\(end|begin){(.*?)}\n*", "", text)
+        text = re.sub(r"\t*\\(end|begin){(.*?)}", "", text)
         text = re.sub(r'\t*- <ex></ex>\n*', '', text)
 
         # no jumps > 1
@@ -324,7 +330,6 @@ class ConvertLatexMultiline:
         for line in lines:
             depth = len(re.match('^\t*', line).group()) if line.strip() else depth
             start = ''.join(['\t' for x in range(depth)])
-            # no jumps > 1
             if depth - previous_depth > 1:
                 start = ''.join(['\t' for x in range(previous_depth + 1)])
             end = line[-1] if line and line[-1] in [' ', '\n'] else ''
@@ -353,6 +358,25 @@ class ConvertLatexMultiline:
             elif line.strip():
                 flatten = False
             previous_depth = depth
+        text = ''.join(new_lines)
+
+        # flatten subitems with no parent
+        depth = 0
+        new_lines = []
+        flatten = False
+        lines = [l + '\n' for l in text.split('\n')]
+        for line in lines:
+            depth = len(re.match('^\t*', line).group()) if line.strip() else depth
+            start = ''.join(['\t' for x in range(depth)])
+            if depth > 0 and flatten:
+                start = ''.join(['\t' for x in range(depth-1)])
+            end = line[-1] if line and line[-1] in [' ', '\n'] else ''
+            if not re.match('^([0-9]+\.|- ).*', line.strip()) and line.strip():
+                flatten = True
+            elif re.match('^([0-9]+\.|- ).*', line):
+                flatten = False
+            line = start + line.strip() + end
+            new_lines.append(line)
         text = ''.join(new_lines)
 
         # merge lines
@@ -385,15 +409,6 @@ class ConvertLatexMultiline:
                 text = re.sub(re.escape(line1) + '\s*' + re.escape(line2), line1 +'\n'+ line2, text)
             previous_depth = depth
 
-        # add '- ' on previous line if missing
-        depth = 0
-        previous_depth = 0
-        lines = [line + '\n' for line in text.split('\n')]
-        for line1, line2 in zip([''] + lines, lines + ['']):
-            depth = len(re.match('^\t*', line2).group()) if line2.strip() else depth
-            if depth > previous_depth and not re.match('^([0-9]+\.|- ).*', line1.strip()) and line1.strip():
-                text = text.replace(line1+line2, '\n- '+line1+line2)
-            previous_depth = depth
         return text
 
     def convert_tables(self, text):
