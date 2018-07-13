@@ -325,8 +325,8 @@ class ConvertLatexMultiline:
             new_lines.append(line)
         text = ''.join(new_lines)
         text = re.sub(r"\t*\\(end|begin){(.*?)}", "", text)
-        text = re.sub(r'\t*- <ex></ex>\n*', '', text)
-        for x in re.finditer('<ex><label>(?P<label>.*?)</label></ex>\s+(- )?<ex>', text):
+        # text = re.sub(r'\t*- <ex></ex>\n*', '', text)
+        for x in re.finditer('<label>(?P<label>.*?)</label>\s+(- )?<ex>', text):
             label = x.group('label')
             text = text.replace(x.group(), '<ex><label>' + label + '</label>')
 
