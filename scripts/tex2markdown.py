@@ -142,8 +142,9 @@ class ConvertLatexMultiline:
         text = text.replace("$\\rightarrow$", "→")
         text = text.replace("$\\nrightarrow$", "↛")
         text = text.replace("$_{\\text{\\backposs}}$", "<sub>[[`$]]</sub>")
-        text = self.circum_replace(text=text, prefix=r"\$_{\\text{", suffix=r"}}\$", rprefix='<sub>', rsuffix='</sub>')
-        text = self.circum_replace(text=text, prefix=r"\$_{", suffix=r"}\$", rprefix='<sub>', rsuffix='</sub>')
+        text = self.circum_replace(text=text, prefix=r"\\text{", suffix=r"}", rprefix='', rsuffix='')
+        text = re.sub(r"\$_{", '<sub>', text)
+        text = re.sub(r"}\$", '</sub>', text)
         return text
 
     def convert_basic(self, text):
@@ -275,7 +276,7 @@ class ConvertLatexMultiline:
                     text = self.circum_replace(text=text, prefix='\\'+ex+'{', rprefix='<'+ex+'>', rsuffix='</'+ex+'>', max=1)
                 else:
                     start = m.end()
-                    x = re.compile(r'(\t*\\(ex|sn)|\\end|\\begin|\t*- <ex>|</?table>)').search(text, pos=start)
+                    x = re.compile(r'(\t*\\(ex|sn)|\\end|\\begin|\t*(- )?<ex>|</?table>)').search(text, pos=start)
                     x = x or re.compile(r'\n').search(text, pos=start)
                     end = x.start()
 
@@ -285,14 +286,6 @@ class ConvertLatexMultiline:
         # fix junk
         text = re.sub(r'</ex>\n*', '</ex>\n\n', text)
         text = re.sub(r'</sn>\n*', '</sn>\n\n', text)
-        while re.search('<ex><label>(?P<label>.*?)</label></ex>\s+<ex>', text):
-            x = re.search('<ex><label>(?P<label>.*?)</label></ex>\s+<ex>', text)
-            label = x.group('label')
-            text = text.replace(x.group(), '<ex><label>' + label + '</label>')
-        # move </ex> before \begin{xlist}
-        while re.search(r'\\begin{.*?}</ex>', text):
-            x = re.search(r'\\begin{.*?}</ex>', text)
-            text = text.replace(x.group(), '</ex>\n'+x.group().replace('</ex>', ''))
         # get rid of \n in example
         for x in re.finditer(r'<(ex|sn)>.*?</(ex|sn)>', text, re.DOTALL):
             if '\n' in x.group():
@@ -321,6 +314,9 @@ class ConvertLatexMultiline:
         text = ''.join(new_lines)
         text = re.sub(r"\t*\\(end|begin){(.*?)}", "", text)
         text = re.sub(r'\t*- <ex></ex>\n*', '', text)
+        for x in re.finditer('<ex><label>(?P<label>.*?)</label></ex>\s+(- )?<ex>', text):
+            label = x.group('label')
+            text = text.replace(x.group(), '<ex><label>' + label + '</label>')
 
         # no jumps > 1
         previous_depth = 0
@@ -425,9 +421,17 @@ class ConvertLatexMultiline:
             if not 'en/' in rows[0]:
                 rows.insert(1,'------------|------------')
             else:
-                rows.insert(0, '| | |')
-                rows.insert(1, '------------|------------')
-            text = text.replace(x.group(),'\n'+'\n'.join(rows)+'\n')
+                SS_RE = re.compile(r'\[[\w$`-]+\]\(/([\w$`-]+)\)')
+                y = re.search(r'((- )?(<(ex|sn)>)?(?P<ss>'+SS_RE.pattern+'):?(</(ex|sn)>)?\s*)' + re.escape(x.group()), text)
+                if y:
+                    rows.insert(0, '|'+y.group('ss')+'|'+y.group('ss')+'|')
+                    rows.insert(1, '------------|------------')
+                    text = text.replace(y.group(),x.group())
+                else:
+                    rows.insert(0, '| | |')
+                    rows.insert(1, '------------|------------')
+            table = '\n'+'\n'.join(rows)+'\n'
+            text = text.replace(x.group(), table)
         return text
 
     def convert_last(self, text):

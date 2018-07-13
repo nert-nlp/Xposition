@@ -9,8 +9,10 @@ P_RE = re.compile(r'\[(?P<text>([\w\\\'’-])+)\]\(/en/(?P<p>[\w\'’\\-]+)\)')
 SS_RE = re.compile(r'\[[\w$`-]+\]\(/(?P<ss>[\w$`-]+)\)')
 HEADER_RE1 = re.compile('^(- )?(<(ex|sn)>)?('+SS_RE.pattern+'.*):(</(ex|sn)>)?$') # [PartPortion](/PartPortion) is used ...:
 HEADER_RE2 = re.compile('^(- )?(<(ex|sn)>)?(.*'+SS_RE.pattern+'):(</(ex|sn)>)?$') # [PartPortion](/PartPortion) is used ...:
+HEADER_RE3 = re.compile('^(- )?(<(ex|sn)>)?(.*: '+SS_RE.pattern+')(</(ex|sn)>)?$') # [PartPortion](/PartPortion) is used ...:
 TABLE_HEADER_RE = re.compile('(<(ex|sn)>)?'+SS_RE.pattern+'(</(ex|sn)>)?\|')
 ALT_SS_RE = re.compile('\('+SS_RE.pattern+'\)')
+SUBSCRIPT_SS_RE = re.compile('<sub>'+SS_RE.pattern+'</sub>')
 ORDINARY_RE = re.compile('^(\[|\w).*$')
 EXAMPLE_RE = re.compile('<(ex|sn)>(?P<ex>.+?)</(ex|sn)>')
 LABEL_RE = re.compile('<label>(?P<label>.+?)</label>')
@@ -111,7 +113,7 @@ for file in os.listdir(dir):
 
                 depth = len(re.match('^\t*', line).group()) if line.strip() else depth
 
-                if HEADER_RE1.match(line) or HEADER_RE2.match(line):
+                if HEADER_RE1.match(line) or HEADER_RE2.match(line) or HEADER_RE3.match(line):
                     default_ss = SS_RE.search(line).group('ss')
                     # print(default_ss,line)
                 elif TABLE_HEADER_RE.search(line):
@@ -138,6 +140,11 @@ for file in os.listdir(dir):
                     text = re.sub('[’`]', "'", text)
                     if '|' in line and len(table_ss) == 2:
                         tmp_ss = table_ss[0 if p_link.start()<line.index('|') else 1]
+                    if SUBSCRIPT_SS_RE.search(line):
+                        for x in SUBSCRIPT_SS_RE.finditer(line):
+                            if p_link.start() < x.start():
+                                tmp_ss = x.group('ss')
+                                break
                     if text == prep:
                         if EXAMPLE_RE.search(line) and not ' ' in default_ss:
                             line = line.replace(p_link.group(0),
