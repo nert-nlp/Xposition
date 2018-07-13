@@ -111,7 +111,7 @@ class ArticleMetadataFormFunctions:
         newcategory = ArticleCategory(slug=name,
                                       name=name,
                                       description='[created by import]',
-                                      parent=models.Article.objects.get(urlpath=parent).category if parent else None)
+                                      parent=None)
         newcategory.article = newarticle
         newcategory.save()
         return newarticle, newcategory
