@@ -22,7 +22,7 @@ DEFAULT_STR = ' '
 construal_list = set()
 adposition_list = set()
 usage_list = set()
-supersense_list = set()
+supersense_list = {'Temporal', 'Configuration', 'Participant'}
 adp_trans = set()
 adp_intrans = set()
 
@@ -228,8 +228,8 @@ with open(file, encoding='utf8') as f:
                     mwe_subtokens = tok_sem['lexlemma']
                     main_subtoken_indices = main_indices(token_indices)
                     main_subtoken_string = main_string(mwe_subtokens, token_indices)
-
-                    add_ptoken()
+                    if construal_id>0 and usage_id>0 and adposition_id>0:
+                        add_ptoken()
 
                     morphtype = 'standalone_preposition' if not adposition_name == "'s" else 'suffix'
                     if hasobj:
@@ -237,21 +237,21 @@ with open(file, encoding='utf8') as f:
                     else:
                         adp_intrans.add(adposition_name)
                     adposition_list.add((adposition_name, language_name, morphtype, obj_case))
-                    construal_list.add(
-                        (role_name, function_name, special, ids.clean_ss(role_name), ids.clean_ss(function_name)))
-                    usage_list.add((adposition_name, role_name, function_name, obj_case, adposition_id, construal_id))
-                    if not '?' in role_name and not '`' in role_name and not role_name == ' ':
-                        supersense_list.add(role_name)
-                    if not '?' in function_name and not '`' in function_name and not function_name == ' ':
-                        supersense_list.add(function_name)
+                    if ids.clean_ss(role_name)>0 and ids.clean_ss(function_name)>0:
+                        construal_list.add( (role_name, function_name, special, ids.clean_ss(role_name), ids.clean_ss(function_name)) )
+                    if adposition_id>0 and construal_id>0:
+                        usage_list.add((adposition_name, role_name, function_name, obj_case, adposition_id, construal_id))
+                    supersense_list.add(role_name)
+                    supersense_list.add(function_name)
 
 
 # output CorpusSentences
 with open('corpus_sentences.json', 'w', encoding='utf8') as f:
     json.dump(corpus_sentences, f)
 # output PTokenAnnotations
-with open('ptoken_annotations.json', 'w', encoding='utf8') as f:
-    json.dump(ptoken_annotations, f)
+if ptoken_annotations:
+    with open('ptoken_annotations.json', 'w', encoding='utf8') as f:
+        json.dump(ptoken_annotations, f)
 # calculate adposition transitivity
 adp_transitivity = {}
 for a in adposition_list:
@@ -265,15 +265,17 @@ with open('adposition_revisions.tsv', 'w') as f:
     for a in adposition_list:
         f.write('\t'.join(a) +'\t'+adp_transitivity[a[0]]+'\n')
 # output Construals
-with open('construals.tsv', 'w') as f:
-    f.write('role_name\tfunction_name\tspecial\trole_id\tfunction_id' + '\n')
-    for c in construal_list:
-        f.write('\t'.join(c) + '\n')
+if len(construal_list)>1:
+    with open('construals.tsv', 'w') as f:
+        f.write('role_name\tfunction_name\tspecial\trole_id\tfunction_id' + '\n')
+        for c in construal_list:
+            f.write('\t'.join(c) + '\n')
 # output UsageRevisions
-with open('usage_revisions.tsv', 'w') as f:
-    f.write('adposition_name\trole_name\tfunction_name\tobj_case\tadposition_id\tconstrual_id' + '\n')
-    for u in usage_list:
-        f.write('\t'.join(u) + '\n')
+if len(construal_list) > 1:
+    with open('usage_revisions.tsv', 'w') as f:
+        f.write('adposition_name\trole_name\tfunction_name\tobj_case\tadposition_id\tconstrual_id' + '\n')
+        for u in usage_list:
+            f.write('\t'.join(u) + '\n')
 # output SupersenseRevisions
 with open('supersense_revisions.tsv', 'w') as f:
     f.write('supersense_name' + '\n')

@@ -301,6 +301,7 @@ class ConvertLatexMultiline:
                 text = text.replace(x.group(), x.group().replace('\n',' '))
             if not P_RE.search(x.group()) or re.match('.*:(</(ex|sn)>)?$',x.group()):
                 text = text.replace(x.group(), x.group('content'))
+        text = text.replace('\n- \n', '\n')
         return text
 
     def convert_indentation(self, text):
