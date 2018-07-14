@@ -645,10 +645,17 @@ class Adposition(Metadata):
     class Meta:
         verbose_name = _('adposition')
 
+def adp_name_validator(value):
+    if not value:
+        raise ValidationError('Adposition name must not be null', code='invalid')
+    x = re.search('[0-9]', value)
+    if x:
+        raise ValidationError(f'Adposition name must not contain a number: {x.group()} in {value}', code='invalid')
+
 
 class AdpositionRevision(MetadataRevision):
     lang = models.ForeignKey(Language, related_name='adpositionrevisions', verbose_name='Language/dialect')
-    # name = models.CharField(max_length=200, verbose_name='Lemma',
+    # name = models.CharField(max_length=200, verbose_name='Lemma',validators=[adp_name_validator] ,
     #     help_text="Lowercase unless it would normally be capitalized in a dictionary")
     # issue #4: transliteration field
     transliteration = models.CharField(max_length=200, blank=True, verbose_name="Transliteration",
@@ -732,17 +739,23 @@ class UsageRevision(MetadataRevision):
 #
 # Corpus fields
 # Name, version, is_current, url, genre, lang(s), size?, stats?
-
+def version_validator(value):
+    if not value:
+        raise ValidationError('Corpus version must not be null', code='invalid')
+    x = re.search('[0-9]', value)
+    if not x:
+        raise ValidationError(f'Corpus version must contain a number: {value}', code='invalid')
 
 class Corpus(SimpleMetadata):
     # Name, version, is_current, url, genre, lang(s), size?, stats?
     name = models.CharField(max_length=200, null=True, verbose_name="Corpus Name")
-    version = models.CharField(max_length=200, null=True, verbose_name="Version")
+    version = models.CharField(max_length=200, null=True, validators=[version_validator], verbose_name="Version")
     url = models.URLField(max_length=200, blank=True, verbose_name="URL")
     genre = models.CharField(max_length=200, blank=True, verbose_name="Corpus Genre")
     description = models.CharField(max_length=300, blank=True, verbose_name="Description",
                                    help_text="Include number of tokens and basic statistics")
     languages = models.CharField(max_length=200, null=True, verbose_name="Language(s)")
+
 
     def __str__(self):
         return self.name.lower() + self.version
