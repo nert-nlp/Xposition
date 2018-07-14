@@ -744,7 +744,7 @@ def version_validator(value):
         raise ValidationError('Corpus version must not be null', code='invalid')
     x = re.search('[0-9]', value)
     if not x:
-        raise ValidationError(f'Corpus version must contain a number: {value}', code='invalid')
+        raise ValidationError(f'Corpus version must contain a number', code='invalid')
 
 class Corpus(SimpleMetadata):
     # Name, version, is_current, url, genre, lang(s), size?, stats?
