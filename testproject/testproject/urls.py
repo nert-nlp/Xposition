@@ -14,6 +14,7 @@ admin.autodiscover()
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
     url(r'^robots.txt', lambda _: HttpResponse('User-agent: *\nDisallow: /')),
+    url(r'^silk/', include('silk.urls', namespace='silk')),
 ]
 
 if settings.DEBUG:

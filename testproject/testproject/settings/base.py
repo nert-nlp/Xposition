@@ -57,12 +57,18 @@ INSTALLED_APPS = [
     'wiki.plugins.categories.editor',
     'wiki.plugins.metadata',
     'import_export',
+    'silk',
 ]
 
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 
 
+# MIDDLEWARE = [
+#     'silk.middleware.SilkyMiddleware',
+# ]
+
 MIDDLEWARE_CLASSES = [
+    'silk.middleware.SilkyMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -170,3 +176,4 @@ SECURE_BROWSER_XSS_FILTER = True
 SESSION_COOKIE_SECURE = False   # setting to True breaks django-wiki login
 CSRF_COOKIE_SECURE = False  # setting to True breaks django-wiki login
 X_FRAME_OPTIONS = 'DENY'
+
