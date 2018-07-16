@@ -11,7 +11,7 @@ HEADER_RE1 = re.compile('^(- )?(<(ex|sn)>)?('+SS_RE.pattern+'.*):(</(ex|sn)>)?$'
 HEADER_RE2 = re.compile('^(- )?(<(ex|sn)>)?(.*'+SS_RE.pattern+'):(</(ex|sn)>)?$') # [PartPortion](/PartPortion) is used ...:
 HEADER_RE3 = re.compile('^(- )?(<(ex|sn)>)?(.*: '+SS_RE.pattern+')(</(ex|sn)>)?$') # [PartPortion](/PartPortion) is used ...:
 TABLE_HEADER_RE = re.compile('(<(ex|sn)>)?'+SS_RE.pattern+'(</(ex|sn)>)?\|')
-ALT_SS_RE = re.compile('\('+SS_RE.pattern+'\)')
+ALT_SS_RE = re.compile('\('+SS_RE.pattern+'(: .+)?\)')
 SUBSCRIPT_SS_RE = re.compile('<sub>'+SS_RE.pattern+'</sub>')
 ORDINARY_RE = re.compile('^(\[|\w).*$')
 EXAMPLE_RE = re.compile('<(ex|sn)>(?P<ex>.+?)</(ex|sn)>')
@@ -133,29 +133,31 @@ for file in os.listdir(dir):
                 elif ORDINARY_RE.match(line) or depth < previous_depth:
                     default_ss = title
                     # print(default_ss, line)
-                if ALT_SS_RE.search(line):
-                    tmp_ss = ALT_SS_RE.search(line).group('ss')
-                    # print(tmp_ss, line)
-                elif '**'+file.replace('.txt', '')+'**' in line:
-                    tmp_ss = title
-                    # print(tmp_ss, line)
-                if not '|' in line:
-                    table_ss = []
 
                 # convert p
                 ignore_usage = False
-                for p_link in P_RE.finditer(line):
+                while P_RE.search(line):
+                    p_link = P_RE.search(line)
+
+                    if ALT_SS_RE.search(line):
+                        tmp_ss = ALT_SS_RE.search(line).group('ss')
+                        # print(ALT_SS_RE.search(line).group(), tmp_ss)
+                    elif '**' + file.replace('.txt', '') + '**' in line:
+                        tmp_ss = title
+                        # print(tmp_ss, line)
+                    if not '|' in line:
+                        table_ss = []
+
                     prep = p_link.group('p')
                     prep = re.sub('[’`]',"'",prep)
                     text = p_link.group('text')
                     text = re.sub('[’`]', "'", text)
                     if '|' in line and len(table_ss) == 2:
                         tmp_ss = table_ss[0 if p_link.start()<line.index('|') else 1]
-                    if SUBSCRIPT_SS_RE.search(line):
-                        for x in SUBSCRIPT_SS_RE.finditer(line):
-                            if p_link.start() < x.start():
-                                tmp_ss = x.group('ss')
-                                break
+                    for x in SUBSCRIPT_SS_RE.finditer(line):
+                        if p_link.end() == x.start():
+                            tmp_ss = x.group('ss')
+                            break
                     # no usage for prep in brackets
                     for i,ch in enumerate(line):
                         if not ch == '[': continue
@@ -164,9 +166,7 @@ for file in os.listdir(dir):
                                 start = i
                                 end = i+j
                                 x = line[start:end+1]
-                                p_copy = P_RE.search(line)
-                                if p_link.group() == p_copy.group() and p_copy.start()>start and p_copy.end()<end and check_brackets(x):
-                                    # print(title, x, p_copy.group())
+                                if p_link.start()>start and p_link.end()<end and check_brackets(x):
                                     ignore_usage = True
                                     break
                         if ignore_usage: break
@@ -182,6 +182,7 @@ for file in os.listdir(dir):
                         line = line.replace(p_link.group(0), pstart + ' en/' + prep + ']', 1)
 
                     ignore_usage = False
+                    tmp_ss = None
 
                 # convert ss
                 for ss_link in SS_RE.finditer(line):
@@ -199,8 +200,6 @@ for file in os.listdir(dir):
                 if re.match('[}{]',line.strip()):
                     line = '\n'
 
-
-                tmp_ss = None
 
                 previous_depth = depth
                 new_text.append(line)
