@@ -3,6 +3,8 @@ os.chdir('..\scripts')
 
 from wiki.plugins.metadata import models as ms
 
+dir = 'json'
+
 file = 'streusle.go.notes.json'
 
 corpus_sentences = []
@@ -18,13 +20,19 @@ ptoken_header = ['token_indices', 'adposition_name', 'language_name', 'role_name
                  'obj_supersense', 'is_gold', 'annotator_cluster', 'is_transitive', 'adposition_id', 'construal_id',
                  'usage_id', 'mwe_subtokens', 'main_subtoken_indices', 'main_subtoken_string']
 
-DEFAULT_STR = ' '
-construal_list = set()
-adposition_list = set()
-usage_list = set()
-supersense_list = {'Temporal', 'Configuration', 'Participant'}
+DEFAULT_STR = ''
+construal_set = set()
+adposition_set = set()
+usage_set = set()
+supersense_set = set()
 adp_trans = set()
 adp_intrans = set()
+construal_json = []
+adposition_json = []
+usage_json = []
+supersense_json = [
+    {'supersense_name':'Temporal'}, {'supersense_name':'Configuration'}, {'supersense_name':'Participant'}
+]
 
 # corpus sent
 corpus_name = 'STREUSLE'
@@ -236,48 +244,83 @@ with open(file, encoding='utf8') as f:
                         adp_trans.add(adposition_name)
                     else:
                         adp_intrans.add(adposition_name)
-                    adposition_list.add((adposition_name, language_name, morphtype, obj_case))
-                    if int(ids.clean_ss(role_name))>0 and int(ids.clean_ss(function_name))>0:
-                        construal_list.add( (role_name, function_name, special, ids.clean_ss(role_name), ids.clean_ss(function_name)) )
-                    if int(adposition_id)>0 and int(construal_id)>0:
-                        usage_list.add((adposition_name, role_name, function_name, obj_case, adposition_id, construal_id))
-                    supersense_list.add(role_name)
-                    supersense_list.add(function_name)
+                    if not adposition_name in adposition_set:
+                        adposition_json.append({
+                            'adposition_name':adposition_name,
+                            'language_name':language_name,
+                            'morphtype':morphtype,
+                            'obj_case':obj_case
+                        })
+                        adposition_set.add(adposition_name)
+                    role_id = ids.clean_ss(role_name)
+                    function_id = ids.clean_ss(function_name)
+                    if not (role_name, function_name, special) in construal_set and ((int(role_id)>0 and int(function_id)>0) or special):
+                        construal_json.append({
+                                'role_name':role_name,
+                                'function_name':function_name,
+                                'special':special,
+                                'role_id':role_id,
+                                'function_id':function_id
+                        })
+                        construal_set.add( (role_name, function_name, special) )
+                    if not (adposition_name, role_name, function_name) in usage_set and int(adposition_id)>0 and int(construal_id)>0:
+                        usage_json.append({
+                            'adposition_name':adposition_name,
+                            'role_name':role_name,
+                            'function_name': function_name,
+                            'obj_case':obj_case,
+                            'adposition_id': adposition_id,
+                            'construal_id': construal_id
+                        })
+                        usage_set.add( (adposition_name, role_name, function_name) )
+                    if not role_name in supersense_set:
+                        supersense_json.append({
+                            'supersense_name':role_name
+                        })
+                        supersense_set.add(role_name)
+                    if not function_name in supersense_set:
+                        supersense_json.append({
+                            'supersense_name':function_name
+                        })
+                        supersense_set.add(function_name)
 
+
+if not os.path.exists(dir):
+    os.makedirs(dir)
 
 # output CorpusSentences
-with open('corpus_sentences.json', 'w', encoding='utf8') as f:
+file = os.path.join(dir,'corpus_sentences.json')
+with open(file, 'w', encoding='utf8') as f:
     json.dump(corpus_sentences, f)
+
 # output PTokenAnnotations
+file = os.path.join(dir,'ptoken_annotations.json')
 if ptoken_annotations:
-    with open('ptoken_annotations.json', 'w', encoding='utf8') as f:
+    with open(file, 'w', encoding='utf8') as f:
         json.dump(ptoken_annotations, f)
+
 # calculate adposition transitivity
-adp_transitivity = {}
-for a in adposition_list:
-    adp = a[0]
-    adp_transitivity[adp] = 'sometimes_transitive' if (adp in adp_trans and adp in adp_intrans) \
+for i,a in enumerate(adposition_json):
+    adp = a['adposition_name']
+    trans = 'sometimes_transitive' if (adp in adp_trans and adp in adp_intrans) \
                             else 'always_transitive' if adp in adp_trans \
                             else 'always_intransitive'
+    adposition_json[i]['transitivity'] = trans
 # output AdpositionRevisions
-with open('adposition_revisions.tsv', 'w') as f:
-    f.write('adposition_name\tlanguage_name\tmorphtype\tobj_case\ttransitivity' + '\n')
-    for a in adposition_list:
-        f.write('\t'.join(a) +'\t'+adp_transitivity[a[0]]+'\n')
+file = os.path.join(dir,'adposition_revisions.json')
+with open(file, 'w') as f:
+    json.dump(adposition_json, f)
 # output Construals
-if len(construal_list)>1:
-    with open('construals.tsv', 'w') as f:
-        f.write('role_name\tfunction_name\tspecial\trole_id\tfunction_id' + '\n')
-        for c in construal_list:
-            f.write('\t'.join(c) + '\n')
+file = os.path.join(dir,'construals.json')
+if len(construal_json)>1:
+    with open(file, 'w') as f:
+        json.dump(construal_json, f)
 # output UsageRevisions
-if len(construal_list) > 1:
-    with open('usage_revisions.tsv', 'w') as f:
-        f.write('adposition_name\trole_name\tfunction_name\tobj_case\tadposition_id\tconstrual_id' + '\n')
-        for u in usage_list:
-            f.write('\t'.join(u) + '\n')
+file = os.path.join(dir,'usage_revisions.json')
+if len(usage_json) > 1:
+    with open(file, 'w') as f:
+        json.dump(usage_json, f)
 # output SupersenseRevisions
-with open('supersense_revisions.tsv', 'w') as f:
-    f.write('supersense_name' + '\n')
-    for s in supersense_list:
-        f.write(s  + '\n')
+file = os.path.join(dir,'supersense_revisions.json')
+with open(file, 'w') as f:
+    json.dump(supersense_json, f)

@@ -7,6 +7,9 @@ from wiki.plugins.metadata import models as ms
 dir = 'markdown-and-macros'
 dir2 = 'markdown-construals'
 
+dir_out = 'json'
+
+OUTPUT_SS_DESCRIPTIONS = False
 
 def write_json(dir, output):
     ids = defaultdict(int)
@@ -36,10 +39,12 @@ def write_json(dir, output):
 
     with open(output, 'w', encoding='utf8') as f:
         json.dump(articles,f)
-    if short_descriptions:
+    if short_descriptions and OUTPUT_SS_DESCRIPTIONS:
         with open('ss_short_descriptions.txt', 'w', encoding='utf8') as f:
             f.write('\n\n'.join(short_descriptions))
 
-write_json(dir,'supersense_article_revisions.json')
+file = os.path.join(dir_out,'supersense_article_revisions.json')
+write_json(dir,file)
 if os.path.exists(dir2):
-    write_json(dir2, 'construal_article_revisions.json')
+    file = os.path.join(dir_out, 'construal_article_revisions.json')
+    write_json(dir2, file)
