@@ -41,4 +41,5 @@ def write_json(dir, output):
             f.write('\n\n'.join(short_descriptions))
 
 write_json(dir,'supersense_article_revisions.json')
-write_json(dir2, 'construal_article_revisions.json')
+if os.path.exists(dir2):
+    write_json(dir2, 'construal_article_revisions.json')

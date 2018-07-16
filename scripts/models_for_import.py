@@ -104,25 +104,25 @@ class GetIDs:
         if (adposition_name,language_name) in self.adp_memo:
             return self.adp_memo[(adposition_name,language_name)]
         else:
-            return DEFAULT_STR
+            return '0'
 
     def clean_con(self, role_name, function_name, special):
         if (role_name, function_name, special) in self.con_memo:
             return self.con_memo[(role_name, function_name, special)]
         else:
-            return DEFAULT_STR
+            return '0'
 
     def clean_us(self, adposition_name, construal_id):
         if (adposition_name, construal_id) in self.us_memo:
             return self.us_memo[(adposition_name, construal_id)]
         else:
-            return DEFAULT_STR
+            return '0'
 
     def clean_ss(self, name):
         if name in self.ss_memo:
             return self.ss_memo[name]
         else:
-            return DEFAULT_STR
+            return '0'
 
 def add_corp_sent():
     x = {}
@@ -221,14 +221,14 @@ with open(file, encoding='utf8') as f:
                     is_transitive = '1' if hasobj else '0'
                     adposition_id = ids.clean_adp(language_name, adposition_name)
                     construal_id = ids.clean_con(role_name, function_name, special)
-                    usage_id = ids.clean_us(adposition_name, int(construal_id)) if not construal_id == DEFAULT_STR \
-                        else DEFAULT_STR
+                    usage_id = ids.clean_us(adposition_name, int(construal_id)) if not construal_id == '0' \
+                        else '0'
                     gov_head_index = str(govobj['gov']) if hasgov else DEFAULT_STR
                     obj_head_index = str(govobj['obj']) if hasobj else DEFAULT_STR
                     mwe_subtokens = tok_sem['lexlemma']
                     main_subtoken_indices = main_indices(token_indices)
                     main_subtoken_string = main_string(mwe_subtokens, token_indices)
-                    if construal_id>0 and usage_id>0 and adposition_id>0:
+                    if int(construal_id)>0 and int(usage_id)>0 and int(adposition_id)>0:
                         add_ptoken()
 
                     morphtype = 'standalone_preposition' if not adposition_name == "'s" else 'suffix'
@@ -237,9 +237,9 @@ with open(file, encoding='utf8') as f:
                     else:
                         adp_intrans.add(adposition_name)
                     adposition_list.add((adposition_name, language_name, morphtype, obj_case))
-                    if ids.clean_ss(role_name)>0 and ids.clean_ss(function_name)>0:
+                    if int(ids.clean_ss(role_name))>0 and int(ids.clean_ss(function_name))>0:
                         construal_list.add( (role_name, function_name, special, ids.clean_ss(role_name), ids.clean_ss(function_name)) )
-                    if adposition_id>0 and construal_id>0:
+                    if int(adposition_id)>0 and int(construal_id)>0:
                         usage_list.add((adposition_name, role_name, function_name, obj_case, adposition_id, construal_id))
                     supersense_list.add(role_name)
                     supersense_list.add(function_name)
