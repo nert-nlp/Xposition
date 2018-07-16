@@ -67,7 +67,9 @@ TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 #     'silk.middleware.SilkyMiddleware',
 # ]
 
-MIDDLEWARE_CLASSES = [
+
+# MIDDLEWARE_CLASSES
+MIDDLEWARE = [
     'silk.middleware.SilkyMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
