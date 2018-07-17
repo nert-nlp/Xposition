@@ -57,20 +57,15 @@ INSTALLED_APPS = [
     'wiki.plugins.categories.editor',
     'wiki.plugins.metadata',
     'import_export',
-    'silk',
+    # 'silk',
 ]
 
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 
 
-# MIDDLEWARE = [
-#     'silk.middleware.SilkyMiddleware',
-# ]
-
-
-# MIDDLEWARE_CLASSES
-MIDDLEWARE = [
-    'silk.middleware.SilkyMiddleware',
+# MIDDLEWARE
+MIDDLEWARE_CLASSES = [
+    # 'silk.middleware.SilkyMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
