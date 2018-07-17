@@ -360,7 +360,7 @@ class ConvertLatexMultiline:
         for line in lines:
             depth = len(re.match('^\t*', line).group()) if line.strip() else depth
             start = ''.join(['\t' for x in range(depth)])
-            if depth > previous_depth and flatten:
+            if depth > previous_depth and flatten and '<ex>' in line:
                 start = ''.join(['\t' for x in range(previous_depth)])
                 depth = previous_depth
             end = line[-1] if line and line[-1] in [' ', '\n'] else ''
