@@ -61,7 +61,7 @@ class ConvertLatexByLine:
         if r'\begin{itemize}' in line or r'\begin{enumerate}' in line:
             self.list_num = 1
         if r'\item' in line:
-            start = '###' if self.depth<=1 else ''
+            start = '\n\n###' if self.depth<=1 else ''
             line = line.replace(r'\item', start+str(self.list_num) + '.')
             self.list_num += 1
         return line
@@ -178,9 +178,9 @@ class ConvertLatexMultiline:
             start = text.index('<choices>')
             end = text.index('</choices>')
             content = text[start:end]
-            content = re.sub('(?<=[^<])/', r'\\', content)
-            content = content.replace(r'\\\\', r'\\')
-            content = content.replace(r'\\', '</u>/<u>')
+            content = re.sub('(?<=[^<])/', '</u>/<u>', content)
+            content = content.replace('\\\\', '</u>/<u>')
+            content = content.replace('</u>/<u></u>/<u>', '</u>/<u>')
             text = text[:start] + content + text[end:]
             text = text.replace('<choices>', '<u>', 1)
             text = text.replace('</choices>', '</u>', 1)
@@ -229,7 +229,7 @@ class ConvertLatexMultiline:
         text = text.replace('[toward(s)](/en/toward(s))', '[toward](/en/toward)/[towards](/en/towards)')
         text = text.replace('[off(_of)](/en/off(_of))', '[off](/en/off)/[off_of](/en/off_of)')
         text = text.replace('[out(_of)](/en/out(_of))', '[out](/en/out)/[out_of](/en/out_of)')
-        text = text.replace('[as](/en/as)--[as](/en/as)', '[as](/en/as)—[as](/en/as)')
+        text = re.sub('\[[Aa]s\]\(/en/as\)([- ])?-\[as\]\(/en/as\)', '[as](/en/as)—[as](/en/as)', text)
 
         # PartPortion
         text = re.sub(r'\\psstX{Part/Portion}{Part/Portion}', " [[PartPortion]] ", text)
@@ -303,6 +303,7 @@ class ConvertLatexMultiline:
         for x in re.finditer(r'<(ex|sn)>(?P<content>.*?)</(ex|sn)>', text, re.DOTALL):
             if '\n' in x.group():
                 text = text.replace(x.group(), x.group().replace('\n',' '))
+        for x in re.finditer(r'<(ex|sn)>(?P<content>.*?)</(ex|sn)>', text, re.DOTALL):
             if not P_RE.search(x.group()) or re.match('.*:(</(ex|sn)>)?$',x.group()):
                 text = text.replace(x.group(), x.group('content'))
         text = text.replace('\n- \n', '\n')
@@ -360,16 +361,17 @@ class ConvertLatexMultiline:
         for line in lines:
             depth = len(re.match('^\t*', line).group()) if line.strip() else depth
             start = ''.join(['\t' for x in range(depth)])
-            if depth > previous_depth and flatten and '<ex>' in line:
-                start = ''.join(['\t' for x in range(previous_depth)])
+            if depth > previous_depth and flatten:
+                if '<ex>' in line:
+                    start = ''.join(['\t' for x in range(previous_depth)])
                 depth = previous_depth
+            elif line.strip():
+                flatten = False
             end = line[-1] if line and line[-1] in [' ', '\n'] else ''
             line = start + line.strip() + end
             new_lines.append(line)
             if '<ex>' in line and P_RE.search(line):
                 flatten = True
-            elif line.strip():
-                flatten = False
             previous_depth = depth
         text = ''.join(new_lines)
 
