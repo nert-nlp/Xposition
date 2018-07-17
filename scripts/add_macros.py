@@ -237,6 +237,7 @@ for file in os.listdir(dir2):
                     line = line.replace(x.group(0), '[ss '+x.group('ss')+']')
                 # fix as-as
                 line = re.sub('\[p en/as [\w$`-]+\]—\[p en/as [\w$`-]+\]', '[p en/as]—[p en/as]', line)
+                line = re.sub('\[pspecial As en/as [\w$`-]+\]—\[p en/as [\w$`-]+\]', '[pspecial As en/as]—[p en/as]', line)
                 new_text.append(line)
 
 

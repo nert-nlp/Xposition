@@ -229,7 +229,8 @@ class ConvertLatexMultiline:
         text = text.replace('[toward(s)](/en/toward(s))', '[toward](/en/toward)/[towards](/en/towards)')
         text = text.replace('[off(_of)](/en/off(_of))', '[off](/en/off)/[off_of](/en/off_of)')
         text = text.replace('[out(_of)](/en/out(_of))', '[out](/en/out)/[out_of](/en/out_of)')
-        text = re.sub('\[[Aa]s\]\(/en/as\)([- ])?-\[as\]\(/en/as\)', '[as](/en/as)—[as](/en/as)', text)
+        text = re.sub('\[as\]\(/en/as\)([- ])?-\[as\]\(/en/as\)', '[as](/en/as)—[as](/en/as)', text)
+        text = re.sub('\[As\]\(/en/as\)([- ])?-\[as\]\(/en/as\)', '[As](/en/as)—[as](/en/as)', text)
 
         # PartPortion
         text = re.sub(r'\\psstX{Part/Portion}{Part/Portion}', " [[PartPortion]] ", text)
