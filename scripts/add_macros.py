@@ -116,8 +116,8 @@ for file in os.listdir(dir):
             depth = 0
 
             examples.INDEX = 1
-
-            for line in f:
+            lines = f.readlines()
+            for index, line in enumerate(lines):
                 # fix Part/Portion
                 line = line.replace('Part/Portion', 'PartPortion')
 
@@ -172,6 +172,15 @@ for file in os.listdir(dir):
                         if ignore_usage: break
                     if ' ' in default_ss:
                         ignore_usage = True
+                    # examples with readings don't get a usage
+                    if EXAMPLE_RE.search(line) and len(lines)>index+1:
+                        next_line = lines[index + 1]
+                        i = 1
+                        while next_line.strip()=='' and len(lines)>index+i:
+                            next_line = lines[index + i]
+                            i +=1
+                        if not EXAMPLE_RE.search(next_line) and re.search(r'[Rr]eading', next_line):
+                            ignore_usage = True
                     pstart = '[p'
                     if not text == prep:
                         pstart = '[pspecial ' + text

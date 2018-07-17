@@ -20,7 +20,7 @@ ptoken_header = ['token_indices', 'adposition_name', 'language_name', 'role_name
                  'obj_supersense', 'is_gold', 'annotator_cluster', 'is_transitive', 'adposition_id', 'construal_id',
                  'usage_id', 'mwe_subtokens', 'main_subtoken_indices', 'main_subtoken_string']
 
-DEFAULT_STR = ''
+DEFAULT_STR = ' '
 construal_set = set()
 adposition_set = set()
 usage_set = set()
@@ -295,7 +295,7 @@ with open(file, 'w', encoding='utf8') as f:
 
 # output PTokenAnnotations
 file = os.path.join(dir,'ptoken_annotations.json')
-if ptoken_annotations:
+if [p['adposition_name'] for p in ptoken_annotations if not p['adposition_name']=='at']:
     with open(file, 'w', encoding='utf8') as f:
         json.dump(ptoken_annotations, f)
 
@@ -317,7 +317,7 @@ if len(construal_json)>1:
         json.dump(construal_json, f)
 # output UsageRevisions
 file = os.path.join(dir,'usage_revisions.json')
-if len(usage_json) > 1:
+if [u['adposition_name'] for u in usage_json if not u['adposition_name']=='at']:
     with open(file, 'w') as f:
         json.dump(usage_json, f)
 # output SupersenseRevisions

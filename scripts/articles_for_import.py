@@ -43,6 +43,9 @@ def write_json(dir, output):
         with open('ss_short_descriptions.txt', 'w', encoding='utf8') as f:
             f.write('\n\n'.join(short_descriptions))
 
+
+if not os.path.exists(dir_out):
+    os.makedirs(dir_out)
 file = os.path.join(dir_out,'supersense_article_revisions.json')
 write_json(dir,file)
 if os.path.exists(dir2):
