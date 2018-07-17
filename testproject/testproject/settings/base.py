@@ -175,3 +175,12 @@ CSRF_COOKIE_SECURE = False  # setting to True breaks django-wiki login
 X_FRAME_OPTIONS = 'DENY'
 
 SILKY_PYTHON_PROFILER = True
+
+DEBUG_TOOLBAR_PANELS = [
+    'debug_toolbar.panels.timer.TimerPanel',
+    'debug_toolbar.panels.settings.SettingsPanel',
+    'debug_toolbar.panels.request.RequestPanel',
+    'debug_toolbar.panels.sql.SQLPanel',
+    'debug_toolbar.panels.redirects.RedirectsPanel',
+    'debug_toolbar.panels.profiling.ProfilingPanel'
+]
