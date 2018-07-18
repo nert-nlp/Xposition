@@ -116,8 +116,9 @@ class ArticleMetadataFormFunctions:
         newcategory.save()
         return newarticle, newcategory
 
-    def newArticle_without_category(self, name=None, parent=None, slug=None):
-        newarticle = self.newArticle(name=name,
+    def newArticle_without_category(self, ex_article=None, name=None, parent=None, slug=None):
+        newarticle = self.newArticle(ex_article=ex_article,
+                                     name=name,
                                      slug=slug or name,
                                      parent=parent)
         newarticle.save()
