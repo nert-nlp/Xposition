@@ -20,14 +20,6 @@
       {% endfor %}
     </ul>
 
-    {% usages_for_lang as usages %}
-    <h4 id="usages">Usages ({{usages|length}})</h4>
-    <ul>
-      {% for u in usages %}
-      <li>{{u.metadata.html}}</li>
-      {% endfor %}
-    </ul>
-
     {% include "category_article_view.html" %}
   </div>
   <div class="col-md-3">
