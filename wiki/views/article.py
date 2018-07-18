@@ -38,7 +38,7 @@ class ArticleView(ArticleMixin, TemplateView):
 
     template_name = "wiki/view.html"
 
-    # @silk_profile(name='Load Article')
+
     @method_decorator(get_article(can_read=True))
     def dispatch(self, request, article, *args, **kwargs):
         try:    # TODO: look for another way to choose the template dynamically
