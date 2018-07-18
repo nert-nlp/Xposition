@@ -181,6 +181,8 @@ class ConvertLatexMultiline:
             content = re.sub('(?<=[^<])/', '</u>/<u>', content)
             content = content.replace('\\\\', '</u>/<u>')
             content = content.replace('</u>/<u></u>/<u>', '</u>/<u>')
+            content = content.replace(' </u>/<u>', '</u>/<u>')
+            content = content.replace('</u>/<u> ', '</u>/<u>')
             text = text[:start] + content + text[end:]
             text = text.replace('<choices>', '<u>', 1)
             text = text.replace('</choices>', '</u>', 1)
