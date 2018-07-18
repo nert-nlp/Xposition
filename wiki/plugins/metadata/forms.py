@@ -82,6 +82,13 @@ class ArticleMetadataForm(forms.ModelForm):
         newcategory.save()
         return newarticle, newcategory
 
+    def newArticle_without_category(self, name=None, parent=None, slug=None):
+        newarticle = self.newArticle(name=name or self.cleaned_data['name'],
+                                     slug=slug or name or self.cleaned_data['slug'],
+                                     parent=parent)
+        newarticle.save()
+        return newarticle
+
     def save(self, commit=True):
         m = super(ArticleMetadataForm, self).save(commit=False)
         if self.instance.id:
@@ -371,7 +378,7 @@ class AdpositionForm(ArticleMetadataForm):
         return thep.article.urlpath_set.all()[0]
 
     def new(self, m, commit=True):
-        newarticle, newcategory = self.newArticle_ArticleCategory(parent=self.article.urlpath_set.all()[0])
+        newarticle, newcategory = self.newArticle_without_category(parent=self.article.urlpath_set.all()[0])
         # associate the article with the SupersenseRevision
         m.article = newarticle
 
@@ -408,7 +415,7 @@ class ConstrualForm(ArticleMetadataForm):
         function_name = deepest_instance(self.cleaned_data['function'].current_revision).name
         name = self.get_construal_slug(role_name, function_name)
         # slug will be the same as name
-        newarticle, newcategory = self.newArticle_ArticleCategory(name=name)
+        newarticle, newcategory = self.newArticle_without_category(name=name)
         m.article = newarticle
         m.category = newcategory
         if commit:
@@ -470,9 +477,9 @@ class UsageForm(ArticleMetadataForm):
         name = self.get_usage_name(deepest_instance(m.adposition.current_revision).name,
                                    str(m.construal),
                                    case)
-        newarticle, newcategory = self.newArticle_ArticleCategory(parent=self.article.urlpath_set.all()[0],
-                                                                  name=name,
-                                                                  slug=caseSlug + construalSlug)
+        newarticle, newcategory = self.newArticle_without_category(parent=self.article.urlpath_set.all()[0],
+                                                                   name=name,
+                                                                   slug=caseSlug + construalSlug)
         # associate the article with the SupersenseRevision
         m.article = newarticle
         m.name = name
@@ -514,9 +521,9 @@ class CorpusForm(ArticleMetadataForm):
         name = m.name
         version = m.version
         slug = self.get_corpus_slug(name, version)
-        newarticle, newcategory = self.newArticle_ArticleCategory(name=name,
-                                                                  parent=self.article.urlpath_set.all()[0],
-                                                                  slug=slug)
+        newarticle, newcategory = self.newArticle_without_category(name=name,
+                                                                   parent=self.article.urlpath_set.all()[0],
+                                                                   slug=slug)
         m.article = newarticle
         m.category = newcategory
         if commit:

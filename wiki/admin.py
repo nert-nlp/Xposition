@@ -116,6 +116,13 @@ class ArticleMetadataFormFunctions:
         newcategory.save()
         return newarticle, newcategory
 
+    def newArticle_without_category(self, name=None, parent=None, slug=None):
+        newarticle = self.newArticle(name=name,
+                                     slug=slug or name,
+                                     parent=parent)
+        newarticle.save()
+        return newarticle
+
 class ArticleRevisionInstanceLoader(import_export.instance_loaders.ModelInstanceLoader):
     def get_queryset(self):
         x = super(ArticleRevisionInstanceLoader,self).get_queryset()
@@ -273,7 +280,7 @@ class ConstrualResource(resources.ModelResource):
         function_name = deepest_instance(m.function.current_revision).name if m.function else None
         name = self.get_construal_slug(role_name, function_name, m.special)
         # slug will be the same as name
-        newarticle, newcategory = ArticleMetadataFormFunctions(ADMIN_REQUEST).newArticle_ArticleCategory(name=name,
+        newarticle, newcategory = ArticleMetadataFormFunctions(ADMIN_REQUEST).newArticle_without_category(name=name,
                                                                                                          slug=name,
                                                                                                          ex_article=ex_article,
                                                                                                          parent=None)
@@ -363,7 +370,7 @@ class AdpositionRevisionResource(import_export.resources.ModelResource):
             return
 
         # code taken from wiki/plugins/metadata/forms.py
-        newarticle, newcategory = ArticleMetadataFormFunctions(ADMIN_REQUEST).newArticle_ArticleCategory(name=m.name,
+        newarticle, newcategory = ArticleMetadataFormFunctions(ADMIN_REQUEST).newArticle_without_category(name=m.name,
                                                                                         ex_article=ex_article,
                                                                                         parent=lang_article.urlpath_set.all()[0],
                                                                                         slug=m.name)
@@ -438,7 +445,7 @@ class UsageRevisionResource(import_export.resources.ModelResource):
         name = self.get_usage_name(deepest_instance(m.adposition.current_revision).name,
                                    str(m.construal),
                                    case)
-        newarticle, newcategory = ArticleMetadataFormFunctions(ADMIN_REQUEST).newArticle_ArticleCategory(ex_article=self.ex_article,
+        newarticle, newcategory = ArticleMetadataFormFunctions(ADMIN_REQUEST).newArticle_without_category(ex_article=self.ex_article,
                                                                                                          parent=adp_article.urlpath_set.all()[0],
                                                                                                          name=name,
                                                                                                          slug=caseSlug + construalSlug)
