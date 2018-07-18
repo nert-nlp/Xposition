@@ -4,6 +4,7 @@ import re, os
 dir = 'markdown'
 dir2 = 'markdown-and-macros'
 
+SKIP_SPECIAL = False
 
 P_RE = re.compile(r'\[(?P<text>([\w\\\'’-])+)\]\(/en/(?P<p>[\w\'’\\-]+)\)')
 SS_RE = re.compile(r'\[[\w$`-]+\]\(/(?P<ss>[\w$`-]+)\)')
@@ -212,7 +213,7 @@ for file in os.listdir(dir):
 
                 previous_depth = depth
                 new_text.append(line)
-            if not ' ' in file:  # ignore 'Special Constructions', ...
+            if not ' ' in file or not SKIP_SPECIAL:  # ignore 'Special Constructions', ...
                 with open(os.path.join(dir2, file), 'w+', encoding='utf8') as f2:
                     f2.write(''.join(new_text))
 
@@ -241,7 +242,7 @@ for file in os.listdir(dir2):
                 new_text.append(line)
 
 
-        if not ' ' in file:  # ignore 'Special Constructions', ...
+        if not ' ' in file or not SKIP_SPECIAL:  # ignore 'Special Constructions', ...
             with open(os.path.join(dir2, file), 'w', encoding='utf8') as f2:
                 f2.write(''.join(new_text))
 
