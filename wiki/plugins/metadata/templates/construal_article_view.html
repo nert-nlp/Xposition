@@ -12,11 +12,11 @@
   <div class="col-md-9">
     {% wiki_render article %}
 
-    {% usages_for_construal as usages %}
+    {% usagerevs_for_construal as usages %}
     <h4 id="usages">Usages ({{usages|length}})</h4>
     <ul>
       {% for u in usages %}
-      <li>{{u.metadata.html}}</li>
+      <li>{{u.html}}</li>
       {% endfor %}
     </ul>
 

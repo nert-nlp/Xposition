@@ -12,21 +12,16 @@
   <div class="col-md-9">
     {% wiki_render article %}
 
-    {% adpositions_for_lang as adpositions %}
+    {% adpositionrevs_for_lang as adpositions %}
     <h4 id="adps">Adpositions ({{adpositions|length}})</h4>
     <ul>
       {% for p in adpositions %}
-      <li>{{p.metadata.html}} {{p.current_revision.metadatarevision.adpositionrevision.transliteration}}</li>
+      <li>{{p.html}} {{p.transliteration}}</li>
       {% endfor %}
     </ul>
 
-    {% usages_for_lang as usages %}
-    <h4 id="usages">Usages ({{usages|length}})</h4>
-    <ul>
-      {% for u in usages %}
-      <li>{{u.metadata.html}}</li>
-      {% endfor %}
-    </ul>
+    {# usages_for_lang as usages #}
+    
 
     {% include "category_article_view.html" %}
   </div>

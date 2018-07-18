@@ -7,6 +7,7 @@ from bitfield import BitField
 import copy, sys, re
 from enum import IntEnum
 from django.utils.encoding import force_text
+from django.utils.functional import cached_property
 from django.utils.safestring import mark_safe
 from django.contrib.contenttypes.models import ContentType
 from functools import reduce
@@ -342,7 +343,15 @@ class Supersense(Metadata):
         else:
             return ugettext('Current revision not set!!')
 
-    @property
+    @cached_property
+    def html(self):
+        return mark_safe('<a href="' + self.article.get_absolute_url() + '" class="supersense">' + self.name_html + '</a>')
+
+    @cached_property
+    def name_html(self):    # technically this can change if a user edits the supersense name, but it's going to be rare
+        return format_html('{}', self.current_revision.metadatarevision.name)
+
+    @cached_property
     def template(self):
         return "supersense_article_view.html"
 
@@ -367,7 +376,7 @@ class SupersenseRevision(MetadataRevision):
     def editurl(cls, urlpath):
         return reverse('wiki:metadata_edit_supersense', args=[urlpath])
 
-    @property
+    @cached_property
     def supersense(self):
         return Supersense.objects.get(current_revision=self)
 
@@ -389,10 +398,15 @@ class Construal(SimpleMetadata):
     def __str__(self):
         return str(self.role) + ' ~> ' + str(self.function) if self.function and self.role else str(self.special)
 
-    def html(self):
-        return super(Construal, self).html().replace(' ~> ', '&#x219d;')
-
     @property
+    def html(self):
+        return mark_safe(f'<a href="{self.article.get_absolute_url()}" class="construal">{self.name_html}</a>')
+
+    @cached_property
+    def name_html(self):
+        return self.special.strip() or format_html('{}&#x219d;{}', self.role, self.function)
+
+    @cached_property
     def template(self):
         return "construal_article_view.html"
 
@@ -570,7 +584,7 @@ class Language(SimpleMetadata):
 
         return options, default
 
-    @property
+    @cached_property
     def template(self):
         return "language_article_view.html"
 
@@ -639,6 +653,14 @@ class Adposition(Metadata):
             return ugettext('Current revision not set!!')
 
     @property
+    def html(self):
+        return format_html('<a href="' + self.article.get_absolute_url() + '" class="adposition">' + self.name_html + '</a>')
+
+    @cached_property
+    def name_html(self):    # technically this can change if a user edits the adposition name, but it's going to be rare
+        return format_html('{}', self.current_revision.metadatarevision.name)
+
+    @cached_property
     def template(self):
         return "adposition_article_view.html"
 
@@ -671,12 +693,15 @@ class AdpositionRevision(MetadataRevision):
     def __str__(self):
         return ('Adposition Revision: %s %d') % (self.name, self.revision_number)
 
+    def html(self):
+        return format_html('<a href="' + self.article_revision.article.get_absolute_url() + '" class="adposition">{}</a>', self.name)
+
     @classmethod
     def editurl(cls, urlpath):
         # return "_plugin/metadata/editp"
         return reverse('wiki:metadata_edit_adposition', args=[urlpath])
 
-    @property
+    @cached_property
     def adposition(self):
         return Adposition.objects.get(current_revision=self)
 
@@ -695,7 +720,7 @@ class Usage(Metadata):
     def field_names(self):
         return {'name', 'description', 'adposition', 'obj_case', 'construal'}
 
-    @property
+    @cached_property
     def template(self):
         return "usage_article_view.html"
 
@@ -713,10 +738,15 @@ class UsageRevision(MetadataRevision):
     def __str__(self):
         return ('Usage Revision: %s %d') % (self.name, self.revision_number)
 
-    def html(self, container_type=None):
-        content = (self.adposition.html() + ': ' + self.construal.html()).replace('<a ', '<span ').replace('</a>',
-                                                                                                           '</span>')
-        return mark_safe(super(UsageRevision, self).html(container_type=container_type).replace(self.name, content))
+    @cached_property
+    def url(self):
+        return self.article_revision.article.get_absolute_url()
+
+    @cached_property
+    def html(self):
+        return mark_safe('<a href="' + self.url + '" class="usage">'
+            '<span class="adposition">' + self.adposition.name_html + '</span>: <span class="construal">' \
+            + self.construal.name_html + '</span></a>')
 
     class Meta:
         verbose_name = _('usage revision')
@@ -760,7 +790,7 @@ class Corpus(SimpleMetadata):
     def __str__(self):
         return self.name.lower() + self.version
 
-    @property
+    @cached_property
     def template(self):
         return "corpus_article_view.html"
 
@@ -791,13 +821,15 @@ class CorpusSentence(models.Model):
     note = models.CharField(max_length=200, blank=True, verbose_name="Annotator Note")
     mwe_markup = models.CharField(max_length=200, blank=True, verbose_name="MWE Markup")
 
-    def get_absolute_url(self):
+    @cached_property
+    def url(self):
         return reverse('wiki:corpus_sentence_view', args=[self.language.slug, self.corpus, self.sent_id])
 
+    @cached_property
     def html(self):
-        return format_html('<a href="{}" class="corpussentence">{}</a>', self.get_absolute_url(), self.sent_id)
+        return format_html(f'<a href="{self.url}" class="corpussentence">{{}}</a>', self.sent_id)
 
-    @property
+    @cached_property
     def template(self):
         return "corpus_sentence_view.html"
 
@@ -849,7 +881,7 @@ class PTokenAnnotation(models.Model):
     main_subtoken_indices = IntListField(max_length=200, blank=True, null=True, verbose_name="Main Subtoken Indices")
     main_subtoken_string = StringListField(max_length=200, blank=True, null=True, verbose_name="Main Subtoken String")
 
-    @property
+    @cached_property
     def exnum(self):
         """
         Example number to display in parentheses. 
@@ -858,21 +890,23 @@ class PTokenAnnotation(models.Model):
         """
         return self.id + 3000
 
-    def get_absolute_url(self):
+    @cached_property
+    def url(self):
         return reverse('wiki:ptoken_view', args=[self.exnum])
 
+    @cached_property
     def html(self):
         """Linked example number in parentheses"""
-        return format_html('<a href="{}" class="exnum">({})</a>', self.get_absolute_url(), self.exnum)
+        return format_html(f'<a href="{self.url}" class="exnum">({{}})</a>', self.exnum)
 
     def tokenhtml(self, offsets=False):
         """Linked main token(s) (the contiguous part of the expression): actual tokens, not lemmas.
         If offsets is True, specify token offsets as the title attribute of each word."""
         i, j = self.main_subtoken_indices[0]-1, self.main_subtoken_indices[-1]
         displaystr = ' '.join(format_html('<span title="{}">{}</span>', h, t) for h,t in enumerate(self.sentence.tokens[i:j], start=i+1))
-        return format_html('<a href="{}" class="exnum">' + displaystr + '</a>', self.get_absolute_url())
+        return mark_safe(f'<a href="{self.url}" class="exnum">' + displaystr + '</a>')
 
-    @property
+    @cached_property
     def template(self):
         return "ptoken_view.html"
 
