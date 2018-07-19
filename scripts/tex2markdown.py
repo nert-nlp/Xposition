@@ -7,6 +7,9 @@ into our new Xposition website/wiki
 """
 import re, os
 
+# os.chdir('misc')
+
+
 dir1 = 'tex'
 dir2 = 'markdown'
 
@@ -81,7 +84,12 @@ class ConvertLatexByLine:
         'amr': 'Banarescu et al., 2013',  # AMR;][,
         'amr-guidelines': 'Banarescu et al., 2015',
         'srikumar-13': 'Srikumar and Roth, 2013a',
-        'srikumar-13-inventory': 'Srikumar and Roth, 2013b'
+        'srikumar-13-inventory': 'Srikumar and Roth, 2013b',
+        'lakoff-80':'Lakoff and Johnson, 1980',
+        'nunez-06':'Núñez and Sweetser, 2006',
+        'casasanto-08':'Casasanto and Boroditsky, 2008',
+        'blodgett-18':'Blodgett and Schneider (2018)',
+        'quirk-85':'Quirk et al., 1985',
     }
     def convert_citations(self, line):
         line = re.sub(r'\\Citep', '\cite', line)
@@ -108,6 +116,7 @@ class ConvertLatexByLine:
                     if c in self.CITATIONS:
                         cites[i] = '[' + self.CITATIONS[c] + ']'\
                                        +'(/bib/' + self.CITATIONS[c].replace(' ', '_').replace(',', '').replace('.', '') + '/)'
+                        # print(cites[i])
                 line = line.replace(p.search(line).group(), '(' + op1 + ', '.join(cites) + op2 + ')')
         return line
 
@@ -146,7 +155,7 @@ class ConvertLatexMultiline:
         text = text.replace("$\\rightarrow$", "→")
         text = text.replace("$\\nrightarrow$", "↛")
         text = text.replace("$_{\\text{\\backposs}}$", "<sub>[[`$]]</sub>")
-        text = self.circum_replace(text=text, prefix=r"\\text{", suffix=r"}", rprefix='', rsuffix='')
+        text = self.circum_replace(text=text, prefix=r"\\text{", rprefix='', rsuffix='')
         text = re.sub(r"\$_{", '<sub>', text)
         text = re.sub(r"}\$", '</sub>', text)
         return text
@@ -190,21 +199,21 @@ class ConvertLatexMultiline:
         # handle \p{}
         text = self.circum_replace(text=text, prefix=r'#\\p{', rprefix='#')
         text = self.circum_replace(text=text, prefix=r'\*\\p{', rprefix='*')
-        text = self.circum_replace(text=text, prefix=r'\\p{', rprefix=' [[en/', rsuffix=']] ')
+        text = self.circum_replace(text=text, prefix=r'\\p{', rprefix='<tmp>en/', rsuffix='</tmp>')
         # handle \p*{}{}
         text = self.circum_replace(text=text, prefix=r'\\p\*{', rprefix='\\p1{', rsuffix='](/en/\\p2')
         text = self.circum_replace(text=text, prefix=r'\\p2{', rprefix='', rsuffix='}')
         text = self.circum_replace(text=text, prefix=r'\\p1{', rprefix=' [', rsuffix=') ')
         # handle \psst{}
-        text = self.circum_replace(text=text, prefix=r'\\psst{', rprefix=' [[', rsuffix=']] ')
+        text = self.circum_replace(text=text, prefix=r'\\psst{', rprefix='<tmp>', rsuffix='</tmp>')
         # handle \rf{}{}
         text = self.circum_replace(text=text, prefix=r'\\rf{', rprefix='\\rf1{', rsuffix='--\\rf2')
         text = self.circum_replace(text=text, prefix=r'\\rf2{', rprefix='', rsuffix='}')
-        text = self.circum_replace(text=text, prefix=r'\\rf1{', rprefix=' [[', rsuffix=']] ')
+        text = self.circum_replace(text=text, prefix=r'\\rf1{', rprefix='<tmp>', rsuffix='</tmp>')
         # reformat links
-        while re.search(r' \[\[(.*?)\]\] ', text):
-            ref = re.search(r' \[\[(.*?)\]\] ', text).group(1)
-            text = text.replace(' [[' + ref + ']] ', '[' + ref + '](/' + ref + ')')
+        while re.search(r'<tmp>(.*?)</tmp>', text):
+            ref = re.search(r'<tmp>(.*?)</tmp>', text).group(1)
+            text = text.replace('<tmp>' + ref + '</tmp>', '[' + ref + '](/' + ref + ')')
         text = re.sub(r'\[en/', '[', text)
         
         # labels
@@ -488,13 +497,14 @@ def convert_file(ifile, ofile, title):
 
 
         lines = f.readlines()
-
+        title = title.replace('\\backi', '`i').replace('\\backd', '`d')
+        title = title.replace('\\backc', '`c').replace('\\backposs', '`$')
 
         new_lines = []
         # single line conversions
         for line in lines:
             # embold title of article
-            line = line.replace(r'\section{'+title+'}', '')
+            line = re.sub(r'\\section{.*?}', '', line)
             # line = re.sub(r'\\psst{' + title + '}', '**' + title + '**', line)
             line = convert_line.delete_junk(line)
             line = convert_line.convert_lists(line)
@@ -516,8 +526,6 @@ def convert_file(ifile, ofile, title):
 
         # last conversions
         text = convert_multiline.convert_last(text)
-
-        # print(text)
 
     with open(ofile, 'w+', encoding='utf8') as f:
         f.write(text)
