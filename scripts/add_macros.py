@@ -1,6 +1,8 @@
 # coding=utf-8
 import re, os
 
+# os.chdir('misc')
+
 dir = 'markdown'
 dir2 = 'markdown-and-macros'
 
