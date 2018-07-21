@@ -286,7 +286,7 @@ class Metadata(RevisionPlugin):
 
 class MetadataRevision(RevisionPluginRevision):
     template = models.CharField(max_length=100, default="wiki/view.html", editable=False)
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, db_index=True)
     description = models.CharField(max_length=200)
     article_revision = models.OneToOneField(ArticleRevision, null=True, related_name='metadata_revision')
 
@@ -344,8 +344,16 @@ class Supersense(Metadata):
             return ugettext('Current revision not set!!')
 
     @cached_property
+    def url(self):
+        """For effeciency, anything that calls this should call select_related() on the supersense's article__current_revision"""
+        # The "correct" way would be self.article.get_absolute_url(), but that is expensive.
+        # We take advantage of the fact that a supersense's article title is always the same as its slug.
+        return f'/{self.article}'
+
+    @cached_property
     def html(self):
-        return mark_safe('<a href="' + self.article.get_absolute_url() + '" class="supersense">' + self.name_html + '</a>')
+        """For effeciency, anything that calls this should call select_related() on the supersense's article__current_revision"""
+        return mark_safe(f'<a href="{self.url}" class="supersense">{self.name_html}</a>')
 
     @cached_property
     def name_html(self):    # technically this can change if a user edits the supersense name, but it's going to be rare
@@ -398,12 +406,26 @@ class Construal(SimpleMetadata):
     def __str__(self):
         return str(self.role) + ' ~> ' + str(self.function) if self.function and self.role else str(self.special)
 
-    @property
+    @cached_property
+    def url(self):
+        """For efficiency, callers should invoke .select_related('article__current_revision') 
+        if this field is not already being queried"""
+        # The "correct" way would be self.article.get_absolute_url(), but that is expensive.
+        # We take advantage of the fact that a construal's article title is always the same as its slug.
+        return f'/{self.article}'
+
+    @cached_property
     def html(self):
-        return mark_safe(f'<a href="{self.article.get_absolute_url()}" class="construal">{self.name_html}</a>')
+        """For efficiency, callers should invoke .select_related('article__current_revision',
+        'construal__role__current_revision__metadatarevision', 
+        'construal__function__current_revision__metadatarevision') if these fields are not already being queried"""
+        return mark_safe(f'<a href="{self.url}" class="construal">{self.name_html}</a>')
 
     @cached_property
     def name_html(self):
+        """For efficiency, callers should invoke .select_related(
+        'construal__role__current_revision__metadatarevision', 
+        'construal__function__current_revision__metadatarevision') if these fields are not already being queried"""
         return self.special.strip() or format_html('{}&#x219d;{}', self.role, self.function)
 
     @cached_property
@@ -547,7 +569,7 @@ class Language(SimpleMetadata):
 
     @classmethod
     def with_nav_links(cls):
-        return cls.objects.filter(navlink=True)
+        return cls.objects.select_related('article__current_revision').filter(navlink=True)
 
     def __str__(self):
         return self.name
@@ -652,12 +674,22 @@ class Adposition(Metadata):
         else:
             return ugettext('Current revision not set!!')
 
-    @property
+    @cached_property
+    def url(self):
+        """For efficiency, callers should invoke .select_related('article') 
+        if this field is not already being queried"""
+        return self.article.get_absolute_url()
+
+    @cached_property
     def html(self):
-        return format_html('<a href="' + self.article.get_absolute_url() + '" class="adposition">' + self.name_html + '</a>')
+        """For efficiency, callers should invoke .select_related('article',
+        'current_revision__metadatarevision') if these fields are not already being queried"""
+        return mark_safe(f'<a href="{self.url}" class="adposition">{self.name_html}</a>')
 
     @cached_property
     def name_html(self):    # technically this can change if a user edits the adposition name, but it's going to be rare
+        """For efficiency, callers should invoke .select_related('current_revision__metadatarevision') 
+        if this field is not already being queried"""
         return format_html('{}', self.current_revision.metadatarevision.name)
 
     @cached_property
@@ -695,6 +727,23 @@ class AdpositionRevision(MetadataRevision):
 
     def html(self):
         return format_html('<a href="' + self.article_revision.article.get_absolute_url() + '" class="adposition">{}</a>', self.name)
+
+    @cached_property
+    def url(self):
+        """For efficiency, callers should invoke .select_related('article_revision__article') 
+        if this field is not already being queried"""
+        return self.article_revision.article.get_absolute_url()
+
+    @cached_property
+    def html(self):
+        """For efficiency, callers should invoke .select_related('article_revision__article') 
+        if this field is not already being queried"""
+        return mark_safe(f'<a href="{self.url}" class="adposition">{self.name_html}</a>')
+
+    @cached_property
+    def name_html(self):    # technically this can change if a user edits the adposition name, but it's going to be rare
+        return format_html('{}', self.name)
+
 
     @classmethod
     def editurl(cls, urlpath):
@@ -744,6 +793,10 @@ class UsageRevision(MetadataRevision):
 
     @cached_property
     def html(self):
+        """For efficiency, callers should invoke .select_related('article_revision__article__current_revision',
+        'adposition__current_revision__metadatarevision', 
+        'construal__role__current_revision__metadatarevision', 
+        'construal__function__current_revision__metadatarevision') if these fields are not already being queried"""
         return mark_safe('<a href="' + self.url + '" class="usage">'
             '<span class="adposition">' + self.adposition.name_html + '</span>: <span class="construal">' \
             + self.construal.name_html + '</span></a>')

@@ -12,6 +12,15 @@ def other_p_tokens_in_sentence(pt):
     return result
 
 class PTokenAnnotationTable(tables.Table):
+    """
+    Note: the caller should use 
+        .select_related('construal__article__current_revision', 
+            'construal__role__article__current_revision', 'construal__function__article__current_revision', 
+            'usage__current_revision__metadatarevision__usagerevision__article_revision__article',
+            'sentence', 'adposition')
+    for efficiency (if those fields aren't being queried directly).
+    """
+    
     exid = tables.Column(accessor='id', verbose_name='Ex')
     lcontext = tables.Column(accessor='sentence.tokens', verbose_name='')
     target = tables.Column(accessor='sentence.tokens', verbose_name='P', order_by=('adposition', 'construal'))
@@ -21,6 +30,7 @@ class PTokenAnnotationTable(tables.Table):
     function = tables.Column(accessor='construal.function', verbose_name='Function')
     note = tables.Column(accessor='annotator_cluster', verbose_name='ℹ')
     sentid = tables.Column(accessor='sentence', verbose_name='Sent ID')
+    
     
     def render_exid(self, record):
         return record.html
@@ -81,7 +91,7 @@ class PTokenAnnotationTable(tables.Table):
         return value if value.role is None else {True: '=', False: '≠'}[value.role==value.function]
         
     def render_construal(self, value):
-        return mark_safe(f'<a href="{value.article.get_absolute_url()}" class="construal">{self.value_construal(value)}</a>')
+        return mark_safe(f'<a href="{value.url}" class="construal">{self.value_construal(value)}</a>')
     
     def value_note(self, value):
         return value.strip()
@@ -101,7 +111,6 @@ class PTokenAnnotationTable(tables.Table):
 
     class Meta:
         model = PTokenAnnotation
-        #fields = ('id', 'adposition', 'construal', 'usage', 'sentence')
         fields = ('adp_pos', 'gov_head', 'gov_pos', 'gov_supersense', 'obj_head', 'obj_pos', 'obj_supersense', 'gov_obj_syntax', 'is_transitive')
         sequence = ('exid', 'lcontext', 'target', 'rcontext', 'role', 'construal', 'function', 'note') # columns to prepose
         template_name = 'django_tables2/bootstrap.html'

@@ -85,7 +85,7 @@ def langs_display(context):
 @register.simple_tag(takes_context=True)
 def adpositionrevs_for_lang(context):
     larticle = context['article']
-    a = AdpositionRevision.objects.filter(lang__article=larticle,
+    a = AdpositionRevision.objects.select_related('article_revision__article').filter(lang__article=larticle,
         article_revision__deleted=False, 
         article_revision__article__current_revision=F('article_revision'))  # ensure this isn't an outdated revision
     return a.order_by('name')
@@ -100,7 +100,9 @@ def usages_for_lang(context):
 @register.simple_tag(takes_context=True)
 def usagerevs_for_adp(context):
     particle = context['article']
-    u = UsageRevision.objects.filter(adposition__article=particle,
+    u = UsageRevision.objects.select_related('adposition__current_revision__metadatarevision', 
+        'construal__role__current_revision__metadatarevision', 
+        'construal__function__current_revision__metadatarevision').filter(adposition__article=particle,
         article_revision__deleted=False, 
         article_revision__article__current_revision=F('article_revision'))  # ensure this isn't an outdated revision
     return u
@@ -108,7 +110,9 @@ def usagerevs_for_adp(context):
 @register.simple_tag(takes_context=True)
 def usagerevs_for_construal(context):
     carticle = context['article']
-    u = UsageRevision.objects.filter(construal__article=carticle, 
+    u = UsageRevision.objects.select_related('adposition__current_revision__metadatarevision', 
+        'construal__role__current_revision__metadatarevision', 
+        'construal__function__current_revision__metadatarevision').filter(construal__article=carticle, 
         article_revision__deleted=False,
         article_revision__article__current_revision=F('article_revision'))  # ensure this isn't an outdated revision
     return u
@@ -132,25 +136,37 @@ def paginate(items, context):
 @register.simple_tag(takes_context=True)
 def tokens_for_adposition(context):
     article = context['article']
-    t = PTokenAnnotation.objects.filter(adposition__article=article).order_by('sentence__sent_id')
+    t = PTokenAnnotation.objects.select_related('construal__article__current_revision', 
+        'construal__role__article__current_revision', 'construal__function__article__current_revision', 
+        'usage__current_revision__metadatarevision__usagerevision__article_revision__article',
+        'sentence', 'adposition').filter(adposition__article=article).order_by('sentence__sent_id')
     return paginate(t, context)
 
 @register.simple_tag(takes_context=True)
 def tokens_for_construal(context):
     article = context['article']
-    t = PTokenAnnotation.objects.filter(construal__article=article).order_by('sentence__sent_id')
+    t = PTokenAnnotation.objects.select_related('construal__article__current_revision', 
+        'construal__role__article__current_revision', 'construal__function__article__current_revision', 
+        'usage__current_revision__metadatarevision__usagerevision__article_revision__article',
+        'sentence', 'adposition').filter(construal__article=article).order_by('sentence__sent_id')
     return paginate(t, context)
 
 @register.simple_tag(takes_context=True)
 def tokens_for_supersense(context):
     article = context['article']
-    t = PTokenAnnotation.objects.filter(Q(construal__role__article=article) | Q(construal__function__article=article)).order_by('sentence__sent_id')
+    t = PTokenAnnotation.objects.select_related('construal__article__current_revision', 
+        'construal__role__article__current_revision', 'construal__function__article__current_revision', 
+        'usage__current_revision__metadatarevision__usagerevision__article_revision__article',
+        'sentence', 'adposition').filter(Q(construal__role__article=article) | Q(construal__function__article=article)).order_by('sentence__sent_id')
     return paginate(t, context)
 
 @register.simple_tag(takes_context=True)
 def tokens_for_usage(context):
     article = context['article']
-    t = PTokenAnnotation.objects.filter(usage__article=article).order_by('sentence__sent_id')
+    t = PTokenAnnotation.objects.select_related('construal__article__current_revision', 
+        'construal__role__article__current_revision', 'construal__function__article__current_revision', 
+        'usage__current_revision__metadatarevision__usagerevision__article_revision__article',
+        'sentence', 'adposition').filter(usage__article=article).order_by('sentence__sent_id')
     return paginate(t, context)
 
 @register.simple_tag(takes_context=True)
@@ -241,7 +257,9 @@ def construals_display(context, role=None, function=None, order_by='role' or 'fu
     """Display a list of construals recorded in the database."""
     order_by2 = 'role' if order_by=='function' else 'function'
     s = ''
-    cc = Construal.objects.filter(article__current_revision__deleted=False)
+    cc = Construal.objects.select_related('article__current_revision', # to speed up c.html below
+            'role__current_revision__metadatarevision',
+            'function__current_revision__metadatarevision').filter(article__current_revision__deleted=False)
     if role is not None:
         cc = cc.filter(role__current_revision__metadatarevision__name=role)
     if function is not None:
