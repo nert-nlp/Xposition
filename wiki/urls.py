@@ -7,7 +7,7 @@ from wiki.core.plugins import registry
 from wiki.core.plugins.loader import load_wiki_plugins
 from wiki.core.utils import get_class_from_str
 from wiki.views import accounts, article, deleted_list
-from django.views.decorators.cache import cache_page
+# from django.views.decorators.cache import cache_page
 
 
 class WikiURLPatterns(object):
@@ -133,7 +133,8 @@ class WikiURLPatterns(object):
         urlpatterns = [
             # Paths decided by article_ids
             url(r'^(?P<article_id>\d+)/$',
-                cache_page(60 * 15)(self.article_view_class.as_view()),
+                #cache_page(60 * 15)(self.article_view_class.as_view()),
+                self.article_view_class.as_view(),
                 name='get'),
             url(r'^(?P<article_id>\d+)/delete/$',
                 self.article_delete_view_class.as_view(),
