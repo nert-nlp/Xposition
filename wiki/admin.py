@@ -116,6 +116,14 @@ class ArticleMetadataFormFunctions:
         newcategory.save()
         return newarticle, newcategory
 
+    def newArticle_without_category(self, ex_article=None, name=None, parent=None, slug=None):
+        newarticle = self.newArticle(ex_article=ex_article,
+                                     name=name,
+                                     slug=slug or name,
+                                     parent=parent)
+        newarticle.save()
+        return newarticle
+
 class ArticleRevisionInstanceLoader(import_export.instance_loaders.ModelInstanceLoader):
     def get_queryset(self):
         x = super(ArticleRevisionInstanceLoader,self).get_queryset()
@@ -273,12 +281,11 @@ class ConstrualResource(resources.ModelResource):
         function_name = deepest_instance(m.function.current_revision).name if m.function else None
         name = self.get_construal_slug(role_name, function_name, m.special)
         # slug will be the same as name
-        newarticle, newcategory = ArticleMetadataFormFunctions(ADMIN_REQUEST).newArticle_ArticleCategory(name=name,
+        newarticle = ArticleMetadataFormFunctions(ADMIN_REQUEST).newArticle_without_category(name=name,
                                                                                                          slug=name,
                                                                                                          ex_article=ex_article,
                                                                                                          parent=None)
         m.article = newarticle
-        m.category = newcategory
         m.save()
 
     def get_construal_slug(cls, role_name, function_name, special):
@@ -364,7 +371,7 @@ class AdpositionRevisionResource(import_export.resources.ModelResource):
             return
 
         # code taken from wiki/plugins/metadata/forms.py
-        newarticle, newcategory = ArticleMetadataFormFunctions(ADMIN_REQUEST).newArticle_ArticleCategory(name=m.name,
+        newarticle = ArticleMetadataFormFunctions(ADMIN_REQUEST).newArticle_without_category(name=m.name,
                                                                                         ex_article=ex_article,
                                                                                         parent=lang_article.urlpath_set.all()[0],
                                                                                         slug=m.name)
@@ -374,7 +381,6 @@ class AdpositionRevisionResource(import_export.resources.ModelResource):
         # create the Supersense, add the article, category, and revision
         p = ms.Adposition()
         p.article = newarticle
-        p.category = newcategory
         p.add_revision(m, ADMIN_REQUEST, article_revision=newarticle.current_revision,
                        save=True)  # cannot delay saving the new adposition revision
 
@@ -439,7 +445,7 @@ class UsageRevisionResource(import_export.resources.ModelResource):
         name = self.get_usage_name(deepest_instance(m.adposition.current_revision).name,
                                    str(m.construal),
                                    case)
-        newarticle, newcategory = ArticleMetadataFormFunctions(ADMIN_REQUEST).newArticle_ArticleCategory(ex_article=self.ex_article,
+        newarticle = ArticleMetadataFormFunctions(ADMIN_REQUEST).newArticle_without_category(ex_article=self.ex_article,
                                                                                                          parent=adp_article.urlpath_set.all()[0],
                                                                                                          name=name,
                                                                                                          slug=caseSlug + construalSlug)
@@ -450,7 +456,6 @@ class UsageRevisionResource(import_export.resources.ModelResource):
         # create the Usage, add the article, category, and revision
         u = ms.Usage()
         u.article = newarticle
-        u.category = newcategory
         u.add_revision(m, ADMIN_REQUEST, article_revision=newarticle.current_revision, save=True) # cannot delay saving the new adposition revision
 
         m.save()

@@ -114,7 +114,7 @@ DATABASES = {
         'NAME': os.path.join(PROJECT_DIR, 'db', 'prepopulated.db'),
     }
 }
-#
+
 # CACHES = {
 #     'default': {
 #         'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
