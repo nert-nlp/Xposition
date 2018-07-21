@@ -687,6 +687,8 @@ class AdpositionRevision(MetadataRevision):
     morphtype = models.PositiveIntegerField(choices=Adposition.MorphType.choices(), verbose_name="Morphological type")
     transitivity = models.PositiveIntegerField(choices=Adposition.Transitivity.choices())
     obj_cases = BitField(flags=Case.flags(), verbose_name="Possible cases of the object")
+    is_pp_idiom = models.BooleanField(default=False, verbose_name="Is PP Idiom?",
+                                   help_text='Lexicalized Adposition+Noun Phrase:\nsuch as "in no time", "to my surprise", but not "with exception of"')
 
     unique_together = [('name', 'lang', 'revision_number')]
 

@@ -345,6 +345,7 @@ class AdpositionRevisionResource(import_export.resources.ModelResource):
     morphtype = fields.Field(attribute='morphtype', widget=MorphTypeWidget())
     transitivity = fields.Field(attribute='transitivity', widget=TransitivityWidget())
     obj_cases = fields.Field(column_name='obj_case', attribute='obj_cases', widget=ObjCasesWidget())
+    is_pp_idiom = fields.Field(column_name='is_pp_idiom', attribute='is_pp_idiom', widget=widgets.CharWidget())
 
     # handle revision creation
     def save_instance(self, instance, using_transactions=True, dry_run=False):

@@ -240,6 +240,7 @@ with open(file, encoding='utf8') as f:
                         add_ptoken()
 
                     morphtype = 'standalone_preposition' if not adposition_name == "'s" else 'suffix'
+                    is_pp_idiom = str(tok_sem['lexcat'] == 'PP')
                     if hasobj:
                         adp_trans.add(adposition_name)
                     else:
@@ -249,7 +250,8 @@ with open(file, encoding='utf8') as f:
                             'adposition_name':adposition_name,
                             'language_name':language_name,
                             'morphtype':morphtype,
-                            'obj_case':obj_case
+                            'obj_case':obj_case,
+                            'is_pp_idiom':is_pp_idiom,
                         })
                         adposition_set.add(adposition_name)
                     role_id = ids.clean_ss(role_name)
