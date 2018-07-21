@@ -26,7 +26,7 @@ from wiki.core.plugins import registry as plugin_registry
 from wiki.core.utils import object_to_json_response
 from wiki.decorators import get_article
 from wiki.views.mixins import ArticleMixin
-# from silk.profiling.profiler import silk_profile
+
 
 
 
@@ -38,7 +38,7 @@ class ArticleView(ArticleMixin, TemplateView):
 
     template_name = "wiki/view.html"
 
-    # @silk_profile(name='Load Article')
+
     @method_decorator(get_article(can_read=True))
     def dispatch(self, request, article, *args, **kwargs):
         try:    # TODO: look for another way to choose the template dynamically

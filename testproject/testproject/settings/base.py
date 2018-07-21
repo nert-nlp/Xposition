@@ -114,6 +114,13 @@ DATABASES = {
         'NAME': os.path.join(PROJECT_DIR, 'db', 'prepopulated.db'),
     }
 }
+#
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+#         'LOCATION': 'article_cache'
+#     }
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/1.9/ref/settings/#auth-password-validators
