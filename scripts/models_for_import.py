@@ -197,7 +197,7 @@ with open(file, encoding='utf8') as f:
 
         for words in [sent['swes'], sent['smwes'], sent['wmwes']]:
             for i in words:
-                if words[i]['lexcat'] in ['P', 'PRON.POSS', 'POSS']:
+                if words[i]['lexcat'] in ['P', 'PRON.POSS', 'POSS', 'PP', 'INF.P']:
                     tok_sem = words[i]  # token semantic features
                     tok_morph = sent['toks'][tok_sem['toknums'][0] - 1]  # token morphological/syntactic features
                     # used to check NoneType

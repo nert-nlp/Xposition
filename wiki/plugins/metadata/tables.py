@@ -23,7 +23,7 @@ class PTokenAnnotationTable(tables.Table):
     sentid = tables.Column(accessor='sentence', verbose_name='Sent ID')
     
     def render_exid(self, record):
-        return record.html()
+        return record.html
     
     def value_lcontext(self, record, value):    # text only
         return ' '.join(value[:record.main_subtoken_indices[0]-1])
@@ -54,7 +54,8 @@ class PTokenAnnotationTable(tables.Table):
 
     def render_target(self, record, value):
         tokens = [format_html('<span title="{}">{}</span>', i+1, value[i]) for i in range(record.main_subtoken_indices[0]-1, record.main_subtoken_indices[-1])]
-        return mark_safe(format_html('<a href="{}" class="usage">', record.usage.current_revision.plugin.article.get_absolute_url()) + ' '.join(tokens) + '</a>')
+        usageurl = record.usage.current_revision.metadatarevision.usagerevision.url
+        return mark_safe(f'<a href="{usageurl}" class="usage">' + ' '.join(tokens) + '</a>')
     
     def value_rcontext(self, record, value):   # text only
         return ' '.join(value[record.main_subtoken_indices[-1]:])
@@ -71,16 +72,16 @@ class PTokenAnnotationTable(tables.Table):
         return mark_safe(' '.join(tokens))
     
     def render_role(self, value):
-        return value.html()
+        return value.html
         
     def render_function(self, value):
-        return value.html()
+        return value.html
     
     def value_construal(self, value):
         return value if value.role is None else {True: '=', False: '≠'}[value.role==value.function]
         
     def render_construal(self, value):
-        return format_html('<a href="{}" class="construal">{}</a>', value.article.get_absolute_url(), self.value_construal(value))
+        return mark_safe(f'<a href="{value.article.get_absolute_url()}" class="construal">{self.value_construal(value)}</a>')
     
     def value_note(self, value):
         return value.strip()
@@ -96,7 +97,7 @@ class PTokenAnnotationTable(tables.Table):
         return value.sent_id
 
     def render_sentid(self, value):
-        return value.html()
+        return value.html
 
     class Meta:
         model = PTokenAnnotation
