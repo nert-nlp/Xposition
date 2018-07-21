@@ -190,7 +190,10 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
     )
 
     def exref(self, id, page):
-        return link(f'{page}#{id}', '/' + page.replace('`', "'") + '/#' + id, 'exref')
+        slug = self.markdown.article.current_revision.title
+        print(page,slug)
+        display = f'{page}#{id}' if not page==slug else f'#{id}'
+        return link(display, '/' + page.replace('`', "'") + '/#' + id, 'exref')
 
     # meta data
     exref.meta = dict(
