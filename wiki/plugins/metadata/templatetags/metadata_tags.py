@@ -1,12 +1,12 @@
 from django import template
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
-from django.db.models import Q
+from django.db.models import F, Q
 from django.utils.safestring import mark_safe
 from django_tables2 import RequestConfig
 from bitfield import BitField
 from wiki.models import Article, ArticleRevision
 from wiki.models.pluginbase import RevisionPlugin, RevisionPluginRevision
-from wiki.plugins.metadata.models import MetadataRevision, SimpleMetadata, Supersense, Construal, Language, Adposition, Usage, PTokenAnnotation, deepest_instance
+from wiki.plugins.metadata.models import MetadataRevision, SimpleMetadata, Supersense, Construal, Language, Adposition, AdpositionRevision, Usage, UsageRevision, PTokenAnnotation, deepest_instance
 from wiki.plugins.metadata.tables import PTokenAnnotationTable
 from wiki.plugins.categories.models import Category
 
@@ -44,7 +44,7 @@ def metadata_display(context):
             display += f'    <tr><th style="padding: 10px;">{fld.name}</th><td>'
             v = getattr(meta, fld.name)
             if hasattr(v, 'html'):
-                display += v.html()
+                display += v.html() if callable(v.html) else v.html
             elif hasattr(fld, 'choices') and fld.choices:
                 choices = dict(fld.choices)
                 if v is not None:   # if None, display nothing
@@ -71,7 +71,6 @@ def langs_display(context):
     article = context['article']
     s = ''
     for lang in Language.with_nav_links().order_by('name'):
-        # issue #9: get rid of deleted articles in lists
         if lang.article.current_revision.deleted:
             continue
         langart = lang.article
@@ -84,43 +83,34 @@ def langs_display(context):
     return mark_safe(s)
 
 @register.simple_tag(takes_context=True)
-def adpositions_for_lang(context):
-    article = context['article']
-    # issue #9: get rid of deleted articles in lists
-    a = Adposition.objects.filter(current_revision__metadatarevision__adpositionrevision__lang__article=article,
-        current_revision__metadatarevision__article_revision__deleted=False)
-    return a
+def adpositionrevs_for_lang(context):
+    larticle = context['article']
+    a = AdpositionRevision.objects.filter(lang__article=larticle,
+        article_revision__deleted=False, 
+        article_revision__article__current_revision=F('article_revision'))  # ensure this isn't an outdated revision
+    return a.order_by('name')
 
 @register.simple_tag(takes_context=True)
 def usages_for_lang(context):
     article = context['article']
-    # issue #9: get rid of deleted articles in lists
     u = Usage.objects.filter(current_revision__metadatarevision__usagerevision__adposition__current_revision__metadatarevision__adpositionrevision__lang__article=article,
         current_revision__metadatarevision__article_revision__deleted=False)
     return u
 
 @register.simple_tag(takes_context=True)
-def usages_for_adp(context):
-    article = context['article']
-    # issue #9: get rid of deleted articles in lists
-    u = Usage.objects.filter(current_revision__metadatarevision__usagerevision__adposition__article=article,
-        current_revision__metadatarevision__article_revision__deleted=False)
+def usagerevs_for_adp(context):
+    particle = context['article']
+    u = UsageRevision.objects.filter(adposition__article=particle,
+        article_revision__deleted=False, 
+        article_revision__article__current_revision=F('article_revision'))  # ensure this isn't an outdated revision
     return u
 
 @register.simple_tag(takes_context=True)
-def usages_for_construal(context):
-    article = context['article']
-    
-    
-    """ # using related_name sounds nice in principle, but actually looks pretty nasty
-    construal = deepest_instance(article.articleplugin_set.first())
-    urs = construal.usages.filter(article_revision__deleted=False)    # UsageRevision instances
-    u = [ur.plugin_set.first() for ur in urs] # Usage instances
-    """
-    
-    # issue #9: get rid of deleted articles in lists
-    u = Usage.objects.filter(current_revision__metadatarevision__usagerevision__construal__article=article, 
-        current_revision__metadatarevision__usagerevision__article_revision__deleted=False)
+def usagerevs_for_construal(context):
+    carticle = context['article']
+    u = UsageRevision.objects.filter(construal__article=carticle, 
+        article_revision__deleted=False,
+        article_revision__article__current_revision=F('article_revision'))  # ensure this isn't an outdated revision
     return u
 
 def paginate(items, context):
@@ -142,28 +132,24 @@ def paginate(items, context):
 @register.simple_tag(takes_context=True)
 def tokens_for_adposition(context):
     article = context['article']
-    # issue #9: get rid of deleted articles in lists
     t = PTokenAnnotation.objects.filter(adposition__article=article).order_by('sentence__sent_id')
     return paginate(t, context)
 
 @register.simple_tag(takes_context=True)
 def tokens_for_construal(context):
     article = context['article']
-    # issue #9: get rid of deleted articles in lists
     t = PTokenAnnotation.objects.filter(construal__article=article).order_by('sentence__sent_id')
     return paginate(t, context)
 
 @register.simple_tag(takes_context=True)
 def tokens_for_supersense(context):
     article = context['article']
-    # issue #9: get rid of deleted articles in lists
     t = PTokenAnnotation.objects.filter(Q(construal__role__article=article) | Q(construal__function__article=article)).order_by('sentence__sent_id')
     return paginate(t, context)
 
 @register.simple_tag(takes_context=True)
 def tokens_for_usage(context):
     article = context['article']
-    # issue #9: get rid of deleted articles in lists
     t = PTokenAnnotation.objects.filter(usage__article=article).order_by('sentence__sent_id')
     return paginate(t, context)
 
@@ -223,13 +209,12 @@ def _category_subtree(c, recursive=False):
     ss = c.supersense.all()[0]
     a = ss.article
     #s = '<li><a href="{url}">{rev}</a>'.format(url=a.get_absolute_url(), rev=a.current_revision.title)
-    s = f'<li class="clt">{ss.metadata.html()}' if not recursive else f'<li>{ss.metadata.html()}'
+    s = f'<li class="clt">{ss.html}' if not recursive else f'<li>{ss.metadata.html()}'
     # number of construals for the supersense
     nAsRole = len(ss.rfs_with_role.all())
     nAsFunction = len(ss.rfs_with_function.all())
     s += ' <small style="font-size: 50%;">{}<span style="color: #999;" class="construal-arrow">&#x219d;</span>{}</small>'.format(nAsRole, nAsFunction)
     #print(s)
-    # issue #9: get rid of deleted articles in lists
     children = c.children.all() #.filter(current_revision__metadatarevision__article_revision__deleted=False)
     #print(children)
     if len(children):
@@ -253,19 +238,18 @@ def supersenses_display(context, top):
 
 @register.simple_tag(takes_context=True)
 def construals_display(context, role=None, function=None, order_by='role' or 'function'):
-    """Display a list of supersenses recorded in the database."""
+    """Display a list of construals recorded in the database."""
     order_by2 = 'role' if order_by=='function' else 'function'
     s = ''
-    cc = Construal.objects.all()
+    cc = Construal.objects.filter(article__current_revision__deleted=False)
     if role is not None:
         cc = cc.filter(role__current_revision__metadatarevision__name=role)
     if function is not None:
         cc = cc.filter(function__current_revision__metadatarevision__name=function)
-    # issue #9: get rid of deleted articles in lists
-    cc = cc.filter(article__current_revision__deleted=False)
+
     for c in cc.order_by(order_by+'__current_revision__metadatarevision__name',
                          order_by2+'__current_revision__metadatarevision__name'):
         #a = c.article
         #s += '<li><a href="{url}">{rev}</a></li>\n'.format(url=a.get_absolute_url(), rev=a.current_revision.title)
-        s += f'<li>{c.html()}</li>\n'
+        s += f'<li>{c.html}</li>\n'
     return mark_safe(s)

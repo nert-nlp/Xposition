@@ -26,7 +26,7 @@ from wiki.core.plugins import registry as plugin_registry
 from wiki.core.utils import object_to_json_response
 from wiki.decorators import get_article
 from wiki.views.mixins import ArticleMixin
-# from silk.profiling.profiler import silk_profile
+
 
 
 
