@@ -10,8 +10,8 @@ import re, os
 # os.chdir('misc')
 
 
-dir1 = 'tex'
-dir2 = 'markdown'
+tex_dir = 'tex'
+markdown_dir = 'markdown'
 
 P_RE = re.compile(r'\[(?P<text>([\w\\\'’-])+)\]\(/en/(?P<p>[\w\'’\\-]+)\)')
 SS_RE = re.compile(r'\[[\w$`-]+\]\(/([\w$`-]+)\)')
@@ -531,12 +531,23 @@ def convert_file(ifile, ofile, title):
         f.write(text)
 
 
+def recursive_modify_dir(idir, odir):
+    x = []
+    for dirpath, _, filenames in os.walk(idir):
+        # copy dir structure
+        if not os.path.exists(dirpath.replace(idir, odir, 1)):
+            os.makedirs(dirpath.replace(idir, odir, 1))
+        for name in filenames:
+            ifile = os.path.join(dirpath, name)
+            ofile = ifile.replace(idir, odir, 1)
+            x.append((ifile, ofile, name))
+    return x
 
-for file in os.listdir(dir1):
-    print(file)
-    if not os.path.exists(dir2):
-        os.makedirs(dir2)
-    if file.endswith('.tex'):
-        convert_file(os.path.join(dir1,file),
-                os.path.join(dir2,file.replace('.tex','.txt')),
-                file.replace('.tex',''))
+
+
+for tex_file, markdown_file, name in recursive_modify_dir(tex_dir, markdown_dir):
+    if not tex_file.endswith('.tex'):
+        continue
+    print(tex_file)
+    markdown_file = markdown_file.replace('.tex', '.txt')
+    convert_file(ifile=tex_file, ofile=markdown_file, title=name)

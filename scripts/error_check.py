@@ -1,12 +1,13 @@
 import os, re
 
-dir = 'markdown'
+dir = 'markdown-and-macros'
 
-Check = re.compile(r"\\section")
+Check = re.compile(r"\[\[")
 
 for file in os.listdir(dir):
+    if os.path.isdir(os.path.join(dir, file)):
+        continue
     with open(os.path.join(dir, file), 'r', encoding='utf8') as f:
-        # print(file)
         f = f.readlines()
         for i, line in enumerate(f):
             x = Check.search(line)

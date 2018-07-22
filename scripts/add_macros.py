@@ -3,10 +3,9 @@ import re, os
 
 # os.chdir('misc')
 
-dir = 'markdown'
-dir2 = 'markdown-and-macros'
+markdown_dir = 'markdown'
+macro_dir = 'markdown-and-macros'
 
-SKIP_SPECIAL = False
 
 P_RE = re.compile(r'\[(?P<text>([\w\\\'’-])+)\]\(/en/(?P<p>[\w\'’\\-]+)\)')
 SS_RE = re.compile(r'\[[\w$`-]+\]\(/(?P<ss>[\w$`-]+)\)')
@@ -81,7 +80,7 @@ class Examples:
                     repl.append('[ss ' + l.replace('sec:','') + ']')
                 elif l.startswith('sec:') and l in self.ids:
                     ss = self.id(l)[0]
-                    repl.append('[[ ' + ss + ']]')
+                    repl.append('[[' + ss + ']]')
                 else:
                     repl.append(l)
                     print('fix label', title, l)
@@ -98,20 +97,28 @@ def check_brackets(text):
     if text[-1] == ']' and depth==1: return True
     else: return False
 
+def recursive_modify_dir(idir, odir):
+    x = []
+    for dirpath, _, filenames in os.walk(idir):
+        # copy dir structure
+        if not os.path.exists(dirpath.replace(idir, odir, 1)):
+            os.makedirs(dirpath.replace(idir, odir, 1))
+        for name in filenames:
+            ifile = os.path.join(dirpath, name)
+            ofile = ifile.replace(idir, odir, 1)
+            x.append((ifile, ofile, name))
+    return x
 
-
-if not os.path.exists(dir2):
-    os.makedirs(dir2)
 
 examples = Examples()
 
-for file in os.listdir(dir):
-    if file.endswith('.txt'):
-        with open(os.path.join(dir,file), 'r', encoding='utf8') as f:
+for markdown_file, macro_file, name in recursive_modify_dir(markdown_dir, macro_dir):
+    title = name.replace('.txt','')
+    if markdown_file.endswith('.txt'):
+        with open(markdown_file, 'r', encoding='utf8') as f:
             new_text = []
 
 
-            title = file.replace('.txt', '').replace(' ','_')
             default_ss = title
             table_ss = []
             tmp_ss = None
@@ -145,7 +152,7 @@ for file in os.listdir(dir):
                     if ALT_SS_RE.search(line):
                         tmp_ss = ALT_SS_RE.search(line).group('ss')
                         # print(ALT_SS_RE.search(line).group(), tmp_ss)
-                    elif '**' + file.replace('.txt', '') + '**' in line:
+                    elif '**' + title + '**' in line:
                         tmp_ss = title
                         # print(tmp_ss, line)
                     if not '|' in line:
@@ -215,14 +222,14 @@ for file in os.listdir(dir):
 
                 previous_depth = depth
                 new_text.append(line)
-            if not ' ' in file or not SKIP_SPECIAL:  # ignore 'Special Constructions', ...
-                with open(os.path.join(dir2, file), 'w+', encoding='utf8') as f2:
-                    f2.write(''.join(new_text))
+            with open(macro_file, 'w+', encoding='utf8') as f2:
+                f2.write(''.join(new_text))
 
 
-for file in os.listdir(dir2):
-    if file.endswith('.txt'):
-        with open(os.path.join(dir2, file), 'r', encoding='utf8') as f:
+for  _, macro_file, name in recursive_modify_dir(markdown_dir, macro_dir):
+    title = name.replace('.txt','')
+    if macro_file.endswith('.txt'):
+        with open(macro_file, 'r', encoding='utf8') as f:
             new_text = []
 
             for i, line in enumerate(f):
@@ -232,7 +239,7 @@ for file in os.listdir(dir2):
                     new_text.pop()
 
                 # convert example refs
-                line = examples.convert_ex_ref(line, file.replace('.txt',''))
+                line = examples.convert_ex_ref(line, title)
                 # misc
                 line =line.replace(r'<ex></ex>', '')
                 while re.search(r'\[\[`[A-Za-z$]\]\]', line):
@@ -244,7 +251,6 @@ for file in os.listdir(dir2):
                 new_text.append(line)
 
 
-        if not ' ' in file or not SKIP_SPECIAL:  # ignore 'Special Constructions', ...
-            with open(os.path.join(dir2, file), 'w', encoding='utf8') as f2:
-                f2.write(''.join(new_text))
+        with open(macro_file, 'w', encoding='utf8') as f2:
+            f2.write(''.join(new_text))
 

@@ -4,10 +4,9 @@ os.chdir('..\scripts')
 from collections import defaultdict
 from wiki.plugins.metadata import models as ms
 
-dir = 'markdown-and-macros'
-dir2 = 'markdown-construals'
-
-dir_out = 'json'
+macro_dir = 'markdown-and-macros'
+construal_dir = 'markdown-construals'
+json_dir = 'json'
 
 OUTPUT_SS_DESCRIPTIONS = False
 
@@ -44,10 +43,14 @@ def write_json(dir, output):
             f.write('\n\n'.join(short_descriptions))
 
 
-if not os.path.exists(dir_out):
-    os.makedirs(dir_out)
-file = os.path.join(dir_out,'supersense_article_revisions.json')
-write_json(dir,file)
-if os.path.exists(dir2):
-    file = os.path.join(dir_out, 'construal_article_revisions.json')
-    write_json(dir2, file)
+if not os.path.exists(json_dir):
+    os.makedirs(json_dir)
+outfile = os.path.join(json_dir,'supersense_article_revisions.json')
+write_json(macro_dir,outfile)
+if os.path.exists(construal_dir):
+    outfile = os.path.join(json_dir, 'construal_article_revisions.json')
+    write_json(construal_dir, outfile)
+misc_dir = os.path.join(macro_dir,'misc')
+if os.path.exists(misc_dir):
+    outfile = os.path.join(json_dir, 'misc_article_revisions.json')
+    write_json(misc_dir, outfile)
