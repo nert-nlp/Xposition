@@ -13,7 +13,7 @@ ul.inline,ul.inline > li { display: inline-block; }
 ul.inline { padding: 0; }
 ul.inline > li { margin: 0px 5px; }
 
-.wiki-article { font-family: 'Roboto', sans-serif; }
+.wiki-article { font-family: 'Roboto', sans-serif; font-size: 14pt; }
 
 /* Xposition macros: special styling */
 .example { font-family: 'Roboto Light', sans-serif; }
