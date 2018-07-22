@@ -181,7 +181,6 @@ SESSION_COOKIE_SECURE = False   # setting to True breaks django-wiki login
 CSRF_COOKIE_SECURE = False  # setting to True breaks django-wiki login
 X_FRAME_OPTIONS = 'DENY'
 
-SILKY_PYTHON_PROFILER = True
 
 DEBUG_TOOLBAR_PANELS = [
     'debug_toolbar.panels.timer.TimerPanel',
@@ -191,3 +190,6 @@ DEBUG_TOOLBAR_PANELS = [
     'debug_toolbar.panels.redirects.RedirectsPanel',
     'debug_toolbar.panels.profiling.ProfilingPanel'
 ]
+
+WIKI_REVISIONS_PER_MINUTES = 10
+
