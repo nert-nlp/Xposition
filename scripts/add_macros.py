@@ -68,19 +68,25 @@ class Examples:
             ls = [l.strip() for l in ls]
             repl = []
             for l in ls:
+                # exrefs
                 if l.startswith('ex:'):
-                    if l in self.ids:
-                        ss = self.id(l)[0]
-                        id = self.id(l)[1]
-                        repl.append('[exref ' + str(id).zfill(3) + ' ' + ss + ']')
-                    else:
-                        repl.append(l)
+                    if not l in self.ids:
                         print('fix label', title, l)
-                elif l.startswith('sec:') and l.replace('sec:','') in ['Species','Temporal','Path']:
-                    repl.append('[ss ' + l.replace('sec:','') + ']')
-                elif l.startswith('sec:') and l in self.ids:
+                        repl.append(l)
+                        continue
                     ss = self.id(l)[0]
-                    repl.append('[[' + ss + ']]')
+                    id = self.id(l)[1]
+                    repl.append('[exref ' + str(id).zfill(3) + ' ' + ss + ']')
+                # handle sections 'Species','Temporal','Path'
+                elif l.replace('sec:','') in ['Species','Temporal','Path']:
+                    repl.append('[ss ' + l.replace('sec:','') + ']')
+                # handle misc articles
+                elif l.startswith('sec:') and l in self.ids:
+                    ref = self.id(l)[0]
+                    if ref in ['`$', '`d', '`i', '`c']:
+                        repl.append('[ss ' + ref + ']')
+                    else:
+                        repl.append('[[' + ref + ']]')
                 else:
                     repl.append(l)
                     print('fix label', title, l)
