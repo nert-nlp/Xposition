@@ -186,6 +186,8 @@ ids = GetIDs()
 with open(file, encoding='utf8') as f:
     data = json.load(f)
     for i, sent in enumerate(data):
+        if i%500==0:
+            print(str(i)+' / '+str(len(data)))
         # assign fields
         sent_id = sent['sent_id']
         doc_id = sent['sent_id'].split('-')[0] + '-' + sent['sent_id'].split('-')[1]
@@ -245,7 +247,7 @@ with open(file, encoding='utf8') as f:
                         adp_trans.add(adposition_name)
                     else:
                         adp_intrans.add(adposition_name)
-                    if not adposition_name in adposition_set:
+                    if not (adposition_name,is_pp_idiom) in adposition_set:
                         adposition_json.append({
                             'adposition_name':adposition_name,
                             'language_name':language_name,
@@ -253,7 +255,7 @@ with open(file, encoding='utf8') as f:
                             'obj_case':obj_case,
                             'is_pp_idiom':is_pp_idiom,
                         })
-                        adposition_set.add(adposition_name)
+                        adposition_set.add((adposition_name,is_pp_idiom))
                     role_id = ids.clean_ss(role_name)
                     function_id = ids.clean_ss(function_name)
                     if not (role_name, function_name, special) in construal_set and ((int(role_id)>0 and int(function_id)>0) or special):
@@ -285,7 +287,7 @@ with open(file, encoding='utf8') as f:
                             'supersense_name':function_name
                         })
                         supersense_set.add(function_name)
-
+print(str(len(data))+' / '+str(len(data)))
 construal_json.append({
     'role_name':' ',
     'function_name':' ',
@@ -319,6 +321,7 @@ if not os.path.exists(dir):
     os.makedirs(dir)
 
 # output CorpusSentences
+print('corpus_sentences.json')
 file = os.path.join(dir,'corpus_sentences.json')
 with open(file, 'w', encoding='utf8') as f:
     json.dump(corpus_sentences, f)
@@ -326,8 +329,11 @@ with open(file, 'w', encoding='utf8') as f:
 # output PTokenAnnotations
 file = os.path.join(dir,'ptoken_annotations.json')
 if [p['adposition_name'] for p in ptoken_annotations if not p['adposition_name']=='at']:
+    print('ptoken_annotations.json')
     with open(file, 'w', encoding='utf8') as f:
         json.dump(ptoken_annotations, f)
+else:
+    print('skipping ptoken_annotations.json')
 
 # calculate adposition transitivity
 for i,a in enumerate(adposition_json):
@@ -337,20 +343,28 @@ for i,a in enumerate(adposition_json):
                             else 'always_intransitive'
     adposition_json[i]['transitivity'] = trans
 # output AdpositionRevisions
+print('adposition_revisions.json')
 file = os.path.join(dir,'adposition_revisions.json')
 with open(file, 'w') as f:
     json.dump(adposition_json, f)
 # output Construals
 file = os.path.join(dir,'construals.json')
 if len(construal_json)>1:
+    print('construals.json')
     with open(file, 'w') as f:
         json.dump(construal_json, f)
+else:
+    print('skipping construals.json')
 # output UsageRevisions
 file = os.path.join(dir,'usage_revisions.json')
 if [u['adposition_name'] for u in usage_json if not u['adposition_name']=='at']:
+    print('usage_revisions.json')
     with open(file, 'w') as f:
         json.dump(usage_json, f)
+else:
+    print('skipping usages.json')
 # output SupersenseRevisions
+print('supersense_revisions.json')
 file = os.path.join(dir,'supersense_revisions.json')
 with open(file, 'w') as f:
     json.dump(supersense_json, f)
