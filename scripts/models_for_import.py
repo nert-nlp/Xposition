@@ -240,7 +240,7 @@ with open(file, encoding='utf8') as f:
                         add_ptoken()
 
                     morphtype = 'standalone_preposition' if not adposition_name == "'s" else 'suffix'
-                    is_pp_idiom = str(tok_sem['lexcat'] == 'PP')
+                    is_pp_idiom = '1' if tok_sem['lexcat'] == 'PP' else '0'
                     if hasobj:
                         adp_trans.add(adposition_name)
                     else:
