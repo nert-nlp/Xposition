@@ -88,7 +88,7 @@ class ConvertLatexByLine:
         'lakoff-80':'Lakoff and Johnson, 1980',
         'nunez-06':'Núñez and Sweetser, 2006',
         'casasanto-08':'Casasanto and Boroditsky, 2008',
-        'blodgett-18':'Blodgett and Schneider (2018)',
+        'blodgett-18':'Blodgett and Schneider, 2018',
         'quirk-85':'Quirk et al., 1985',
     }
     def convert_citations(self, line):
@@ -115,9 +115,10 @@ class ConvertLatexByLine:
                 for i, c in enumerate(cites):
                     if c in self.CITATIONS:
                         cites[i] = '[' + self.CITATIONS[c] + ']'\
-                                       +'(/bib/' + self.CITATIONS[c].replace(' ', '_').replace(',', '').replace('.', '') + '/)'
+                                       +'(/bib/' + self.CITATIONS[c].lower().replace(' ', '_').replace(',', '').replace('.', '') + '/)'
                         # print(cites[i])
                 line = line.replace(p.search(line).group(), '(' + op1 + ', '.join(cites) + op2 + ')')
+                line = line.replace('núñez_and_sweetser_2006','nunez_and_sweetser_2006')
         return line
 
 class ConvertLatexMultiline:
@@ -526,6 +527,10 @@ def convert_file(ifile, ofile, title):
 
         # last conversions
         text = convert_multiline.convert_last(text)
+
+        # citations = ['- [' + convert_line.CITATIONS[c] + ']'+'(/bib/' + convert_line.CITATIONS[c].lower()
+        #     .replace(' ', '_').replace(',', '').replace('.', '') + '/)' for c in convert_line.CITATIONS]
+        # print('\n'.join(sorted(citations)))
 
     with open(ofile, 'w+', encoding='utf8') as f:
         f.write(text)
