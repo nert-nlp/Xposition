@@ -94,6 +94,7 @@ def adpositionrevs_for_lang(context):
     context['swps'] = a.filter(is_pp_idiom=False).exclude(name__contains='_')
     context['mwps'] = a.filter(is_pp_idiom=False, name__contains='_')
     context['ppidioms'] = a.filter(is_pp_idiom=True)
+    context['misc'] = a.exclude(is_pp_idiom__in=(True,False))
     return a
 
 @register.simple_tag(takes_context=True)
