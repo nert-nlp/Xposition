@@ -272,9 +272,9 @@ class ConstrualResource(resources.ModelResource):
 
         m = instance
 
-        if not m.role and not m.function and ms.Construal.objects.filter(special=m.special):
+        if not m.role and not m.function and ms.Construal.objects.exists(special=m.special):
             return
-        if m.role and m.function and ms.Construal.objects.filter(role__pk=m.role.pk,function__pk=m.function.pk):
+        if m.role and m.function and ms.Construal.objects.exists(role__pk=m.role.pk,function__pk=m.function.pk):
             return
 
         role_name = deepest_instance(m.role.current_revision).name if m.role else None
@@ -310,7 +310,7 @@ class SupersenseRevisionResource(resources.ModelResource):
             raise Exception("Xposition Import: Please create Supersense 'Locus' to use as a model!")
 
         m = instance
-        if ms.Supersense.objects.filter(current_revision__metadatarevision__supersenserevision__name=m.name):
+        if ms.Supersense.objects.exists(current_revision__metadatarevision__supersenserevision__name=m.name):
             return
 
 
@@ -366,9 +366,10 @@ class AdpositionRevisionResource(import_export.resources.ModelResource):
 
         lang_article = ms.Language.objects.get(name=m.lang.name).article
 
-        if ms.Adposition.objects.filter(current_revision__metadatarevision__adpositionrevision__lang__name=m.lang.name,
+        if ms.Adposition.objects.exists(current_revision__metadatarevision__adpositionrevision__lang__name=m.lang.name,
                                         current_revision__metadatarevision__adpositionrevision__name=m.name):
-            thep = m.adposition
+            thep = ms.Adposition.objects.get(current_revision__metadatarevision__adpositionrevision__lang__name=m.lang.name,
+                                        current_revision__metadatarevision__adpositionrevision__name=m.name)
             thep.newRevision(ADMIN_REQUEST,
                              commit=True,
                              name=m.name,
@@ -432,7 +433,7 @@ class UsageRevisionResource(import_export.resources.ModelResource):
             self.ex_article = x[0].article
 
         m = instance
-        if ms.Usage.objects.filter(current_revision__metadatarevision__usagerevision__adposition__pk=
+        if ms.Usage.objects.exists(current_revision__metadatarevision__usagerevision__adposition__pk=
                                     m.adposition.pk,
                                    current_revision__metadatarevision__usagerevision__construal__pk=
                                     m.construal.pk):
