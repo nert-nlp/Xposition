@@ -4,7 +4,7 @@ from django.core.validators import RegexValidator
 from django.utils.html import conditional_escape, format_html, mark_safe
 from django.db import models
 from bitfield import BitField
-import copy, sys, re
+import copy, sys, re, urllib
 from enum import IntEnum
 from django.utils.encoding import force_text
 from django.utils.functional import cached_property
@@ -348,7 +348,7 @@ class Supersense(Metadata):
         """For effeciency, anything that calls this should call select_related() on the supersense's article__current_revision"""
         # The "correct" way would be self.article.get_absolute_url(), but that is expensive.
         # We take advantage of the fact that a supersense's article title is always the same as its slug.
-        return f'/{self.article}'
+        return urllib.parse.quote(f'/{self.article}')
 
     @cached_property
     def html(self):
@@ -412,7 +412,7 @@ class Construal(SimpleMetadata):
         if this field is not already being queried"""
         # The "correct" way would be self.article.get_absolute_url(), but that is expensive.
         # We take advantage of the fact that a construal's article title is always the same as its slug.
-        return f'/{self.article}'
+        return urllib.parse.quote(f'/{self.article}')    # "??" needs escaping
 
     @cached_property
     def html(self):
