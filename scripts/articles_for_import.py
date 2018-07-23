@@ -2,7 +2,7 @@ import re, os, django, json
 os.chdir('..\scripts')
 
 from collections import defaultdict
-from wiki.plugins.metadata import models as ms
+from wiki.models import Article
 
 macro_dir = 'markdown-and-macros'
 construal_dir = 'markdown-construals'
@@ -13,8 +13,8 @@ OUTPUT_SS_DESCRIPTIONS = False
 def write_json(dir, output):
     ids = defaultdict(int)
     ids.setdefault(0)
-    for a in ms.Article.objects.all():
-        ids[str(a.urlpath_set.all()[0])[:-1]] = a.pk
+    for a in Article.objects.all():
+        ids[str(a.urlpath_set.all().first())[:-1]] = a.pk
     # print(ids)
 
     articles = []
