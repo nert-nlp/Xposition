@@ -84,11 +84,17 @@ def langs_display(context):
 
 @register.simple_tag(takes_context=True)
 def adpositionrevs_for_lang(context):
+    context['always_transitive'] = Adposition.Transitivity.always_transitive
+    context['sometimes_transitive'] = Adposition.Transitivity.sometimes_transitive
+    context['always_intransitive'] = Adposition.Transitivity.always_intransitive
     larticle = context['article']
     a = AdpositionRevision.objects.select_related('article_revision__article').filter(lang__article=larticle,
         article_revision__deleted=False, 
-        article_revision__article__current_revision=F('article_revision'))  # ensure this isn't an outdated revision
-    return a.order_by('name')
+        article_revision__article__current_revision=F('article_revision')).order_by('name')  # ensure this isn't an outdated revision
+    context['swps'] = a.filter(is_pp_idiom=False).exclude(name__contains='_')
+    context['mwps'] = a.filter(is_pp_idiom=False, name__contains='_')
+    context['ppidioms'] = a.filter(is_pp_idiom=True)
+    return a
 
 @register.simple_tag(takes_context=True)
 def usages_for_lang(context):
