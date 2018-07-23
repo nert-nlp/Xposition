@@ -391,7 +391,7 @@ class AdpositionRevisionResource(import_export.resources.ModelResource):
     class Meta:
         model = ms.AdpositionRevision
         import_id_fields = ('name', 'lang',)
-        fields = ('name', 'lang', 'morphtype', 'transitivity', 'obj_cases')
+        fields = ('name', 'lang', 'morphtype', 'transitivity', 'obj_cases', 'is_pp_idiom')
 
 
 class UsageRevisionResource(import_export.resources.ModelResource):
