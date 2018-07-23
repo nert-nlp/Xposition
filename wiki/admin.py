@@ -127,7 +127,7 @@ class ArticleMetadataFormFunctions:
 class ArticleRevisionInstanceLoader(import_export.instance_loaders.ModelInstanceLoader):
     def get_queryset(self):
         x = super(ArticleRevisionInstanceLoader,self).get_queryset()
-        article = Article.objects.filter(articlerevision__article__pk=x[0].article.pk)[0]
+        article = Article.objects.filter(pk=x[0].article.pk)[0]
         x = x.filter(pk=article.current_revision.pk)
         return x
 
@@ -339,6 +339,12 @@ class SupersenseRevisionResource(resources.ModelResource):
         import_id_fields = ('name',)
         fields = ('name',)
 
+# class AdpositionRevisionInstanceLoader(import_export.instance_loaders.ModelInstanceLoader):
+#     def get_queryset(self):
+#         x = super(AdpositionRevisionInstanceLoader,self).get_queryset()
+#         adp = ms.Adposition.objects.filter(pk=x[0].adposition.pk)[0]
+#         x = x.filter(pk=adp.current_revision.metadatarevision.adpositionrevision.pk)
+#         return x
 
 class AdpositionRevisionResource(import_export.resources.ModelResource):
 
@@ -368,15 +374,16 @@ class AdpositionRevisionResource(import_export.resources.ModelResource):
 
         if ms.Adposition.objects.filter(current_revision__metadatarevision__adpositionrevision__lang__name=m.lang.name,
                                         current_revision__metadatarevision__adpositionrevision__name=m.name):
-            thep = m.adposition
-            thep.newRevision(ADMIN_REQUEST,
-                             commit=True,
-                             name=m.name,
-                             lang=m.lang,
-                             morphtype=m.morphtype,
-                             transitivity=m.transitivity,
-                             obj_cases=m.obj_cases,
-                             is_pp_idiom=m.is_pp_idiom)
+            # thep = ms.Adposition.objects.get(current_revision__metadatarevision__adpositionrevision__lang__name=m.lang.name,
+            #                             current_revision__metadatarevision__adpositionrevision__name=m.name)
+            # thep.newRevision(ADMIN_REQUEST,
+            #                  commit=True,
+            #                  name=m.name,
+            #                  lang=m.lang,
+            #                  morphtype=m.morphtype,
+            #                  transitivity=m.transitivity,
+            #                  obj_cases=m.obj_cases,
+            #                  is_pp_idiom=m.is_pp_idiom)
             return
 
         # code taken from wiki/plugins/metadata/forms.py
@@ -401,6 +408,7 @@ class AdpositionRevisionResource(import_export.resources.ModelResource):
         model = ms.AdpositionRevision
         import_id_fields = ('name', 'lang',)
         fields = ('name', 'lang', 'morphtype', 'transitivity', 'obj_cases', 'is_pp_idiom')
+        # instance_loader_class = AdpositionRevisionInstanceLoader
 
 
 class UsageRevisionResource(import_export.resources.ModelResource):
