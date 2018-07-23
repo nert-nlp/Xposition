@@ -202,7 +202,7 @@ with open(file, encoding='utf8') as f:
                     tok_morph = sent['toks'][tok_sem['toknums'][0] - 1]  # token morphological/syntactic features
                     # used to check NoneType
                     govobj = tok_sem['heuristic_relation']
-                    hasobj = type(govobj['obj']) is int
+                    hasobj = type(govobj['obj']) is int and not tok_sem['lexcat']=='PP'
                     hasgov = type(govobj['gov']) is int
 
                     # assign fields
@@ -286,6 +286,34 @@ with open(file, encoding='utf8') as f:
                         })
                         supersense_set.add(function_name)
 
+construal_json.append({
+    'role_name':' ',
+    'function_name':' ',
+    'special':'`$',
+    'role_id':'0',
+    'function_id':'0'
+    })
+construal_json.append({
+    'role_name':' ',
+    'function_name':' ',
+    'special':'`i',
+    'role_id':'0',
+    'function_id':'0'
+    })
+construal_json.append({
+    'role_name':' ',
+    'function_name':' ',
+    'special':'`d',
+    'role_id':'0',
+    'function_id':'0'
+    })
+construal_json.append({
+    'role_name':' ',
+    'function_name':' ',
+    'special':'`c',
+    'role_id':'0',
+    'function_id':'0'
+    })
 
 if not os.path.exists(dir):
     os.makedirs(dir)
