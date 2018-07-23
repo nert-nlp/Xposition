@@ -648,11 +648,14 @@ class Adposition(Metadata):
     # issue #51, add standard aposition spelling variants here
     def normalize_adp(cls, adp='', language_name=''):
         try:
-            a = AdpositionRevision.objects.get(name=adp)
-            if a.lang.name == language_name or a.lang.slug == language_name:
-                return adp
-            else:
+            a_list = Adposition.objects.filter(current_revision__metadatarevision__adpositionrevision__name=adp)
+            if not a_list:
                 raise ObjectDoesNotExist()
+            for a in a_list:
+                a = a.current_revision.metadatarevision.adpositionrevision
+                if a.lang.name == language_name or a.lang.slug == language_name:
+                    return adp
+            raise ObjectDoesNotExist()
         except ObjectDoesNotExist:
             for a in AdpositionRevision.objects.all():
                 if not (a.lang.name==language_name or a.lang.slug==language_name):
