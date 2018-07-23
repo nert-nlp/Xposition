@@ -368,6 +368,15 @@ class AdpositionRevisionResource(import_export.resources.ModelResource):
 
         if ms.Adposition.objects.filter(current_revision__metadatarevision__adpositionrevision__lang__name=m.lang.name,
                                         current_revision__metadatarevision__adpositionrevision__name=m.name):
+            thep = m.adposition
+            thep.newRevision(ADMIN_REQUEST,
+                             commit=True,
+                             name=m.name,
+                             lang=m.lang,
+                             morphtype=m.morphtype,
+                             transitivity=m.transitivity,
+                             obj_cases=m.obj_cases,
+                             is_pp_idiom=m.is_pp_idiom)
             return
 
         # code taken from wiki/plugins/metadata/forms.py
