@@ -38,12 +38,14 @@ class PTokenAnnotationTable(tables.Table):
     def value_lcontext(self, record, value):    # text only
         return ' '.join(value[:record.main_subtoken_indices[0]-1])
 
-    def _gohead(self, i, pt):
+    def _gohead(self, i, pt, rhs=False):
         s = ''
         if i==pt.gov_head_index:
             s += 'govhead '
         if i==pt.obj_head_index:
             s += 'objhead '
+        if rhs and i in pt.token_indices:   # for gappy multiword adpositions
+            s += 'usage target '
         if s:
             s = s.strip()
             s = f' class="{s}"'
@@ -72,7 +74,7 @@ class PTokenAnnotationTable(tables.Table):
     
     def render_rcontext(self, record, value):
         h = record.main_subtoken_indices[-1]    # beginning of right context
-        tokens = [format_html('<span title="{}"' + self._gohead(q,record) + '>{}</span>', q, x) for q,x in enumerate(value[h:], start=h+1)]
+        tokens = [format_html('<span title="{}"' + self._gohead(q,record,rhs=True) + '>{}</span>', q, x) for q,x in enumerate(value[h:], start=h+1)]
         spans_to_link = other_p_tokens_in_sentence(record)
         for (i,j),anno in sorted(spans_to_link.items(), reverse=True):
             assert i-h<len(tokens)

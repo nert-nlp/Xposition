@@ -44,7 +44,7 @@ a.exref { color: #aaa; }
 .usage {
   color: #f93;
 }
-.target .usage,.example .usage { font-weight: bold; }
+.target .usage,.usage.target,.example .usage { font-weight: bold; }
 a.usage:hover { 
   color: #fc6;
   text-decoration: underline;
