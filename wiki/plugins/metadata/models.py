@@ -669,7 +669,7 @@ class Adposition(Metadata):
     def field_names(self):
         # issue #4: transliteration field
         return {'name', 'transliteration', 'other_forms', 'description', 'lang', 'morphtype', 'transitivity',
-                'obj_cases'}
+                'obj_cases', 'is_pp_idiom'}
 
     def __str__(self):
         if self.current_revision:
@@ -722,8 +722,7 @@ class AdpositionRevision(MetadataRevision):
     morphtype = models.PositiveIntegerField(choices=Adposition.MorphType.choices(), verbose_name="Morphological type")
     transitivity = models.PositiveIntegerField(choices=Adposition.Transitivity.choices())
     obj_cases = BitField(flags=Case.flags(), verbose_name="Possible cases of the object")
-    is_pp_idiom = models.BooleanField(default=False, verbose_name="Is PP Idiom?",
-                                   help_text='Lexicalized Adposition+Noun Phrase:\nsuch as "in no time", "to my surprise", but not "with exception of"')
+    is_pp_idiom = models.BooleanField(default=False, verbose_name="Is PP Idiom?")
 
     unique_together = [('name', 'lang', 'revision_number')]
 
