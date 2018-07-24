@@ -200,16 +200,23 @@ with open(file, encoding='utf8') as f:
         for words in [sent['swes'], sent['smwes'], sent['wmwes']]:
             for i in words:
                 if words[i]['lexcat'] in ['P', 'PRON.POSS', 'POSS', 'PP', 'INF.P']:
+
+                    adposition_name = get_adp(words[i]['lexlemma'], language_name)
+
                     tok_sem = words[i]  # token semantic features
                     tok_morph = sent['toks'][tok_sem['toknums'][0] - 1]  # token morphological/syntactic features
                     # used to check NoneType
                     govobj = tok_sem['heuristic_relation']
+                    if adposition_name in ['in_this_day','to_eat','to_go']:
+                        tok_sem['lexcat']='PP'
+                        hasobj = False
+                    elif adposition_name in ['in_hope_to', 'just_about', 'nothing_but', 'back_and_forth', 'up_and_run']:
+                        tok_sem['lexcat'] = 'P'
                     hasobj = type(govobj['obj']) is int and not tok_sem['lexcat']=='PP'
                     hasgov = type(govobj['gov']) is int
 
                     # assign fields
                     token_indices = ' '.join([str(x) for x in tok_sem['toknums']])
-                    adposition_name = get_adp(tok_sem['lexlemma'], language_name)
                     if '?' in tok_sem['ss'] or '`' in tok_sem['ss']:
                         role_name = DEFAULT_STR
                         function_name = DEFAULT_STR
