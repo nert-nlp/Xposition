@@ -326,15 +326,13 @@ file = os.path.join(dir,'corpus_sentences.json')
 with open(file, 'w', encoding='utf8') as f:
     json.dump(corpus_sentences, f)
 
-# output PTokenAnnotations
-file = os.path.join(dir,'ptoken_annotations.json')
-if [p['adposition_name'] for p in ptoken_annotations if not p['adposition_name']=='at']:
-    print('ptoken_annotations.json')
-    with open(file, 'w', encoding='utf8') as f:
-        json.dump(ptoken_annotations, f)
-else:
-    print('skipping ptoken_annotations.json')
+# output SupersenseRevisions
+print('supersense_revisions.json')
+file = os.path.join(dir,'supersense_revisions.json')
+with open(file, 'w') as f:
+    json.dump(supersense_json, f)
 
+# output AdpositionRevisions
 # calculate adposition transitivity
 for i,a in enumerate(adposition_json):
     adp = a['adposition_name']
@@ -342,11 +340,11 @@ for i,a in enumerate(adposition_json):
                             else 'always_transitive' if adp in adp_trans \
                             else 'always_intransitive'
     adposition_json[i]['transitivity'] = trans
-# output AdpositionRevisions
 print('adposition_revisions.json')
 file = os.path.join(dir,'adposition_revisions.json')
 with open(file, 'w') as f:
     json.dump(adposition_json, f)
+
 # output Construals
 file = os.path.join(dir,'construals.json')
 if len(construal_json)>1:
@@ -355,6 +353,7 @@ if len(construal_json)>1:
         json.dump(construal_json, f)
 else:
     print('skipping construals.json')
+
 # output UsageRevisions
 file = os.path.join(dir,'usage_revisions.json')
 if [u['adposition_name'] for u in usage_json if not u['adposition_name']=='at']:
@@ -363,8 +362,12 @@ if [u['adposition_name'] for u in usage_json if not u['adposition_name']=='at']:
         json.dump(usage_json, f)
 else:
     print('skipping usages.json')
-# output SupersenseRevisions
-print('supersense_revisions.json')
-file = os.path.join(dir,'supersense_revisions.json')
-with open(file, 'w') as f:
-    json.dump(supersense_json, f)
+
+# output PTokenAnnotations
+file = os.path.join(dir,'ptoken_annotations.json')
+if [p['adposition_name'] for p in ptoken_annotations if not p['adposition_name']=='at']:
+    print('ptoken_annotations.json')
+    with open(file, 'w', encoding='utf8') as f:
+        json.dump(ptoken_annotations, f)
+else:
+    print('skipping ptoken_annotations.json')
