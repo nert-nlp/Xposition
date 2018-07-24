@@ -12,11 +12,11 @@
     {% wiki_render article %}
 
     <div class="col-md-4">
-      {% usages_for_adp as usages %}
+      {% usagerevs_for_adp as usages %}
       <h4 id="usages">Usages ({{usages|length}})</h4>
       <ul>
         {% for u in usages %}
-        <li>{{u.metadata.html}}</li>
+        <li>{{u.html}}</li>
         {% endfor %}
       </ul>
     </div>
@@ -30,6 +30,9 @@
   <div class="col-md-3">
     {% metadata_display %}{# if there is metadata for the article, display it! #}
   </div>
-
+  <div class="col-md-12">
+	{% tokens_for_adposition as tokens %}
+    {% include "ptoken_data_table.html" %}
+  </div>
 
 {% endblock %}

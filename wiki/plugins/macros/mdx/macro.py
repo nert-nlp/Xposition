@@ -8,10 +8,11 @@ from django.template.loader import render_to_string
 from django.utils.translation import ugettext as _
 from six import string_types
 from wiki.plugins.macros import settings
+from wiki.plugins.metadata import models
 
 # See:
 # http://stackoverflow.com/questions/430759/regex-for-managing-escaped-characters-for-items-like-string-literals
-re_sq_short = r"'([^'\\]*(?:\\.[^'\\]*)*)'"
+re_sq_short = r'"([^"\\]*(?:\\.[^"\\]*)*)"'
 
 MACRO_RE = re.compile(
     r"(\[(?P<macro>\w+)(?P<args>(\s(\w+:)?(%s|[\w'`&!%%+/$-]+))*)\])" %
@@ -54,9 +55,9 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
                             for arg in ARG_RE.finditer(args):
                                 value = arg.group('value')
                                 if isinstance(value, string_types):
-                                    # If value is enclosed with ': Remove and
+                                    # If value is enclosed with ": Remove and
                                     # remove escape sequences
-                                    if value.startswith("'") and len(value) > 2:
+                                    if value.startswith('"') and len(value) > 2:
                                         value = value[1:-1]
                                         value = value.replace("\\\\", "¤KEEPME¤")
                                         value = value.replace("\\", "")
@@ -108,18 +109,24 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
 
     def p(self, *args):
         cl = None
+        prep = args[0]
+        short = prep.split('/')[-1]
+        p = models.Adposition.normalize_adp(cls=models.Adposition,
+                                            adp=short,
+                                            language_name=prep.split('/')[-2])
+        if p:
+            prep = prep.replace(short, p)
         if len(args) >= 3:
             cl = args[2]
         if len(args) > 1 and not '-' == args[1]:
-            prep, construal = args[0], args[1]
-            short = prep.split('/')[-1]
-            if '`' in args[0]:
-                return link(short, '/' + prep + '/' + construal.replace('`', "'"), cl if cl else 'usage')
-            elif '--' in construal:
+            construal = args[1]
+            if '`' in construal:
+                return link(short, '/' + prep + '/' + construal, cl if cl else 'usage')
+            elif '--' in construal or "'" in construal or '?' in construal:
                 return link(short.replace('--','&#x219d;'), '/' + prep + '/' + construal, cl if cl else 'usage')
             else:
                 return link(short, '/' + prep + '/' + construal + '--' + construal, cl if cl else 'usage')
-        return link(args[0].split('/')[-1], '/' + args[0], cl if cl else 'adposition')
+        return link(short, '/' + prep, cl if cl else 'adposition')
     # meta data
     p.meta = dict(
         short_description=_('Link to Adposition, Usage'),
@@ -128,16 +135,52 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
         args={'prep': _('Name of adposition'), 'construal': _('Name of construal'), 'class': _('optional class')}
     )
 
+    def pspecial(self, *args):
+        cl = None
+        text = args[0]
+        prep = args[1]
+        p = models.Adposition.normalize_adp(cls=models.Adposition,
+                                            adp=prep.split('/')[-1],
+                                            language_name=prep.split('/')[-2])
+        if p:
+            prep = prep.replace(prep.split('/')[-1], p)
+        if len(args) >= 4:
+            cl = args[3]
+        if len(args) > 2 and not '-' == args[2]:
+            construal = args[2]
+            if '`' in construal:
+                return link(text, '/' + prep + '/' + construal, cl if cl else 'usage')
+            elif '--' in construal or "'" in construal or '?' in construal:
+                return link(text.replace('--', '&#x219d;'), '/' + prep + '/' + construal, cl if cl else 'usage')
+            else:
+                return link(text, '/' + prep + '/' + construal + '--' + construal, cl if cl else 'usage')
+        return link(text, '/' + prep, cl if cl else 'adposition')
+    # meta data
+    pspecial.meta = dict(
+        short_description=_('Link to Adposition, Usage'),
+        help_text=_('Create a link to a preposition or preposition-construal pair with special (nonstandard) spelling or noncanonical capitalization'),
+        example_code='[pspecial In en/in] or [pspecial In en/in Locus--Locus]',
+        args={'prep': _('Name of adposition'), 'special': _('Text to display'), 'construal': _('Name of construal'), 'class': _('optional class')}
+    )
+
+
+
     def ss(self, *args):
         cl = None
         if len(args) >= 2:
             cl = args[1]
-        if '`' in args[0]:
-            return link(args[0], '/' + args[0].replace('`', "'"), cl if cl else 'misc')
-        elif '--' in args[0]:
-            return link(args[0].replace('--','&#x219d;'), '/' + args[0], cl if cl else 'construal')
+        if '--' in args[0]:
+            display = args[0].replace('--','&#x219d;')
+            cls = cl or 'construal'
+            if args[0]==self.markdown.article.current_revision.title:
+                return f'<span class="{cls} this-construal">{display}</span>'
+            return link(display, '/' + args[0], cl if cl else 'construal')
         else:
-            return link(args[0], '/' + args[0], cl if cl else 'supersense')
+            display = args[0].replace('`',r'\`')
+            cls = cl or 'supersense'
+            if args[0]==self.markdown.article.current_revision.title:
+                return f'<span class="{cls} this-supersense">{display}</span>'
+            return link(display, '/' + args[0].replace('`','%60'), cls)
     # meta data
     ss.meta = dict(
         short_description=_('Link to Supersense or Construal'),
@@ -147,7 +190,9 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
     )
 
     def exref(self, id, page):
-        return link('ex. ' + page + ' ' + id, '/' + page.replace('`', "'") + '/#' + id, 'exref')
+        title = self.markdown.article.current_revision.title
+        display = f'{page}#{id}' if not page.split('/')[-1]==title else f'#{id}'
+        return link(display, '/' + page + '/#' + id, 'exref')
 
     # meta data
     exref.meta = dict(
@@ -158,13 +203,15 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
     )
 
     def ex(self, id, sent, label=None):
-        return '<a id="' + id + '"></a>"<span class="example">' + sent + '</span>" (' + (label if label else id) + ')'
+        if label:
+            return f'<span id="{id}" class="example">{sent}&nbsp;<span class="exlabel">{label}</span></span>'
+        return f'<span id="{id}" class="example">{sent}&nbsp;<a href="#{id}" class="exlabel">{id}</a></span>'
     # meta data
     ex.meta = dict(
         short_description=_('Create an Example'),
         help_text=_('Create an example sentence with a linkable id'),
-        example_code='[ex 001 \'The cat [p en/under Locus] the table.\']',
-        args={'id': _('id of example'), 'sent': _('full sentence in single quotes'), 'label': _('string to display after ex. (if not id)')}
+        example_code='[ex 001 "The cat [p en/under Locus] the table."]',
+        args={'id': _('id of example'), 'sent': _('full sentence in double quotes'), 'label': _('string to display after ex. (if not id)')}
     )
 
 

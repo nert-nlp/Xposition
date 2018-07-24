@@ -102,6 +102,7 @@ class ConstrualView(ArticleMetadataView):
     form_class = forms.ConstrualForm
     form_heading = 'Create Construal'
 
+
 class SupersenseView(ArticleMetadataView):
     form_class = forms.SupersenseForm
     form_heading = 'Create Supersense'
@@ -113,6 +114,18 @@ class SupersenseView(ArticleMetadataView):
         article = instance.supersense.article
         urlpath = article.urlpath_set.all()[0]
         return {'slug': urlpath.slug}
+
+
+class CorpusView(ArticleMetadataView):
+    form_class = forms.CorpusForm
+    form_heading = 'Create Corpus'
+
+class CorpusSentenceView(TemplateView):
+    template_name = models.CorpusSentence.template
+
+class PTokenView(TemplateView):
+    template_name = models.PTokenAnnotation.template
+
 
 class MetadataView(LoginRequiredMixin, ArticleMixin, TemplateView):
     template_name = "metadata.html"

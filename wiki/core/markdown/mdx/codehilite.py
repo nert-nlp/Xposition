@@ -47,10 +47,10 @@ class WikiCodeHiliteExtension(CodeHiliteExtension):
         hiliter = HiliteTreeprocessor(md)
         hiliter.config = self.getConfigs()
         if "hilite" in md.treeprocessors:
-            logger.warning(
-                "Replacing existing 'hilite' extension - please remove "
-                "'codehilite' from WIKI_MARKDOWN_KWARGS"
-            )
+            # logger.warning(
+            #     "Replacing existing 'hilite' extension - please remove "
+            #     "'codehilite' from WIKI_MARKDOWN_KWARGS"
+            # )
             del md.treeprocessors["hilite"]
         md.treeprocessors.add("hilite", hiliter, "<inline")
 

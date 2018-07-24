@@ -12,21 +12,39 @@
   <div class="col-md-9">
     {% wiki_render article %}
 
-    {% adpositions_for_lang as adpositions %}
+    {% adpositionrevs_for_lang as adpositions %}
     <h4 id="adps">Adpositions ({{adpositions|length}})</h4>
-    <ul>
-      {% for p in adpositions %}
-      <li>{{p.metadata.html}} {{p.current_revision.metadatarevision.adpositionrevision.transliteration}}</li>
-      {% endfor %}
-    </ul>
+    <div class="container-fluid">
+    <div class="col-md-4">
+		<h5>Single-word ({{swps|length}})</h5>
+		<ul>
+		  {% for p in swps %}
+		  <li>{{p.html}} {{p.transliteration}} {% if p.transitivity == always_intransitive %}[intr.]{% elif p.transitivity == sometimes_transitive %}[tr./intr.]{% endif %}</li>
+		  {% endfor %}
+		</ul>
+    </div>
+    <div class="col-md-4">
+		<h5>Multiword ({{mwps|length}})</h5>
+		<ul>
+		  {% for p in mwps %}
+		  <li>{{p.html}} {{p.transliteration}} {% if p.transitivity == always_intransitive %}[intr.]{% elif p.transitivity == sometimes_transitive %}[tr./intr.]{% endif %}</li>
+		  {% endfor %}
+		</ul>
+    </div>
+    <div class="col-md-4">
+		<h5>PP Idioms ({{ppidioms|length}})</h5>
+		<ul>
+		  {% for p in ppidioms %}
+		  <li>{{p.html}} {{p.transliteration}} {% if p.transitivity == always_intransitive %}[intr.]{% elif p.transitivity == sometimes_transitive %}[tr./intr.]{% endif %}</li>
+		  {% endfor %}
+		</ul>
+    </div>
+	</div>
 
-    {% usages_for_lang as usages %}
-    <h4 id="usages">Usages ({{usages|length}})</h4>
-    <ul>
-      {% for u in usages %}
-      <li>{{u.metadata.html}}</li>
-      {% endfor %}
-    </ul>
+	{# this list should be empty--indicates an invalid value for is_pp_idiom! #}
+	{% for p in misc %}
+		  {{p.html}} {{p.transliteration}} {% if p.transitivity == always_intransitive %}[intr.]{% elif p.transitivity == sometimes_transitive %}[tr./intr.]{% endif %}</li>
+	{% endfor %}
 
     {% include "category_article_view.html" %}
   </div>
