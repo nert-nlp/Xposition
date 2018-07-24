@@ -14,5 +14,9 @@ for c in ms.Construal.objects.all():
     if cats:
         print(cats)
         cats.delete()
-
+for u in ms.Usage.objects.all():
+    cats = ArticleCategory.objects.filter(name=str(u))
+    if cats:
+        print(cats)
+        cats.delete()
 
