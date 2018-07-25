@@ -427,9 +427,8 @@ class AdpositionRevisionResource(import_export.resources.ModelResource):
 class UsageRevisionInstanceLoader(import_export.instance_loaders.ModelInstanceLoader):
     def get_queryset(self):
         x = super(UsageRevisionInstanceLoader,self).get_queryset()
-        u = ms.Usage.objects.filter(current_revision__pk=x[0].pk)[0]
-        x = x.filter(pk=u.current_revision.metadatarevision.usagerevision.pk)
-        return x
+        u = ms.Usage.objects.filter(current_revision=x[0])
+        return u
 
 class UsageRevisionResource(import_export.resources.ModelResource):
     adposition = fields.Field(
