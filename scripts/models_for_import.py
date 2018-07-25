@@ -1,5 +1,5 @@
 import os, json
-os.chdir('..\scripts')
+os.chdir('../scripts')
 
 from wiki.plugins.metadata import models as ms
 
