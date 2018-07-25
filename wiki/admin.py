@@ -263,6 +263,13 @@ class ConstrualResource(resources.ModelResource):
         widget=NullForeignKeyWidget(ms.Supersense))
     special = fields.Field(attribute='special', widget=widgets.CharWidget())
 
+    def skip_row(self, instance, original):
+        m = instance
+        if not m.role and not m.function and ms.Construal.objects.filter(special=m.special):
+            return True
+        if m.role and m.function and ms.Construal.objects.filter(role__pk=m.role.pk, function__pk=m.function.pk):
+            return True
+        return False
 
     def save_instance(self, instance, using_transactions=True, dry_run=False):
         try:
@@ -339,12 +346,12 @@ class SupersenseRevisionResource(resources.ModelResource):
         import_id_fields = ('name',)
         fields = ('name',)
 
-# class AdpositionRevisionInstanceLoader(import_export.instance_loaders.ModelInstanceLoader):
-#     def get_queryset(self):
-#         x = super(AdpositionRevisionInstanceLoader,self).get_queryset()
-#         adp = ms.Adposition.objects.filter(pk=x[0].adposition.pk)[0]
-#         x = x.filter(pk=adp.current_revision.metadatarevision.adpositionrevision.pk)
-#         return x
+class AdpositionRevisionInstanceLoader(import_export.instance_loaders.ModelInstanceLoader):
+    def get_queryset(self):
+        x = super(AdpositionRevisionInstanceLoader,self).get_queryset()
+        adp = ms.Adposition.objects.filter(pk=x[0].adposition.pk)[0]
+        x = x.filter(pk=adp.current_revision.metadatarevision.adpositionrevision.pk)
+        return x
 
 class AdpositionRevisionResource(import_export.resources.ModelResource):
 
@@ -359,6 +366,13 @@ class AdpositionRevisionResource(import_export.resources.ModelResource):
     transitivity = fields.Field(attribute='transitivity', widget=TransitivityWidget())
     obj_cases = fields.Field(column_name='obj_case', attribute='obj_cases', widget=ObjCasesWidget())
     is_pp_idiom = fields.Field(column_name='is_pp_idiom', attribute='is_pp_idiom', widget=widgets.BooleanWidget())
+
+    def skip_row(self, instance, original):
+        m = instance
+        if ms.Adposition.objects.filter(current_revision__metadatarevision__adpositionrevision__lang__name=m.lang.name,
+                                        current_revision__metadatarevision__adpositionrevision__name=m.name):
+            return True
+        return False
 
     # handle revision creation
     def save_instance(self, instance, using_transactions=True, dry_run=False):
@@ -408,8 +422,14 @@ class AdpositionRevisionResource(import_export.resources.ModelResource):
         model = ms.AdpositionRevision
         import_id_fields = ('name', 'lang',)
         fields = ('name', 'lang', 'morphtype', 'transitivity', 'obj_cases', 'is_pp_idiom')
-        # instance_loader_class = AdpositionRevisionInstanceLoader
+        instance_loader_class = AdpositionRevisionInstanceLoader
 
+class UsageRevisionInstanceLoader(import_export.instance_loaders.ModelInstanceLoader):
+    def get_queryset(self):
+        x = super(UsageRevisionInstanceLoader,self).get_queryset()
+        u = ms.Usage.objects.filter(pk=x[0].usage.pk)[0]
+        x = x.filter(pk=u.current_revision.metadatarevision.usagerevision.pk)
+        return x
 
 class UsageRevisionResource(import_export.resources.ModelResource):
     adposition = fields.Field(
@@ -428,6 +448,16 @@ class UsageRevisionResource(import_export.resources.ModelResource):
         widget=ObjCaseWidget())
 
     ex_article = None
+
+    def skip_row(self, instance, original):
+        m = instance
+        if ms.Usage.objects.filter(current_revision__metadatarevision__usagerevision__adposition__pk=
+                                    m.adposition.pk,
+                                   current_revision__metadatarevision__usagerevision__construal__pk=
+                                    m.construal.pk):
+            return True
+        return False
+
     # handle revision creation
     def save_instance(self, instance, using_transactions=True, dry_run=False):
         if not self.ex_article:
@@ -489,6 +519,7 @@ class UsageRevisionResource(import_export.resources.ModelResource):
         model = ms.UsageRevision
         import_id_fields = ('adposition', 'construal', 'obj_case')
         fields = ('adposition', 'construal', 'obj_case')
+        instance_loader_class = UsageRevisionInstanceLoader
 
 
 class CorpusSentenceAdmin(ImportExportModelAdmin):
