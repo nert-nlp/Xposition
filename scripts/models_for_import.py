@@ -328,13 +328,13 @@ if not os.path.exists(dir):
     os.makedirs(dir)
 
 # output CorpusSentences
-print('corpus_sentences.json')
+print('corpus_sentences.json', len(corpus_sentences))
 file = os.path.join(dir,'corpus_sentences.json')
 with open(file, 'w', encoding='utf8') as f:
     json.dump(corpus_sentences, f)
 
 # output SupersenseRevisions
-print('supersense_revisions.json')
+print('supersense_revisions.json', len(supersense_json))
 file = os.path.join(dir,'supersense_revisions.json')
 with open(file, 'w') as f:
     json.dump(supersense_json, f)
@@ -347,7 +347,7 @@ for i,a in enumerate(adposition_json):
                             else 'always_transitive' if adp in adp_trans \
                             else 'always_intransitive'
     adposition_json[i]['transitivity'] = trans
-print('adposition_revisions.json')
+print('adposition_revisions.json', len(adposition_json))
 file = os.path.join(dir,'adposition_revisions.json')
 with open(file, 'w') as f:
     json.dump(adposition_json, f)
@@ -355,7 +355,7 @@ with open(file, 'w') as f:
 # output Construals
 file = os.path.join(dir,'construals.json')
 if len(construal_json)>1:
-    print('construals.json')
+    print('construals.json', len(construal_json))
     with open(file, 'w') as f:
         json.dump(construal_json, f)
 else:
@@ -364,17 +364,26 @@ else:
 # output UsageRevisions
 file = os.path.join(dir,'usage_revisions.json')
 if [u['adposition_name'] for u in usage_json if not u['adposition_name']=='at']:
-    print('usage_revisions.json')
+    print('usage_revisions.json', len(usage_json))
     with open(file, 'w') as f:
         json.dump(usage_json, f)
 else:
     print('skipping usages.json')
 
 # output PTokenAnnotations
-file = os.path.join(dir,'ptoken_annotations.json')
+# split ptokens json into multiple files of a particular size
+PER_FILE = 300
 if [p['adposition_name'] for p in ptoken_annotations if not p['adposition_name']=='at']:
-    print('ptoken_annotations.json')
+    for i in range(int(len(ptoken_annotations)/PER_FILE)):
+        file = os.path.join(dir, 'ptoken_annotations'+str(i)+'.json')
+        print(file,i*PER_FILE, '-',(i+1)*PER_FILE-1)
+        with open(file, 'w', encoding='utf8') as f:
+            json.dump(ptoken_annotations[i*PER_FILE:(i+1)*PER_FILE], f)
+    i = int(len(ptoken_annotations) / PER_FILE)
+    file = os.path.join(dir, 'ptoken_annotations' + str(i) + '.json')
+    print(file, i * PER_FILE, '-', len(ptoken_annotations)-1)
     with open(file, 'w', encoding='utf8') as f:
-        json.dump(ptoken_annotations, f)
+        json.dump(ptoken_annotations[i * PER_FILE:], f)
+
 else:
     print('skipping ptoken_annotations.json')
