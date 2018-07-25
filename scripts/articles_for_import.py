@@ -1,5 +1,5 @@
 import re, os, django, json
-os.chdir('..\scripts')
+os.chdir('../scripts')
 
 from collections import defaultdict
 from wiki.models import Article
