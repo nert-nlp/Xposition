@@ -120,9 +120,9 @@ class GetIDs:
         else:
             return '0'
 
-    def clean_us(self, adposition_name, construal_id):
-        if (adposition_name, construal_id) in self.us_memo:
-            return self.us_memo[(adposition_name, construal_id)]
+    def clean_us(self, adposition_id, construal_id):
+        if (adposition_id, construal_id) in self.us_memo:
+            return self.us_memo[(adposition_id, construal_id)]
         else:
             return '0'
 
@@ -238,7 +238,7 @@ with open(file, encoding='utf8') as f:
                     is_transitive = '1' if hasobj else '0'
                     adposition_id = ids.clean_adp(language_name, adposition_name)
                     construal_id = ids.clean_con(role_name, function_name, special)
-                    usage_id = ids.clean_us(adposition_name, int(construal_id)) if not construal_id == '0' \
+                    usage_id = ids.clean_us(int(adposition_id), int(construal_id)) if not construal_id == '0' and not adposition_id=='0'\
                         else '0'
                     gov_head_index = str(govobj['gov']) if hasgov else DEFAULT_STR
                     obj_head_index = str(govobj['obj']) if hasobj else DEFAULT_STR
