@@ -73,8 +73,8 @@ is_transitive = '1'
 adposition_id = DEFAULT_STR
 construal_id = DEFAULT_STR
 usage_id = DEFAULT_STR
-gov_head_index = DEFAULT_STR
-obj_head_index = DEFAULT_STR
+gov_head_index = None
+obj_head_index = None
 is_typo = '0'
 is_abbr = '0'
 mwe_subtokens = DEFAULT_STR
@@ -240,8 +240,8 @@ with open(file, encoding='utf8') as f:
                     construal_id = ids.clean_con(role_name, function_name, special)
                     usage_id = ids.clean_us(adposition_name, int(construal_id)) if not construal_id == '0' \
                         else '0'
-                    gov_head_index = str(govobj['gov']) if hasgov else DEFAULT_STR
-                    obj_head_index = str(govobj['obj']) if hasobj else DEFAULT_STR
+                    gov_head_index = int(govobj['gov']) if hasgov else None
+                    obj_head_index = int(govobj['obj']) if hasobj else None
                     mwe_subtokens = tok_sem['lexlemma']
                     main_subtoken_indices = main_indices(token_indices)
                     main_subtoken_string = main_string(mwe_subtokens, token_indices)
