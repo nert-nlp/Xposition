@@ -372,7 +372,7 @@ else:
 
 # output PTokenAnnotations
 # split ptokens json into multiple files of a particular size
-PER_FILE = 300
+PER_FILE = 1000
 if [p['adposition_name'] for p in ptoken_annotations if not p['adposition_name']=='at']:
     for i in range(int(len(ptoken_annotations)/PER_FILE)):
         file = os.path.join(dir, 'ptoken_annotations'+str(i)+'.json')
