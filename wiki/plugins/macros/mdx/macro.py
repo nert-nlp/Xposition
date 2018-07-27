@@ -203,12 +203,6 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
                 ref_slug = ref_slug[1:]
             if ref_slug[-1]=='/':
                 ref_slug = ref_slug[:-1]
-        # check for article with matching path
-        else:
-            for a in Article.objects.all():
-                if a.urlpath_set.all() and str(a.urlpath_set.all()[0]) == ref_slug+'/':
-                    ref_title = a.current_revision.title
-                    break
         display = f'{ref_title}#{id}' if not ref_title==my_title else f'#{id}'
         return link(display, '/' + ref_slug + '/#' + id, 'exref')
 
@@ -217,7 +211,7 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
         short_description=_('Link to Example'),
         help_text=_('Create a link to an example sentence'),
         example_code='[exref 001 Locus]',
-        args={'id': _('id of example'), 'page': _('page example is on')}
+        args={'id': _('id of example'), 'page': _('title of page example is on')}
     )
 
     def ex(self, id, sent, label=None):

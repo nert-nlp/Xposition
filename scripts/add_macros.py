@@ -75,14 +75,12 @@ class Examples:
                         repl.append(l)
                         continue
                     ss = self.id(l)[0]
-                    if ss in ['Ages', 'Comparatives and Superlatives', 'GenitivesPossessives',
-                              'Infinitive Clauses', 'Passives', 'PP Idioms', 'With Absolutes']:
-                        # print(ss)
-                        ss = 'en/' + ss.lower()
-                    if ss in ['Constraints on Role and Function Combinations', 'What counts as an adposition']:
-                        # print(ss)
-                        ss = ss.lower()
-                    ss = ss.replace(' ','_')
+                    if ss == 'GenitivesPossessives':
+                        ss = 'Genitives/Possessives'
+                    if ss == 'What counts as an adposition':
+                        ss = 'What counts as an adposition?'
+                    if ' ' in ss:
+                        ss = '"' + ss + '"'
                     id = self.id(l)[1]
                     repl.append('[exref ' + str(id).zfill(3) + ' ' + ss + ']')
                 # handle sections 'Species','Temporal','Path'
