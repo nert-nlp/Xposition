@@ -75,6 +75,14 @@ class Examples:
                         repl.append(l)
                         continue
                     ss = self.id(l)[0]
+                    if ss in ['Ages', 'Comparatives and Superlatives', 'GenitivesPossessives',
+                              'Infinitive Clauses', 'Passives', 'PP Idioms', 'With Absolutes']:
+                        # print(ss)
+                        ss = 'en/' + ss.lower()
+                    if ss in ['Constraints on Role and Function Combinations', 'What counts as an adposition']:
+                        # print(ss)
+                        ss = ss.lower()
+                    ss = ss.replace(' ','_')
                     id = self.id(l)[1]
                     repl.append('[exref ' + str(id).zfill(3) + ' ' + ss + ']')
                 # handle sections 'Species','Temporal','Path'
@@ -237,6 +245,7 @@ for  _, macro_file, name in recursive_modify_dir(markdown_dir, macro_dir):
     if macro_file.endswith('.txt'):
         with open(macro_file, 'r', encoding='utf8') as f:
             new_text = []
+            # print(title)
 
             for i, line in enumerate(f):
 

@@ -9,6 +9,7 @@ from django.utils.translation import ugettext as _
 from six import string_types
 from wiki.plugins.macros import settings
 from wiki.plugins.metadata import models
+from wiki.models import Article
 
 # See:
 # http://stackoverflow.com/questions/430759/regex-for-managing-escaped-characters-for-items-like-string-literals
@@ -190,9 +191,18 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
     )
 
     def exref(self, id, page):
-        title = self.markdown.article.current_revision.title
-        display = f'{page}#{id}' if not page.split('/')[-1]==title else f'#{id}'
-        return link(display, '/' + page + '/#' + id, 'exref')
+        my_title = self.markdown.article.current_revision.title
+        ref_title = page
+        ref_slug = page
+        # try to find article
+        x = Article.objects.filter(current_revision__title=ref_title)
+        if not x:
+            for a in Article.objects.all():
+                if a.urlpath_set.all()[0] == ref_slug+'/':
+                    ref_title = a.current_revision.title
+                    break
+        display = f'{ref_title}#{id}' if not ref_title==my_title else f'#{id}'
+        return link(display, '/' + ref_slug + '/#' + id, 'exref')
 
     # meta data
     exref.meta = dict(
