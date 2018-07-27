@@ -196,9 +196,17 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
         ref_slug = page
         # try to find article
         x = Article.objects.filter(current_revision__title=ref_title)
-        if not x:
+        # check for article with matching title
+        if x:
+            ref_slug = str(x[0].urlpath_set.all()[0])
+            if ref_slug[0]=='/':
+                ref_slug = ref_slug[1:]
+            if ref_slug[-1]=='/':
+                ref_slug = ref_slug[:-1]
+        # check for article with matching path
+        else:
             for a in Article.objects.all():
-                if a.urlpath_set.all()[0] == ref_slug+'/':
+                if a.urlpath_set.all() and str(a.urlpath_set.all()[0]) == ref_slug+'/':
                     ref_title = a.current_revision.title
                     break
         display = f'{ref_title}#{id}' if not ref_title==my_title else f'#{id}'
