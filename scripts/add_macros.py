@@ -91,10 +91,20 @@ class Examples:
                 # handle misc articles
                 elif l.startswith('sec:') and l in self.ids:
                     ref = self.id(l)[0]
+                    slug = ref
+                    if slug in ['Ages', 'Comparatives and Superlatives', 'GenitivesPossessives',
+                              'Infinitive Clauses', 'Passives', 'PP Idioms', 'With Absolutes']:
+                        # print(ss)
+                        slug = 'en/' + slug.lower()
+                        ref = ref.replace('GenitivesPossessives','Genitives/Possessives')
+                    if slug in ['Constraints on Role and Function Combinations', 'What counts as an adposition']:
+                        # print(ss)
+                        slug = slug.lower()
+                    slug = slug.replace(' ','_')
                     if ref in ['`$', '`d', '`i', '`c']:
                         repl.append('[ss ' + ref + ']')
                     else:
-                        repl.append('[[' + ref + ']]')
+                        repl.append('[' + ref + '](/' + slug + ')')
                 else:
                     repl.append(l)
                     print('fix label', title, l)
