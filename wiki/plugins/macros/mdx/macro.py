@@ -9,6 +9,7 @@ from django.utils.translation import ugettext as _
 from six import string_types
 from wiki.plugins.macros import settings
 from wiki.plugins.metadata import models
+from wiki.models import Article
 
 # See:
 # http://stackoverflow.com/questions/430759/regex-for-managing-escaped-characters-for-items-like-string-literals
@@ -178,6 +179,8 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
         else:
             display = args[0].replace('`',r'\`')
             cls = cl or 'supersense'
+            if args[0] in ['??','`d','`i','`c','`$']:
+                cls = cl or 'misc-label'
             if args[0]==self.markdown.article.current_revision.title:
                 return f'<span class="{cls} this-supersense">{display}</span>'
             return link(display, '/' + args[0].replace('`','%60'), cls)
@@ -190,16 +193,27 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
     )
 
     def exref(self, id, page):
-        title = self.markdown.article.current_revision.title
-        display = f'{page}#{id}' if not page.split('/')[-1]==title else f'#{id}'
-        return link(display, '/' + page + '/#' + id, 'exref')
+        my_title = self.markdown.article.current_revision.title
+        ref_title = page
+        ref_slug = page
+        # try to find article
+        x = Article.objects.filter(current_revision__title=ref_title)
+        # check for article with matching title
+        if x:
+            ref_slug = str(x[0].urlpath_set.all()[0])
+            if ref_slug[0]=='/':
+                ref_slug = ref_slug[1:]
+            if ref_slug[-1]=='/':
+                ref_slug = ref_slug[:-1]
+        display = f'{ref_title}#{id}' if not ref_title==my_title else f'#{id}'
+        return link(display, '/' + ref_slug + '/#' + id, 'exref')
 
     # meta data
     exref.meta = dict(
         short_description=_('Link to Example'),
         help_text=_('Create a link to an example sentence'),
         example_code='[exref 001 Locus]',
-        args={'id': _('id of example'), 'page': _('page example is on')}
+        args={'id': _('id of example'), 'page': _('title of page example is on')}
     )
 
     def ex(self, id, sent, label=None):

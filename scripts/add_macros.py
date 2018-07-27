@@ -75,6 +75,12 @@ class Examples:
                         repl.append(l)
                         continue
                     ss = self.id(l)[0]
+                    if ss == 'GenitivesPossessives':
+                        ss = 'Genitives/Possessives'
+                    if ss == 'What counts as an adposition':
+                        ss = 'What counts as an adposition?'
+                    if ' ' in ss:
+                        ss = '"' + ss + '"'
                     id = self.id(l)[1]
                     repl.append('[exref ' + str(id).zfill(3) + ' ' + ss + ']')
                 # handle sections 'Species','Temporal','Path'
@@ -83,10 +89,20 @@ class Examples:
                 # handle misc articles
                 elif l.startswith('sec:') and l in self.ids:
                     ref = self.id(l)[0]
+                    slug = ref
+                    if slug in ['Ages', 'Comparatives and Superlatives', 'GenitivesPossessives',
+                              'Infinitive Clauses', 'Passives', 'PP Idioms', 'With Absolutes']:
+                        # print(ss)
+                        slug = 'en/' + slug.lower()
+                        ref = ref.replace('GenitivesPossessives','Genitives/Possessives')
+                    if slug in ['Constraints on Role and Function Combinations', 'What counts as an adposition']:
+                        # print(ss)
+                        slug = slug.lower()
+                    slug = slug.replace(' ','_')
                     if ref in ['`$', '`d', '`i', '`c']:
                         repl.append('[ss ' + ref + ']')
                     else:
-                        repl.append('[[' + ref + ']]')
+                        repl.append('[' + ref + '](/' + slug + ')')
                 else:
                     repl.append(l)
                     print('fix label', title, l)
@@ -237,6 +253,7 @@ for  _, macro_file, name in recursive_modify_dir(markdown_dir, macro_dir):
     if macro_file.endswith('.txt'):
         with open(macro_file, 'r', encoding='utf8') as f:
             new_text = []
+            # print(title)
 
             for i, line in enumerate(f):
 

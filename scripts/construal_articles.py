@@ -3,10 +3,9 @@ import re, os
 dir = 'markdown-and-macros'
 dir2 = 'markdown-construals'
 
-NEW_SS_RE = re.compile('(- )?\[ss (?P<ss>[\w$`-]+)\]')
-ALT_SE_RE = re.compile('\(\[ss (?P<ss>[\w$`-]+)\]\)')
-ORDINARY_RE = re.compile('^\s*[^-\s].*')
-EXAMPLE_RE = re.compile('\[ex (?P<id>\w+) (?P<ex>".+")\]')
+P_RE = re.compile('\[p(special [^\s\]]+)? [^\s\]]+ (?P<ss>[^\s\]]+)\]')
+EXAMPLE_RE = re.compile('\[ex (?P<id>[^\s\]]+) (?P<ex>".+?")\]')
+
 
 construals = {}
 
@@ -24,20 +23,16 @@ for file in os.listdir(dir):
 
             print(default_ss)
             for line in f:
-                if NEW_SS_RE.match(line):
-                    default_ss = NEW_SS_RE.match(line).group('ss')
-                elif ORDINARY_RE.match(line):
-                    default_ss = file.replace('.txt', '')
-                elif ALT_SE_RE.search(line):
-                    tmp_ss = ALT_SE_RE.search(line).group('ss')
-                elif '**'+file.replace('.txt', '')+'**' in line:
-                    tmp_ss = file.replace('.txt', '')
                 # add to construals
-                ss = tmp_ss if tmp_ss else default_ss
-                ss = ss if '--' in ss else ss+'--'+ss
                 for ex in EXAMPLE_RE.finditer(line):
                     example = ex.group('ex')
+                    # remove footnotes
                     example = re.sub('\[\^[0-9]+\]','',example)
+                    ss = P_RE.search(example)
+                    if not ss:
+                        continue
+                    ss = ss.group('ss')
+                    ss = ss if '--' in ss else ss + '--' + ss
                     if ss not in construals:
                         construals[ss] = []
                     exref = '"[exref '+ex.group('id')+' '+file.replace('.txt', '')+']"'
