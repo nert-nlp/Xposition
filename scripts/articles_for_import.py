@@ -26,11 +26,13 @@ def write_json(dir, output):
             SHORT_RE = re.compile('<short_description>(?P<desc>.+?)</short_description>', re.DOTALL)
             content = SHORT_RE.sub('', text)
             short = SHORT_RE.search(text).group() if SHORT_RE.search(text) else ''
-
+            slug = file.replace('.txt','').replace(' ','_').lower()
+            if not slug in ids.keys():
+                slug = 'en/'+slug
             articles.append(
                 {'content':content,
                  'title':file.replace('.txt',''),
-                 'article_id':str(ids[file.replace('.txt','')])}
+                 'article_id':str(ids[slug])}
             )
             if short:
                 # print(short)
