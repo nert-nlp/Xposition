@@ -179,6 +179,8 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
         else:
             display = args[0].replace('`',r'\`')
             cls = cl or 'supersense'
+            if args[0] in ['??','`d','`i','`c','`$']:
+                cls = cl or 'misc-label'
             if args[0]==self.markdown.article.current_revision.title:
                 return f'<span class="{cls} this-supersense">{display}</span>'
             return link(display, '/' + args[0].replace('`','%60'), cls)
