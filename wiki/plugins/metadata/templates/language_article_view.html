@@ -14,12 +14,14 @@
 
     {% adpositionrevs_for_lang as adpositions %}
     <h4 id="adps">Adpositions ({{adpositions|length}})</h4>
+    <p>The number of <b>construals</b> (role/function combinations) in a usage with each adposition is shown in parentheses.</p>
     <div class="container-fluid">
     <div class="col-md-4">
 		<h5>Single-word ({{swps|length}})</h5>
 		<ul>
 		  {% for p in swps %}
-		  <li>{{p.html}} {{p.transliteration}} {% if p.transitivity == always_intransitive %}[intr.]{% elif p.transitivity == sometimes_transitive %}[tr./intr.]{% endif %}</li>
+		  <li>{{p.html}} {{p.transliteration}} {% if p.transitivity == always_intransitive %}[intr.]{% elif p.transitivity == sometimes_transitive %}[tr./intr.]{% endif %}
+		  (<span class="nusages{% if p.adposition.usages.count >= 10 %} major{% endif %}">{{p.adposition.usages.count}}</span>)</li>
 		  {% endfor %}
 		</ul>
     </div>
@@ -27,7 +29,8 @@
 		<h5>Multiword ({{mwps|length}})</h5>
 		<ul>
 		  {% for p in mwps %}
-		  <li>{{p.html}} {{p.transliteration}} {% if p.transitivity == always_intransitive %}[intr.]{% elif p.transitivity == sometimes_transitive %}[tr./intr.]{% endif %}</li>
+		  <li>{{p.html}} {{p.transliteration}} {% if p.transitivity == always_intransitive %}[intr.]{% elif p.transitivity == sometimes_transitive %}[tr./intr.]{% endif %}
+		  (<span class="nusages{% if p.adposition.usages.count >= 10 %} major{% endif %}">{{p.adposition.usages.count}}</span>)</li>
 		  {% endfor %}
 		</ul>
     </div>
@@ -35,7 +38,8 @@
 		<h5>PP Idioms ({{ppidioms|length}})</h5>
 		<ul>
 		  {% for p in ppidioms %}
-		  <li>{{p.html}} {{p.transliteration}} {% if p.transitivity == always_intransitive %}[intr.]{% elif p.transitivity == sometimes_transitive %}[tr./intr.]{% endif %}</li>
+		  <li>{{p.html}} {{p.transliteration}} {% if p.transitivity == always_intransitive %}[intr.]{% elif p.transitivity == sometimes_transitive %}[tr./intr.]{% endif %}
+		  (<span class="nusages{% if p.adposition.usages.count >= 10 %} major{% endif %}">{{p.adposition.usages.count}}</span>)</li>
 		  {% endfor %}
 		</ul>
     </div>

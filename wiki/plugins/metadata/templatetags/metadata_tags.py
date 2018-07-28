@@ -276,5 +276,6 @@ def construals_display(context, role=None, function=None, order_by='role' or 'fu
                          order_by2+'__current_revision__metadatarevision__name'):
         #a = c.article
         #s += '<li><a href="{url}">{rev}</a></li>\n'.format(url=a.get_absolute_url(), rev=a.current_revision.title)
-        s += f'<li>{c.html}</li>\n'
+        nadps = c.usages.count()
+        s += f'<li>{c.html} (<span class="nadpositions' + (' major' if nadps>=10 else '') + f'">{nadps}</span>)</li>\n'
     return mark_safe(s)
