@@ -774,6 +774,14 @@ class Usage(Metadata):
         return {'name', 'description', 'adposition', 'obj_case', 'construal'}
 
     @cached_property
+    def url(self):
+        return self.current_revision.metadatarevision.usagerevision.url
+
+    @cached_property
+    def html(self):
+        return self.current_revision.metadatarevision.usagerevision.html
+
+    @cached_property
     def template(self):
         return "usage_article_view.html"
 
