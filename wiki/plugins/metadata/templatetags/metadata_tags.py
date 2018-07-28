@@ -6,7 +6,7 @@ from django_tables2 import RequestConfig
 from bitfield import BitField
 from wiki.models import Article, ArticleRevision
 from wiki.models.pluginbase import RevisionPlugin, RevisionPluginRevision
-from wiki.plugins.metadata.models import MetadataRevision, SimpleMetadata, Supersense, Construal, Language, Adposition, AdpositionRevision, Usage, UsageRevision, PTokenAnnotation, deepest_instance
+from wiki.plugins.metadata.models import MetadataRevision, SimpleMetadata, Supersense, Construal, Language, Corpus, Adposition, AdpositionRevision, Usage, UsageRevision, PTokenAnnotation, deepest_instance
 from wiki.plugins.metadata.tables import PTokenAnnotationTable
 from wiki.plugins.categories.models import Category
 
@@ -103,6 +103,12 @@ def usages_for_lang(context):
     u = Usage.objects.filter(current_revision__metadatarevision__usagerevision__adposition__current_revision__metadatarevision__adpositionrevision__lang__article=article,
         current_revision__metadatarevision__article_revision__deleted=False)
     return u
+
+@register.simple_tag(takes_context=True)
+def corpora_for_lang(context):
+    article = context['article']
+    cc = Corpus.objects.filter(article__current_revision__deleted=False)
+    return [c for c in cc if c.article.urlpath_set.all()[0].parent.article==article]
 
 @register.simple_tag(takes_context=True)
 def usagerevs_for_adp(context):

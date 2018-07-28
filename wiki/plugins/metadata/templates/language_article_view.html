@@ -12,6 +12,18 @@
   <div class="col-md-9">
     {% wiki_render article %}
 
+	
+	{% corpora_for_lang as corpora %}
+	{% if corpora %}
+	<h4 id="corpora">Corpora</h4>
+	<ul>
+		{% for c in corpora %}<li><a href="/{{c.article.urlpath_set.first}}">{{c.article}} {{c.version}}</a></li>
+		{% endfor %}
+	</ul>
+	{% else %}
+	<h4 id="corpora">No Corpora</h4>
+	{% endif %}
+
     {% adpositionrevs_for_lang as adpositions %}
     <h4 id="adps">Adpositions ({{adpositions|length}})</h4>
     <p>The number of <b>construals</b> (role/function combinations) in a usage with each adposition is shown in parentheses.</p>
