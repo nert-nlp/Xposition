@@ -1,12 +1,12 @@
 from django import template
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
-from django.db.models import F, Q
+from django.db.models import F, Q, Count
 from django.utils.safestring import mark_safe
 from django_tables2 import RequestConfig
 from bitfield import BitField
 from wiki.models import Article, ArticleRevision
 from wiki.models.pluginbase import RevisionPlugin, RevisionPluginRevision
-from wiki.plugins.metadata.models import MetadataRevision, SimpleMetadata, Supersense, Construal, Language, Adposition, AdpositionRevision, Usage, UsageRevision, PTokenAnnotation, deepest_instance
+from wiki.plugins.metadata.models import MetadataRevision, SimpleMetadata, Supersense, Construal, Language, Corpus, Adposition, AdpositionRevision, Usage, UsageRevision, PTokenAnnotation, deepest_instance
 from wiki.plugins.metadata.tables import PTokenAnnotationTable
 from wiki.plugins.categories.models import Category
 
@@ -103,6 +103,45 @@ def usages_for_lang(context):
     u = Usage.objects.filter(current_revision__metadatarevision__usagerevision__adposition__current_revision__metadatarevision__adpositionrevision__lang__article=article,
         current_revision__metadatarevision__article_revision__deleted=False)
     return u
+
+@register.simple_tag(takes_context=True)
+def corpora_for_lang(context):
+    article = context['article']
+    cc = Corpus.objects.filter(article__current_revision__deleted=False)
+    return [c for c in cc if c.article.urlpath_set.all()[0].parent.article==article]
+
+@register.simple_tag(takes_context=True)
+def corpus_stats(context):
+    article = context['article']
+    c = Corpus.objects.get(article=article)
+    nSents = c.corpus_sentences.count()
+    nDocs = c.corpus_sentences.aggregate(num_docs=Count('doc_id', distinct=True))['num_docs']
+    nWords = sum(len(sent.tokens) for sent in c.corpus_sentences.all())
+    nAdpToks = PTokenAnnotation.objects.filter(sentence__corpus=c).count()
+    adptypes = Adposition.objects.annotate(adposition_freq=Count('ptokenannotation', filter=Q(sentence__corpus=c))).order_by('-adposition_freq', 'current_revision__metadatarevision__name')
+    context['adpositions_freq'] = adptypes
+    #adpconst = Adposition.objects.annotate(adposition_nconst=Count('ptokenannotation__usage', distinct=True, filter=Q(sentence__corpus=c))).order_by('-adposition_nconst', 'current_revision__metadatarevision__name')
+    #context['adpositions_nconstruals'] = adpconst
+    usages = Usage.objects.select_related('current_revision__metadatarevision__usagerevision__adposition__current_revision__metadatarevision', 
+        'current_revision__metadatarevision__usagerevision__construal__role__current_revision__metadatarevision', 
+        'current_revision__metadatarevision__usagerevision__construal__function__current_revision__metadatarevision').annotate(usage_freq=Count('ptokenannotation', filter=Q(sentence__corpus=c))).order_by('-usage_freq', 'current_revision__metadatarevision__name')
+    context['usages_freq'] = usages
+    construals = Construal.objects.annotate(construal_freq=Count('ptoken_with_construal', filter=Q(sentence__corpus=c))).order_by('-construal_freq', 'special', 'role', 'function')
+    context['construals_freq'] = construals
+    ssr = Supersense.objects.annotate(role_freq=Count('rfs_with_role__ptoken_with_construal', filter=Q(sentence__corpus=c))).order_by('-role_freq', 'current_revision__metadatarevision__name') 
+    ssf = Supersense.objects.annotate(fxn_freq=Count('rfs_with_function__ptoken_with_construal', filter=Q(sentence__corpus=c))).order_by('-fxn_freq', 'current_revision__metadatarevision__name')
+    context['ss_role_freq'] = ssr
+    context['ss_fxn_freq'] = ssf
+    s = f'''<table id="stats" class="table text-right">
+                <tr><th>&nbsp;</th><th>Tokens</th><th>Types</th></tr>
+                <tr><th>Documents</th><td>{nDocs}</td></tr>
+                <tr><th>Sentences</th><td>{nSents}</td></tr>
+                <tr><th>Words</th><td>{nWords}</td></tr>
+                <tr><th>Adpositions</th><td>{nAdpToks}</td><td>{adptypes.count()}</tr>
+                <tr><th>Usages</th><td></td><td>{usages.count()}</tr>
+                <tr><th>Construals</th><td></td><td>{construals.count()}</tr>
+            </table>'''
+    return mark_safe(s)
 
 @register.simple_tag(takes_context=True)
 def usagerevs_for_adp(context):
@@ -276,5 +315,6 @@ def construals_display(context, role=None, function=None, order_by='role' or 'fu
                          order_by2+'__current_revision__metadatarevision__name'):
         #a = c.article
         #s += '<li><a href="{url}">{rev}</a></li>\n'.format(url=a.get_absolute_url(), rev=a.current_revision.title)
-        s += f'<li>{c.html}</li>\n'
+        nadps = c.usages.count()
+        s += f'<li>{c.html} (<span class="nadpositions' + (' major' if nadps>=10 else '') + f'">{nadps}</span>)</li>\n'
     return mark_safe(s)
