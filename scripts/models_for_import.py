@@ -10,6 +10,9 @@ file = 'streusle.go.notes.json'
 corpus_sentences = []
 ptoken_annotations = []
 
+
+DEBUG_MODE = False
+
 corpus_sentences_header = ['corpus_name', 'corpus_version', 'sent_id', 'language_name', 'orthography', 'is_parallel', 'doc_id',
                'text', 'tokens', 'word_gloss', 'sent_gloss', 'note', 'mwe_markup']
 
@@ -104,7 +107,7 @@ class GetIDs:
                       c.special if c.special else DEFAULT_STR)] = str(c.pk)
 
         for u in ms.Usage.objects.all():
-            self.us_memo[(u.current_revision.metadatarevision.usagerevision.adposition.current_revision.metadatarevision.adpositionrevision.name,
+            self.us_memo[(u.current_revision.metadatarevision.usagerevision.adposition.pk,
                      u.current_revision.metadatarevision.usagerevision.construal.pk)] \
                 = str(u.pk)
 
@@ -112,24 +115,38 @@ class GetIDs:
         if (adposition_name,language_name) in self.adp_memo:
             return self.adp_memo[(adposition_name,language_name)]
         else:
+            if DEBUG_MODE:
+                print('Adposition Missing:',language_name, adposition_name)
             return '0'
 
     def clean_con(self, role_name, function_name, special):
         if (role_name, function_name, special) in self.con_memo:
             return self.con_memo[(role_name, function_name, special)]
         else:
+            if DEBUG_MODE:
+                print('Construal Missing:',role_name, function_name, special)
             return '0'
 
     def clean_us(self, adposition_id, construal_id):
+        if int(adposition_id) == 0 or int(construal_id) == 0:
+            if DEBUG_MODE:
+                print('Usage Missing:',adposition_name, role_name, function_name, special, adposition_id, construal_id)
+            return '0'
         if (adposition_id, construal_id) in self.us_memo:
             return self.us_memo[(adposition_id, construal_id)]
         else:
+            if DEBUG_MODE:
+                print('Usage Missing:',adposition_name, role_name, function_name, special, adposition_id, construal_id)
             return '0'
 
     def clean_ss(self, name):
+        if not name.strip():
+            return '0'
         if name in self.ss_memo:
             return self.ss_memo[name]
         else:
+            if DEBUG_MODE:
+                print('Supersense Missing:', name)
             return '0'
 
 def add_corp_sent():
@@ -238,8 +255,7 @@ with open(file, encoding='utf8') as f:
                     is_transitive = '1' if hasobj else '0'
                     adposition_id = ids.clean_adp(language_name, adposition_name)
                     construal_id = ids.clean_con(role_name, function_name, special)
-                    usage_id = ids.clean_us(int(adposition_id), int(construal_id)) if not construal_id == '0' and not adposition_id=='0'\
-                        else '0'
+                    usage_id = ids.clean_us(int(adposition_id), int(construal_id))
                     gov_head_index = str(govobj['gov']) if hasgov else DEFAULT_STR
                     obj_head_index = str(govobj['obj']) if hasobj else DEFAULT_STR
                     mwe_subtokens = tok_sem['lexlemma']
@@ -247,6 +263,10 @@ with open(file, encoding='utf8') as f:
                     main_subtoken_string = main_string(mwe_subtokens, token_indices)
                     if int(construal_id)>0 and int(usage_id)>0 and int(adposition_id)>0:
                         add_ptoken()
+                    # else:
+                    #     print(adposition_name, adposition_id)
+                    #     print(role_name, function_name, special, construal_id)
+                    #     print(adposition_name+':', role_name, function_name, special, usage_id)
 
                     morphtype = 'standalone_preposition' if not adposition_name == "'s" else 'suffix'
                     is_pp_idiom = '1' if tok_sem['lexcat'] == 'PP' else '0'
@@ -372,18 +392,17 @@ else:
 
 # output PTokenAnnotations
 # split ptokens json into multiple files of a particular size
-PER_FILE = 1000
+PER_FILE = 1500
 if [p['adposition_name'] for p in ptoken_annotations if not p['adposition_name']=='at']:
     for i in range(int(len(ptoken_annotations)/PER_FILE)):
         file = os.path.join(dir, 'ptoken_annotations'+str(i)+'.json')
-        print(file,i*PER_FILE, '-',(i+1)*PER_FILE-1)
+        print('ptoken_annotations' + str(i+1) + '.json', i*PER_FILE, '-',(i+1)*PER_FILE-1)
         with open(file, 'w', encoding='utf8') as f:
             json.dump(ptoken_annotations[i*PER_FILE:(i+1)*PER_FILE], f)
     i = int(len(ptoken_annotations) / PER_FILE)
     file = os.path.join(dir, 'ptoken_annotations' + str(i) + '.json')
-    print(file, i * PER_FILE, '-', len(ptoken_annotations)-1)
+    print('ptoken_annotations' + str(i+1) + '.json', i * PER_FILE, '-', len(ptoken_annotations)-1)
     with open(file, 'w', encoding='utf8') as f:
         json.dump(ptoken_annotations[i * PER_FILE:], f)
-
 else:
     print('skipping ptoken_annotations.json')
