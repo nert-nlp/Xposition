@@ -93,7 +93,8 @@ class PTokenAnnotationTable(tables.Table):
         return value if value.role is None else {True: '=', False: '≠'}[value.role==value.function]
         
     def render_construal(self, value):
-        return mark_safe(f'<a href="{value.url}" class="construal">{self.value_construal(value)}</a>')
+        special = value.special and value.special.strip()
+        return mark_safe(f'<a href="{value.url}" class="{"misc-label" if special else "construal"}">{self.value_construal(value)}</a>')
     
     def value_note(self, value):
         return value.strip()
