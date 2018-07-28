@@ -419,7 +419,7 @@ class Construal(SimpleMetadata):
         """For efficiency, callers should invoke .select_related('article__current_revision',
         'construal__role__current_revision__metadatarevision', 
         'construal__function__current_revision__metadatarevision') if these fields are not already being queried"""
-        return mark_safe(f'<a href="{self.url}" class="construal">{self.name_html}</a>')
+        return mark_safe(f'<a href="{self.url}" class="{"misc-label" if self.special and self.special.strip() else "construal"}">{self.name_html}</a>')
 
     @cached_property
     def name_html(self):
@@ -801,9 +801,10 @@ class UsageRevision(MetadataRevision):
         'adposition__current_revision__metadatarevision', 
         'construal__role__current_revision__metadatarevision', 
         'construal__function__current_revision__metadatarevision') if these fields are not already being queried"""
-        return mark_safe('<a href="' + self.url + '" class="usage">'
-            '<span class="adposition">' + self.adposition.name_html + '</span>: <span class="construal">' \
-            + self.construal.name_html + '</span></a>')
+        special = self.construal.special and self.construal.special.strip()
+        return mark_safe(f'<a href="{self.url}" class="usage">'
+            f'<span class="adposition">{self.adposition.name_html}</span>: '
+            f'<span class="{"misc-label" if special else "construal"}">{self.construal.name_html}</span></a>')
 
     class Meta:
         verbose_name = _('usage revision')
