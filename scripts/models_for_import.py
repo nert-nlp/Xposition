@@ -294,7 +294,7 @@ with open(file, encoding='utf8') as f:
                                 'function_id':function_id
                         })
                         construal_set.add( (role_name, function_name, special) )
-                    if not (adposition_name, role_name, function_name) in usage_set and int(adposition_id)>0 and int(construal_id)>0:
+                    if not (adposition_name, role_name, function_name, special) in usage_set and int(adposition_id)>0 and int(construal_id)>0:
                         usage_json.append({
                             'adposition_name':adposition_name,
                             'role_name':role_name,
@@ -303,7 +303,7 @@ with open(file, encoding='utf8') as f:
                             'adposition_id': adposition_id,
                             'construal_id': construal_id
                         })
-                        usage_set.add( (adposition_name, role_name, function_name) )
+                        usage_set.add( (adposition_name, role_name, function_name, special) )
                     if not role_name in supersense_set:
                         supersense_json.append({
                             'supersense_name':role_name
