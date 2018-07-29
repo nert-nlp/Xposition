@@ -34,12 +34,12 @@ from django.utils.translation import ugettext_lazy as _
 
 class StringList(list):
     '''
-    List of strings stored as space-separated.
-    Using field values of a type with a custom __str__ ensures that 
-    it will be rendered in form fields correctly.
+    List of values stored as space-separated strings.
+    With a custom __str__, providing an instance of this class as a field value 
+    ensures that it will be rendered correctly in form fields.
     '''
     def __str__(self):
-        return ' '.join(self)
+        return ' '.join(map(str, self))
     
     @staticmethod
     def from_str(s):
@@ -61,7 +61,7 @@ class StringListField(models.TextField):
         if not value: return
         if not isinstance(value, (list, tuple)):
             value = self.to_python(value)
-        return str(StringList(str(s) for s in value))
+        return str(StringList(value))
 
     def value_to_string(self, obj):
         value = self._get_val_from_obj(obj)
@@ -73,12 +73,10 @@ class SeparatedValuesField(StringListField):
 
 class IntListField(StringListField):
     def to_python(self, value):
-        if not value: return
-        if value==' ': return []
-        if isinstance(value, list):
-            return value
-        return [int(x) for x in str(value).split(self.token)]
-
+        sl = super(IntListField, self).to_python(value)
+        for i in range(len(sl)):
+            sl[i] = int(sl[i])
+        return sl
 
 def deepest_instance(x):
     """
