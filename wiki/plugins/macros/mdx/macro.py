@@ -228,6 +228,46 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
         args={'id': _('id of example'), 'sent': _('full sentence in double quotes'), 'label': _('string to display after ex. (if not id)')}
     )
 
+    GLOSS_RE = re.compile('{(?P<tok_gloss>[^}]*)}')
+    def gex(self, id, sent, sent_gloss='', label=None, *args):
+        words_and_glosses = sent.split()
+        columns = []
+        for word_gloss in words_and_glosses:
+            gloss = self.GLOSS_RE.match(word_gloss)
+            column = ''
+            if gloss:
+                tok_gloss = gloss.group('tok_gloss')
+                if '||' in tok_gloss:
+                    xs = tok_gloss.split('||')
+                else:
+                    xs = tok_gloss.split()
+                column = '<div class="gll">'+'<br />'.join(xs)+'</div>'
+            else:
+                column = '<div class="gll">'+word_gloss+'</div>'
+            columns.append(column)
+        interlinear = '\n'.join(columns)
+        interlinear = f'''
+                    <div class="interlinear">
+                    <p class="gloss">
+                        {interlinear}
+                    </p>
+                    <p class="translation">{sent_gloss}</p>
+                    </div>
+                    '''
+        return interlinear
+    # meta data
+    gex.meta = dict(
+        short_description=_('Create a Glossed Example'),
+        help_text=_('Create an example sentence word and sentence translation displayed on separate lines.'),
+        example_code='[gex 001 '
+                     '"{L\' the}{éléphant elephant} {gris gray} est<br> {[p fr/dans Locus] [p en/in Locus]} {la voiture||the car}." '
+                     '"The gray elephant is in the car."]',
+        args={'id': _('id of example'),
+              'sent': _('full sentence in double quotes with glossed tokens as {token||gloss}'),
+              'sent_gloss': _('glossed translation of sentence'),
+              'label': _('string to display after ex. (if not id)')}
+    )
+
 
 def link(t, l, clazz):
     return '<a href="' + l + '" class="' + clazz + '">' + t + '</a>'
