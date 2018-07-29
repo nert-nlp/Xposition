@@ -357,7 +357,7 @@ class Supersense(Metadata):
 
     @cached_property
     def html(self):
-        """For effeciency, anything that calls this should call select_related() on the supersense's article__current_revision"""
+        """For effeciency, anything that calls this should call .select_related('article__current_revision', 'current_revision__metadatarevision')'"""
         return mark_safe(f'<a href="{self.url}" class="supersense">{self.name_html}</a>')
 
     @cached_property
@@ -734,9 +734,6 @@ class AdpositionRevision(MetadataRevision):
     def __str__(self):
         return ('Adposition Revision: %s %d') % (self.name, self.revision_number)
 
-    def html(self):
-        return format_html('<a href="' + self.article_revision.article.get_absolute_url() + '" class="adposition">{}</a>', self.name)
-
     @cached_property
     def url(self):
         """For efficiency, callers should invoke .select_related('article_revision__article') 
@@ -760,7 +757,7 @@ class AdpositionRevision(MetadataRevision):
         return reverse('wiki:metadata_edit_adposition', args=[urlpath])
 
     @cached_property
-    def adposition(self):
+    def adposition(self): # TODO: another option: self.plugin.metadata.adposition
         return Adposition.objects.get(current_revision=self)
 
     class Meta:
