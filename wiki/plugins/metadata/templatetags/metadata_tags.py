@@ -1,7 +1,8 @@
 from django import template
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
-from django.db.models import F, Q, Count
+from django.db.models import F, Q, Count, URLField
 from django.utils.safestring import mark_safe
+from django.utils.html import conditional_escape, format_html
 from django_tables2 import RequestConfig
 from bitfield import BitField
 from wiki.models import Article, ArticleRevision
@@ -52,8 +53,12 @@ def metadata_display(context):
                     display += str(v)
             elif isinstance(fld, BitField):
                 display += ', '.join(case for case,allowed in v if allowed)
+            elif isinstance(fld, URLField):
+                display += format_html('<a href="{}">{}</a>', v, v)
             elif fld.name=='description' and hasattr(meta, 'descriptionhtml'):
                 display += meta.descriptionhtml()
+            elif isinstance(v, list):
+                display += ', '.join(v)
             else:
                 display += str(v)
             display += '</td></tr>\n'
