@@ -259,15 +259,15 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
                         {interlinear}
                     </p>
                     <p class="translation">{{}}</p>
-                    </div>&nbsp;<a href="#{id}" class="exlabel">{id}</a></span>
-                    ''', sent_gloss)
+                    </div>&nbsp;<a href="#{{}}" class="exlabel">{{}}</a></span>
+                    ''', sent_gloss, id, id)
         return interlinear
     # meta data
     gex.meta = dict(
         short_description=_('Create a Glossed Example'),
         help_text=_('Create an example sentence word and sentence translation displayed on separate lines.'),
         example_code='[gex 001 '
-                     '"{L\' the}{éléphant elephant} {gris gray} est<br> {[p fr/dans Locus] [p en/in Locus]} {la voiture||the car}." '
+                     '"{L\' the}{éléphant elephant} {gris gray} est<br> {[p fr/dans Locus]||[p en/in Locus]} {la voiture||the car}." '
                      '"The gray elephant is in the car."]',
         args={'id': _('id of example'),
               'sent': _('full sentence in double quotes with glossed tokens as {token||gloss}'),
