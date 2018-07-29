@@ -93,7 +93,9 @@ def adpositionrevs_for_lang(context):
     larticle = context['article']
     a = AdpositionRevision.objects.select_related('article_revision__article').filter(lang__article=larticle,
         article_revision__deleted=False, 
-        article_revision__article__current_revision=F('article_revision')).order_by('name')  # ensure this isn't an outdated revision
+        article_revision__article__current_revision=F('article_revision'))
+    a = a.annotate(num_usages=Count('plugin__metadata__adposition__usages', filter=Q(article_revision__deleted=False, 
+        article_revision__article__current_revision=F('article_revision')))).order_by('name')  # ensure this isn't an outdated revision
     context['swps'] = a.filter(is_pp_idiom=False).exclude(name__contains='_')
     context['mwps'] = a.filter(is_pp_idiom=False, name__contains='_')
     context['ppidioms'] = a.filter(is_pp_idiom=True)
@@ -318,6 +320,8 @@ def construals_display(context, role=None, function=None, order_by='role' or 'fu
                          order_by2+'__current_revision__metadatarevision__name'):
         #a = c.article
         #s += '<li><a href="{url}">{rev}</a></li>\n'.format(url=a.get_absolute_url(), rev=a.current_revision.title)
-        nadps = c.usages.count()
+        nadps = Usage.objects.filter(current_revision__metadatarevision__usagerevision__construal=c, 
+                                     article__current_revision__deleted=False).count()
+        # NOT c.usages, which consists of all UsageRevisions
         s += f'<li>{c.html} (<span class="nadpositions' + (' major' if nadps>=10 else '') + f'">{nadps}</span>)</li>\n'
     return mark_safe(s)
