@@ -228,22 +228,29 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
         args={'id': _('id of example'), 'sent': _('full sentence in double quotes'), 'label': _('string to display after ex. (if not id)')}
     )
 
-    GLOSS_RE = re.compile('{(?P<tok_gloss>[^}]*)}')
+    GLOSS_RE = re.compile('^\{(?P<tok_gloss>[^}]*?)\}')
     def gex(self, id, sent, sent_gloss='', label=None, *args):
-        words_and_glosses = sent.split()
         columns = []
-        for word_gloss in words_and_glosses:
-            gloss = self.GLOSS_RE.match(word_gloss)
-            column = ''
+        while len(sent)>0:
+            gloss = self.GLOSS_RE.match(sent)
             if gloss:
-                tok_gloss = gloss.group('tok_gloss')
-                if '||' in tok_gloss:
-                    xs = tok_gloss.split('||')
+                print(gloss.group())
+                word_gloss = gloss.group('tok_gloss')
+                sent = sent[len(gloss.group()):]
+                if '||' in word_gloss:
+                    xs = word_gloss.split('||')
                 else:
-                    xs = tok_gloss.split()
+                    xs = word_gloss.split()
                 column = '<div class="gll">'+'<br />'.join(xs)+'</div>'
             else:
-                column = '<div class="gll">'+word_gloss+'</div>'
+                end = sent.index('{') if '{' in sent else len(sent)
+                word_gloss = sent[:end]
+                sent = sent[len(word_gloss):]
+                if word_gloss.strip():
+                    column = '<div class="gll">' + word_gloss.strip() + '</div>'
+                    print(word_gloss.strip())
+                else:
+                    column = ''
             columns.append(column)
         interlinear = '\n'.join(columns)
         interlinear = f'''
@@ -254,7 +261,7 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
                     <p class="translation">{sent_gloss}</p>
                     </div>
                     '''
-        return interlinear
+        return f'<span id="{id}" class="example">{interlinear}&nbsp;<a href="#{id}" class="exlabel">{id}</a></span>'
     # meta data
     gex.meta = dict(
         short_description=_('Create a Glossed Example'),
