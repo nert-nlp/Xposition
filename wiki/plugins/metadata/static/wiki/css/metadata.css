@@ -116,3 +116,25 @@ http://nicolasgallagher.com/jump-links-and-viewport-positioning/demo/#method-D *
     background-clip: padding-box;
 }
 
+// interlinear.css 2/28/2009 Kevin B. McGowan <clunis@umich.edu>
+
+// this first class is thorougly unnecessary unless you want to 
+// be able to manipulate all of the glls in a given interlinear
+.interlinear {
+    padding-left: 20px;
+}
+
+p.gloss, p.gl {
+    margin-bottom: 0px;
+}
+
+div.gll {
+    valign: top;
+    display: inline-table;
+    padding-right: 10px;
+    margin-bottom: 0px;
+}
+
+p.translation, p.trans, p.glt {
+    margin-top: 0px;
+}
