@@ -32,29 +32,36 @@ from django.core.files.storage import get_storage_class
 
 from django.utils.translation import ugettext_lazy as _
 
-# SeparatedValuesField copied from https://stackoverflow.com/a/1113039
+class StringList(list):
+    '''
+    List of strings stored as space-separated.
+    Using field values of a type with a custom __str__ ensures that 
+    it will be rendered in form fields correctly.
+    '''
+    def __str__(self):
+        return ' '.join(self)
+    
+    @staticmethod
+    def from_str(s):
+        return StringList(s.strip().split())
+
+# cf. SeparatedValuesField at https://stackoverflow.com/a/1113039
 class StringListField(models.TextField):
-    # __metaclass__ = models.SubfieldBase
-
-    def __init__(self, *args, **kwargs):
-        self.token = ' '
-        super(StringListField, self).__init__(*args, **kwargs)
-
     def to_python(self, value):
+        '''Deserialize a value into a Python-friendly object.'''
         if not value: return
-        if value==' ': return []
         if isinstance(value, list):
             return value
-        return str(value).split(self.token)
+        return StringList.from_str(str(value))
 
     def from_db_value(self, value, expression, connection, context):
         return self.to_python(value)
 
     def get_db_prep_value(self, value, connection=None, prepared=True, **kwargs):
         if not value: return
-        if not (isinstance(value, list) or isinstance(value, tuple)):
+        if not isinstance(value, (list, tuple)):
             value = self.to_python(value)
-        return self.token.join([str(s) for s in value]) # self.token.join([unicode(s) for s in value])
+        return str(StringList(str(s) for s in value))
 
     def value_to_string(self, obj):
         value = self._get_val_from_obj(obj)
