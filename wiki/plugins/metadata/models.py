@@ -287,7 +287,7 @@ class Metadata(RevisionPlugin):
 class MetadataRevision(RevisionPluginRevision):
     template = models.CharField(max_length=100, default="wiki/view.html", editable=False)
     name = models.CharField(max_length=100, db_index=True)
-    description = models.CharField(max_length=200)
+    description = models.CharField(max_length=300)
     article_revision = models.OneToOneField(ArticleRevision, null=True, related_name='metadata_revision')
 
     unique_together = None  # can be overriden by subclasses
@@ -840,7 +840,7 @@ class Corpus(SimpleMetadata):
     version = models.CharField(max_length=200, null=True, validators=[version_validator], verbose_name="Version")
     url = models.URLField(max_length=200, blank=True, verbose_name="URL")
     genre = models.CharField(max_length=200, blank=True, verbose_name="Corpus Genre")
-    description = models.CharField(max_length=300, blank=True, verbose_name="Description",
+    description = models.CharField(max_length=200, blank=True, verbose_name="Description",
                                    help_text="Include number of tokens and basic statistics")
     languages = models.CharField(max_length=200, null=True, verbose_name="Language(s)")
 
