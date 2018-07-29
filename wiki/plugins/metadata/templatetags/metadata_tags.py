@@ -57,8 +57,6 @@ def metadata_display(context):
                 display += format_html('<a href="{}">{}</a>', v, v)
             elif fld.name=='description' and hasattr(meta, 'descriptionhtml'):
                 display += meta.descriptionhtml()
-            elif isinstance(v, list):
-                display += ', '.join(v)
             else:
                 display += str(v)
             display += '</td></tr>\n'

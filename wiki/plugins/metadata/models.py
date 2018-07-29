@@ -32,6 +32,11 @@ from django.core.files.storage import get_storage_class
 
 from django.utils.translation import ugettext_lazy as _
 
+class StringList(list):
+    SEP = ' '
+    def __str__(self):
+        return self.SEP.join(self)
+
 # SeparatedValuesField copied from https://stackoverflow.com/a/1113039
 class StringListField(models.TextField):
     # __metaclass__ = models.SubfieldBase
@@ -41,20 +46,21 @@ class StringListField(models.TextField):
         super(StringListField, self).__init__(*args, **kwargs)
 
     def to_python(self, value):
+        '''Deserialize a value into a Python-friendly object.'''
         if not value: return
-        if value==' ': return []
+        if value==' ': return StringList()
         if isinstance(value, list):
             return value
-        return str(value).split(self.token)
+        return StringList(str(value).split(StringList.SEP))
 
     def from_db_value(self, value, expression, connection, context):
         return self.to_python(value)
 
     def get_db_prep_value(self, value, connection=None, prepared=True, **kwargs):
         if not value: return
-        if not (isinstance(value, list) or isinstance(value, tuple)):
+        if not isinstance(value, (list, tuple)):
             value = self.to_python(value)
-        return self.token.join([str(s) for s in value]) # self.token.join([unicode(s) for s in value])
+        return StringList.SEP.join(str(s) for s in value)
 
     def value_to_string(self, obj):
         value = self._get_val_from_obj(obj)
