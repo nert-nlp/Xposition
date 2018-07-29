@@ -10,6 +10,7 @@ from six import string_types
 from wiki.plugins.macros import settings
 from wiki.plugins.metadata import models
 from wiki.models import Article
+from django.utils.html import escape, mark_safe, format_html
 
 # See:
 # http://stackoverflow.com/questions/430759/regex-for-managing-escaped-characters-for-items-like-string-literals
@@ -234,34 +235,33 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
         while len(sent)>0:
             gloss = self.GLOSS_RE.match(sent)
             if gloss:
-                print(gloss.group())
                 word_gloss = gloss.group('tok_gloss')
                 sent = sent[len(gloss.group()):]
                 if '||' in word_gloss:
                     xs = word_gloss.split('||')
                 else:
                     xs = word_gloss.split()
+                xs = [escape(x) for x in xs]
                 column = '<div class="gll">'+'<br />'.join(xs)+'</div>'
             else:
                 end = sent.index('{') if '{' in sent else len(sent)
                 word_gloss = sent[:end]
                 sent = sent[len(word_gloss):]
                 if word_gloss.strip():
-                    column = '<div class="gll">' + word_gloss.strip() + '</div>'
-                    print(word_gloss.strip())
+                    column = '<div class="gll">' + escape(word_gloss.strip()) + '</div>'
                 else:
                     column = ''
             columns.append(column)
         interlinear = '\n'.join(columns)
-        interlinear = f'''
+        interlinear = format_html(f'''<span id="{id}" class="example">
                     <div class="interlinear">
                     <p class="gloss">
-                        {interlinear}
+                        {{}}
                     </p>
-                    <p class="translation">{sent_gloss}</p>
-                    </div>
-                    '''
-        return f'<span id="{id}" class="example">{interlinear}&nbsp;<a href="#{id}" class="exlabel">{id}</a></span>'
+                    <p class="translation">{{}}</p>
+                    </div>&nbsp;<a href="#{id}" class="exlabel">{id}</a></span>
+                    ''', mark_safe(interlinear), sent_gloss)
+        return interlinear
     # meta data
     gex.meta = dict(
         short_description=_('Create a Glossed Example'),
