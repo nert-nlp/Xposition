@@ -258,8 +258,8 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
                     <p class="gloss">
                         {interlinear}
                     </p>
-                    <p class="translation">{{}}</p>
-                    </div>&nbsp;<a href="#{{}}" class="exlabel">{{}}</a></span>
+                    <p class="translation">{{}}&nbsp;<a href="#{{}}" class="exlabel">{{}}</a></p>
+                    </div></span>
                     ''', sent_gloss, id, id)
         return interlinear
     # meta data
