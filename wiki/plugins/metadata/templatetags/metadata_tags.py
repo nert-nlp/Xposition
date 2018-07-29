@@ -1,6 +1,6 @@
 from django import template
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
-from django.db.models import F, Q, Count, URLField
+from django.db.models import F, Q, Count, Min, URLField
 from django.utils.safestring import mark_safe
 from django.utils.html import conditional_escape, format_html
 from django_tables2 import RequestConfig
@@ -91,11 +91,11 @@ def adpositionrevs_for_lang(context):
     context['sometimes_transitive'] = Adposition.Transitivity.sometimes_transitive
     context['always_intransitive'] = Adposition.Transitivity.always_intransitive
     larticle = context['article']
-    a = AdpositionRevision.objects.select_related('article_revision__article').filter(lang__article=larticle,
+    a = AdpositionRevision.objects.select_related('article_revision__article').prefetch_related('article_revision__article__urlpath_set').filter(lang__article=larticle,
         article_revision__deleted=False, 
         article_revision__article__current_revision=F('article_revision'))
     a = a.annotate(num_usages=Count('plugin__metadata__adposition__usages', filter=Q(article_revision__deleted=False, 
-        article_revision__article__current_revision=F('article_revision')))).order_by('name')  # ensure this isn't an outdated revision
+                        article_revision__article__current_revision=F('article_revision')))).order_by('name')  # ensure this isn't an outdated revision
     context['swps'] = a.filter(is_pp_idiom=False).exclude(name__contains='_')
     context['mwps'] = a.filter(is_pp_idiom=False, name__contains='_')
     context['ppidioms'] = a.filter(is_pp_idiom=True)
@@ -123,18 +123,21 @@ def corpus_stats(context):
     nDocs = c.corpus_sentences.aggregate(num_docs=Count('doc_id', distinct=True))['num_docs']
     nWords = sum(len(sent.tokens) for sent in c.corpus_sentences.all())
     nAdpToks = PTokenAnnotation.objects.filter(sentence__corpus=c).count()
-    adptypes = Adposition.objects.annotate(adposition_freq=Count('ptokenannotation', filter=Q(sentence__corpus=c))).filter(adposition_freq__gt=0).order_by('-adposition_freq', 'current_revision__metadatarevision__name')
+    adptypes = Adposition.objects.select_related('current_revision__metadatarevision').prefetch_related('article__urlpath_set').annotate(adposition_freq=Count('ptokenannotation', filter=Q(sentence__corpus=c))).filter(adposition_freq__gt=0).order_by('-adposition_freq', 'current_revision__metadatarevision__name')
     context['adpositions_freq'] = adptypes
     #adpconst = Adposition.objects.annotate(adposition_nconst=Count('ptokenannotation__usage', distinct=True, filter=Q(sentence__corpus=c))).order_by('-adposition_nconst', 'current_revision__metadatarevision__name')
     #context['adpositions_nconstruals'] = adpconst
-    usages = Usage.objects.select_related('current_revision__metadatarevision__usagerevision__adposition__current_revision__metadatarevision', 
+    usages = Usage.objects.select_related('current_revision__metadatarevision__usagerevision__article_revision__article__current_revision',
+        'current_revision__metadatarevision__usagerevision__adposition__current_revision__metadatarevision', 
         'current_revision__metadatarevision__usagerevision__construal__role__current_revision__metadatarevision', 
-        'current_revision__metadatarevision__usagerevision__construal__function__current_revision__metadatarevision').annotate(usage_freq=Count('ptokenannotation', filter=Q(sentence__corpus=c))).filter(usage_freq__gt=0).order_by('-usage_freq', 'current_revision__metadatarevision__name')
+        'current_revision__metadatarevision__usagerevision__construal__function__current_revision__metadatarevision').prefetch_related('article__urlpath_set').annotate(usage_freq=Count('ptokenannotation', filter=Q(sentence__corpus=c))).filter(usage_freq__gt=0).order_by('-usage_freq', 'current_revision__metadatarevision__name')
     context['usages_freq'] = usages
-    construals = Construal.objects.annotate(construal_freq=Count('ptoken_with_construal', filter=Q(sentence__corpus=c))).filter(construal_freq__gt=0).order_by('-construal_freq', 'special', 'role', 'function')
+    construals = Construal.objects.select_related('article__current_revision',
+        'role__current_revision__metadatarevision', 
+        'function__current_revision__metadatarevision').annotate(construal_freq=Count('ptoken_with_construal', filter=Q(sentence__corpus=c))).filter(construal_freq__gt=0).order_by('-construal_freq', 'special', 'role', 'function')
     context['construals_freq'] = construals
-    ssr = Supersense.objects.annotate(role_freq=Count('rfs_with_role__ptoken_with_construal', filter=Q(sentence__corpus=c))).order_by('-role_freq', 'current_revision__metadatarevision__name') 
-    ssf = Supersense.objects.annotate(fxn_freq=Count('rfs_with_function__ptoken_with_construal', filter=Q(sentence__corpus=c))).order_by('-fxn_freq', 'current_revision__metadatarevision__name')
+    ssr = Supersense.objects.select_related('article__current_revision', 'current_revision__metadatarevision').annotate(role_freq=Count('rfs_with_role__ptoken_with_construal', filter=Q(sentence__corpus=c))).order_by('-role_freq', 'current_revision__metadatarevision__name') 
+    ssf = Supersense.objects.select_related('article__current_revision', 'current_revision__metadatarevision').annotate(fxn_freq=Count('rfs_with_function__ptoken_with_construal', filter=Q(sentence__corpus=c))).order_by('-fxn_freq', 'current_revision__metadatarevision__name')
     context['ss_role_freq'] = ssr
     context['ss_fxn_freq'] = ssf
     s = f'''<table id="stats" class="table text-right">
