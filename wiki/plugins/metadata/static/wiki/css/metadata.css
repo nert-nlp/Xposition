@@ -58,6 +58,8 @@ a.usage > .construal { font-weight: normal; }
 
 th:empty { display: none; }
 
+u { text-decoration: none; background-color: #eee; }
+
 /* Tree list, adapted from https://two-wrongs.com/draw-a-tree-structure-with-only-css 
    Set class="clt" on the parent element
 */
