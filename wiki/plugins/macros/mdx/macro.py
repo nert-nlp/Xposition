@@ -252,7 +252,7 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
                 else:
                     column = ''
             columns.append(column)
-        interlinear = '\n'.join(columns)
+        interlinear = ''.join(columns)
         interlinear = format_html(f'''<span id="{id}" class="example">
                     <div class="interlinear">
                     <p class="gloss">
