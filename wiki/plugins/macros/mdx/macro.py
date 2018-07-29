@@ -192,7 +192,7 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
         args={'name': _('Name of supersense/construal label'), 'class': _('optional class')}
     )
 
-    def exref(self, id, page):
+    def exref(self, id, page, *args):
         my_title = self.markdown.article.current_revision.title
         ref_title = page
         ref_slug = page
@@ -216,7 +216,7 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
         args={'id': _('id of example'), 'page': _('title of page example is on')}
     )
 
-    def ex(self, id, sent, label=None):
+    def ex(self, id, sent, label=None, *args):
         if label:
             return f'<span id="{id}" class="example">{sent}&nbsp;<span class="exlabel">{label}</span></span>'
         return f'<span id="{id}" class="example">{sent}&nbsp;<a href="#{id}" class="exlabel">{id}</a></span>'
