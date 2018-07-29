@@ -256,11 +256,11 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
         interlinear = format_html(f'''<span id="{id}" class="example">
                     <div class="interlinear">
                     <p class="gloss">
-                        {{}}
+                        {interlinear}
                     </p>
                     <p class="translation">{{}}</p>
                     </div>&nbsp;<a href="#{id}" class="exlabel">{id}</a></span>
-                    ''', mark_safe(interlinear), sent_gloss)
+                    ''', sent_gloss)
         return interlinear
     # meta data
     gex.meta = dict(
