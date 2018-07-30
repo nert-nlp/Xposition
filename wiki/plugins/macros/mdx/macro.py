@@ -248,13 +248,13 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
                 word_gloss = sent[:end]
                 sent = sent[len(word_gloss):]
                 if word_gloss.strip():
-                    column = '<div class="gll">' + escape(word_gloss.strip()) + '</div>'
+                    column = '<div class="gll">' + word_gloss.strip() + '</div>'
                 else:
                     column = ''
             columns.append(column)
         interlinear = ''.join(columns)
         interlinear = format_html(f'''<span id="{id}" class="example">
-                    <div class="interlinear">
+                    <div class="interlinear example">
                     <p class="gloss">
                         {interlinear}
                     </p>
