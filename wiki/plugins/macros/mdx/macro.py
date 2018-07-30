@@ -10,6 +10,7 @@ from six import string_types
 from wiki.plugins.macros import settings
 from wiki.plugins.metadata import models
 from wiki.models import Article
+from django.utils.html import escape, mark_safe, format_html
 
 # See:
 # http://stackoverflow.com/questions/430759/regex-for-managing-escaped-characters-for-items-like-string-literals
@@ -192,7 +193,7 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
         args={'name': _('Name of supersense/construal label'), 'class': _('optional class')}
     )
 
-    def exref(self, id, page):
+    def exref(self, id, page, *args):
         my_title = self.markdown.article.current_revision.title
         ref_title = page
         ref_slug = page
@@ -216,7 +217,7 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
         args={'id': _('id of example'), 'page': _('title of page example is on')}
     )
 
-    def ex(self, id, sent, label=None):
+    def ex(self, id, sent, label=None, *args):
         if label:
             return f'<span id="{id}" class="example">{sent}&nbsp;<span class="exlabel">{label}</span></span>'
         return f'<span id="{id}" class="example">{sent}&nbsp;<a href="#{id}" class="exlabel">{id}</a></span>'
@@ -226,6 +227,52 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
         help_text=_('Create an example sentence with a linkable id'),
         example_code='[ex 001 "The cat [p en/under Locus] the table."]',
         args={'id': _('id of example'), 'sent': _('full sentence in double quotes'), 'label': _('string to display after ex. (if not id)')}
+    )
+
+    GLOSS_RE = re.compile('^\{(?P<tok_gloss>[^}]*?)\}')
+    def gex(self, id, sent, sent_gloss='', label=None, *args):
+        columns = []
+        while len(sent)>0:
+            gloss = self.GLOSS_RE.match(sent)
+            if gloss:
+                word_gloss = gloss.group('tok_gloss')
+                sent = sent[len(gloss.group()):]
+                if '||' in word_gloss:
+                    xs = word_gloss.split('||')
+                else:
+                    xs = word_gloss.split()
+                xs = [escape(x) for x in xs]
+                column = '<div class="gll">'+'<br />'.join(xs)+'</div>'
+            else:
+                end = sent.index('{') if '{' in sent else len(sent)
+                word_gloss = sent[:end]
+                sent = sent[len(word_gloss):]
+                if word_gloss.strip():
+                    column = '<div class="gll">' + escape(word_gloss.strip()) + '</div>'
+                else:
+                    column = ''
+            columns.append(column)
+        interlinear = ''.join(columns)
+        interlinear = format_html(f'''<span id="{id}" class="example">
+                    <div class="interlinear">
+                    <p class="gloss">
+                        {interlinear}
+                    </p>
+                    <p class="translation">{{}}&nbsp;<a href="#{{}}" class="exlabel">{{}}</a></p>
+                    </div></span>
+                    ''', sent_gloss, id, id)
+        return interlinear
+    # meta data
+    gex.meta = dict(
+        short_description=_('Create a Glossed Example'),
+        help_text=_('Create an example sentence word and sentence translation displayed on separate lines.'),
+        example_code='[gex 001 '
+                     '"{L\' the}{éléphant elephant} {gris gray} est<br> {[p fr/dans Locus]||[p en/in Locus]} {la voiture||the car}." '
+                     '"The gray elephant is in the car."]',
+        args={'id': _('id of example'),
+              'sent': _('full sentence in double quotes with glossed tokens as {token||gloss}'),
+              'sent_gloss': _('glossed translation of sentence'),
+              'label': _('string to display after ex. (if not id)')}
     )
 
 
