@@ -253,6 +253,7 @@ def morphtype_validator(lang, forbidden_vals):
     for any of the language's adpositions"""
     NONE = models.Language.Presence.none
     Adp = models.Adposition
+
     def validator(value):
         if int(value)!=NONE: return
         Ps = []
@@ -261,7 +262,17 @@ def morphtype_validator(lang, forbidden_vals):
                                           current_revision__metadatarevision__adpositionrevision__morphtype=forbidden))
         if Ps:
             raise ValidationError(f'This language has {len(Ps)} adposition(s) of this type, including "{Ps[0]}"', code='invalid')
+        # issue #23: disallow language with no adposition or affix type
+        assert False, 'Validator is running'
+        req1 = [lang.fields['pre'], lang.fields['post'], lang.fields['circum']]
+        req2 = [lang.fields['separate_word'], lang.fields['clitic_or_affix']]
+        print(req1)
+        print(req2)
+        if all(int(p) == NONE for p in req1) or all(int(p) == NONE for p in req2):
+            raise forms.ValidationError(ugettext('You need to choose at least one type of adposition or affix!'))
     return validator
+
+
 
 class LanguageForm(ArticleMetadataForm):
 
@@ -279,15 +290,15 @@ class LanguageForm(ArticleMetadataForm):
         if self.instance.id:
             MT = models.Adposition.MorphType
             self.fields['pre'].validators.append(morphtype_validator(self.instance,
-                (MT.prefix, MT.standalone_preposition)))
+                (MT.prefix, MT.standalone_preposition)).validator)
             self.fields['post'].validators.append(morphtype_validator(self.instance,
-                (MT.suffix, MT.standalone_postposition)))
+                (MT.suffix, MT.standalone_postposition)).validator)
             self.fields['circum'].validators.append(morphtype_validator(self.instance,
-                (MT.circumfix, MT.standalone_circumposition)))
+                (MT.circumfix, MT.standalone_circumposition)).validator)
             self.fields['separate_word'].validators.append(morphtype_validator(self.instance,
-                (MT.standalone_preposition, MT.standalone_postposition, MT.standalone_circumposition)))
+                (MT.standalone_preposition, MT.standalone_postposition, MT.standalone_circumposition)).validator)
             self.fields['clitic_or_affix'].validators.append(morphtype_validator(self.instance,
-                (MT.prefix, MT.suffix, MT.circumfix)))
+                (MT.prefix, MT.suffix, MT.circumfix)).validator)
 
         # use horizontal radio buttons/checkboxes (requires metadata.css)
         for f in self.fields.values():
