@@ -248,7 +248,7 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
                 word_gloss = sent[:end]
                 sent = sent[len(word_gloss):]
                 if word_gloss.strip():
-                    column = '<div class="gll">' + escape(word_gloss.strip()) + '</div>'
+                    column = '<div class="gll">' + word_gloss.strip() + '</div>'
                 else:
                     column = ''
             columns.append(column)
