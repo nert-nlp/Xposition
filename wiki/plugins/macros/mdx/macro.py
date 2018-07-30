@@ -254,7 +254,7 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
             columns.append(column)
         interlinear = ''.join(columns)
         interlinear = format_html(f'''<span id="{id}" class="example">
-                    <div class="interlinear">
+                    <div class="interlinear example">
                     <p class="gloss">
                         {interlinear}
                     </p>
