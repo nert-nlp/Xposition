@@ -456,7 +456,7 @@ class UsageForm(ArticleMetadataForm):
             self.fields['obj_case'].required = False
         else:
             self.fields['obj_case'].required = True
-
+        self.fields['construal'].choices = [(construal.id,str(construal)) for construal in models.Construal.objects.filter(article__current_revision__deleted=False)]
         # use horizontal radio buttons (requires metadata.css)
         for fname,f in self.fields.items():
             if isinstance(f.widget, forms.RadioSelect):
