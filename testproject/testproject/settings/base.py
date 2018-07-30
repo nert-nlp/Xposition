@@ -173,7 +173,7 @@ WIKI_ANONYMOUS_CREATE = False
 WIKI_URL_CASE_SENSITIVE = True
 WIKI_URL_CONFIG_CLASS = 'wiki.plugins.metadata.urls.XpositionURLPatterns'
 
-WIKI_MARKDOWN_HTML_WHITELIST = ['sub', 'sup', 'hr', 'u']
+WIKI_MARKDOWN_HTML_WHITELIST = ['sub', 'sup', 'hr', 'u', 'br']
 
 # To make deployment happy
 SECURE_BROWSER_XSS_FILTER = True

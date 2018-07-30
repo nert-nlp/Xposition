@@ -12,6 +12,7 @@ METHODS = getattr(
      'toc',
      'wikilink',
      'ex',
+     'gex',
      'p',
      'pspecial',
      'ss',
