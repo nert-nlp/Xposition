@@ -198,7 +198,7 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
         ref_title = page
         ref_slug = page
         # try to find article
-        x = Article.objects.filter(current_revision__title=ref_title)
+        x = Article.objects.filter(current_revision__title=ref_title, current_revision__deleted=False)
         # check for article with matching title
         if x:
             ref_slug = str(x[0].urlpath_set.all()[0])
