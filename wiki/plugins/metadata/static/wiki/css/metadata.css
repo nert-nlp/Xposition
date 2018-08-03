@@ -131,7 +131,6 @@ p.gloss, p.gl {
 }
 
 div.gll {
-    valign: top;
     display: inline-table;
     padding-right: 10px;
     margin-bottom: 0px;
