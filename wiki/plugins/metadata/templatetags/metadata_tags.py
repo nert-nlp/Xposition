@@ -86,20 +86,22 @@ def langs_display(context):
     return mark_safe(s)
 
 @register.simple_tag(takes_context=True)
-def adpositionrevs_for_lang(context):
+def adpositions_for_lang(context):
     context['always_transitive'] = Adposition.Transitivity.always_transitive
     context['sometimes_transitive'] = Adposition.Transitivity.sometimes_transitive
     context['always_intransitive'] = Adposition.Transitivity.always_intransitive
     larticle = context['article']
-    a = AdpositionRevision.objects.select_related('article_revision__article').prefetch_related('article_revision__article__urlpath_set').filter(lang__article=larticle,
-        article_revision__deleted=False, 
-        article_revision__article__current_revision=F('article_revision'))
-    a = a.annotate(num_usages=Count('plugin__metadata__adposition__usages', filter=Q(article_revision__deleted=False, 
-                        article_revision__article__current_revision=F('article_revision')))).order_by('name')  # ensure this isn't an outdated revision
-    context['swps'] = a.filter(is_pp_idiom=False).exclude(name__contains='_')
-    context['mwps'] = a.filter(is_pp_idiom=False, name__contains='_')
-    context['ppidioms'] = a.filter(is_pp_idiom=True)
-    context['misc'] = a.exclude(is_pp_idiom__in=(True,False))
+    a = Adposition.objects.select_related('article').prefetch_related('current_revision__metadatarevision__adpositionrevision__lang',
+        'article__urlpath_set').filter(current_revision__metadatarevision__adpositionrevision__lang__article=larticle, 
+            article__current_revision__deleted=False)
+    a = a.annotate(num_usages=Count('usages', filter=Q(article_revision__deleted=False, 
+                        article_revision__article__current_revision=F('article_revision')))).order_by('current_revision__metadatarevision__name')  # ensure this isn't an outdated revision
+    context['swps'] = a.filter(current_revision__metadatarevision__adpositionrevision__is_pp_idiom=False).exclude(
+        current_revision__metadatarevision__name__contains='_')
+    context['mwps'] = a.filter(current_revision__metadatarevision__adpositionrevision__is_pp_idiom=False, 
+        current_revision__metadatarevision__name__contains='_')
+    context['ppidioms'] = a.filter(current_revision__metadatarevision__adpositionrevision__is_pp_idiom=True)
+    context['misc'] = a.exclude(current_revision__metadatarevision__adpositionrevision__is_pp_idiom__in=(True,False))
     return a
 
 @register.simple_tag(takes_context=True)
