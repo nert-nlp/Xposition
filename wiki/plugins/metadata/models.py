@@ -574,7 +574,7 @@ class Language(SimpleMetadata):
 
     @classmethod
     def with_nav_links(cls):
-        return cls.objects.select_related('article__current_revision').filter(navlink=True)
+        return cls.objects.select_related('article__current_revision').filter(navlink=True, article__current_revision__deleted=False)
 
     def __str__(self):
         return self.name
