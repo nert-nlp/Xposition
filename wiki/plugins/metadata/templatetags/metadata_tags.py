@@ -123,14 +123,15 @@ def corpus_stats(context):
     nDocs = c.corpus_sentences.aggregate(num_docs=Count('doc_id', distinct=True))['num_docs']
     nWords = sum(len(sent.tokens) for sent in c.corpus_sentences.all())
     nAdpToks = PTokenAnnotation.objects.filter(sentence__corpus=c).count()
-    adptypes = Adposition.objects.select_related('current_revision__metadatarevision').prefetch_related('article__urlpath_set').annotate(adposition_freq=Count('ptokenannotation', filter=Q(sentence__corpus=c))).filter(adposition_freq__gt=0).order_by('-adposition_freq', 'current_revision__metadatarevision__name')
+    adptypes = Adposition.objects.select_related('current_revision__metadatarevision').prefetch_related('article__urlpath_set__parent').annotate(adposition_freq=Count('ptokenannotation', filter=Q(sentence__corpus=c))).filter(adposition_freq__gt=0).order_by('-adposition_freq', 'current_revision__metadatarevision__name')
     context['adpositions_freq'] = adptypes
     #adpconst = Adposition.objects.annotate(adposition_nconst=Count('ptokenannotation__usage', distinct=True, filter=Q(sentence__corpus=c))).order_by('-adposition_nconst', 'current_revision__metadatarevision__name')
     #context['adpositions_nconstruals'] = adpconst
     usages = Usage.objects.select_related('current_revision__metadatarevision__usagerevision__article_revision__article__current_revision',
+        #'current_revision__metadatarevision__usagerevision__article_revision__article__owner',
         'current_revision__metadatarevision__usagerevision__adposition__current_revision__metadatarevision', 
         'current_revision__metadatarevision__usagerevision__construal__role__current_revision__metadatarevision', 
-        'current_revision__metadatarevision__usagerevision__construal__function__current_revision__metadatarevision').prefetch_related('article__urlpath_set').annotate(usage_freq=Count('ptokenannotation', filter=Q(sentence__corpus=c))).filter(usage_freq__gt=0).order_by('-usage_freq', 'current_revision__metadatarevision__name')
+        'current_revision__metadatarevision__usagerevision__construal__function__current_revision__metadatarevision').prefetch_related('current_revision__metadatarevision__usagerevision__article_revision__article__urlpath_set__parent').annotate(usage_freq=Count('ptokenannotation', filter=Q(sentence__corpus=c))).filter(usage_freq__gt=0).order_by('-usage_freq', 'current_revision__metadatarevision__name')
     context['usages_freq'] = usages
     construals = Construal.objects.select_related('article__current_revision',
         'role__current_revision__metadatarevision', 

@@ -253,14 +253,14 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
                     column = ''
             columns.append(column)
         interlinear = ''.join(columns)
-        interlinear = format_html(f'''<span id="{id}" class="example">
-                    <div class="interlinear example">
-                    <p class="gloss">
-                        {interlinear}
-                    </p>
-                    <p class="translation">{{}}&nbsp;<a href="#{{}}" class="exlabel">{{}}</a></p>
-                    </div></span>
-                    ''', sent_gloss, id, id)
+        interlinear = format_html(f'''
+                    <div id="{id}" class="interlinear example">
+                        <p class="gloss">
+                            {interlinear}
+                        </p>
+                        <p class="translation">{{}}&nbsp;<a href="#{{}}" class="exlabel">{{}}</a></p>
+                    </div>
+                    '''.strip(), sent_gloss, id, id)
         return interlinear
     # meta data
     gex.meta = dict(
