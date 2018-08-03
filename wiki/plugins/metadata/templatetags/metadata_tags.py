@@ -74,13 +74,9 @@ def langs_display(context):
     article = context['article']
     s = ''
     for lang in Language.with_nav_links().order_by('name'):
-        if lang.article.current_revision.deleted:
-            continue
         langart = lang.article
         s += '<li'
-        if article==langart \
-            or (hasattr(article, 'metadata') and getattr(article.metadata, 'language', None)==lang) \
-            or (hasattr(article.current_revision, 'metadata_revision') and getattr(deepest_instance(article.current_revision.metadata_revision), 'lang', None)==lang):
+        if article==langart:
             s += ' class="active"'
         s += '><a href="' + langart.get_absolute_url() + '">' + lang.name + '</a></li>'
     return mark_safe(s)
