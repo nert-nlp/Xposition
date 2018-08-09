@@ -51,6 +51,7 @@
 			if (x.startsWith("wiki-toc-")) {
 				x = x.slice(0, 50);
 				$(this).attr("id", "");
+				$(this).wrapInner('<span></span>');
 				$(this).prepend('<a id="' + x + '" href="#' + x + '" class="handle">#</a>');
 			}
 		});
