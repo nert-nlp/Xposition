@@ -29,6 +29,12 @@ ul.inline > li { margin: 0px 5px; }
 .wiki-article h1:hover > a.handle,.wiki-article h2:hover > a.handle,.wiki-article h3:hover > a.handle,.wiki-article h4:hover > a.handle,.wiki-article h5:hover > a.handle,.wiki-article h6:hover > a.handle { 
 	visibility: visible;
 }
+
+/* wiki-bootstrap.css puts a bottom border, not anticipating that we've widened the heading to make room for the handle. 
+   so we remove the border on the full element and put it just on its textual content, which has been wrapped in a <span> with JS */
+.wiki-article h1,.wiki-article h2 { border-bottom: none; }
+.wiki-article h1 > span,.wiki-article h2 > span { border-bottom: solid 1px #eee; display: block; }
+
 a.handle { color: #ddd; font-size: 80%; position: absolute; left: 0px; top: 0px; padding-top: 1pt; font-weight: normal; }
 
 /* Xposition macros: special styling */
