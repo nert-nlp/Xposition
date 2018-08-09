@@ -45,12 +45,13 @@
 <script type="text/javascript">
 	$(function () {
 		// insert handle hyperlink for each article heading, and truncate the heading ID to 50 chars
+		// move the ID to the link so as not to mess with the CSS :target hack for navbar (some headings have custom margins)
 		$('h1,h2,h3,h4,h5,h6').each(function (i) {
 			var x = $(this).attr("id");
 			if (x.startsWith("wiki-toc-")) {
 				x = x.slice(0, 50);
-				$(this).attr("id", x);
-				$(this).prepend('<a href="#' + x + '" class="handle">#</a>');
+				$(this).attr("id", "");
+				$(this).prepend('<a id="' + x + '" href="#' + x + '" class="handle">#</a>');
 			}
 		});
 	});
