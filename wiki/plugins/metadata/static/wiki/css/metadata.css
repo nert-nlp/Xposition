@@ -128,7 +128,7 @@ table.ptokenannotation .objhead { font-weight: bold; text-decoration: #d3b dotte
 http://nicolasgallagher.com/jump-links-and-viewport-positioning/demo/#method-D */
 :target {
     border-top: 50px solid transparent;
-    margin-top: -50px;
+    margin-top: -50px !important;
     -webkit-background-clip: padding-box;
     -moz-background-clip: padding;
     background-clip: padding-box;
