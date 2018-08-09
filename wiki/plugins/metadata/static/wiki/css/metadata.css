@@ -16,6 +16,21 @@ ul.inline > li { margin: 0px 5px; }
 
 .wiki-article { font-family: 'Roboto', sans-serif; font-size: 14pt; }
 
+/* link handles for article headings */
+.wiki-article h1,.wiki-article h2,.wiki-article h3,.wiki-article h4,.wiki-article h5,.wiki-article h6 { 
+	position: relative;
+	overflow: visible; 
+	margin-left: -1em;
+	padding-left: 1em;
+}
+.wiki-article h1 > a.handle,.wiki-article h2 > a.handle,.wiki-article h3 > a.handle,.wiki-article h4 > a.handle,.wiki-article h5 > a.handle,.wiki-article h6 > a.handle {
+	visibility: hidden;
+}
+.wiki-article h1:hover > a.handle,.wiki-article h2:hover > a.handle,.wiki-article h3:hover > a.handle,.wiki-article h4:hover > a.handle,.wiki-article h5:hover > a.handle,.wiki-article h6:hover > a.handle { 
+	visibility: visible;
+}
+a.handle { color: #ddd; font-size: 80%; position: absolute; left: 0px; top: 0px; padding-top: 1pt; font-weight: normal; }
+
 /* Xposition macros: special styling */
 .example { font-family: 'Roboto Light', sans-serif; }
 .example a.exlabel,.example .exlabel > a { font-size: 10pt; color: #ddd; border: solid 1px transparent; padding-left: 5px; padding-right: 5px; }
