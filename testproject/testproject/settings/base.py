@@ -39,7 +39,6 @@ INSTALLED_APPS = [
     'django.contrib.admindocs.apps.AdminDocsConfig',
     'sekizai',
     'sorl.thumbnail',
-<<<<<<< HEAD
     "django_nyt.apps.DjangoNytConfig",
     "wiki.apps.WikiConfig",
     "wiki.plugins.macros.apps.MacrosConfig",
@@ -49,17 +48,6 @@ INSTALLED_APPS = [
     "wiki.plugins.attachments.apps.AttachmentsConfig",
     "wiki.plugins.notifications.apps.NotificationsConfig",
     'wiki.plugins.globalhistory.apps.GlobalHistoryConfig',
-=======
-    'django_nyt',
-    'django_tables2',
-    'wiki',
-    'wiki.plugins.macros',
-    'wiki.plugins.help',
-    'wiki.plugins.links',
-    'wiki.plugins.images',
-    'wiki.plugins.attachments',
-    'wiki.plugins.notifications',
->>>>>>> master
     'mptt',
     'wiki.plugins.categories',
     'wiki.plugins.categories.editor',
@@ -71,13 +59,7 @@ INSTALLED_APPS = [
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 
 
-<<<<<<< HEAD
 MIDDLEWARE = [
-=======
-# MIDDLEWARE
-MIDDLEWARE_CLASSES = [
-    # 'silk.middleware.SilkyMiddleware',
->>>>>>> master
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -203,5 +185,4 @@ DEBUG_TOOLBAR_PANELS = [
     'debug_toolbar.panels.profiling.ProfilingPanel'
 ]
 
-WIKI_REVISIONS_PER_MINUTES = 10
 
