@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.admindocs.apps.AdminDocsConfig',
     'sekizai',
     'sorl.thumbnail',
+<<<<<<< HEAD
     "django_nyt.apps.DjangoNytConfig",
     "wiki.apps.WikiConfig",
     "wiki.plugins.macros.apps.MacrosConfig",
@@ -48,16 +49,35 @@ INSTALLED_APPS = [
     "wiki.plugins.attachments.apps.AttachmentsConfig",
     "wiki.plugins.notifications.apps.NotificationsConfig",
     'wiki.plugins.globalhistory.apps.GlobalHistoryConfig',
+=======
+    'django_nyt',
+    'django_tables2',
+    'wiki',
+    'wiki.plugins.macros',
+    'wiki.plugins.help',
+    'wiki.plugins.links',
+    'wiki.plugins.images',
+    'wiki.plugins.attachments',
+    'wiki.plugins.notifications',
+>>>>>>> master
     'mptt',
     'wiki.plugins.categories',
     'wiki.plugins.categories.editor',
     'wiki.plugins.metadata',
+    'import_export',
+    # 'silk',
 ]
 
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 
 
+<<<<<<< HEAD
 MIDDLEWARE = [
+=======
+# MIDDLEWARE
+MIDDLEWARE_CLASSES = [
+    # 'silk.middleware.SilkyMiddleware',
+>>>>>>> master
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -106,6 +126,13 @@ DATABASES = {
         'NAME': os.path.join(PROJECT_DIR, 'db', 'prepopulated.db'),
     }
 }
+
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+#         'LOCATION': 'article_cache'
+#     }
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/1.9/ref/settings/#auth-password-validators
@@ -156,11 +183,25 @@ WIKI_ANONYMOUS_WRITE = True
 WIKI_ANONYMOUS_CREATE = False
 
 WIKI_URL_CASE_SENSITIVE = True
+WIKI_URL_CONFIG_CLASS = 'wiki.plugins.metadata.urls.XpositionURLPatterns'
 
-WIKI_MARKDOWN_HTML_WHITELIST = ['sub', 'sup', 'hr', 'u']
+WIKI_MARKDOWN_HTML_WHITELIST = ['sub', 'sup', 'hr', 'u', 'br']
 
 # To make deployment happy
 SECURE_BROWSER_XSS_FILTER = True
 SESSION_COOKIE_SECURE = False   # setting to True breaks django-wiki login
 CSRF_COOKIE_SECURE = False  # setting to True breaks django-wiki login
 X_FRAME_OPTIONS = 'DENY'
+
+
+DEBUG_TOOLBAR_PANELS = [
+    'debug_toolbar.panels.timer.TimerPanel',
+    'debug_toolbar.panels.settings.SettingsPanel',
+    'debug_toolbar.panels.request.RequestPanel',
+    'debug_toolbar.panels.sql.SQLPanel',
+    'debug_toolbar.panels.redirects.RedirectsPanel',
+    'debug_toolbar.panels.profiling.ProfilingPanel'
+]
+
+WIKI_REVISIONS_PER_MINUTES = 10
+

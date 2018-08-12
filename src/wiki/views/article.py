@@ -26,12 +26,17 @@ from wiki.core.utils import object_to_json_response
 from wiki.decorators import get_article
 from wiki.views.mixins import ArticleMixin
 
+
+
+
+
 log = logging.getLogger(__name__)
 
 
 class ArticleView(ArticleMixin, TemplateView):
 
     template_name = "wiki/view.html"
+
 
     @method_decorator(get_article(can_read=True))
     def dispatch(self, request, article, *args, **kwargs):

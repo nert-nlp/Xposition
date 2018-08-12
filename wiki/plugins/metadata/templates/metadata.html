@@ -35,12 +35,23 @@
     an adposition for that language.</p>
 
       {% endif %}
+      {% if aplugin.simplemetadata.language %}
+
+  <h2><a href="createcorpus">Create Corpus</a></h2>
+
+      {% else %}
+
+  <p>Navigate to a language page and click on <b>Metadata</b> to create
+    a corpus for that language.</p>
+
+      {% endif %}
     {% endwith %}
   {% else %}
 
   <p>Navigate to a language page and click on <b>Metadata</b> to create
     an adposition for that language.</p>
-
+  <p>Navigate to a language page and click on <b>Metadata</b> to create
+    a corpus for that language.</p>
   {% endif %}
 
 

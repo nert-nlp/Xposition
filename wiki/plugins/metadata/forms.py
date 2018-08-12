@@ -82,6 +82,13 @@ class ArticleMetadataForm(forms.ModelForm):
         newcategory.save()
         return newarticle, newcategory
 
+    def newArticle_without_category(self, name=None, parent=None, slug=None):
+        newarticle = self.newArticle(name=name or self.cleaned_data['name'],
+                                     slug=slug or name or self.cleaned_data['slug'],
+                                     parent=parent)
+        newarticle.save()
+        return newarticle
+
     def save(self, commit=True):
         m = super(ArticleMetadataForm, self).save(commit=False)
         if self.instance.id:
@@ -94,7 +101,20 @@ class ArticleMetadataForm(forms.ModelForm):
         return True
 
 # From http://forums.mozillazine.org/viewtopic.php?f=25&t=834075
-UNICODE_LETTERS_NUMERICS_HYPHEN_APPOS = (
+"""
+UNICODE_LETTERS_HYPHEN_APPOS Represents:
+-_\'A-Za-zªµºÀ-ÖØ-öø-ˁˆ-ˑˠ-ˤˬˮͰ-ʹͶ-ͷͺ-ͽΆΈ-ΊΌΎ-ΡΣ-ϵϷ-ҁҊ-ԣԱ-Ֆՙա-ևא-תװ-ײء-يٮ-ٯٱ-ۓەۥ-ۦۮ-ۯۺ-ۼۿܐܒ-ܯݍ-ޥޱߊ-ߪߴ-ߵߺऄ-हऽ
+ॐक़-ॡॱ-ॲॻ-ॿঅ-ঌএ-ঐও-নপ-রলশ-হঽৎড়-ঢ়য়-ৡৰ-ৱਅ-ਊਏ-ਐਓ-ਨਪ-ਰਲ-ਲ਼ਵ-ਸ਼ਸ-ਹਖ਼-ੜਫ਼ੲ-ੴઅ-ઍએ-ઑઓ-નપ-રલ-ળવ-હઽૐૠ-ૡଅ-ଌ
+ଏ-ଐଓ-ନପ-ରଲ-ଳଵ-ହଽଡ଼-ଢ଼ୟ-ୡୱஃஅ-ஊஎ-ஐஒ-கங-சஜஞ-டண-தந-பம-ஹௐఅ-ఌఎ-ఐఒ-నప-ళవ-హఽౘ-ౙౠ-ౡಅ-ಌಎ-ಐ
+ಒ-ನಪ-ಳವ-ಹಽೞೠ-ೡഅ-ഌഎ-ഐഒ-നപ-ഹഽൠ-ൡൺ-ൿඅ-ඖක-නඳ-රලව-ෆก-ะา-ำเ-ๆກ-ຂຄງ-ຈຊຍດ-ທນ-ຟມ-ຣລວສ-ຫອ-ະາ-ຳຽເ-ໄໆ
+ໜ-ໝༀཀ-ཇཉ-ཬྈ-ྋက-ဪဿၐ-ၕၚ-ၝၡၥ-ၦၮ-ၰၵ-ႁႎႠ-Ⴥა-ჺჼᄀ-ᅙᅟ-ᆢᆨ-ᇹሀ-ቈቊ-ቍቐ-ቖቘቚ-ቝበ-ኈኊ-ኍነ-ኰኲ-ኵኸ-ኾዀዂ-ዅወ-ዖዘ-ጐጒ-ጕ
+ጘ-ፚᎀ-ᎏᎠ-Ᏼᐁ-ᙬᙯ-ᙶᚁ-ᚚᚠ-ᛪᛮ-ᛰᜀ-ᜌᜎ-ᜑᜠ-ᜱᝀ-ᝑᝠ-ᝬᝮ-ᝰក-ឳៗៜᠠ-ᡷᢀ-ᢨᢪᤀ-ᤜᥐ-ᥭᥰ-ᥴᦀ-ᦩᧁ-ᧇᨀ-ᨖᬅ-ᬳᭅ-ᭋᮃ-ᮠᮮ-ᮯᰀ-ᰣᱍ-ᱏᱚ-ᱽᴀ-ᶿḀ-ἕἘ-Ἕἠ-ὅ
+Ὀ-Ὅὐ-ὗὙὛὝὟ-ώᾀ-ᾴᾶ-ᾼιῂ-ῄῆ-ῌῐ-ΐῖ-Ίῠ-Ῥῲ-ῴῶ-ῼⁱⁿₐ-ₔℂℇℊ-ℓℕℙ-ℝℤΩℨK-ℭℯ-ℹℼ-ℿⅅ-ⅉⅎⅠ-ↈⰀ-Ⱞⰰ-ⱞⱠ-Ɐⱱ-ⱽⲀ-ⳤⴀ-ⴥⴰ-ⵥⵯⶀ-ⶖⶠ-ⶦⶨ-ⶮⶰ-ⶶ
+ⶸ-ⶾⷀ-ⷆⷈ-ⷎⷐ-ⷖⷘ-ⷞⸯ々-〇〡-〩〱-〵〸-〼ぁ-ゖゝ-ゟァ-ヺー-ヿㄅ-ㄭㄱ-ㆎㆠ-ㆷㇰ-ㇿ㐀䶵一鿃ꀀ-ꒌꔀ-ꘌꘐ-ꘟꘪ-ꘫꙀ-ꙟꙢ-ꙮꙿ-ꚗꜗ-ꜟꜢ-ꞈꞋ-ꞌꟻ-ꠁ
+ꠃ-ꠅꠇ-ꠊꠌ-ꠢꡀ-ꡳꢂ-ꢳꤊ-ꤥꤰ-ꥆꨀ-ꨨꩀ-ꩂꩄ-ꩋ가힣豈-鶴侮-頻並-龎ﬀ-ﬆﬓ-ﬗיִײַ-ﬨשׁ-זּטּ-לּמּנּ-סּףּ-פּצּ-ﮱﯓ-ﴽﵐ-ﶏﶒ-ﷇﷰ-ﷻﹰ-ﹴﹶ-ﻼＡ-Ｚａ-ｚｦ-ﾾￂ-ￇￊ-ￏￒ-ￗￚ-ￜ
+"""
+
+UNICODE_LETTERS_HYPHEN_APPOS = (
     r'^[-_\'\u0041-\u005A\u0061-\u007A\u00AA\u00B5\u00BA\u00C0-\u00D6\u00D8-\u00F6'
     r'\u00F8-\u02C1\u02C6-\u02D1\u02E0-\u02E4\u02EC\u02EE\u0370-\u0374'
     r'\u0376-\u0377\u037A-\u037D\u0386\u0388-\u038A\u038C\u038E-\u03A1'
@@ -326,8 +346,8 @@ class AdpositionForm(ArticleMetadataForm):
         self.fields['slug'].widget = wiki.forms.TextInputPrepend(
             prepend='/' + self.article.urlpath_set.all()[0].path,
             attrs={
-                'pattern': UNICODE_LETTERS_NUMERICS_HYPHEN_APPOS,
-                'title': 'Letters, numbers, hyphens, underscores, apostrophes'
+                'pattern': UNICODE_LETTERS_HYPHEN_APPOS,
+                'title': 'Letters, hyphens, underscores, apostrophes'
             }
         )
 
@@ -358,14 +378,13 @@ class AdpositionForm(ArticleMetadataForm):
         return thep.article.urlpath_set.all()[0]
 
     def new(self, m, commit=True):
-        newarticle, newcategory = self.newArticle_ArticleCategory(parent=self.article.urlpath_set.all()[0])
+        newarticle = self.newArticle_without_category(parent=self.article.urlpath_set.all()[0])
         # associate the article with the SupersenseRevision
         m.article = newarticle
 
         # create the Supersense, add the article, category, and revision
         p = models.Adposition()
         p.article = newarticle
-        p.category = newcategory
         p.add_revision(m, self.request, article_revision=newarticle.current_revision, save=True) # cannot delay saving the new adposition revision
 
         if commit:
@@ -376,7 +395,7 @@ class AdpositionForm(ArticleMetadataForm):
     class Meta:
         model = models.AdpositionRevision
 		# issue #4: transliteration field
-        fields = ('lang', 'name', 'transliteration', 'other_forms', 'description', 'morphtype', 'transitivity', 'slug', 'obj_cases')
+        fields = ('lang', 'name', 'transliteration', 'other_forms', 'description', 'morphtype', 'transitivity', 'slug', 'obj_cases', 'is_pp_idiom')
         widgets = {f: forms.RadioSelect for f in {'morphtype', 'transitivity'}}
 
 
@@ -395,9 +414,8 @@ class ConstrualForm(ArticleMetadataForm):
         function_name = deepest_instance(self.cleaned_data['function'].current_revision).name
         name = self.get_construal_slug(role_name, function_name)
         # slug will be the same as name
-        newarticle, newcategory = self.newArticle_ArticleCategory(name=name)
+        newarticle = self.newArticle_without_category(name=name)
         m.article = newarticle
-        m.category = newcategory
         if commit:
             m.save()
         return self.article_urlpath
@@ -457,9 +475,9 @@ class UsageForm(ArticleMetadataForm):
         name = self.get_usage_name(deepest_instance(m.adposition.current_revision).name,
                                    str(m.construal),
                                    case)
-        newarticle, newcategory = self.newArticle_ArticleCategory(parent=self.article.urlpath_set.all()[0],
-                                                                  name=name,
-                                                                  slug=caseSlug + construalSlug)
+        newarticle = self.newArticle_without_category(parent=self.article.urlpath_set.all()[0],
+                                                                   name=name,
+                                                                   slug=caseSlug + construalSlug)
         # associate the article with the SupersenseRevision
         m.article = newarticle
         m.name = name
@@ -468,7 +486,6 @@ class UsageForm(ArticleMetadataForm):
         # create the Supersense, add the article, category, and revision
         u = models.Usage()
         u.article = newarticle
-        u.category = newcategory
         u.add_revision(m, self.request, article_revision=newarticle.current_revision, save=True) # cannot delay saving the new adposition revision
 
         if commit:
@@ -486,6 +503,39 @@ class UsageForm(ArticleMetadataForm):
         model = models.UsageRevision
         fields = ('adposition', 'obj_case', 'construal')
         widgets = {'obj_case': forms.RadioSelect}
+
+class CorpusForm(ArticleMetadataForm):
+
+    def __init__(self, article, request, *args, **kwargs):
+        super(CorpusForm, self).__init__(article, request, *args, **kwargs)
+
+    def edit(self, m, commit=True):
+        if commit:
+            m.save()
+        return m.article.urlpath_set.all()[0]
+
+    def new(self, m, commit=True):
+        name = m.name
+        version = m.version
+        slug = self.get_corpus_slug(name, version)
+        newarticle = self.newArticle_without_category(name=name,
+                                                                   parent=self.article.urlpath_set.all()[0],
+                                                                   slug=slug)
+        m.article = newarticle
+        if commit:
+            m.save()
+        return self.article_urlpath
+
+
+    def get_corpus_slug(self, name, version):
+        return ''+str(name).lower()+str(version)
+
+    class Meta:
+        model = models.Corpus
+
+        fields = ('name', 'version', 'url', 'genre', 'description', 'languages')
+
+
 
 
 def MetaSidebarForm(article, request, *args, **kwargs):

@@ -4,6 +4,7 @@ from wiki.conf import settings
 from wiki.core.plugins import registry
 from wiki import sites
 from wiki.views import accounts, article, deleted_list
+# from django.views.decorators.cache import cache_page
 
 
 urlpatterns = [
@@ -132,7 +133,12 @@ class WikiURLPatterns:
     def get_article_urls(self):
         urlpatterns = [
             # Paths decided by article_ids
+<<<<<<< HEAD:src/wiki/urls.py
             url(r'^(?P<article_id>[0-9]+)/$',
+=======
+            url(r'^(?P<article_id>\d+)/$',
+                #cache_page(60 * 15)(self.article_view_class.as_view()),
+>>>>>>> master:wiki/urls.py
                 self.article_view_class.as_view(),
                 name='get'),
             url(r'^(?P<article_id>[0-9]+)/delete/$',
