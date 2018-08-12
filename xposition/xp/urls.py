@@ -3,14 +3,12 @@ from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.http.response import HttpResponse
 from django.views.static import serve as static_serve
-<<<<<<< HEAD
-from wiki.compat import include, url
-=======
+# from wiki.compat import include, url
 from django_nyt.urls import get_pattern as get_notify_pattern
 from wiki.urls import get_pattern as get_wiki_pattern
 from django.conf import settings
 from django.conf.urls import include, url
->>>>>>> master
+
 
 admin.autodiscover()
 
