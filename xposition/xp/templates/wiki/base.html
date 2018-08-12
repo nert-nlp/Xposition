@@ -1,0 +1,25 @@
+{% extends "wiki/base_site.html" %}
+{% load metadata_tags sekizai_tags %}
+
+{# render.html should take care of this, but since it apparently isn't called for the metadata forms, we hack it here: #}
+{% block wiki_body %}
+<link rel="stylesheet" href="/static/wiki/css/metadata.css" />
+<link rel="shortcut icon" href="/media/wiki/images/X-icon.png"/>
+<meta property="og:image" content="/media/wiki/images/Xposition-logo.png"/>
+{{block.super}}
+{% endblock %}
+
+{% block wiki_site_title %} - Xposition{% endblock %}
+
+{% block wiki_header_branding %}
+<a class="navbar-brand" href="/" style="padding: 0; margin: 0 20px 0 0;"><img src="/media/wiki/images/Xposition-logo.png" alt="Xposition" style="height: 50px;" /></a>
+{% endblock %}
+
+{% block wiki_header_navlinks %}
+<ul class="nav navbar-nav">
+  <li class="active"><a href="{% url 'wiki:root' %}">Home</a></li>
+  <li><a href="/supersenses">Supersenses</a></li>
+  <li><a href="/construals">Construals</a></li>
+  {% langs_display %}
+</ul>
+{% endblock %}
