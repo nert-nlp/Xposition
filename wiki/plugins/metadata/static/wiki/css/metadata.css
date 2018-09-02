@@ -141,8 +141,8 @@ http://nicolasgallagher.com/jump-links-and-viewport-positioning/demo/#method-D *
 }
 
 .interlinear { font-size: 90%; }
-.interlinear.translation { font-style: italic; }
-.interlinear.translation > p:empty { display: none; /* remove space between word glosses and sentence gloss */ }
+.interlinear.example .translation { font-style: italic; }
+.interlinear.example > p:empty { display: none; /* remove space between word glosses and sentence gloss */ }
 
 // interlinear.css 2/28/2009 Kevin B. McGowan <clunis@umich.edu>
 
