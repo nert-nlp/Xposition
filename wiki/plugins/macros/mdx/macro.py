@@ -231,6 +231,7 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
 
     GLOSS_RE = re.compile('^\{(?P<tok_gloss>[^}]*?)\}')
     def gex(self, id, sent, sent_gloss='', label=None, *args):
+        debug = (sent, sent_gloss)
         columns = []
         while len(sent)>0:
             gloss = self.GLOSS_RE.match(sent)
@@ -248,10 +249,15 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
                 word_gloss = sent[:end]
                 sent = sent[len(word_gloss):]
                 if word_gloss.strip():
-                    column = '<div class="gll">' + word_gloss.strip() + '</div>'
+                    column = '<div class="gll">' + word_gloss.strip().replace('}', '&#125;') + '</div>'
+                elif end==0:
+                    column = sent.replace('{', '&#123;').replace('}', '&#125;')
+                    sent = ''
                 else:
                     column = ''
             columns.append(column)
+            if len(columns)>60:
+                assert False,(debug,columns)
         interlinear = ''.join(columns)
         interlinear = format_html(f'''
                     <div id="{id}" class="interlinear example">
