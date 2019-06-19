@@ -80,4 +80,3 @@ If you would like to contribute to these or other languages, let us know.
 * Project leader: [Nathan Schneider](http://nathan.cl) (Georgetown)
 * Xposition software development: Max Kim, Joseph Ledford (Georgetown)
 * Other collaborators/contributors: TODO/see PrepWiki
->>>>>>> 91ff73518db584d3382b199f62976f2bd988500f
