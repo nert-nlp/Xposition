@@ -58,7 +58,7 @@ from .dev import *
 
 2b. If you are configuring Xposition for **production**, make sure that the end
 of `testproject/testproject/settings/local.py` has the `.base` import
-**uncommented**, and the `.base` import commented, like this:
+**uncommented**, and the `.dev` import commented, like this:
 
 ```py
 #from .dev import *
