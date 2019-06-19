@@ -49,20 +49,20 @@ echo 'SECRET_KEY = "..."' > testproject/testproject/settings/unversioned.py
 
 2a. If you are configuring Xposition for **development**, make sure that the end
 of `testproject/testproject/settings/local.py` has the `.dev` import
-**uncommented**, and the `.base` imported commented, like this:
-
-```py
-#from .dev import *
-from .base import *
-```
-
-2b. If you are configuring Xposition for **production**, make sure that the end
-of `testproject/testproject/settings/local.py` has the `.base` import
-**uncommented**, and the `.base` imported commented, like this:
+**uncommented**, and the `.base` import commented, like this:
 
 ```py
 from .dev import *
 #from .base import *
+```
+
+2b. If you are configuring Xposition for **production**, make sure that the end
+of `testproject/testproject/settings/local.py` has the `.base` import
+**uncommented**, and the `.base` import commented, like this:
+
+```py
+#from .dev import *
+from .base import *
 ```
 
 3. Run the migration to update the server's SQL schema:
