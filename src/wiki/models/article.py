@@ -153,6 +153,7 @@ class Article(models.Model):
         new_revision.article = self
         new_revision.previous_revision = self.current_revision
         if save:
+            new_revision.clean()
             new_revision.save()
         self.current_revision = new_revision
         if save:
@@ -206,9 +207,9 @@ class Article(models.Model):
 
     def get_cache_content_key(self, user=None):
         """Returns per-article-user cache key."""
-        return "{key}:{user!s}".format(
+        return "{key}:{user}".format(
             key=self.get_cache_key(),
-            user=user if user else "")
+            user=user.get_username() if user else "")
 
     def get_cached_content(self, user=None):
         """Returns cached version of rendered article.
@@ -371,6 +372,12 @@ class ArticleRevision(BaseRevisionMixin, models.Model):
 
     def __str__(self):
         return "%s (%d)" % (self.title, self.revision_number)
+
+    def clean(self):
+        # Enforce DOS line endings \r\n. It is the standard for web browsers,
+        # but when revisions are created programatically, they might
+        # have UNIX line endings \n instead.
+        self.content = self.content.replace('\r', '').replace('\n', '\r\n')
 
     def inherit_predecessor(self, article):
         """

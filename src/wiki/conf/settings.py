@@ -1,5 +1,4 @@
 import bleach
-from django.apps import apps
 from django.conf import settings as django_settings
 from django.contrib.messages import constants as messages
 from django.core.files.storage import default_storage
@@ -26,18 +25,32 @@ MARKDOWN_SANITIZE_HTML = getattr(
     'WIKI_MARKDOWN_SANITIZE_HTML',
     True)
 
-#: Arguments for the Markdown instance, for instance a list of extensions to
-#: use.
-#: See: https://pythonhosted.org/Markdown/extensions/index.html
+#: Arguments for the Markdown instance, as a dictionary. The "extensions" key
+#: should be a list of extra extensions to use besides the built-in django-wiki
+#: extensions, and the "extension_configs" should be a dictionary, specifying
+#: the keyword-arguments to pass to each extension.
 #:
-#: To set a custom title for TOC's::
+#: For a list of extensions officially supported by Python-Markdown, see:
+#: https://python-markdown.github.io/extensions/
 #:
-#:    WIKI_MARKDOWN_KWARGS = {'extension_configs': {'toc': _('Contents of this article')}}
+#: To set a custom title for table of contents, specify the following in your
+#: Django project settings::
+#:
+#:     WIKI_MARKDOWN_KWARGS = {
+#:         'extension_configs': {
+#:             'wiki.plugins.macros.mdx.toc': {'title': 'Contents of this article'},
+#:         },
+#:     }
+#:
+#: Besides the extensions enabled by the "extensions" key, the following
+#: built-in django-wiki extensions can be configured with "extension_configs":
+#: "wiki.core.markdown.mdx.codehilite", "wiki.core.markdown.mdx.previewlinks",
+#: "wiki.core.markdown.mdx.responsivetable", "wiki.plugins.macros.mdx.macro",
+#: "wiki.plugins.macros.mdx.toc", "wiki.plugins.macros.mdx.wikilinks".
 MARKDOWN_KWARGS = {
     'extensions': [
         'markdown.extensions.footnotes',
         'markdown.extensions.attr_list',
-        'markdown.extensions.smart_strong',
         'markdown.extensions.footnotes',
         'markdown.extensions.attr_list',
         'markdown.extensions.def_list',
@@ -46,8 +59,8 @@ MARKDOWN_KWARGS = {
         'markdown.extensions.sane_lists',
     ],
     'extension_configs': {
-        'toc': {
-            'title': _('Table of Contents')}},
+        'wiki.plugins.macros.mdx.toc': {'title': _('Contents')},
+    },
 }
 MARKDOWN_KWARGS.update(getattr(django_settings, 'WIKI_MARKDOWN_KWARGS', {}))
 
@@ -146,16 +159,16 @@ LOG_IPS_ANONYMOUS = getattr(django_settings, 'WIKI_LOG_IPS_ANONYMOUS', True)
 #: Do we want to log IPs of logged in users?
 LOG_IPS_USERS = getattr(django_settings, 'WIKI_LOG_IPS_USERS', False)
 
-#: Mapping from message.tag to bootstrap class names.
+#: Mapping from message.level to bootstrap class names.
 MESSAGE_TAG_CSS_CLASS = getattr(
     django_settings,
     'WIKI_MESSAGE_TAG_CSS_CLASS',
     {
-        messages.DEFAULT_TAGS[messages.DEBUG]: "alert alert-info",
-        messages.DEFAULT_TAGS[messages.ERROR]: "alert alert-danger",
-        messages.DEFAULT_TAGS[messages.INFO]: "alert alert-info",
-        messages.DEFAULT_TAGS[messages.SUCCESS]: "alert alert-success",
-        messages.DEFAULT_TAGS[messages.WARNING]: "alert alert-warning",
+        messages.DEBUG: "alert alert-info",
+        messages.ERROR: "alert alert-danger",
+        messages.INFO: "alert alert-info",
+        messages.SUCCESS: "alert alert-success",
+        messages.WARNING: "alert alert-warning",
     }
 )
 

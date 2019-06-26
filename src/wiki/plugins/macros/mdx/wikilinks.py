@@ -5,7 +5,7 @@ import re
 
 import markdown
 from django.urls import reverse
-from markdown.extensions import wikilinks
+from markdown.extensions import Extension, wikilinks
 
 
 def build_url(label, base, end, md):
@@ -22,9 +22,9 @@ def build_url(label, base, end, md):
     return '%s%s%s' % (base, clean_label, end)
 
 
-class WikiLinkExtension(wikilinks.WikiLinkExtension):
+class WikiLinkExtension(Extension):
 
-    def __init__(self, configs={}):
+    def __init__(self, **kwargs):
         # set extension defaults
         self.config = {
             'base_url': ['', 'String to append to beginning or URL.'],
@@ -32,12 +32,9 @@ class WikiLinkExtension(wikilinks.WikiLinkExtension):
             'html_class': ['wiki_wikilink', 'CSS hook. Leave blank for none.'],
             'build_url': [build_url, 'Callable formats URL from label.'],
         }
+        super().__init__(**kwargs)
 
-        # Override defaults with user settings
-        for key, value in configs:
-            self.setConfig(key, value)
-
-    def extendMarkdown(self, md, md_globals):
+    def extendMarkdown(self, md):
         self.md = md
 
         # append to end of inline patterns
@@ -47,18 +44,19 @@ class WikiLinkExtension(wikilinks.WikiLinkExtension):
         md.inlinePatterns.add('wikilink', wikilinkPattern, "<not_strong")
 
 
-class WikiLinks(wikilinks.WikiLinks):
+class WikiLinks(wikilinks.WikiLinksInlineProcessor):
 
-    def handleMatch(self, m):
-        if m.group(2).strip():
-            base_url, end_url, html_class = self._getMeta()
-            label = m.group(2).strip()
-            url = self.config['build_url'](label, base_url, end_url, self.md)
-            a = markdown.util.etree.Element('a')
-            a.text = label
-            a.set('href', url)
-            if html_class:
-                a.set('class', html_class)
-        else:
-            a = ''
-        return a
+    def handleMatch(self, m, data):
+        base_url, end_url, html_class = self._getMeta()
+        label = m.group(1).strip()
+        url = self.config['build_url'](label, base_url, end_url, self.md)
+        a = markdown.util.etree.Element('a')
+        a.text = label
+        a.set('href', url)
+        if html_class:
+            a.set('class', html_class)
+        return a, m.start(0), m.end(0)
+
+def makeExtension(*args, **kwargs):
+    """Return an instance of the extension."""
+    return WikiLinkExtension(*args, **kwargs)

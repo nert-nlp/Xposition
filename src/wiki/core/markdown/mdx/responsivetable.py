@@ -6,7 +6,7 @@ from markdown.util import etree
 class ResponsiveTableExtension(markdown.Extension):
     """Wraps all tables with Bootstrap's table-responsive class"""
 
-    def extendMarkdown(self, md, md_globals):
+    def extendMarkdown(self, md):
         md.treeprocessors.add('responsivetable', ResponsiveTableTree(md), "_end")
 
 
@@ -37,3 +37,8 @@ class ResponsiveTableTree(Treeprocessor):
     def convert_to_wrapper(self, element):
         element.tag = 'div'
         element.set('class', 'table-responsive')
+
+
+def makeExtension(*args, **kwargs):
+    """Return an instance of the extension."""
+    return ResponsiveTableExtension(*args, **kwargs)
