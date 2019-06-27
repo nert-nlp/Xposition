@@ -26,7 +26,7 @@ PROJECT_PARENT = os.path.abspath(os.path.split(PROJECT_PATH)[0])
 sys.path.append(PROJECT_PATH)
 sys.path.append(PROJECT_PARENT)
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "testproject.settings")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "xp.settings")
 
 application = get_wsgi_application()
 

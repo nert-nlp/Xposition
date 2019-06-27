@@ -70,7 +70,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
 ]
 
-ROOT_URLCONF = 'testproject.urls'
+ROOT_URLCONF = 'xp.urls'
 
 TEMPLATES = [
     {
@@ -94,7 +94,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'testproject.wsgi.application'
+WSGI_APPLICATION = 'xp.wsgi.application'
 
 
 LOGIN_REDIRECT_URL = reverse_lazy('wiki:get', kwargs={'path': ''})

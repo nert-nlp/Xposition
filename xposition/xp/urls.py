@@ -25,8 +25,8 @@ urlpatterns += [
     url(r'', include('wiki.urls')),
 ]
 
-handler500 = 'testproject.views.server_error'
-handler404 = 'testproject.views.page_not_found'
+handler500 = 'xp.views.server_error'
+handler404 = 'xp.views.page_not_found'
 
 
 if settings.DEBUG:

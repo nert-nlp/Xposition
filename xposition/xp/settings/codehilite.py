@@ -1,5 +1,5 @@
-from testproject.settings import *
-from testproject.settings.local import *
+from xp.settings import *
+from xp.settings.local import *
 
 WIKI_MARKDOWN_HTML_WHITELIST = ['sub', 'sup', 'hr', 'u']
 
