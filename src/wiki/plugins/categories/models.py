@@ -1,5 +1,5 @@
 from wiki.models import Article
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.db import models
 from django.utils.encoding import force_text
 from django.contrib.contenttypes.models import ContentType
@@ -54,7 +54,7 @@ class Category(CategoryBase):
 
     def get_absolute_url(self):
         """Return a path"""
-        from django.core.urlresolvers import NoReverseMatch
+        from django.urls import NoReverseMatch
 
         if self.alternate_url:
             return self.alternate_url
