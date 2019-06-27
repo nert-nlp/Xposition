@@ -188,15 +188,15 @@ DEBUG_TOOLBAR_PANELS = [
 # - Customization ---------------------------------------------
 
 INSTALLED_APPS += [
-    'django_nyt',
+    #'django_nyt',
     'django_tables2',
-    'wiki',
-    'wiki.plugins.macros',
-    'wiki.plugins.help',
-    'wiki.plugins.links',
-    'wiki.plugins.images',
-    'wiki.plugins.attachments',
-    'wiki.plugins.notifications',
+    #'wiki',
+    #'wiki.plugins.macros',
+    #'wiki.plugins.help',
+    #'wiki.plugins.links',
+    #'wiki.plugins.images',
+    #'wiki.plugins.attachments',
+    #'wiki.plugins.notifications',
 ]
 
 
