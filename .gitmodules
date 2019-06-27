@@ -1,0 +1,4 @@
+[submodule "src/wiki/plugins/django-categories"]
+	path = src/wiki/plugins/categories
+	url = https://github.com/callowayproject/django-categories
+	branch = master
