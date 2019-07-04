@@ -1,4 +1,4 @@
-[submodule "src/wiki/plugins/django-categories"]
-	path = src/wiki/plugins/categories
-	url = https://github.com/callowayproject/django-categories
+[submodule "src/wiki/plugins/categories"]
+	path = src/wiki/plugins/nert-nlp-django-categories
+	url = https://github.com/nert-nlp/django-categories
 	branch = master
