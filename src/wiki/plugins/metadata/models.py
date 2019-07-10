@@ -293,7 +293,7 @@ class MetadataRevision(RevisionPluginRevision):
     template = models.CharField(max_length=100, default="wiki/view.html", editable=False)
     name = models.CharField(max_length=100, db_index=True)
     description = models.CharField(max_length=300)
-    article_revision = models.OneToOneField(ArticleRevision, null=True, related_name='metadata_revision')
+    article_revision = models.OneToOneField(ArticleRevision, null=True, related_name='metadata_revision', on_delete=models.CASCADE)
 
     unique_together = None  # can be overriden by subclasses
 
@@ -337,7 +337,7 @@ class MetadataRevision(RevisionPluginRevision):
 
 
 class Supersense(Metadata):
-    category = models.ForeignKey(ArticleCategory, null=False, related_name='supersense')
+    category = models.ForeignKey(ArticleCategory, null=False, related_name='supersense', on_delete=models.CASCADE)
 
     def field_names(self):
         return {'name', 'description', 'parent', 'animacy'}
@@ -378,7 +378,7 @@ class SupersenseRevision(MetadataRevision):
         animate = 1
 
     animacy = models.PositiveIntegerField(choices=AnimacyType.choices(), default=AnimacyType.unspecified)
-    parent = models.ForeignKey(Supersense, null=True, blank=True, related_name='sschildren')
+    parent = models.ForeignKey(Supersense, null=True, blank=True, related_name='sschildren', on_delete=models.CASCADE)
 
     unique_together = [('name', 'revision_number')]
 
@@ -404,8 +404,8 @@ class SupersenseRevision(MetadataRevision):
 
 
 class Construal(SimpleMetadata):
-    role = models.ForeignKey(Supersense, null=True, blank=True, related_name='rfs_with_role')
-    function = models.ForeignKey(Supersense, null=True, blank=True, related_name='rfs_with_function')
+    role = models.ForeignKey(Supersense, null=True, blank=True, related_name='rfs_with_role', on_delete=models.CASCADE)
+    function = models.ForeignKey(Supersense, null=True, blank=True, related_name='rfs_with_function', on_delete=models.CASCADE)
     special = models.CharField(max_length=200,  default='', null=True, blank=True)
 
     def __str__(self):
@@ -521,7 +521,7 @@ class Language(SimpleMetadata):
                                       "such as <tt>en</tt> for English and <tt>en-us</tt> for American English.",
                             validators=[lang_code_validator])
 
-    category = models.ForeignKey(ArticleCategory, null=False, related_name='language')
+    category = models.ForeignKey(ArticleCategory, null=False, related_name='language', on_delete=models.CASCADE)
 
     # Other names for the language/dialect, possibly in other orthographies
     other_names = models.CharField(max_length=200, blank=True, verbose_name="Other names for the language/dialect")
@@ -716,7 +716,7 @@ def adp_name_validator(value):
 
 
 class AdpositionRevision(MetadataRevision):
-    lang = models.ForeignKey(Language, related_name='adpositionrevisions', verbose_name='Language/dialect')
+    lang = models.ForeignKey(Language, related_name='adpositionrevisions', verbose_name='Language/dialect', on_delete=models.CASCADE)
     # name = models.CharField(max_length=200, verbose_name='Lemma',validators=[adp_name_validator] ,
     #     help_text="Lowercase unless it would normally be capitalized in a dictionary")
     # issue #4: transliteration field
@@ -793,9 +793,9 @@ class Usage(Metadata):
 
 
 class UsageRevision(MetadataRevision):
-    adposition = models.ForeignKey(Adposition, null=True, related_name='usages')
+    adposition = models.ForeignKey(Adposition, null=True, related_name='usages', on_delete=models.CASCADE)
     obj_case = models.PositiveIntegerField(choices=Case.choices(), null=True)
-    construal = models.ForeignKey(Construal, null=True, related_name='usages')
+    construal = models.ForeignKey(Construal, null=True, related_name='usages', on_delete=models.CASCADE)
 
     unique_together = [('adposition', 'obj_case', 'construal', 'revision_number')]
 
@@ -875,9 +875,9 @@ class CorpusSentence(models.Model):
     # Corpus (foreign key), sent id, lang, orthography, is_parallel, doc id,
     # offset within doc, sent text: original string, sent text: tokenized,
     # word glosses?, sentence gloss?, note?
-    corpus = models.ForeignKey(Corpus, null=True, related_name='corpus_sentences')
+    corpus = models.ForeignKey(Corpus, null=True, related_name='corpus_sentences', on_delete=models.CASCADE)
     sent_id = models.CharField(max_length=200, null=True, verbose_name="Sentence ID")
-    language = models.ForeignKey(Language, blank=True, related_name='corpus_sentences')
+    language = models.ForeignKey(Language, blank=True, related_name='corpus_sentences', on_delete=models.CASCADE)
     orthography = models.CharField(max_length=200, blank=True, verbose_name="Orthography",
                                    help_text="language-specific details such as style of transliteration")
     is_parallel = models.BooleanField(default=False)
@@ -920,10 +920,10 @@ class PTokenAnnotation(models.Model):
     # list of weak associations (for mwe), is_gold, annotator note?,
     # annotator grouping/cluster
     token_indices = IntListField(max_length=200, blank=True, verbose_name="Token Indices")
-    adposition = models.ForeignKey(Adposition, null=True, blank=True)
-    construal = models.ForeignKey(Construal, null=True, blank=True, related_name='ptoken_with_construal')
-    usage = models.ForeignKey(Usage, null=True, blank=True)
-    sentence = models.ForeignKey(CorpusSentence, null=True)
+    adposition = models.ForeignKey(Adposition, null=True, blank=True, on_delete=models.CASCADE)
+    construal = models.ForeignKey(Construal, null=True, blank=True, related_name='ptoken_with_construal', on_delete=models.CASCADE)
+    usage = models.ForeignKey(Usage, null=True, blank=True, on_delete=models.CASCADE)
+    sentence = models.ForeignKey(CorpusSentence, null=True, on_delete=models.CASCADE)
     obj_case = models.PositiveIntegerField(choices=Case.choices(), blank=True)
 
     obj_head = models.CharField(max_length=200, null=True, verbose_name="Object Head")
