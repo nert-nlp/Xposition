@@ -574,7 +574,7 @@ class Language(SimpleMetadata):
 
     @classmethod
     def with_nav_links(cls):
-        return cls.objects.select_related('article__current_revision').filter(navlink=True)
+        return cls.objects.select_related('article__current_revision').filter(navlink=True, article__current_revision__deleted=False)
 
     def __str__(self):
         return self.name
@@ -777,7 +777,8 @@ class Usage(Metadata):
 
     @cached_property
     def url(self):
-        return self.current_revision.metadatarevision.usagerevision.url
+        """For efficiency, callers should invoke .select_related('article__current_revision')"""
+        return self.article.get_absolute_url()
 
     @cached_property
     def html(self):
@@ -803,6 +804,7 @@ class UsageRevision(MetadataRevision):
 
     @cached_property
     def url(self):
+        """For efficiency, callers should invoke .select_related('article_revision__article__current_revision')"""
         return self.article_revision.article.get_absolute_url()
 
     @cached_property
