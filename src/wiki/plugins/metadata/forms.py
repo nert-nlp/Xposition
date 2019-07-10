@@ -4,7 +4,7 @@ from wiki.models import URLPath
 from django.utils.safestring import mark_safe
 from django import forms
 from django.core.exceptions import ValidationError
-from django.core.urlresolvers import reverse
+from django.urls import reverse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.core.validators import _lazy_re_compile, RegexValidator
 from django.utils.translation import ugettext_lazy as _
