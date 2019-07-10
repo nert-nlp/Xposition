@@ -1,5 +1,3 @@
-from __future__ import absolute_import, unicode_literals
-
 import import_export
 import bitfield
 
@@ -9,19 +7,19 @@ from django.contrib.contenttypes.admin import GenericTabularInline
 from django.utils.translation import gettext_lazy as _
 from mptt.admin import MPTTModelAdmin
 
-from . import editors, models
+from . import models
 
 # import_export django models
-from .plugins.metadata import models as ms
+from wiki.plugins.metadata import models as ms
 from import_export.admin import ImportExportModelAdmin
 from import_export import resources
 from import_export import fields
 from import_export import widgets
 from import_export.widgets import ForeignKeyWidget, IntegerWidget, Widget
-from .plugins.categories.models import ArticleCategory
-from .models import URLPath, Article
+from wiki.plugins.categories.models import ArticleCategory
+from wiki.models import URLPath, Article
 from django.contrib.auth.models import User
-from .plugins.metadata.models import deepest_instance
+from wiki.plugins.metadata.models import deepest_instance
 from django.core.exceptions import ObjectDoesNotExist
 
 ADMIN_REQUEST = None
