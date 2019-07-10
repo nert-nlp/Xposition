@@ -2,6 +2,7 @@ import difflib
 import logging
 from urllib.parse import urljoin
 
+from wiki.plugins.metadata.models import Supersense, SupersenseRevision, SimpleMetadata, Metadata
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import transaction

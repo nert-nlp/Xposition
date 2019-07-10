@@ -25,8 +25,8 @@ class ArticleRevisionForm(forms.ModelForm):
         self.fields['content'].widget = editor.get_admin_widget()
 
 
-class ArticleRevisionAdmin(ImportExportModelAdmin):
-    resource_class = ArticleRevisionResource
+class ArticleRevisionAdmin(admin.ModelAdmin):
+    resource_class = ArticleRevisionForm
     form = ArticleRevisionForm
     list_display = ('title', 'created', 'modified', 'user', 'ip_address')
 
