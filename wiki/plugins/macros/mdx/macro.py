@@ -14,64 +14,96 @@ from django.utils.html import escape, mark_safe, format_html
 
 # See:
 # http://stackoverflow.com/questions/430759/regex-for-managing-escaped-characters-for-items-like-string-literals
-re_sq_short = r'"([^"\\]*(?:\\.[^"\\]*)*)"'
+#re_sq_short = r'"([^"\\]*(?:\\.[^"\\]*)*)"'
 
-MACRO_RE = re.compile(
-    r"(\[(?P<macro>\w+)(?P<args>(\s(\w+:)?(%s|[\w'`&!%%+/$-]+))*)\])" %
+#MACRO_RE = re.compile(
+#    r"(\[(?P<macro>\w+)(?P<args>(\s(\w+:)?(%s|[\w'`&!%%+/$-]+))*)\])" %
+#    re_sq_short,
+#    re.IGNORECASE | re.UNICODE)
+#
+#ARG_RE = re.compile(
+#    r"\s(\w+:)?(?P<value>(%s|[^\s\[\]:]+))" %
+#    re_sq_short,
+#    re.IGNORECASE | re.UNICODE)
+
+# See:
+# http://stackoverflow.com/questions/430759/regex-for-managing-escaped-characters-for-items-like-string-literals
+re_sq_short = r"'([^'\\]*(?:\\.[^'\\]*)*)'"
+
+MACRO_RE = r"((?i)\[(?P<macro>\w+)(?P<kwargs>\s\w+\:.+)*\])"
+KWARG_RE = re.compile(
+    r'\s*(?P<arg>\w+)(:(?P<value>([^\']+|%s)))?' %
     re_sq_short,
-    re.IGNORECASE | re.UNICODE)
-
-ARG_RE = re.compile(
-    r"\s(\w+:)?(?P<value>(%s|[^\s\[\]:]+))" %
-    re_sq_short,
-    re.IGNORECASE | re.UNICODE)
-
+    re.IGNORECASE)
 
 class MacroExtension(markdown.Extension):
     """ Macro plugin markdown extension for django-wiki. """
 
-    def extendMarkdown(self, md, md_globals):
-        """ Insert MacroPreprocessor before ReferencePreprocessor. """
-        md.preprocessors.add('dw-macros', MacroPreprocessor(md), '>html_block')
+    def extendMarkdown(self, md):
+        md.inlinePatterns.add('dw-macros', MacroPattern(MACRO_RE, md), '>link')
 
-
-class MacroPreprocessor(markdown.preprocessors.Preprocessor):
+class MacroPattern(markdown.inlinepatterns.Pattern):
     """django-wiki macro preprocessor - parse text for various [some_macro] and
     [some_macro (kw:arg)*] references. """
 
-    def run(self, lines):
-        # Look at all those indentations.
-        # That's insane, let's get a helper library
-        # Please note that this pattern is also in plugins.images
-        new_text = []
-        for line in lines:
-            for test_macro in settings.METHODS:
-                if ('[' + test_macro) not in line:
-                    continue
-                for m in MACRO_RE.finditer(line):
-                    macro = m.group('macro').strip()
-                    if macro == test_macro and hasattr(self, macro):
-                        args = m.group('args')
-                        if args:
-                            args_list = []
-                            for arg in ARG_RE.finditer(args):
-                                value = arg.group('value')
-                                if isinstance(value, string_types):
-                                    # If value is enclosed with ": Remove and
-                                    # remove escape sequences
-                                    if value.startswith('"') and len(value) > 2:
-                                        value = value[1:-1]
-                                        value = value.replace("\\\\", "¤KEEPME¤")
-                                        value = value.replace("\\", "")
-                                        value = value.replace("¤KEEPME¤", "\\")
-                                if value is not None:
-                                    args_list.append(value)
-                            line = line.replace(m.group(0), getattr(self, macro)(*args_list))
-                        else:
-                            line = line.replace(m.group(0), getattr(self, macro)())
-            if line is not None:
-                new_text.append(line)
-        return new_text
+    def handleMatch(self, m):
+        macro = m.group('macro').strip()
+        if macro not in settings.METHODS or not hasattr(self, macro):
+            return m.group(2)
+
+        kwargs = m.group('kwargs')
+        if not kwargs:
+            return getattr(self, macro)()
+        kwargs_dict = {}
+        for kwarg in KWARG_RE.finditer(kwargs):
+            arg = kwarg.group('arg')
+            value = kwarg.group('value')
+            if value is None:
+                value = True
+            if isinstance(value, str):
+                # If value is enclosed with ': Remove and
+                # remove escape sequences
+                if value.startswith("'") and len(value) > 2:
+                    value = value[1:-1]
+                    value = value.replace("\\\\", "¤KEEPME¤")
+                    value = value.replace("\\", "")
+                    value = value.replace("¤KEEPME¤", "\\")
+            kwargs_dict[str(arg)] = value
+        return getattr(self, macro)(**kwargs_dict)
+
+    #def run(self, lines):
+    #    # Look at all those indentations.
+    #    # That's insane, let's get a helper library
+    #    # Please note that this pattern is also in plugins.images
+    #    new_text = []
+    #    for line in lines:
+    #        for test_macro in settings.METHODS:
+    #            if ('[' + test_macro) not in line:
+    #                continue
+    #            for m in MACRO_RE.finditer(line):
+    #                macro = m.group('macro').strip()
+    #                if macro == test_macro and hasattr(self, macro):
+    #                    args = m.group('args')
+    #                    if args:
+    #                        args_list = []
+    #                        for arg in KWARG_RE.finditer(args):
+    #                            value = arg.group('value')
+    #                            if isinstance(value, string_types):
+    #                                # If value is enclosed with ": Remove and
+    #                                # remove escape sequences
+    #                                if value.startswith('"') and len(value) > 2:
+    #                                    value = value[1:-1]
+    #                                    value = value.replace("\\\\", "¤KEEPME¤")
+    #                                    value = value.replace("\\", "")
+    #                                    value = value.replace("¤KEEPME¤", "\\")
+    #                            if value is not None:
+    #                                args_list.append(value)
+    #                        line = line.replace(m.group(0), getattr(self, macro)(*args_list))
+    #                    else:
+    #                        line = line.replace(m.group(0), getattr(self, macro)())
+    #        if line is not None:
+    #            new_text.append(line)
+    #    return new_text
 
     def article_list(self, depth="2"):
         html = render_to_string(
@@ -275,6 +307,9 @@ class MacroPreprocessor(markdown.preprocessors.Preprocessor):
               'label': _('string to display after ex. (if not id)')}
     )
 
+def makeExtension(*args, **kwargs):
+    """Return an instance of the extension."""
+    return MacroExtension(*args, **kwargs)
 
 def link(t, l, clazz):
     return '<a href="' + l + '" class="' + clazz + '">' + t + '</a>'
