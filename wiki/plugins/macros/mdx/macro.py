@@ -14,96 +14,64 @@ from django.utils.html import escape, mark_safe, format_html
 
 # See:
 # http://stackoverflow.com/questions/430759/regex-for-managing-escaped-characters-for-items-like-string-literals
-#re_sq_short = r'"([^"\\]*(?:\\.[^"\\]*)*)"'
+re_sq_short = r'"([^"\\]*(?:\\.[^"\\]*)*)"'
 
-#MACRO_RE = re.compile(
-#    r"(\[(?P<macro>\w+)(?P<args>(\s(\w+:)?(%s|[\w'`&!%%+/$-]+))*)\])" %
-#    re_sq_short,
-#    re.IGNORECASE | re.UNICODE)
-#
-#ARG_RE = re.compile(
-#    r"\s(\w+:)?(?P<value>(%s|[^\s\[\]:]+))" %
-#    re_sq_short,
-#    re.IGNORECASE | re.UNICODE)
-
-# See:
-# http://stackoverflow.com/questions/430759/regex-for-managing-escaped-characters-for-items-like-string-literals
-re_sq_short = r"'([^'\\]*(?:\\.[^'\\]*)*)'"
-
-MACRO_RE = r"((?i)\[(?P<macro>\w+)(?P<kwargs>\s\w+\:.+)*\])"
-KWARG_RE = re.compile(
-    r'\s*(?P<arg>\w+)(:(?P<value>([^\']+|%s)))?' %
+MACRO_RE = re.compile(
+    r"(\[(?P<macro>\w+)(?P<args>(\s(\w+:)?(%s|[\w'`&!%%+/$-]+))*)\])" %
     re_sq_short,
-    re.IGNORECASE)
+    re.IGNORECASE | re.UNICODE)
+
+ARG_RE = re.compile(
+    r"\s(\w+:)?(?P<value>(%s|[^\s\[\]:]+))" %
+    re_sq_short,
+    re.IGNORECASE | re.UNICODE)
+
 
 class MacroExtension(markdown.Extension):
     """ Macro plugin markdown extension for django-wiki. """
 
-    def extendMarkdown(self, md):
-        md.inlinePatterns.add('dw-macros', MacroPattern(MACRO_RE, md), '>link')
+    def extendMarkdown(self, md, md_globals):
+        """ Insert MacroPreprocessor before ReferencePreprocessor. """
+        md.preprocessors.add('dw-macros', MacroPreprocessor(md), '>html_block')
 
-class MacroPattern(markdown.inlinepatterns.Pattern):
+
+class MacroPreprocessor(markdown.preprocessors.Preprocessor):
     """django-wiki macro preprocessor - parse text for various [some_macro] and
     [some_macro (kw:arg)*] references. """
 
-    def handleMatch(self, m):
-        macro = m.group('macro').strip()
-        if macro not in settings.METHODS or not hasattr(self, macro):
-            return m.group(2)
-
-        kwargs = m.group('kwargs')
-        if not kwargs:
-            return getattr(self, macro)()
-        kwargs_dict = {}
-        for kwarg in KWARG_RE.finditer(kwargs):
-            arg = kwarg.group('arg')
-            value = kwarg.group('value')
-            if value is None:
-                value = True
-            if isinstance(value, str):
-                # If value is enclosed with ': Remove and
-                # remove escape sequences
-                if value.startswith("'") and len(value) > 2:
-                    value = value[1:-1]
-                    value = value.replace("\\\\", "¤KEEPME¤")
-                    value = value.replace("\\", "")
-                    value = value.replace("¤KEEPME¤", "\\")
-            kwargs_dict[str(arg)] = value
-        return getattr(self, macro)(**kwargs_dict)
-
-    #def run(self, lines):
-    #    # Look at all those indentations.
-    #    # That's insane, let's get a helper library
-    #    # Please note that this pattern is also in plugins.images
-    #    new_text = []
-    #    for line in lines:
-    #        for test_macro in settings.METHODS:
-    #            if ('[' + test_macro) not in line:
-    #                continue
-    #            for m in MACRO_RE.finditer(line):
-    #                macro = m.group('macro').strip()
-    #                if macro == test_macro and hasattr(self, macro):
-    #                    args = m.group('args')
-    #                    if args:
-    #                        args_list = []
-    #                        for arg in KWARG_RE.finditer(args):
-    #                            value = arg.group('value')
-    #                            if isinstance(value, string_types):
-    #                                # If value is enclosed with ": Remove and
-    #                                # remove escape sequences
-    #                                if value.startswith('"') and len(value) > 2:
-    #                                    value = value[1:-1]
-    #                                    value = value.replace("\\\\", "¤KEEPME¤")
-    #                                    value = value.replace("\\", "")
-    #                                    value = value.replace("¤KEEPME¤", "\\")
-    #                            if value is not None:
-    #                                args_list.append(value)
-    #                        line = line.replace(m.group(0), getattr(self, macro)(*args_list))
-    #                    else:
-    #                        line = line.replace(m.group(0), getattr(self, macro)())
-    #        if line is not None:
-    #            new_text.append(line)
-    #    return new_text
+    def run(self, lines):
+        # Look at all those indentations.
+        # That's insane, let's get a helper library
+        # Please note that this pattern is also in plugins.images
+        new_text = []
+        for line in lines:
+            for test_macro in settings.METHODS:
+                if ('[' + test_macro) not in line:
+                    continue
+                for m in MACRO_RE.finditer(line):
+                    macro = m.group('macro').strip()
+                    if macro == test_macro and hasattr(self, macro):
+                        args = m.group('args')
+                        if args:
+                            args_list = []
+                            for arg in ARG_RE.finditer(args):
+                                value = arg.group('value')
+                                if isinstance(value, string_types):
+                                    # If value is enclosed with ": Remove and
+                                    # remove escape sequences
+                                    if value.startswith('"') and len(value) > 2:
+                                        value = value[1:-1]
+                                        value = value.replace("\\\\", "¤KEEPME¤")
+                                        value = value.replace("\\", "")
+                                        value = value.replace("¤KEEPME¤", "\\")
+                                if value is not None:
+                                    args_list.append(value)
+                            line = line.replace(m.group(0), getattr(self, macro)(*args_list))
+                        else:
+                            line = line.replace(m.group(0), getattr(self, macro)())
+            if line is not None:
+                new_text.append(line)
+        return new_text
 
     def article_list(self, depth="2"):
         html = render_to_string(
@@ -263,7 +231,6 @@ class MacroPattern(markdown.inlinepatterns.Pattern):
 
     GLOSS_RE = re.compile('^\{(?P<tok_gloss>[^}]*?)\}')
     def gex(self, id, sent, sent_gloss='', label=None, *args):
-        debug = (sent, sent_gloss)
         columns = []
         while len(sent)>0:
             gloss = self.GLOSS_RE.match(sent)
@@ -281,24 +248,19 @@ class MacroPattern(markdown.inlinepatterns.Pattern):
                 word_gloss = sent[:end]
                 sent = sent[len(word_gloss):]
                 if word_gloss.strip():
-                    column = '<div class="gll">' + word_gloss.strip().replace('}', '&#125;') + '</div>'
-                elif end==0:
-                    column = sent.replace('{', '&#123;').replace('}', '&#125;')
-                    sent = ''
+                    column = '<div class="gll">' + word_gloss.strip() + '</div>'
                 else:
                     column = ''
             columns.append(column)
-            if len(columns)>60:
-                assert False,(debug,columns)
         interlinear = ''.join(columns)
-        interlinear = format_html(f'''
-                    <div id="{id}" class="interlinear example">
-                        <p class="gloss">
-                            {interlinear}
-                        </p>
-                        <p class="translation">&lsquo;{{}}&rsquo;&nbsp;<a href="#{{}}" class="exlabel">{{}}</a></p>
-                    </div>
-                    '''.strip(), sent_gloss, id, id)
+        interlinear = format_html(f'''<span id="{id}" class="example">
+                    <div class="interlinear example">
+                    <p class="gloss">
+                        {interlinear}
+                    </p>
+                    <p class="translation">{{}}&nbsp;<a href="#{{}}" class="exlabel">{{}}</a></p>
+                    </div></span>
+                    ''', sent_gloss, id, id)
         return interlinear
     # meta data
     gex.meta = dict(
@@ -313,9 +275,6 @@ class MacroPattern(markdown.inlinepatterns.Pattern):
               'label': _('string to display after ex. (if not id)')}
     )
 
-def makeExtension(*args, **kwargs):
-    """Return an instance of the extension."""
-    return MacroExtension(*args, **kwargs)
 
 def link(t, l, clazz):
     return '<a href="' + l + '" class="' + clazz + '">' + t + '</a>'

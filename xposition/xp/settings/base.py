@@ -48,11 +48,12 @@ INSTALLED_APPS = [
     "wiki.plugins.attachments.apps.AttachmentsConfig",
     "wiki.plugins.notifications.apps.NotificationsConfig",
     'wiki.plugins.globalhistory.apps.GlobalHistoryConfig',
+    'wiki.plugins.metadata.apps.MetadataConfig',
     'mptt',
     'wiki.plugins.categories',
     'wiki.plugins.categories.editor',
-    'wiki.plugins.metadata',
     'import_export',
+    'django_extensions'
     # 'silk',
 ]
 

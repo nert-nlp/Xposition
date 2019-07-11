@@ -1,20 +1,16 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import, unicode_literals
-from django.forms import modelform_factory
-from django.conf.urls import include, url
-from django.utils.translation import ugettext as _
+from wiki.compat import include, url
+from django.utils.translation import gettext as _
 from wiki.core.plugins import registry
-from wiki.models import Article
 from wiki.core.plugins.base import BasePlugin
-from wiki.plugins.notifications.settings import ARTICLE_EDIT
-from wiki.plugins.notifications.util import truncate_title
+from wiki.plugins.metadata import settings
 from . import views, forms, models
 
 class MetadataPlugin(BasePlugin):
 
     ''' This initializes the entire plugin, both the edit 'sidebar' class and the metadata 'tab' '''
 
-    slug = 'metadata'
+    slug = settings.SLUG
 
     urlpatterns = {
         'article': [url('', include('wiki.plugins.metadata.urls'))]
@@ -29,7 +25,7 @@ class MetadataPlugin(BasePlugin):
     }
 
     article_tab = (_('Metadata'), "fa fa-asterisk")
-    article_view = views.MetadataView.dispatch
+    article_view = views.MetadataView().dispatch
 
     class RenderMedia:
         css = {

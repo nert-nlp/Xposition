@@ -1,6 +1,6 @@
 from __future__ import absolute_import, unicode_literals
 
-from django.conf.urls import include, url
+from wiki.compat import url
 from wiki.urls import WikiURLPatterns
 import wiki.plugins.metadata.views as views
 
@@ -13,7 +13,6 @@ class XpositionURLPatterns(WikiURLPatterns):
         ]
         #assert False,root_url_patterns
         return root_url_patterns + super(XpositionURLPatterns, self).get_root_urls()
-
 
 urlpatterns = [
   url(r'^$', views.MetadataView.as_view(), name ='metadata_view'),
@@ -29,5 +28,4 @@ urlpatterns = [
   url(r'^editsupersense/$', views.SupersenseView.as_view(edit=True), name='metadata_edit_supersense'),
   url(r'^createcorpus/$', views.CorpusView.as_view(), name='metadata_create_corpus'),
   url(r'^editcorpus/$', views.CorpusView.as_view(edit=True), name='metadata_edit_corpus'),
-  
 ]

@@ -40,22 +40,4 @@
 
 {% block wiki_footer_prepend %}
   <p style="margin-bottom: 10px;"><em>{% trans "This article was last modified:" %} {{ article.current_revision.modified }} ET</em></p>
-
-{% addtoblock "js" %}
-<script type="text/javascript">
-	$(function () {
-		// insert handle hyperlink for each article heading, and truncate the heading ID to 50 chars
-		// move the ID to the link so as not to mess with the CSS :target hack for navbar (some headings have custom margins)
-		$('h1,h2,h3,h4,h5,h6').each(function (i) {
-			var x = $(this).attr("id");
-			if (x.startsWith("wiki-toc-")) {
-				x = x.slice(0, 50);
-				$(this).attr("id", "");
-				$(this).wrapInner('<span></span>');
-				$(this).prepend('<a id="' + x + '" href="#' + x + '" class="handle">#</a>');
-			}
-		});
-	});
-</script>
-{% endaddtoblock %}
 {% endblock %}

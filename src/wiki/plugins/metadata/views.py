@@ -133,6 +133,7 @@ class MetadataView(LoginRequiredMixin, ArticleMixin, TemplateView):
 
     @method_decorator(get_article(can_read=True))
     def dispatch(self, request, article, *args, **kwargs):
+        self.request = request # TODO: find out why this is necessary
         return super(MetadataView, self).dispatch(request, article, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
@@ -143,7 +144,7 @@ class MetadataView(LoginRequiredMixin, ArticleMixin, TemplateView):
         except (URLPath.DoesNotExist, Article.DoesNotExist, models.SimpleMetadata.DoesNotExist):
             kwargs['install'] = mark_safe('<h2><a href="installmetadata">Install metadata</a></h2>')
 
-        return ArticleMixin.get_context_data(self, **kwargs)
+        return super().get_context_data(**kwargs)
 
 class InstallView(LoginRequiredMixin, View):
     login_url = 'wiki:login'
