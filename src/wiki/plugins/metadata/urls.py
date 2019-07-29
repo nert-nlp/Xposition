@@ -1,18 +1,27 @@
 from __future__ import absolute_import, unicode_literals
 
+import wiki
 from wiki.compat import url
-from wiki.urls import WikiURLPatterns
+from wiki.sites import WikiSite
 import wiki.plugins.metadata.views as views
 
-class XpositionURLPatterns(WikiURLPatterns):
+
+# TODO: find some conscionable alternative to this evil shortcut
+# See: https://django-wiki.readthedocs.io/en/master/customization.html
+class XpositionWikiSite(WikiSite):
+    # customize certain root URLs to override putting them under _plugin/metadata
     def get_root_urls(self):
-        # customize certain root URLs to override putting them under _plugin/metadata
-        root_url_patterns = [
-            url(r'^ex/(?P<exnum>\d+)/$', views.PTokenView.as_view(), name='ptoken_view'), #  /ex/3495/
-            url('^(?P<lang>[a-z][a-z](-[a-z]+)?)/(?P<corpus>[^/]*[0-9][^/]*)/(?P<sent_id>[^/]+)/$', views.CorpusSentenceView.as_view(), name='corpus_sentence_view'), #  /en/corpus/streusle4.1/reviews-001325-0003
+        our_root_urls = [
+            url(r'^ex/(?P<exnum>\d+)/$',
+                views.PTokenView.as_view(),
+                name='ptoken_view'), #  /ex/3495/
+            url('^(?P<lang>[a-z][a-z](-[a-z]+)?)/(?P<corpus>[^/]*[0-9][^/]*)/(?P<sent_id>[^/]+)/$',
+                views.CorpusSentenceView.as_view(),
+                name='corpus_sentence_view'), #  /en/corpus/streusle4.1/reviews-001325-0003
         ]
-        #assert False,root_url_patterns
-        return root_url_patterns + super(XpositionURLPatterns, self).get_root_urls()
+        return our_root_urls + super().get_root_urls()
+wiki.sites.WikiSite = XpositionWikiSite
+
 
 urlpatterns = [
   url(r'^$', views.MetadataView.as_view(), name ='metadata_view'),
