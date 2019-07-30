@@ -253,15 +253,11 @@ class MacroPattern(markdown.inlinepatterns.Pattern):
         span.set("class", "example")
         sent_span = etree.SubElement(span, "span")
         sent_span.text = sent + " "
-        if label:
-            exlabel_span = etree.SubElement(span, "span")
-            exlabel_span.set("class", "exlabel")
-            exlabel_span.text = label
-        else:
-            exlabel_a = etree.SubElement(span, "a")
-            exlabel_a.set("class", "exlabel")
-            exlabel_a.set("href", "#" + id)
-            exlabel_a.text = id
+
+        exlabel_a = etree.SubElement(span, "a")
+        exlabel_a.set("class", "exlabel")
+        exlabel_a.set("href", "#" + id)
+        exlabel_a.text = label if label else id
 
         return span
     # meta data
