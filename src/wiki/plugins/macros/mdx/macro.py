@@ -31,7 +31,6 @@ class MacroExtension(markdown.Extension):
     """ Macro plugin markdown extension for django-wiki. """
 
     def extendMarkdown(self, md):
-        md.inlinePatterns.deregister('html')
         md.inlinePatterns.add('dw-macros', MacroPattern(MACRO_RE, md), '>link')
 
 
