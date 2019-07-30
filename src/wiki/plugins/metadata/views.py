@@ -6,6 +6,7 @@ from . import models
 from wiki.models import URLPath, Article
 from wiki.plugins.categories.models import ArticleCategory
 from django.utils.decorators import method_decorator
+from django.utils.functional import cached_property
 from wiki.views.mixins import ArticleMixin
 from . import forms
 from django.views import View
@@ -121,10 +122,16 @@ class CorpusView(ArticleMetadataView):
     form_heading = 'Create Corpus'
 
 class CorpusSentenceView(TemplateView):
-    template_name = models.CorpusSentence.template
+    # For some reason, this would not work:
+    # template_name = models.CorpusSentence.template
+    @cached_property
+    def template_name(self):
+        return models.CorpusSentence.template
 
 class PTokenView(TemplateView):
-    template_name = models.PTokenAnnotation.template
+    @cached_property
+    def template_name(self):
+        return models.PTokenAnnotation.template
 
 
 class MetadataView(LoginRequiredMixin, ArticleMixin, TemplateView):
