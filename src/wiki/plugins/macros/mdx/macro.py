@@ -10,20 +10,6 @@ from wiki.models import Article
 from django.utils.html import escape, mark_safe, format_html
 
 
-#def handleMatch(self, m):
-#    if m.group(2).strip():
-#        base_url, end_url, html_class = self._getMeta()
-#        label = m.group(2).strip()
-#        url = self.config['build_url'](label, base_url, end_url, self.md)
-#        a = markdown.util.etree.Element('a')
-#        a.text = label
-#        a.set('href', url)
-#        if html_class:
-#            a.set('class', html_class)
-#    else:
-#        a = ''
-#    return a
-
 # See:
 # http://stackoverflow.com/questions/430759/regex-for-managing-escaped-characters-for-items-like-string-literals
 re_sq_short = r'"([^"\\]*(?:\\.[^"\\]*)*)"'
