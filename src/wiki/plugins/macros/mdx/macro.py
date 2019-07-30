@@ -250,6 +250,7 @@ class MacroPattern(markdown.inlinepatterns.Pattern):
 
         span = etree.Element("span")
         span.set("id", id)
+        span.set("class", "example")
         sent_span = etree.SubElement(span, "span")
         sent_span.text = sent + " "
         if label:
