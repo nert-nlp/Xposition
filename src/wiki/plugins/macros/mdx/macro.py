@@ -248,7 +248,7 @@ class MacroPattern(markdown.inlinepatterns.Pattern):
         span = etree.Element("span")
         span.set("id", id)
         sent_span = etree.SubElement(span, "span")
-        sent_span.text = markdown.util.AtomicString(sent + " ")
+        sent_span.text = sent + " "
         if label:
             exlabel_span = etree.SubElement(span, "span")
             exlabel_span.set("class", "exlabel")
