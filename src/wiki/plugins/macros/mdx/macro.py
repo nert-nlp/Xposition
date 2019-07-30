@@ -260,7 +260,7 @@ class MacroPattern(markdown.inlinepatterns.Pattern):
         else:
             exlabel_a = etree.SubElement(span, "a")
             exlabel_a.set("class", "exlabel")
-            exlabel_a.set("id", "#" + id)
+            exlabel_a.set("href", "#" + id)
             exlabel_a.text = id
 
         return span
