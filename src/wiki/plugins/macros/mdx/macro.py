@@ -6,6 +6,7 @@ from django.template.loader import render_to_string
 from django.utils.translation import gettext as _
 from wiki.plugins.macros import settings
 from wiki.plugins.metadata import models
+from wiki.models import Article
 from django.utils.html import escape, mark_safe, format_html
 
 
@@ -69,6 +70,8 @@ class MacroPattern(markdown.inlinepatterns.Pattern):
             value = kwarg.group('value')
             if arg is None and macro in POSITIONAL_MACROS:
                 arg = "arg" + str(i)
+                if len(value) > 2 and value[0] == '"' and value[-1] == '"':
+                    value = value[1:-1]
             elif arg is None:
                 arg = value
                 value = True
@@ -285,26 +288,44 @@ class MacroPattern(markdown.inlinepatterns.Pattern):
                 else:
                     xs = word_gloss.split()
                 xs = [escape(x) for x in xs]
-                column = '<div class="gll">'+'<br />'.join(xs)+'</div>'
+                column = etree.Element("div")
+                column.set("class", "gll")
+                for i, x in enumerate(xs):
+                    span_x = etree.SubElement(column, "span")
+                    if i != len(xs) - 1:
+                        etree.SubElement(span_x, "br")
+                    span_x.text = x
             else:
                 end = sent.index('{') if '{' in sent else len(sent)
                 word_gloss = sent[:end]
                 sent = sent[len(word_gloss):]
                 if word_gloss.strip():
-                    column = '<div class="gll">' + word_gloss.strip() + '</div>'
+                    column = etree.Element("div")
+                    column.set("class", "gll")
+                    column.text = word_gloss.strip()
                 else:
-                    column = ''
+                    column = etree.Element("span")
             columns.append(column)
-        interlinear = ''.join(columns)
-        interlinear = format_html(f'''<span id="{id}" class="example">
-                    <div class="interlinear example">
-                    <p class="gloss">
-                        {interlinear}
-                    </p>
-                    <p class="translation">{{}}&nbsp;<a href="#{{}}" class="exlabel">{{}}</a></p>
-                    </div></span>
-                    ''', sent_gloss, id, id)
-        return interlinear
+
+        span = etree.Element("span")
+        span.set("id", id)
+        span.set("class", "example")
+        div = etree.SubElement(span, "div")
+        div.set("class", "interlinear example")
+        p_interlinear = etree.SubElement(div, "p")
+        p_interlinear.set("class", "gloss")
+        for col in columns:
+            p_interlinear.append(col)
+        p_trans = etree.SubElement(div, "p")
+        p_trans.set("class", "translation")
+        span_trans = etree.SubElement(p_trans, "span")
+        span_trans.text = "'" + sent_gloss + "' "
+        a_ex = etree.SubElement(p_trans, "a")
+        a_ex.set("href", "#" + id)
+        a_ex.set("class", "exlabel")
+        a_ex.text = id
+
+        return span
     # meta data
     gex.meta = dict(
         short_description=_('Create a Glossed Example'),
