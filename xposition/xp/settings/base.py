@@ -25,8 +25,6 @@ DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
-
-
 INSTALLED_APPS = [
     'django.contrib.humanize.apps.HumanizeConfig',
     'django.contrib.auth.apps.AuthConfig',
@@ -37,9 +35,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles.apps.StaticFilesConfig',
     'django.contrib.admin.apps.AdminConfig',
     'django.contrib.admindocs.apps.AdminDocsConfig',
-    'sekizai',
-    'sorl.thumbnail',
-    "django_nyt.apps.DjangoNytConfig",
     "wiki.apps.WikiConfig",
     "wiki.plugins.macros.apps.MacrosConfig",
     'wiki.plugins.help.apps.HelpConfig',
@@ -49,11 +44,16 @@ INSTALLED_APPS = [
     "wiki.plugins.notifications.apps.NotificationsConfig",
     'wiki.plugins.globalhistory.apps.GlobalHistoryConfig',
     'wiki.plugins.metadata.apps.MetadataConfig',
-    'mptt',
     'wiki.plugins.categories',
     'wiki.plugins.categories.editor',
+    'sekizai',
+    'sorl.thumbnail',
+    "django_nyt.apps.DjangoNytConfig",
+    'mptt',
     'import_export',
-    'django_extensions'
+    'django_extensions',
+    'django_tables2',
+    'markdown.extensions.wikilinks',
     # 'silk',
 ]
 
@@ -185,19 +185,6 @@ DEBUG_TOOLBAR_PANELS = [
 ]
 
 # - Customization ---------------------------------------------
-
-INSTALLED_APPS += [
-    #'django_nyt',
-    'django_tables2',
-    #'wiki',
-    #'wiki.plugins.macros',
-    #'wiki.plugins.help',
-    #'wiki.plugins.links',
-    #'wiki.plugins.images',
-    #'wiki.plugins.attachments',
-    #'wiki.plugins.notifications',
-]
-
 
 WIKI_REVISIONS_PER_MINUTES = 10
 
