@@ -1,5 +1,4 @@
 import re
-
 import markdown
 from markdown.util import etree
 from django.template.loader import render_to_string
@@ -239,10 +238,15 @@ class MacroPattern(markdown.inlinepatterns.Pattern):
         sent_span = etree.SubElement(span, "span")
         sent_span.text = sent + " "
 
-        exlabel_a = etree.SubElement(span, "a")
-        exlabel_a.set("class", "exlabel")
-        exlabel_a.set("href", "#" + id)
-        exlabel_a.text = label if label else id
+        if label:
+            exlabel_span = etree.SubElement(span, "span")
+            exlabel_span.set("class", "exlabel")
+            exlabel_span.text = label
+        else:
+            exlabel_a = etree.SubElement(span, "a")
+            exlabel_a.set("class", "exlabel")
+            exlabel_a.set("href", "#" + id)
+            exlabel_a.text = id
 
         return span
     # meta data
