@@ -69,15 +69,14 @@ WHERE revision_number = (
             username = list(cursor.execute('''SELECT username FROM auth_user WHERE id=?''', (user_id,)))
 
             new_user_message = (f"[This revision was updated by 2019_upgrade_fixes.py. "
-                                f"Original modification time: {modified}. "
+                                f"Script modification time: {datetime.datetime.now()}. "
                                 f"Original user who made the edit: {username[0][0] if username else 'NULL'}. "
                                 f"Original revision message: {user_message}.]")
 
             # update the revision
-            cursor.execute('''UPDATE wiki_articlerevision SET content=?, user_message=?, modified=? WHERE id=?''',
+            cursor.execute('''UPDATE wiki_articlerevision SET content=?, user_message=? WHERE id=?''',
                            (new_text,
                             new_user_message,
-                            datetime.datetime.now(),
                             revision_id))
 
             print("Updated markup for {} [{}]".format(article_title, article_id))
