@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     "wiki.plugins.notifications.apps.NotificationsConfig",
     'wiki.plugins.globalhistory.apps.GlobalHistoryConfig',
     'wiki.plugins.metadata.apps.MetadataConfig',
-    'wiki.plugins.categories',
+    'wiki.plugins.categories.apps.CategoriesConfig',
     'wiki.plugins.categories.editor',
     'sekizai',
     'sorl.thumbnail',
