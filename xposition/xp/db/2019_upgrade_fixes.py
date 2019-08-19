@@ -56,23 +56,36 @@ WHERE revision_number = (
 '''
     rows = list(cursor.execute(latest_revision_query))
     for row in rows:
-        new_text = apply_markup_replacements(row[8])
+        content = row[8]
+        user_id, modified, user_message = row[11], row[7], row[6]
+        revision_id = row[-1]
+        article_title = row[4]
+        article_id = row[9]
 
-        if len(new_text) != len(row[8]):
+        new_text = apply_markup_replacements(content)
+
+        if len(new_text) != len(content):
+
+            username = list(cursor.execute('''SELECT username FROM auth_user WHERE id=?''', (user_id,)))
+
+            new_user_message = (f"[This revision was updated by 2019_upgrade_fixes.py. "
+                                f"Original modification time: {modified}. "
+                                f"Original user who made the edit: {username[0][0] if username else 'NULL'}. "
+                                f"Original revision message: {user_message}.]")
 
             # update the revision
             cursor.execute('''UPDATE wiki_articlerevision SET content=?, user_message=?, modified=? WHERE id=?''',
                            (new_text,
-                            "((This revision was updated by 2019_upgrade_fixes.py)) " + row[6],
+                            new_user_message,
                             datetime.datetime.now(),
-                            row[-1]))
+                            revision_id))
 
-            print("Updated markup for {} [{}]".format(row[4], row[9]))
+            print("Updated markup for {} [{}]".format(article_title, article_id))
             if args.diff_file_dir:
-                old_filepath = args.diff_file_dir + os.sep + row[4] + '.old'
-                new_filepath = args.diff_file_dir + os.sep + row[4] + '.new'
+                old_filepath = args.diff_file_dir + os.sep + article_title + '.old'
+                new_filepath = args.diff_file_dir + os.sep + article_title + '.new'
                 with open(old_filepath, 'w') as f:
-                    f.write(row[8])
+                    f.write(content)
                 with open(new_filepath, 'w') as f:
                     f.write(new_text)
                 try:
@@ -80,7 +93,7 @@ WHERE revision_number = (
                     subprocess.call(["diff", old_filepath, new_filepath])
                 except:
                     pass
-                print("\tSee new and old files at '{}'".format(args.diff_file_dir + os.sep + row[4] + "{.old, .new}"))
+                print("\tSee new and old files at '{}'".format(args.diff_file_dir + os.sep + article_title + "{.old, .new}"))
 
     conn.commit()
     conn.close()
