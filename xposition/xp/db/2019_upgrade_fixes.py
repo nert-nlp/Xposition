@@ -61,8 +61,11 @@ WHERE revision_number = (
         if len(new_text) != len(row[8]):
 
             # update the revision
-            cursor.execute('''UPDATE wiki_articlerevision SET content=?, user_message=? WHERE id=?''',
-                           (new_text, "((This revision was updated by 2019_upgrade_fixes.py)) " + row[6], row[-1]))
+            cursor.execute('''UPDATE wiki_articlerevision SET content=?, user_message=?, modified=? WHERE id=?''',
+                           (new_text,
+                            "((This revision was updated by 2019_upgrade_fixes.py)) " + row[6],
+                            datetime.datetime.now(),
+                            row[-1]))
 
             print("Updated markup for {} [{}]".format(row[4], row[9]))
             if args.diff_file_dir:
