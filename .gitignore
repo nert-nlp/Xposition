@@ -1,4 +1,4 @@
-testproject/testproject/settings/unversioned.py
+xposition/xp/settings/unversioned.py
 *.pyc
 build
 dist
@@ -61,3 +61,9 @@ virtualenv
 *.swp
 
 __pycache__
+
+# syncthing
+*sync-conflict*
+
+# macos
+.DS_Store
