@@ -19,7 +19,6 @@ def apply_markup_replacements(text):
     """
     new_text = []
     macro_status = []
-    quote_status = False
     for i, c in enumerate(text):
         if c == "[" and re.match(r"^(ss|p|pspecial|ex|gex|exref)", text[i+1:]):
             macro_status.append("macro")
@@ -27,9 +26,7 @@ def apply_markup_replacements(text):
             macro_status.append("nonmacro")
         elif c == "]":
             macro_status.pop()
-        elif c == '"' and macro_status and macro_status[-1] == "macro":
-            quote_status = not quote_status
-        elif c == '\\' and quote_status:
+        elif c == '\\' and i < len(text) and text[i+1] == '"':
             continue
         elif macro_status and macro_status[-1] == "macro" and c == '\\' and text[i+1:i+3] == '\\_':
             continue
