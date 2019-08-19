@@ -122,17 +122,10 @@ class CorpusView(ArticleMetadataView):
     form_heading = 'Create Corpus'
 
 class CorpusSentenceView(TemplateView):
-    # For some reason, this would not work:
-    # template_name = models.CorpusSentence.template
-    @cached_property
-    def template_name(self):
-        return models.CorpusSentence.template
+    template_name = models.CorpusSentence.template_name
 
 class PTokenView(TemplateView):
-    @cached_property
-    def template_name(self):
-        return models.PTokenAnnotation.template
-
+    template_name = models.PTokenAnnotation.template_name
 
 class MetadataView(LoginRequiredMixin, ArticleMixin, TemplateView):
     template_name = "metadata.html"

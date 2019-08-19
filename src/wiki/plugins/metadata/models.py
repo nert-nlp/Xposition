@@ -900,7 +900,7 @@ class CorpusSentence(models.Model):
         return format_html(f'<a href="{self.url}" class="corpussentence">{{}}</a>', self.sent_id)
 
     @cached_property
-    def template(self):
+    def template_name(self):
         return "corpus_sentence_view.html"
 
     def __str__(self):
@@ -977,7 +977,7 @@ class PTokenAnnotation(models.Model):
         return mark_safe(f'<a href="{self.url}" class="exnum">' + displaystr + '</a>')
 
     @cached_property
-    def template(self):
+    def template_name(self):
         return "ptoken_view.html"
 
 
