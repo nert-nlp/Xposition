@@ -10,7 +10,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('wiki', '0007_remove_category'),
+        ('wiki', '0006_auto_20190819_0056'), #0007_remove_category'),
         ('metadata', '0042_auto_20180728_2014'),
     ]
 
