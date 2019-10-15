@@ -76,7 +76,10 @@ class NullForeignKeyWidget(ForeignKeyWidget):
 
 
 class ArticleMetadataFormFunctions:
-    user = User.objects.get(username='admin')
+    try:
+        user = User.objects.get(username='admin')
+    except User.DoesNotExist:
+        user = None
 
     def __init__(self, request):
         self.request = request
