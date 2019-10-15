@@ -90,13 +90,6 @@ def adpositions_for_lang(context):
     a = Adposition.objects.select_related('article').prefetch_related('current_revision__metadatarevision__adpositionrevision__lang',
         'article__urlpath_set').filter(current_revision__metadatarevision__adpositionrevision__lang__article=larticle, 
             article__current_revision__deleted=False)
-    print(dir(UsageRevision))
-    print()
-    import inspect
-    for cls in inspect.getmro(UsageRevision):
-        print(cls, dir(cls))
-        print()
-
     a = a.annotate(transliteration=F('current_revision__metadatarevision__adpositionrevision__transliteration'),
                    num_usages=Count('usages'))
     context['swps'] = a.filter(current_revision__metadatarevision__adpositionrevision__is_pp_idiom=False).exclude(
