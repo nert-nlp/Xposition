@@ -13,7 +13,7 @@ from django.utils.html import escape, mark_safe, format_html
 re_sq_short = r'"([^"\\]*(?:\\.[^"\\]*)*)"'
 
 # can't compile: markdown.inlinepatterns.Pattern expects a string
-MACRO_RE = r"(?i)(\[(?P<macro>\w+)(?P<kwargs>(\s(\w+:)?(%s|[\\\w'`&!%%+/$-]+))*)\])" % re_sq_short
+MACRO_RE = r"(?i)(\[(?P<macro>\w+)(?P<kwargs>(\s(\w+:)?(%s|[\w'`&!%%+/$-]+))*)\])" % re_sq_short
 KWARG_RE = re.compile(
     r'\s*((?P<arg>\w+):)?(?P<value>(%s|[^\s:]+))' %
     re_sq_short,
@@ -58,7 +58,6 @@ class SubstitutionPostprocessor(markdown.postprocessors.Postprocessor):
     def run(self, text):
         for pattern, subn in self.subs.items():
             text = text.replace(pattern, subn)
-        print(text)
         return text
 
 
