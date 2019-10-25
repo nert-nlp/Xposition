@@ -8,13 +8,12 @@ from wiki.plugins.metadata import models
 from wiki.models import Article
 from django.utils.html import escape, mark_safe, format_html
 
-
 # See:
 # http://stackoverflow.com/questions/430759/regex-for-managing-escaped-characters-for-items-like-string-literals
 re_sq_short = r'"([^"\\]*(?:\\.[^"\\]*)*)"'
 
 # can't compile: markdown.inlinepatterns.Pattern expects a string
-MACRO_RE = r"(?i)(\[(?P<macro>\w+)(?P<kwargs>(\s(\w+:)?(%s|[\w'`&!%%+/$-]+))*)\])" % re_sq_short
+MACRO_RE = r"(?i)(\[(?P<macro>\w+)(?P<kwargs>(\s(\w+:)?(%s|[\\\w'`&!%%+/$-]+))*)\])" % re_sq_short
 KWARG_RE = re.compile(
     r'\s*((?P<arg>\w+):)?(?P<value>(%s|[^\s:]+))' %
     re_sq_short,
@@ -30,11 +29,40 @@ class MacroExtension(markdown.Extension):
     """ Macro plugin markdown extension for django-wiki. """
 
     def extendMarkdown(self, md):
+        md.preprocessors.add('escaper', SubstitutionPreprocessor(), "_begin")
         md.inlinePatterns.add('dw-macros', MacroPattern(MACRO_RE, md), '>link')
+        md.postprocessors.add('unescaper', SubstitutionPostprocessor(), "_begin")
+
+
+class SubstitutionPreprocessor(markdown.preprocessors.Preprocessor):
+    def __init__(self):
+        self.subs = {
+            "`": "REPLACEME__BACKTICK__REPLACEME"
+        }
+
+    def run(self, lines):
+        new_lines = []
+        for line in lines:
+            for pattern, subn in self.subs.items():
+                line = line.replace(pattern, subn)
+            new_lines.append(line)
+        return new_lines
+
+
+class SubstitutionPostprocessor(markdown.postprocessors.Postprocessor):
+    def __init__(self):
+        self.subs = {
+            "REPLACEME__BACKTICK__REPLACEME": "`"
+        }
+
+    def run(self, text):
+        for pattern, subn in self.subs.items():
+            text = text.replace(pattern, subn)
+        print(text)
+        return text
 
 
 class MacroPattern(markdown.inlinepatterns.Pattern):
-
     """django-wiki macro preprocessor - parse text for various [some_macro] and
     [some_macro (kw:arg)*] references. """
 
@@ -44,6 +72,7 @@ class MacroPattern(markdown.inlinepatterns.Pattern):
             return m.group(2)
 
         kwargs = m.group('kwargs')
+        print(kwargs)
         if not kwargs:
             return getattr(self, macro)()
         kwargs_dict = {}
