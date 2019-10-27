@@ -40,7 +40,7 @@ ESCAPED = ["`"]
 
 
 def escape_before_markdown(pattern):
-    return "_eScApE_" + str(ord(pattern)) + "_EsCaPe_"
+    return "YyYeScApEYyY" + str(ord(pattern)) + "YyYEsCaPeYyY"
 
 
 class SubstitutionPreprocessor(markdown.preprocessors.Preprocessor):
@@ -61,7 +61,11 @@ class SubstitutionPreprocessor(markdown.preprocessors.Preprocessor):
 class SubstitutionPostprocessor(markdown.postprocessors.Postprocessor):
     def run(self, text):
         for pattern in ESCAPED:
+            print(text)
+            print(escape_before_markdown(pattern))
+            print()
             text = text.replace(escape_before_markdown(pattern), pattern)
+            print(text)
         return text
 
 
