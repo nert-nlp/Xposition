@@ -61,7 +61,6 @@ class SubstitutionPreprocessor(markdown.preprocessors.Preprocessor):
 
 class SubstitutionPostprocessor(markdown.postprocessors.Postprocessor):
     def run(self, text):
-        a = Article.objects.get(id=69)
         for pattern in ESCAPED:
             text = text.replace(escape_before_markdown(pattern), pattern)
         return text
