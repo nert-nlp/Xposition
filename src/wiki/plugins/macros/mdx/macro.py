@@ -39,7 +39,7 @@ class MacroExtension(markdown.Extension):
 ESCAPED = ["`"]
 
 
-def escape(pattern):
+def escape_before_markdown(pattern):
     return "_eScApE_" + str(ord(pattern)) + "_EsCaPe_"
 
 
@@ -51,7 +51,7 @@ class SubstitutionPreprocessor(markdown.preprocessors.Preprocessor):
                 offset = 0
                 for m in MACRO_RE_COMPILED.finditer(line):
                     span = m.group()
-                    new_span = span.replace(pattern, escape(pattern))
+                    new_span = span.replace(pattern, escape_before_markdown(pattern))
                     line = line[:m.start() + offset] + new_span + line[m.end() + offset:]
                     offset += len(new_span) - len(span)
             new_lines.append(line)
@@ -61,7 +61,7 @@ class SubstitutionPreprocessor(markdown.preprocessors.Preprocessor):
 class SubstitutionPostprocessor(markdown.postprocessors.Postprocessor):
     def run(self, text):
         for pattern in ESCAPED:
-            text = text.replace(escape(pattern), pattern)
+            text = text.replace(escape_before_markdown(pattern), pattern)
         return text
 
 
