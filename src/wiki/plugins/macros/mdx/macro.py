@@ -14,6 +14,7 @@ re_sq_short = r'"([^"\\]*(?:\\.[^"\\]*)*)"'
 
 # can't compile: markdown.inlinepatterns.Pattern expects a string
 MACRO_RE = r"(?i)(\[(?P<macro>\w+)(?P<kwargs>(\s(\w+:)?(%s|[\w'`&!%%+/$-]+))*)\])" % re_sq_short
+MACRO_RE_COMPILED = re.compile(MACRO_RE)
 KWARG_RE = re.compile(
     r'\s*((?P<arg>\w+):)?(?P<value>(%s|[^\s:]+))' %
     re_sq_short,
@@ -37,14 +38,18 @@ class MacroExtension(markdown.Extension):
 class SubstitutionPreprocessor(markdown.preprocessors.Preprocessor):
     def __init__(self):
         self.subs = {
-            "`": "REPLACEME__BACKTICK__REPLACEME"
+            "`": "👻🖤BACKTICK🖤👻"
         }
 
     def run(self, lines):
         new_lines = []
         for line in lines:
             for pattern, subn in self.subs.items():
-                line = line.replace(pattern, subn)
+                offset = 0
+                for m in MACRO_RE_COMPILED.finditer(line):
+                    new_span = m.group().replace(pattern, subn)
+                    line = line[:m.start() + offset] + new_span + line[m.end() + offset:]
+                    offset += len(new_span)
             new_lines.append(line)
         return new_lines
 
@@ -52,7 +57,7 @@ class SubstitutionPreprocessor(markdown.preprocessors.Preprocessor):
 class SubstitutionPostprocessor(markdown.postprocessors.Postprocessor):
     def __init__(self):
         self.subs = {
-            "REPLACEME__BACKTICK__REPLACEME": "`"
+            "👻🖤BACKTICK🖤👻": "`"
         }
 
     def run(self, text):
@@ -71,7 +76,6 @@ class MacroPattern(markdown.inlinepatterns.Pattern):
             return m.group(2)
 
         kwargs = m.group('kwargs')
-        print(kwargs)
         if not kwargs:
             return getattr(self, macro)()
         kwargs_dict = {}
