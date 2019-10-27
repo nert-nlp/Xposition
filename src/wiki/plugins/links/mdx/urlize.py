@@ -170,7 +170,9 @@ class UrlizeExtension(markdown.extensions.Extension):
 
     def extendMarkdown(self, md):
         """ Replace autolink with UrlizePattern """
-        md.inlinePatterns['autolink'] = UrlizePattern(URLIZE_RE, md)
+        #md.inlinePatterns['autolink'] = UrlizePattern(URLIZE_RE, md)
+        #LDG: disable this for Xposition
+        del md.inlinePatterns['autolink']
 
 
 def makeExtension(*args, **kwargs):
