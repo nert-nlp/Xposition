@@ -23,7 +23,6 @@ def build_url(label, base, end, md):
 
 
 class WikiLinkExtension(Extension):
-
     def __init__(self, **kwargs):
         # set extension defaults
         self.config = {
@@ -35,13 +34,10 @@ class WikiLinkExtension(Extension):
         super().__init__(**kwargs)
 
     def extendMarkdown(self, md):
-        self.md = md
-
-        # append to end of inline patterns
         WIKILINK_RE = r'\[\[([\w0-9_ -]+)\]\]'
         wikilinkPattern = WikiLinks(WIKILINK_RE, self.getConfigs())
         wikilinkPattern.md = md
-        md.inlinePatterns.add('wikilink', wikilinkPattern, "<not_strong")
+        md.inlinePatterns.register(wikilinkPattern, 'wikilink', 999)
 
 
 class WikiLinks(wikilinks.WikiLinksInlineProcessor):
