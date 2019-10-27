@@ -206,8 +206,7 @@ class MacroPattern(markdown.inlinepatterns.Pattern):
             cls = cl or 'construal'
             if args[0]==self.markdown.article.current_revision.title:
                 span = etree.Element("span")
-                span.set("class", cls)
-                span.set("this-construal", "this-construal")
+                span.set("class", cls + " this-construal")
                 span.text = display
                 return span
             return link(display, '/' + args[0], cl if cl else 'construal')
