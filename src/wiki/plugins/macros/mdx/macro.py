@@ -40,8 +40,14 @@ class MacroExtension(markdown.Extension):
 ESCAPED = ["`"]
 
 
-def escape_before_markdown(pattern):
+def escape_pattern(pattern):
     return "YyYeScApEYyY" + str(ord(pattern)) + "YyYEsCaPeYyY"
+
+
+def escape_patterns_in_string(s):
+    for pattern in ESCAPED:
+        s = s.replace(pattern, escape_pattern(pattern))
+    return s
 
 
 class SubstitutionPreprocessor(markdown.preprocessors.Preprocessor):
@@ -52,7 +58,7 @@ class SubstitutionPreprocessor(markdown.preprocessors.Preprocessor):
                 offset = 0
                 for m in MACRO_RE_COMPILED.finditer(line):
                     span = m.group()
-                    new_span = span.replace(pattern, escape_before_markdown(pattern))
+                    new_span = span.replace(pattern, escape_pattern(pattern))
                     line = line[:m.start() + offset] + new_span + line[m.end() + offset:]
                     offset += len(new_span) - len(span)
             new_lines.append(line)
@@ -62,7 +68,7 @@ class SubstitutionPreprocessor(markdown.preprocessors.Preprocessor):
 class SubstitutionPostprocessor(markdown.postprocessors.Postprocessor):
     def run(self, text):
         for pattern in ESCAPED:
-            text = text.replace(escape_before_markdown(pattern), pattern)
+            text = text.replace(escape_pattern(pattern), pattern)
         return text
 
 
@@ -205,7 +211,7 @@ class MacroPattern(markdown.inlinepatterns.Pattern):
         if '--' in args[0]:
             display = args[0].replace('--','&#x219d;')
             cls = cl or 'construal'
-            if args[0]==self.markdown.article.current_revision.title:
+            if args[0] == escape_patterns_in_string(self.markdown.article.current_revision.title):
                 span = etree.Element("span")
                 span.set("class", cls + " this-construal")
                 span.text = display
@@ -216,9 +222,9 @@ class MacroPattern(markdown.inlinepatterns.Pattern):
             cls = cl or 'supersense'
             if args[0] in ['??','`d','`i','`c','`$']:
                 cls = cl or 'misc-label'
-            if args[0] == self.markdown.article.current_revision.title:
+            if args[0] == escape_patterns_in_string(self.markdown.article.current_revision.title):
                 span = etree.Element("span")
-                span.set("class", cls + " this-construal")
+                span.set("class", cls + " this-supersense")
                 span.text = display
                 return span
             return link(display, '/' + args[0].replace('`','%60'), cls)
@@ -234,7 +240,7 @@ class MacroPattern(markdown.inlinepatterns.Pattern):
         args = argize_kwargs(kwargs)
         id = args[0]
         page = args[1]
-        my_title = self.markdown.article.current_revision.title
+        my_title = escape_patterns_in_string(self.markdown.article.current_revision.title)
         ref_title = page
         ref_slug = page
         # try to find article
