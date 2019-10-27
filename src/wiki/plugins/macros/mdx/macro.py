@@ -3,6 +3,7 @@ import markdown
 from markdown.util import etree
 from django.template.loader import render_to_string
 from django.utils.translation import gettext as _
+
 from wiki.plugins.macros import settings
 from wiki.plugins.metadata import models
 from wiki.models import Article
@@ -60,12 +61,9 @@ class SubstitutionPreprocessor(markdown.preprocessors.Preprocessor):
 
 class SubstitutionPostprocessor(markdown.postprocessors.Postprocessor):
     def run(self, text):
+        a = Article.objects.get(id=69)
         for pattern in ESCAPED:
-            print(text)
-            print(escape_before_markdown(pattern))
-            print()
             text = text.replace(escape_before_markdown(pattern), pattern)
-            print(text)
         return text
 
 
