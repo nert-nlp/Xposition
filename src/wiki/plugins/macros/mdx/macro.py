@@ -35,37 +35,37 @@ class MacroExtension(markdown.Extension):
         md.postprocessors.add('unescaper', SubstitutionPostprocessor(), "_begin")
 
 
-class SubstitutionPreprocessor(markdown.preprocessors.Preprocessor):
-    def __init__(self):
-        self.subs = {
-            "`": "👻🖤BACKTICK🖤👻"
-        }
+# Escaping --------------------------------------------------------------------------------
+ESCAPED = ["`"]
 
+
+def escape(pattern):
+    return "_eScApE_" + str(ord(pattern)) + "_EsCaPe_"
+
+
+class SubstitutionPreprocessor(markdown.preprocessors.Preprocessor):
     def run(self, lines):
         new_lines = []
         for line in lines:
-            for pattern, subn in self.subs.items():
+            for pattern in ESCAPED:
                 offset = 0
                 for m in MACRO_RE_COMPILED.finditer(line):
-                    new_span = m.group().replace(pattern, subn)
+                    span = m.group()
+                    new_span = span.replace(pattern, escape(pattern))
                     line = line[:m.start() + offset] + new_span + line[m.end() + offset:]
-                    offset += len(new_span)
+                    offset += len(new_span) - len(span)
             new_lines.append(line)
         return new_lines
 
 
 class SubstitutionPostprocessor(markdown.postprocessors.Postprocessor):
-    def __init__(self):
-        self.subs = {
-            "👻🖤BACKTICK🖤👻": "`"
-        }
-
     def run(self, text):
-        for pattern, subn in self.subs.items():
-            text = text.replace(pattern, subn)
+        for pattern in ESCAPED:
+            text = text.replace(escape(pattern), pattern)
         return text
 
 
+# Macro implementation ----------------------------------------------------------------------
 class MacroPattern(markdown.inlinepatterns.Pattern):
     """django-wiki macro preprocessor - parse text for various [some_macro] and
     [some_macro (kw:arg)*] references. """
