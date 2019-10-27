@@ -31,9 +31,9 @@ class MacroExtension(markdown.Extension):
     """ Macro plugin markdown extension for django-wiki. """
 
     def extendMarkdown(self, md):
-        md.preprocessors.add('escaper', SubstitutionPreprocessor(), "_begin")
-        md.inlinePatterns.add('dw-macros', MacroPattern(MACRO_RE, md), '>link')
-        md.postprocessors.add('unescaper', SubstitutionPostprocessor(), "_begin")
+        md.preprocessors.register(SubstitutionPreprocessor(), 'escaper', 5)
+        md.inlinePatterns.register(MacroPattern(MACRO_RE, md), 'dw-macros', 5)
+        md.postprocessors.register(SubstitutionPostprocessor(), 'unescaper', 5)
 
 
 # Escaping --------------------------------------------------------------------------------
