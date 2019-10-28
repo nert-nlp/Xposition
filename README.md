@@ -33,22 +33,24 @@ conda activate Xposition
 1. Once you've cloned the git repository, you'll need to install the __django-wiki__ and __django-categories__ libraries (and their dependencies):
 
 ```sh
-git clone git@github.com:nert-nlp/Xposition.git
+git clone git@github.com:nert-nlp/Xposition.git --recursive
 cd Xposition
 pip install -r requirements.txt
+# make sure submodules were cloned
+git submodule update
 ```
 
 ## Configuration
 
-1. Create the file `testproject/testproject/settings/unversioned.py`, which
+1. Create the file `xposition/xp/settings/unversioned.py`, which
 contains a variable `SECRET_KEY`. Do not commit this file to git.
 
 ```sh
-echo 'SECRET_KEY = "..."' > testproject/testproject/settings/unversioned.py
+echo 'SECRET_KEY = "..."' > xposition/xp/settings/unversioned.py
 ```
 
 2a. If you are configuring Xposition for **development**, make sure that the end
-of `testproject/testproject/settings/local.py` has the `.dev` import
+of `xposition/xp/settings/local.py` has the `.dev` import
 **uncommented**, and the `.base` import commented, like this:
 
 ```py
@@ -57,7 +59,7 @@ from .dev import *
 ```
 
 2b. If you are configuring Xposition for **production**, make sure that the end
-of `testproject/testproject/settings/local.py` has the `.base` import
+of `xposition/xp/settings/local.py` has the `.base` import
 **uncommented**, and the `.dev` import commented, like this:
 
 ```py
@@ -68,17 +70,17 @@ from .base import *
 3. Run the migration to update the server's SQL schema:
 
 ```sh
-python testproject/manage.py migrate 
+python xposition/manage.py migrate 
 ```
 
 ## Running
 You should now be able to run the server:
 
 ```sh
-python testproject/manage.py runserver
+python xposition/manage.py runserver
 ```
 
-**Note**: If you are running on Windows, you might get an error about `wiki.plugins.categories`. This is because a Unix symlink is not interpreted propertly by Windows. In the `testproject` directory, remove `wiki` and replace it with a Windows symlink: `mklink /D wiki ..\wiki`
+**Note**: If you are running on Windows, you might get an error about `wiki.plugins.categories`. This is because a Unix symlink is not interpreted propertly by Windows. In the `xposition` directory, remove `wiki` and replace it with a Windows symlink: `mklink /D wiki ..\wiki`
 
 ## Login
 

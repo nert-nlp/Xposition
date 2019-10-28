@@ -48,7 +48,7 @@ clean-test: ## remove test and coverage artifacts
 	rm -fr htmlcov/
 
 lint:  ## Check python code conventions
-	pep8 wiki
+	flake8 src/wiki tests/
 
 test:  ## Run automated test suite
 	pytest
@@ -60,22 +60,46 @@ coverage:  ## Generate test coverage report
 	coverage run --source wiki setup.py test
 	coverage report -m
 
+translation-push:  ## Updates and pushes
+	cd src/wiki && django-admin makemessages -l en
+	cd ..
+	tx push -s
+
+translation-pull:  ## Pulls translation languages
+	tx pull -a
+	cd src/wiki && django-admin compilemessages
+
 docs: ## generate Sphinx HTML documentation, including API docs
 	$(MAKE) -C docs clean
 	rm -f docs/wiki*.rst
 	rm -f docs/modules.rst
-	sphinx-build -b linkcheck ./docs ./docs/_build
-	sphinx-apidoc -o docs/ wiki
+	sphinx-apidoc -o docs/ src/wiki
 	$(MAKE) -C docs html
 	$(BROWSER) docs/_build/html/index.html
 
+docs-linkcheck:
+	sphinx-build -b linkcheck ./docs ./docs/_build
+
+
 release: dist  ## Generate and upload release to PyPi
+	@echo ""
+	@echo "Release check list:"
+	@echo ""
+	@echo "1. Release notes?"
+	@echo "2. Pushed source language to transifex?"
+	@echo "3. Pulled new translations from transifex?"
+	@echo "4. Built and committed new assets?"
+	@echo "5. Did you do a signed commit and push to Github?"
+	@echo "6. Check that the .whl and .tar.gz dists work - e.g. that MANIFEST.in is updated."
+	@echo ""
+	@read -p "CTRL+C or ENTER" dummy
 	twine upload -s dist/*
 
 assets:  ## Build CSS files
-	lessc wiki/static/wiki/bootstrap/less/wiki/wiki-bootstrap.less wiki/static/wiki/bootstrap/css/wiki-bootstrap.css
-	lessc -x wiki/static/wiki/bootstrap/less/wiki/wiki-bootstrap.less wiki/static/wiki/bootstrap/css/wiki-bootstrap.min.css
+	lessc src/wiki/static/wiki/bootstrap/less/wiki/wiki-bootstrap.less src/wiki/static/wiki/bootstrap/css/wiki-bootstrap.css
+	lessc -x src/wiki/static/wiki/bootstrap/less/wiki/wiki-bootstrap.less src/wiki/static/wiki/bootstrap/css/wiki-bootstrap.min.css
 
 dist: clean assets  ## Generate wheels distribution
 	python setup.py bdist_wheel
+	python setup.py sdist
 	ls -l dist

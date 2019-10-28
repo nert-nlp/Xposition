@@ -1,7 +1,7 @@
 django-wiki
 ===========
 
-|Docs| |Build Status| |Coverage Status| |PyPi| |Dependency Status|
+|Docs| |Build Status| |Coverage Status| |PyPi| |Dependency Status| |IRC|
 
 .. |Docs| image:: https://readthedocs.org/projects/django-wiki/badge/?version=latest
    :target: http://django-wiki.readthedocs.io/
@@ -15,100 +15,32 @@ django-wiki
    :target: https://pypi.python.org/pypi/wiki/
 .. |Dependency Status| image:: https://gemnasium.com/django-wiki/django-wiki.svg
    :target: https://gemnasium.com/django-wiki/django-wiki
-
+.. |IRC| image:: https://img.shields.io/badge/irc-%23django--wiki%20on%20freenode-blue.svg
+   :target: http://webchat.freenode.net?channels=%23django-wiki
 
 Django support
 --------------
 
 The below table explains which Django versions are supported.
 
-+------------+----------------+--------------+
-| Release    | Django         | Upgrade from |
-+============+================+==============+
-| 0.2        | 1.8, 1.9, 1.10 | 0.1          |
-+------------+----------------+--------------+
-| 0.1        | 1.5, 1.6, 1.7  | 0.24         |
-+------------+----------------+--------------+
-| 0.0.24     | 1.4, 1.5, 1.6  | 0.0.?        |
-|            | 1.7 (unstable) |              |
-+------------+----------------+--------------+
++------------------+----------------+--------------+
+| Release          | Django         | Upgrade from |
++==================+================+==============+
+| 0.4.x            | 1.11, 2.0, 2.1 | 0.3          |
++------------------+----------------+--------------+
+| 0.3.x            | 1.8, 1.9,      | 0.2          |
+|                  | 1.10, 1.11     |              |
++------------------+----------------+--------------+
+| 0.2.x            | 1.8, 1.9, 1.10 | 0.1          |
++------------------+----------------+--------------+
+| 0.1.x            | 1.5, 1.6, 1.7  | 0.0.24       |
++------------------+----------------+--------------+
+| 0.0.24           | 1.4, 1.5, 1.6  | 0.0.?        |
+|                  | 1.7 (unstable) |              |
++------------------+----------------+--------------+
 
 For upgrade instructions, please refer to the `Release
 Notes <http://django-wiki.readthedocs.io/en/latest/release_notes.html>`__
-
-
-News
-----
-
-December 27, 2016
-~~~~~~~~~~~~~~~~~
-
-0.2 final released: `Release notes <http://django-wiki.readthedocs.io/en/0.2/release_notes.html>`_
-
-October 13, 2016
-~~~~~~~~~~~~~~~~
-
-0.2b1 released: `Release notes <http://django-wiki.readthedocs.io/en/latest/release_notes.html#django-wiki-0-2-dev>`__
-
-June 19, 2016
-~~~~~~~~~~~~~
-
-0.1.2 released: `Release notes <http://django-wiki.readthedocs.io/en/latest/release_notes.html#django-wiki-0-1-2>`__
-
-May 6, 2016
-~~~~~~~~~~~
-
-0.1.1 released: `Release notes <http://django-wiki.readthedocs.io/en/latest/release_notes.html#django-wiki-0-1-1>`__
-
-
-January 25, 2016
-~~~~~~~~~~~~~~~~
-
-0.1 final released
-
-
-December 26th, 2015
-~~~~~~~~~~~~~~~~~~~
-
-A new release 0.0.24.4 is out and has fixes for the Django ``loaddata`` management command such that you can create dumps and restore the dump. Notice, though, that ``loaddata`` only works for Django 1.7+.
-
-Django 1.9 support is available in the current master, please help get a 0.1 released by giving feed back in the last remaining issues:
-
-https://github.com/django-wiki/django-wiki/milestones/0.1
-
-
-November 16th, 2015
-~~~~~~~~~~~~~~~~~~~
-
-Django 1.8 support is very ready and 0.1 is right on the doorstep now.
-
-
-January 26th, 2015
-~~~~~~~~~~~~~~~~~~
-
-After too long, the new release is out.
-
-The wait was mainly due to all the confusing changes by adding support
-of Python 3 and readying the migrations for Django 1.7. But there's
-actually new features, too.
-
--  Bootstrap 3.3.1 and Font Awesome 4 (Christian Duvholt)
--  ``django_nyt`` instead of builtin ``django_notify`` (Benjamin Bach,
-   Maximilien Cuony)
--  ``tox`` for testing (Luke Plant)
--  Appropriate use of gettext\_lazy (Jaakko Luttinen)
--  Fixed support of custom username fields (Jan De Bleser)
--  Several fixes to the attachment plugin (Christian Duvholt)
--  Errors on notifications settings tab (Benjamin Richter)
--  Chinese translations (Ronald Bai)
--  Finish translations (Jaakko Luttinen)
--  Compatibility with custom user model in article settings (Andy Fang)
--  Fixed bug when ``[attachment:XX]`` present multiple times on same
-   line (Maximilien Cuony)
--  Simple mediawiki import management command (Maximilien Cuony)
--  Python 3 and Django 1.6 compatibility (Russell-Jones, Antonin
-   Lenfant, Luke Plant, Lubimov Igor, Benjamin Bach)
--  (and more, forgiveness asked if anyone feels left out)
 
 
 Translations (Transifex)
@@ -126,7 +58,7 @@ Demo
 A demo running the latest ``master`` is available here, sign up for an
 account to see the notification system.
 
-https://demo.django.wiki
+https://demo.django-wiki.org
 
 Community
 ---------
@@ -145,12 +77,11 @@ personal support.
 Currently, the model API is subject to smaller changes, and the plugin
 API seems pretty stable.
 
-South is used so no database changes will cause data loss. In order to
-customize the wiki, best idea is to override templates and create your
-own template tags. Do not make your own hard copy of this repository in
-order to fiddle with internal parts of the wiki -- this strategy will
-lead you to lose out on future updates with highly improved features
-and plugins. Possibly security updates as well!
+In order to customize the wiki, best idea is to override templates and create
+your own template tags. Do not make your own hard copy of this repository in
+order to fiddle with internal parts of the wiki -- this strategy will lead you
+to lose out on future updates with highly improved features and plugins.
+Possibly security updates as well!
 
 The release cycle has already begun, so you can administer django-wiki
 through Pypi and pip.
@@ -162,31 +93,8 @@ classes every time there is an update.
 Contributing
 ------------
 
-The best way to contribute is to use our Github issue list to look
-at current wishes. The list is found here:
-
-https://github.com/django-wiki/django-wiki/issues/
-
-Generally speaking, we need more **unit tests**, and new
-features will not be accepted without tests. To add more stuff the
-the project without tests wouldn't be fair to the project or
-your hard work. We use coverage metrics to see that each new
-contribution does not significantly impact test coverage.
-
-The easiest way to add features is to write a plugin. Please create an
-issue to discuss whether your plugin idea is a core plugin
-(``wiki.plugins.*``) or external plugin. If there are additions needed
-to the plugin API, we can discuss that as well!
-
-To run django-wiki's tests, run ``make test``
-after installing the requirements.
-
-If you want to test for more **environments**, install "tox"
-(``pip install tox``) and then just run ``tox`` to run the test
-suite on multiple environments.
-
-To run **specific tests**, call ``pytest`` with a path to the file with
-the tests you wish to run, for instance ``pytest wiki/tests/test_views.py``.
+Please read our
+`Developer Guide <http://django-wiki.readthedocs.io/en/latest/development/index.html>`__
 
 Manifesto
 ---------
@@ -275,17 +183,8 @@ on your host system.
 -  `django-sekizai <https://github.com/ojii/django-sekizai/>`__
 -  `sorl-thumbnail <https://github.com/mariocesar/sorl-thumbnail>`__
 -  `Pillow (Python Imaging Library) <https://pillow.readthedocs.io/en/latest/installation.html>`__
--  Python>=2.7 or Python>=3.2
+-  Python>=3.4
 
-
-Development
------------
-
-The folder **testproject/** contains a pre-configured django project and
-an sqlite database. Login for django admin is *admin:admin*. This
-project should always be maintained, but please do not commit changes to
-the SQLite database as we only care about its contents in case data
-models are changed.
 
 
 Acknowledgements
@@ -310,4 +209,3 @@ Acknowledgements
    `crazyzubr <https://github.com/crazyzubr>`__, and `everyone
    else <https://github.com/django-wiki/django-wiki/graphs/contributors>`__
    involved!
-
