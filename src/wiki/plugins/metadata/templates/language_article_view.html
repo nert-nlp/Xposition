@@ -56,6 +56,13 @@
 		</ul>
     </div>
 	</div>
+    
+  <div class="container-fluid">
+    <h4>Construals ({{construals|length}})</h4>
+    <ul>
+      {% for c in construals %}<li>{{c.html}}</li>{% endfor %}
+    </ul>    
+  </div>
 
 	{# this list should be empty--indicates an invalid value for is_pp_idiom! #}
 	{% for p in misc %}

@@ -98,6 +98,10 @@ def adpositions_for_lang(context):
         current_revision__metadatarevision__name__contains='_')
     context['ppidioms'] = a.filter(current_revision__metadatarevision__adpositionrevision__is_pp_idiom=True)
     context['misc'] = a.exclude(current_revision__metadatarevision__adpositionrevision__is_pp_idiom__in=(True,False))
+    
+    urs = UsageRevision.objects.filter(adposition__in=a, plugin_set__article__current_revision__deleted=False)
+    cc = Construal.objects.filter(usages__in=urs).distinct()
+    context['construals'] = cc    # construals attested in this language
     return a
 
 @register.simple_tag(takes_context=True)
