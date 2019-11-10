@@ -168,6 +168,14 @@ WIKI_URL_CASE_SENSITIVE = True
 
 WIKI_MARKDOWN_HTML_WHITELIST = ['sub', 'sup', 'hr', 'u', 'br']
 
+WIKI_MARKDOWN_KWARGS = {
+    'extension_configs': {
+        'wiki.plugins.macros.mdx.toc': {
+            'permalink': '#' # Put "#" link in headers
+        }
+    }
+}
+
 # To make deployment happy
 SECURE_BROWSER_XSS_FILTER = True
 SESSION_COOKIE_SECURE = False   # setting to True breaks django-wiki login
