@@ -16,26 +16,14 @@ ul.inline > li { margin: 0px 5px; }
 
 .wiki-article { font-family: 'Roboto', sans-serif; font-size: 14pt; }
 
-/* link handles for article headings */
-.wiki-article h1,.wiki-article h2,.wiki-article h3,.wiki-article h4,.wiki-article h5,.wiki-article h6 { 
-	position: relative;
-	overflow: visible; 
-	margin-left: -1em;
-	padding-left: 1em;
-}
-.wiki-article h1 > a.handle,.wiki-article h2 > a.handle,.wiki-article h3 > a.handle,.wiki-article h4 > a.handle,.wiki-article h5 > a.handle,.wiki-article h6 > a.handle {
+/* link handles for article headings, generated in HTML by the toc Markdown extension with the permalink option enabled */
+.wiki-article h1 > a.headerlink,.wiki-article h2 > a.headerlink,.wiki-article h3 > a.headerlink,.wiki-article h4 > a.headerlink,.wiki-article h5 > a.headerlink,.wiki-article h6 > a.headerlink {
 	visibility: hidden;
 }
-.wiki-article h1:hover > a.handle,.wiki-article h2:hover > a.handle,.wiki-article h3:hover > a.handle,.wiki-article h4:hover > a.handle,.wiki-article h5:hover > a.handle,.wiki-article h6:hover > a.handle { 
+.wiki-article h1:hover > a.headerlink,.wiki-article h2:hover > a.headerlink,.wiki-article h3:hover > a.headerlink,.wiki-article h4:hover > a.headerlink,.wiki-article h5:hover > a.headerlink,.wiki-article h6:hover > a.headerlink { 
 	visibility: visible;
 }
-
-/* wiki-bootstrap.css puts a bottom border, not anticipating that we've widened the heading to make room for the handle. 
-   so we remove the border on the full element and put it just on its textual content, which has been wrapped in a <span> with JS */
-.wiki-article h1,.wiki-article h2 { border-bottom: none; }
-.wiki-article h1 > span,.wiki-article h2 > span { border-bottom: solid 1px #eee; display: block; }
-
-a.handle { color: #ddd; font-size: 80%; position: absolute; left: 0px; top: 0px; padding-top: 1pt; font-weight: normal; }
+a.headerlink { color: #ddd; font-size: 80%; margin-left: 0.5em; font-weight: normal; }
 
 /* Xposition macros: special styling */
 .example { font-family: 'Roboto Light', sans-serif; }
