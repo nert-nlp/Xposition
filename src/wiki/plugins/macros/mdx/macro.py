@@ -205,29 +205,37 @@ class MacroPattern(markdown.inlinepatterns.Pattern):
 
     def ss(self, **kwargs):
         args = argize_kwargs(kwargs)
-        cl = None
+
+        construal = None
         if len(args) >= 2:
-            cl = args[1]
+            construal = args[1]
+
         if '--' in args[0]:
-            display = args[0].replace('--','&#x219d;')
-            cls = cl or 'construal'
+            display = args[0].replace('--', '&#x219d;') # replace -- with ↝
+            cls = construal or 'construal'
             if args[0] == escape_patterns_in_string(self.markdown.article.current_revision.title):
                 span = etree.Element("span")
                 span.set("class", cls + " this-construal")
                 span.text = display
                 return span
-            return link(display, '/' + args[0], cl if cl else 'construal')
+            return link(display, '/' + args[0], construal if construal else 'construal')
         else:
+            # get supersense object so we can check if it's deprecated
+            try:
+                supersense = models.Supersense.objects.get(category__name=args[0])
+            except models.Supersense.DoesNotExist:
+                supersense = None
             display = args[0].replace('`',r'\`')
-            cls = cl or 'supersense'
+            cls = construal or 'supersense'
             if args[0] in ['??','`d','`i','`c','`$']:
-                cls = cl or 'misc-label'
+                cls = construal or 'misc-label'
             if args[0] == escape_patterns_in_string(self.markdown.article.current_revision.title):
                 span = etree.Element("span")
                 span.set("class", cls + " this-supersense")
                 span.text = display
-                return span
-            return link(display, '/' + args[0].replace('`','%60'), cls)
+                return strikethrough_if_deprecated(supersense, span)
+            link_elt = link(display, '/' + args[0].replace('`','%60'), cls)
+            return strikethrough_if_deprecated(supersense, link_elt)
     # meta data
     ss.meta = dict(
         short_description=_('Link to Supersense or Construal'),
@@ -380,4 +388,10 @@ def argize_kwargs(kwargs):
     for arg in sorted(kwargs.keys(), key=lambda x:int(x[3:])):
         args.append(kwargs[arg])
     return args
+
+def strikethrough_if_deprecated(entry, elt):
+    # unclear why `entry.deprecated` didn't work..
+    if entry is not None and entry.current_revision.metadatarevision.supersenserevision.deprecated:
+        elt.set("class", "supersense supersense-deprecated")
+    return elt
 
