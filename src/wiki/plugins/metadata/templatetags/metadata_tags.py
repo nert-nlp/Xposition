@@ -282,7 +282,7 @@ def _category_subtree(c, recursive=False):
     ss = c.supersense.all()[0]
     a = ss.article
     #s = '<li><a href="{url}">{rev}</a>'.format(url=a.get_absolute_url(), rev=a.current_revision.title)
-    s = f'<li class="clt">{ss.html}' if not recursive else f'<li>{ss.metadata.html()}'
+    s = f'<li class="clt">{ss.html}' if not recursive else f'<li>{ss.html}'
     # number of construals for the supersense
     nAsRole = len(ss.rfs_with_role.all())
     nAsFunction = len(ss.rfs_with_function.all())
