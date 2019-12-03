@@ -9,6 +9,15 @@
 
 {% block wiki_contents_tab %}
   <div class="col-md-9">
+    {% if article.current_revision.metadata_revision.supersenserevision.deprecated %}
+    <div class="alert alert-warning">
+      <h4>This Supersense is Deprecated</h4>
+      {% if article.current_revision.metadata_revision.supersenserevision.deprecation_message %}
+      <p> {{ article.current_revision.metadata_revision.supersenserevision.deprecation_message }} </p>
+      {% endif %}
+    </div>
+    {% endif %}
+
     <div class="lead" style="border: solid 1px #aaa; padding: 1em 1em .5em 1em;">{{article.current_revision.metadata_revision.descriptionhtml}}</div>
 
     {% wiki_render article %}
