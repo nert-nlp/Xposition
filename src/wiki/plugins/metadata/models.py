@@ -340,7 +340,7 @@ class Supersense(Metadata):
     category = models.ForeignKey(ArticleCategory, null=False, related_name='supersense', on_delete=models.CASCADE)
 
     def field_names(self):
-        return {'name', 'description', 'parent', 'animacy'}
+        return {'name', 'description', 'parent', 'animacy', 'deprecated', 'deprecation_message'}
 
     def __str__(self):
         if self.current_revision:

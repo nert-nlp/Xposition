@@ -242,7 +242,7 @@ class SupersenseForm(ArticleMetadataForm):
 
     class Meta:
         model = models.SupersenseRevision
-        fields = ('name', 'description', 'parent', 'animacy')
+        fields = ('name', 'description', 'parent', 'animacy', 'deprecated', 'deprecation_message')
         labels = {'description': _('Short Description')}
         widgets = {'animacy': forms.RadioSelect}
 
