@@ -358,7 +358,8 @@ class Supersense(Metadata):
     @cached_property
     def html(self):
         """For effeciency, anything that calls this should call .select_related('article__current_revision', 'current_revision__metadatarevision')'"""
-        return mark_safe(f'<a href="{self.url}" class="supersense">{self.name_html}</a>')
+        cls = "supersense" if not self.current_revision.metadatarevision.supersenserevision.deprecated else "supersense supersense-deprecated"
+        return mark_safe(f'<a href="{self.url}" class="{cls}">{self.name_html}</a>')
 
     @cached_property
     def name_html(self):    # technically this can change if a user edits the supersense name, but it's going to be rare
