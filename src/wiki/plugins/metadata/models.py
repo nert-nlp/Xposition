@@ -379,6 +379,8 @@ class SupersenseRevision(MetadataRevision):
 
     animacy = models.PositiveIntegerField(choices=AnimacyType.choices(), default=AnimacyType.unspecified)
     parent = models.ForeignKey(Supersense, null=True, blank=True, related_name='sschildren', on_delete=models.CASCADE)
+    deprecated = models.BooleanField(default=False)
+    deprecation_message = models.CharField(max_length=250, default='', null=True, blank=True)
 
     unique_together = [('name', 'revision_number')]
 
