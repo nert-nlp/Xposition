@@ -28,11 +28,11 @@
     </div>
   </div>
   <p class="text-muted">
-    <input type="checkbox" id="toggle" oninput="toggle_display_deprecated(this.checked)">
+    <input type="checkbox" id="toggle" oninput="toggle_display_deprecated(!this.checked)">
     <label for="toggle">Show deprecated supersenses</label>
   </p>
   <script>
-  function toggle_display_deprecated(checked) {
+  function toggle_display_deprecated(shouldShow) {
     function children_are_deprecated(node) {
       var deprecated = node.classList.contains("supersense-deprecated");
       var ul = node.parentNode.parentNode.querySelector('ul');
@@ -49,7 +49,7 @@
     var sss = document.querySelectorAll('.supersense-deprecated');
     for (var i = 0; i < sss.length; i++) {
       var ss = sss[i];
-      if (!checked) {
+      if (!shouldShow) {
         ss.parentNode.parentNode.style = undefined;
       } else if (children_are_deprecated(ss)) {
         ss.parentNode.parentNode.style.display = 'none';
