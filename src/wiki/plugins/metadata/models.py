@@ -434,7 +434,7 @@ class Construal(SimpleMetadata):
         """For efficiency, callers should invoke .select_related(
         'construal__role__current_revision__metadatarevision', 
         'construal__function__current_revision__metadatarevision') if these fields are not already being queried"""
-        return self.special.strip() or format_html('{}&#x219d;{}', self.role, self.function)
+        return self.special.strip() or format_html('{}&#x219d;{}', self.role.html, self.function.html)
 
     @cached_property
     def template(self):
