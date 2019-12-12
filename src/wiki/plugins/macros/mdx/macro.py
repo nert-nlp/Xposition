@@ -289,8 +289,26 @@ class MacroPattern(markdown.inlinepatterns.Pattern):
                 ref_slug = ref_slug[1:]
             if ref_slug[-1]=='/':
                 ref_slug = ref_slug[:-1]
-        display = f'{ref_title}#{id}' if not ref_title==my_title else f'#{id}'
-        return link(display, '/' + ref_slug + '/#' + id, 'exref')
+
+        try:
+            supersense = models.Supersense.objects.get(category__name=args[1])
+        except models.Supersense.DoesNotExist:
+            supersense = None
+
+        a = etree.Element("a")
+        a.set("href", '/' + ref_slug + '/#' + id)
+        a.set("class", 'exref')
+        print(supersense)
+        if supersense is not None and ref_title != my_title:
+            ss_span = etree.SubElement(a, 'span')
+            ss_span.text = ref_title
+            ss_span = show_deprecation(supersense, ss_span, normal_class="", deprecated_class="exref-deprecated")
+            rest_span = etree.SubElement(a, 'span')
+            rest_span.text = f'#{id}'
+        else:
+            display = f'{ref_title}#{id}' if not ref_title==my_title else f'#{id}'
+            a.text = display
+        return a
 
     # meta data
     exref.meta = dict(
@@ -418,9 +436,9 @@ def argize_kwargs(kwargs):
         args.append(kwargs[arg])
     return args
 
-def show_deprecation(entry, elt):
+def show_deprecation(entry, elt, normal_class="supersense", deprecated_class="supersense-deprecated"):
     # unclear why `entry.deprecated` didn't work..
     if entry is not None and entry.current_revision.metadatarevision.supersenserevision.deprecated:
-        elt.set("class", "supersense supersense-deprecated")
+        elt.set("class", normal_class + " " + deprecated_class)
     return elt
 

@@ -44,6 +44,9 @@ a.exref { color: #aaa; }
     font-style: italic;
     color: gray !important;
 }
+.exref-deprecated {
+    text-decoration: line-through;
+}
 
 .nusages.major,.nadpositions.major { background-color: #ff9; }
 
