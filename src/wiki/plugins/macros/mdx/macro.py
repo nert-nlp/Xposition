@@ -298,7 +298,6 @@ class MacroPattern(markdown.inlinepatterns.Pattern):
         a = etree.Element("a")
         a.set("href", '/' + ref_slug + '/#' + id)
         a.set("class", 'exref')
-        print(supersense)
         if supersense is not None and ref_title != my_title:
             ss_span = etree.SubElement(a, 'span')
             ss_span.text = ref_title
