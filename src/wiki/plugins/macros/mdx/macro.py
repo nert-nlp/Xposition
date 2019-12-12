@@ -172,7 +172,9 @@ class MacroPattern(markdown.inlinepatterns.Pattern):
                 cl += " usage-deprecated" if any(ss_is_deprecated(ss) for ss in supersenses) else ""
                 short = short.replace('--','&#x219d;')
                 href = '/' + prep + '/' + construal
-                return etree.fromstring(f'<a class="{cl}" href="{href}">{short}</a>')
+                link_elt = etree.fromstring(f'<a class="{cl}" href="{href}"></a>')
+                link_elt.text = short
+                return link_elt
         return link(short, '/' + prep, cl if cl else 'adposition')
     # meta data
     p.meta = dict(
