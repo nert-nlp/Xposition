@@ -8,24 +8,48 @@
 {% endblock %}
 
 {% block wiki_contents_tab %}
-  <div class="col-md-3">
-    <ul class="lead">
-    {% supersenses_display "Circumstance" %}
-    </ul>
+  <div class="row">
+    <div class="col-md-3">
+      <ul class="lead">
+      {% supersenses_display "Circumstance" %}
+      </ul>
+    </div>
+    <div class="col-md-3">
+      <ul class="lead">
+      {% supersenses_display "Participant" %}
+      </ul>
+    </div>
+    <div class="col-md-3">
+      <ul class="lead">
+      {% supersenses_display "Configuration" %}
+      </ul>
+    </div>
+    <div class="col-md-3">
+    </div>
   </div>
-  <div class="col-md-3">
-    <ul class="lead">
-    {% supersenses_display "Participant" %}
-    </ul>
-  </div>
-  <div class="col-md-3">
-    <ul class="lead">
-    {% supersenses_display "Configuration" %}
-    </ul>
-  </div>
-  <div class="col-md-3">
+  <p class="text-muted">
+    <input type="checkbox" id="toggle" oninput="toggle_display_deprecated()">
+    <label for="toggle">Show deprecated supersenses</label>
+  </p>
+  <script>
+    function toggle_display_deprecated_wrapper() {
+      var deprecated_supersenses_hidden = false;
+      return function () {
+        var sss = document.querySelectorAll('.supersense-deprecated');
+        for (var i = 0; i < sss.length; i++) {
+          var ss = sss[i];
+          if (deprecated_supersenses_hidden) {
+            ss.parentNode.parentNode.style = undefined;
+          } else {
+            ss.parentNode.parentNode.style.display = 'none';
+          }
+        }
+        deprecated_supersenses_hidden = !deprecated_supersenses_hidden;
+      }
+    }
 
-  </div>
+    var toggle_display_deprecated = toggle_display_deprecated_wrapper();
+  </script>
 
 
 {% endblock %}
