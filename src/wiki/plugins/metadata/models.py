@@ -358,12 +358,12 @@ class Supersense(Metadata):
     @cached_property
     def html(self):
         """For effeciency, anything that calls this should call .select_related('article__current_revision', 'current_revision__metadatarevision')'"""
-        cls = "supersense" if not self.current_revision.metadatarevision.supersenserevision.deprecated else "supersense supersense-deprecated"
-        return mark_safe(f'<a href="{self.url}" class="{cls}">{self.name_html}</a>')
+        return mark_safe(f'<a href="{self.url}">{self.name_html}</a>')
 
     @cached_property
     def name_html(self):    # technically this can change if a user edits the supersense name, but it's going to be rare
-        return format_html('{}', self.current_revision.metadatarevision.name)
+        cls = "supersense" if not self.current_revision.metadatarevision.supersenserevision.deprecated else "supersense supersense-deprecated"
+        return format_html(f'<span class="{cls}">'+'{}</span>', self.current_revision.metadatarevision.name)
 
     @cached_property
     def template(self):
@@ -434,7 +434,7 @@ class Construal(SimpleMetadata):
         """For efficiency, callers should invoke .select_related(
         'construal__role__current_revision__metadatarevision', 
         'construal__function__current_revision__metadatarevision') if these fields are not already being queried"""
-        return self.special.strip() or format_html('{}&#x219d;{}', self.role.html, self.function.html)
+        return self.special.strip() or format_html('{}&#x219d;{}', self.role.name_html, self.function.name_html)
 
     @cached_property
     def template(self):
