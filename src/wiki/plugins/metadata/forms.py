@@ -403,6 +403,8 @@ class ConstrualForm(ArticleMetadataForm):
 
     def __init__(self, article, request, *args, **kwargs):
         super(ConstrualForm, self).__init__(article, request, *args, **kwargs)
+        self.fields['role'].queryset = models.Supersense.objects.filter(current_revision__metadatarevision__supersenserevision__deprecated=False)
+        self.fields['function'].queryset = models.Supersense.objects.filter(current_revision__metadatarevision__supersenserevision__deprecated=False)
 
     def edit(self, m, commit=True):
         if commit:
