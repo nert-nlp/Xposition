@@ -160,10 +160,19 @@ class MacroPattern(markdown.inlinepatterns.Pattern):
             construal = args[1]
             if '`' in construal:
                 return link(short, '/' + prep + '/' + construal, cl if cl else 'usage')
-            elif '--' in construal or "'" in construal or '?' in construal:
+            elif "'" in construal or '?' in construal:
                 return link(short.replace('--','&#x219d;'), '/' + prep + '/' + construal, cl if cl else 'usage')
             else:
-                return link(short, '/' + prep + '/' + construal + '--' + construal, cl if cl else 'usage')
+                cl = cl if cl else 'usage'
+                if '--' in construal:
+                    ss1, ss2 = get_supersenses_for_construal(construal)
+                    supersenses = (ss1, ss2)
+                else:
+                    supersenses = (get_supersense(construal),)
+                cl += " usage-deprecated" if any(ss_is_deprecated(ss) for ss in supersenses) else ""
+                short = short.replace('--','&#x219d;')
+                href = '/' + prep + '/' + construal
+                return etree.fromstring(f'<a class="{cl}" href="{href}">{short}</a>')
         return link(short, '/' + prep, cl if cl else 'adposition')
     # meta data
     p.meta = dict(
@@ -185,18 +194,26 @@ class MacroPattern(markdown.inlinepatterns.Pattern):
             prep = prep.replace(prep.split('/')[-1], p)
         if len(args) >= 4:
             cl = args[3]
-            try:
-                supersense = models.Supersense.objects.get(category__name=args[0])
-            except models.Supersense.DoesNotExist:
-                supersense = None
+
         if len(args) > 2 and not '-' == args[2]:
             construal = args[2]
             if '`' in construal:
                 return link(text, '/' + prep + '/' + construal, cl if cl else 'usage')
-            elif '--' in construal or "'" in construal or '?' in construal:
+            elif "'" in construal or '?' in construal:
                 return link(text.replace('--', '&#x219d;'), '/' + prep + '/' + construal, cl if cl else 'usage')
             else:
-                return link(text, '/' + prep + '/' + construal + '--' + construal, cl if cl else 'usage')
+                cl = cl if cl else 'usage'
+                if '--' in construal:
+                    ss1, ss2 = get_supersenses_for_construal(construal)
+                    supersenses = (ss1, ss2)
+                else:
+                    supersenses = (get_supersense(construal),)
+                cl += " usage-deprecated" if any(ss_is_deprecated(ss) for ss in supersenses) else ""
+                text = text.replace('--','&#x219d;')
+                href = '/' + prep + '/' + construal
+                link_elt = etree.fromstring(f'<a class="{cl}" href="{href}"></a>')
+                link_elt.text = text
+                return link_elt
         return link(text, '/' + prep, cl if cl else 'adposition')
     # meta data
     pspecial.meta = dict(
@@ -214,51 +231,25 @@ class MacroPattern(markdown.inlinepatterns.Pattern):
         if len(args) >= 2:
             cl = args[1]
 
-        # get supersense object so we can check if it's deprecated
-
+        self_reference = args[0] == escape_patterns_in_string(self.markdown.article.current_revision.title)
 
         if '--' in args[0]:
-            try:
-                ss_name_1, ss_name_2 = args[0].split('--')
-                ss1 = models.Supersense.objects.get(category__name=ss_name_1)
-                ss2 = models.Supersense.objects.get(category__name=ss_name_2)
-            except models.Supersense.DoesNotExist:
-                ss1, ss2 = None, None
-            except ValueError:
-                ss1, ss2 = None, None
+            ss1, ss2 = get_supersenses_for_construal(args[0])
             cls = cl or 'construal'
-
-            ss1_span = etree.Element("span")
-            ss1_span.text = ss_name_1
-            ss1_span = show_deprecation(ss1, ss1_span)
-            ss2_span = etree.Element("span")
-            ss2_span.text = ss_name_2
-            ss2_span = show_deprecation(ss2, ss2_span)
-            arrow = etree.Element("span")
-            arrow.text = "&#x219d;" # in effect, display '--' as '↝'
-
-            if args[0] == escape_patterns_in_string(self.markdown.article.current_revision.title):
-                span = etree.Element("span")
-                span.set("class", cls + " this-construal")
-                span.append(ss1_span)
-                span.append(arrow)
-                span.append(ss2_span)
-                return span
-            link_elt = link(None, '/' + args[0], cl if cl else 'construal')
-            link_elt.append(ss1_span)
-            link_elt.append(arrow)
-            link_elt.append(ss2_span)
-            return link_elt
+            if self_reference:
+                cls += " this-construal"
+                cspan = construal_span(ss1, ss2, cls)
+                return cspan
+            else:
+                clink = construal_link(ss1, ss2, '/' + args[0], cl if cl else 'construal')
+                return clink
         else:
-            try:
-                supersense = models.Supersense.objects.get(category__name=args[0])
-            except models.Supersense.DoesNotExist:
-                supersense = None
+            supersense = get_supersense(args[0])
             display = args[0].replace('`',r'\`')
             cls = cl or 'supersense'
             if args[0] in ['??','`d','`i','`c','`$']:
                 cls = cl or 'misc-label'
-            if args[0] == escape_patterns_in_string(self.markdown.article.current_revision.title):
+            if self_reference:
                 span = etree.Element("span")
                 span.set("class", cls + " this-supersense")
                 span.text = display
@@ -290,10 +281,7 @@ class MacroPattern(markdown.inlinepatterns.Pattern):
             if ref_slug[-1]=='/':
                 ref_slug = ref_slug[:-1]
 
-        try:
-            supersense = models.Supersense.objects.get(category__name=args[1])
-        except models.Supersense.DoesNotExist:
-            supersense = None
+        supersense = get_supersense(args[1])
 
         a = etree.Element("a")
         a.set("href", '/' + ref_slug + '/#' + id)
@@ -305,7 +293,7 @@ class MacroPattern(markdown.inlinepatterns.Pattern):
             rest_span = etree.SubElement(a, 'span')
             rest_span.text = f'#{id}'
         else:
-            display = f'{ref_title}#{id}' if not ref_title==my_title else f'#{id}'
+            display = f'{ref_title}#{id}' if not ref_title == my_title else f'#{id}'
             a.text = display
         return a
 
@@ -435,9 +423,49 @@ def argize_kwargs(kwargs):
         args.append(kwargs[arg])
     return args
 
-def show_deprecation(entry, elt, normal_class="supersense", deprecated_class="supersense-deprecated"):
+def ss_is_deprecated(ss):
+    return ss.current_revision.metadatarevision.supersenserevision.deprecated
+
+def show_deprecation(ss, elt, normal_class="supersense", deprecated_class="supersense-deprecated"):
     # unclear why `entry.deprecated` didn't work..
-    if entry is not None and entry.current_revision.metadatarevision.supersenserevision.deprecated:
+    if ss is not None and ss_is_deprecated(ss):
         elt.set("class", normal_class + " " + deprecated_class)
     return elt
+
+def get_supersense(supersense_string):
+    try:
+        return models.Supersense.objects.get(category__name=supersense_string)
+    except models.Supersense.DoesNotExist:
+        return None
+
+def get_supersenses_for_construal(construal_string):
+    try:
+        ss_name_1, ss_name_2 = construal_string.split('--')
+        ss1 = models.Supersense.objects.get(category__name=ss_name_1)
+        ss2 = models.Supersense.objects.get(category__name=ss_name_2)
+    except models.Supersense.DoesNotExist:
+        ss1, ss2 = None, None
+    except ValueError:
+        ss1, ss2 = None, None
+    return ss1, ss2
+
+def construal_span(ss1, ss2, cls):
+    span1 = '<span' + (' class="supersense-deprecated">' if ss_is_deprecated(ss1) else '>')
+    span1 += ss1.current_revision.metadatarevision.name
+    span1 += '</span>'
+    span2 = '<span' + (' class="supersense-deprecated">' if ss_is_deprecated(ss2) else '>')
+    span2 += ss2.current_revision.metadatarevision.name
+    span2 += '</span>'
+    span = f'<span class="{cls}">{span1}&#x219d;{span2}</span>'
+    return etree.fromstring(span)
+
+def construal_link(ss1, ss2, href, cls):
+    span1 = '<span' + (' class="supersense-deprecated">' if ss_is_deprecated(ss1) else '>')
+    span1 += ss1.current_revision.metadatarevision.name
+    span1 += '</span>'
+    span2 = '<span' + (' class="supersense-deprecated">' if ss_is_deprecated(ss2) else '>')
+    span2 += ss2.current_revision.metadatarevision.name
+    span2 += '</span>'
+    a = f'<a href="{href}" class="{cls}">{span1}&#x219d;{span2}</a>'
+    return etree.fromstring(a)
 
