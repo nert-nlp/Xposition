@@ -185,6 +185,10 @@ class MacroPattern(markdown.inlinepatterns.Pattern):
             prep = prep.replace(prep.split('/')[-1], p)
         if len(args) >= 4:
             cl = args[3]
+            try:
+                supersense = models.Supersense.objects.get(category__name=args[0])
+            except models.Supersense.DoesNotExist:
+                supersense = None
         if len(args) > 2 and not '-' == args[2]:
             construal = args[2]
             if '`' in construal:
@@ -206,36 +210,61 @@ class MacroPattern(markdown.inlinepatterns.Pattern):
     def ss(self, **kwargs):
         args = argize_kwargs(kwargs)
 
-        construal = None
+        cl = None
         if len(args) >= 2:
-            construal = args[1]
+            cl = args[1]
+
+        # get supersense object so we can check if it's deprecated
+
 
         if '--' in args[0]:
-            display = args[0].replace('--', '&#x219d;') # replace -- with ↝
-            cls = construal or 'construal'
+            try:
+                ss_name_1, ss_name_2 = args[0].split('--')
+                ss1 = models.Supersense.objects.get(category__name=ss_name_1)
+                ss2 = models.Supersense.objects.get(category__name=ss_name_2)
+            except models.Supersense.DoesNotExist:
+                ss1, ss2 = None, None
+            except ValueError:
+                ss1, ss2 = None, None
+            cls = cl or 'construal'
+
+            ss1_span = etree.Element("span")
+            ss1_span.text = ss_name_1
+            ss1_span = show_deprecation(ss1, ss1_span)
+            ss2_span = etree.Element("span")
+            ss2_span.text = ss_name_2
+            ss2_span = show_deprecation(ss2, ss2_span)
+            arrow = etree.Element("span")
+            arrow.text = "&#x219d;" # in effect, display '--' as '↝'
+
             if args[0] == escape_patterns_in_string(self.markdown.article.current_revision.title):
                 span = etree.Element("span")
                 span.set("class", cls + " this-construal")
-                span.text = display
+                span.append(ss1_span)
+                span.append(arrow)
+                span.append(ss2_span)
                 return span
-            return link(display, '/' + args[0], construal if construal else 'construal')
+            link_elt = link(None, '/' + args[0], cl if cl else 'construal')
+            link_elt.append(ss1_span)
+            link_elt.append(arrow)
+            link_elt.append(ss2_span)
+            return link_elt
         else:
-            # get supersense object so we can check if it's deprecated
             try:
                 supersense = models.Supersense.objects.get(category__name=args[0])
             except models.Supersense.DoesNotExist:
                 supersense = None
             display = args[0].replace('`',r'\`')
-            cls = construal or 'supersense'
+            cls = cl or 'supersense'
             if args[0] in ['??','`d','`i','`c','`$']:
-                cls = construal or 'misc-label'
+                cls = cl or 'misc-label'
             if args[0] == escape_patterns_in_string(self.markdown.article.current_revision.title):
                 span = etree.Element("span")
                 span.set("class", cls + " this-supersense")
                 span.text = display
-                return strikethrough_if_deprecated(supersense, span)
+                return show_deprecation(supersense, span)
             link_elt = link(display, '/' + args[0].replace('`','%60'), cls)
-            return strikethrough_if_deprecated(supersense, link_elt)
+            return show_deprecation(supersense, link_elt)
     # meta data
     ss.meta = dict(
         short_description=_('Link to Supersense or Construal'),
@@ -389,7 +418,7 @@ def argize_kwargs(kwargs):
         args.append(kwargs[arg])
     return args
 
-def strikethrough_if_deprecated(entry, elt):
+def show_deprecation(entry, elt):
     # unclear why `entry.deprecated` didn't work..
     if entry is not None and entry.current_revision.metadatarevision.supersenserevision.deprecated:
         elt.set("class", "supersense supersense-deprecated")
