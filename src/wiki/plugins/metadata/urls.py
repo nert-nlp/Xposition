@@ -16,7 +16,7 @@ class XpositionWikiSite(WikiSite):
             url(r'^ex/(?P<exnum>\d+)/$',
                 views.PTokenView.as_view(),
                 name='ptoken_view'), #  /ex/3495/
-            url('^(?P<lang>[a-z][a-z](-[a-z]+)?)/(?P<corpus>[^/]*[0-9][^/]*)/(?P<sent_id>[^/]+)/$',
+            url('^(?P<lang>[a-z][a-z](-[a-z]+)?)/(?P<corpus>[^/]*[0-9][^/]*)/(?P<sent_id>[^/_][^/]*)/$',
                 views.CorpusSentenceView.as_view(),
                 name='corpus_sentence_view'), #  /en/corpus/streusle4.1/reviews-001325-0003
             url(r'^_table/(?P<metadata_type>.*)/(?P<article_id>.*)/$', tables.ptoken_data_table, name="metadata_ptoken_data_table"),
