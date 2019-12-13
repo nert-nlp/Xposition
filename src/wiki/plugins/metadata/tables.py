@@ -1,5 +1,10 @@
-from django.utils.html import conditional_escape, format_html, mark_safe
+from django.db.models import Q
+from django.http import Http404, HttpResponseBadRequest
+from django.shortcuts import render
+from django.utils.html import format_html, mark_safe
 import django_tables2 as tables
+from django_tables2 import RequestConfig
+
 from .models import PTokenAnnotation
 
 def other_p_tokens_in_sentence(pt):
@@ -118,3 +123,56 @@ class PTokenAnnotationTable(tables.Table):
         sequence = ('exid', 'lcontext', 'target', 'rcontext', 'role', 'construal', 'function', 'note') # columns to prepose
         template_name = 'django_tables2/bootstrap.html'
         attrs = {'class': 'table ptokenannotation'}
+
+
+def tokens_for_supersense(article_id):
+    t = PTokenAnnotation.objects.select_related('construal__article__current_revision',
+                                                'construal__role__article__current_revision', 'construal__function__article__current_revision',
+                                                'usage__current_revision__metadatarevision__usagerevision__article_revision__article',
+                                                'sentence', 'adposition').filter(Q(construal__role__article__id=article_id) | Q(construal__function__article__id=article_id)).order_by('sentence__sent_id')
+    return t
+
+
+def tokens_for_construal(article_id):
+    t = PTokenAnnotation.objects.select_related('construal__article__current_revision',
+        'construal__role__article__current_revision', 'construal__function__article__current_revision',
+        'usage__current_revision__metadatarevision__usagerevision__article_revision__article',
+        'sentence', 'adposition').filter(construal__article__id=article_id).order_by('sentence__sent_id')
+    return t
+
+def tokens_for_adposition(article_id):
+    t = PTokenAnnotation.objects.select_related('construal__article__current_revision',
+        'construal__role__article__current_revision', 'construal__function__article__current_revision',
+        'usage__current_revision__metadatarevision__usagerevision__article_revision__article',
+        'sentence', 'adposition').filter(adposition__article__id=article_id).order_by('sentence__sent_id')
+    return t
+
+def tokens_for_usage(article_id):
+    t = PTokenAnnotation.objects.select_related('construal__article__current_revision',
+        'construal__role__article__current_revision', 'construal__function__article__current_revision',
+        'usage__current_revision__metadatarevision__usagerevision__article_revision__article',
+        'sentence', 'adposition').filter(usage__article__id=article_id).order_by('sentence__sent_id')
+    return t
+
+token_funcs = {
+    'supersense': tokens_for_supersense,
+    'construal': tokens_for_construal,
+    'adposition': tokens_for_adposition,
+    'usage': tokens_for_usage
+}
+
+def ptoken_data_table(request, metadata_type=None, article_id=None):
+    try:
+        t = token_funcs[metadata_type](article_id)
+        if len(t) == 0:
+            raise Http404(f"Couldn't find tokens for article {article_id} of type '{metadata_type}'")
+    except KeyError:
+        return HttpResponseBadRequest(f"Invalid metadata type: '{metadata_type}'")
+
+    table = PTokenAnnotationTable(t)
+    # check url query string for ?perpage=..., else default to 25
+    per_page = request.GET.get("perpage", 25)
+    RequestConfig(request, paginate={"per_page": per_page}).configure(table)
+    return render(request, "ptoken_data_table.html", {"tokstable": table})
+
+

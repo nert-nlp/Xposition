@@ -21,15 +21,38 @@
     </ul>
 
     {% include "category_article_view.html" %}
-    
-    
+
+
   </div>
   <div class="col-md-3">
     {% metadata_display %}{# if there is metadata for the article, display it! #}
   </div>
   <div class="col-md-12">
-	{% tokens_for_construal as tokens %}
-    {% include "ptoken_data_table.html" %}
+    <div id="table-container" class="table-responsive" style="max-height: 50vh; overflow: auto;">
+      <div style="height: 50vh;" class="text-center">
+        <i class="fa fa-spinner fa-spin" style="font-size:24px; margin-top: 25vh;"></i>
+      </div>
+    </div>
   </div>
+  <script>
+    $.ajax({
+      url: "/_table/construal/{{article.id}}",
+      success: function (data) {
+        var container = document.getElementById("table-container");
+        container.innerHTML = data;
+        var a = document.createElement('a');
+        a.setAttribute("href", "/_table/construal/{{article.id}}/?perpage=100");
+        a.setAttribute("target", "_blank");
+        a.innerHTML = '<i class="fa fa-external-link"></i> Open table in separate window';
+
+        var pagination = container.querySelector("ul.pagination");
+        if (pagination.innerText) {
+          pagination.remove(); // don't let them paginate in the page
+          a.innerHTML = '<i class="fa fa-external-link"></i> See more examples in separate window';
+        }
+        container.parentNode.appendChild(a);
+      }
+    })
+  </script>
 
 {% endblock %}
