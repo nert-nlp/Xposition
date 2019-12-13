@@ -46,7 +46,7 @@
         a.innerHTML = '<i class="fa fa-external-link"></i> Open table in separate window';
 
         var pagination = container.querySelector("ul.pagination");
-        if (pagination) {
+        if (pagination.innerText) {
           pagination.remove(); // don't let them paginate in the page
           a.innerText = " See more examples in separate window";
         }
