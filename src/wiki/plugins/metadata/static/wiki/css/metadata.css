@@ -47,6 +47,11 @@ a.exref { color: #aaa; }
 .exref-deprecated {
     text-decoration: line-through;
 }
+.usage-deprecated {
+    background-color: #ffe7e7;
+    padding: 4px;
+    border-radius: 5px;
+}
 
 .nusages.major,.nadpositions.major { background-color: #ff9; }
 

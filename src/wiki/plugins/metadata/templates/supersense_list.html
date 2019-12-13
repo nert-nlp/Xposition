@@ -28,28 +28,39 @@
     </div>
   </div>
   <p class="text-muted">
-    <input type="checkbox" id="toggle" oninput="toggle_display_deprecated()">
+    <input type="checkbox" id="toggle" oninput="toggle_display_deprecated(!this.checked)">
     <label for="toggle">Show deprecated supersenses</label>
   </p>
   <script>
-    function toggle_display_deprecated_wrapper() {
-      var deprecated_supersenses_hidden = false;
-      return function () {
-        var sss = document.querySelectorAll('.supersense-deprecated');
-        for (var i = 0; i < sss.length; i++) {
-          var ss = sss[i];
-          if (deprecated_supersenses_hidden) {
-            ss.parentNode.parentNode.style = undefined;
-          } else {
-            ss.parentNode.parentNode.style.display = 'none';
-          }
-        }
-        deprecated_supersenses_hidden = !deprecated_supersenses_hidden;
+  function toggle_display_deprecated(shouldShow) {
+    function children_are_deprecated(node) {
+      var deprecated = node.classList.contains("supersense-deprecated");
+      var ul = node.parentNode.parentNode.querySelector('ul');
+      if (!ul) {
+        return deprecated;
       }
+      for (var i = 0; i < ul.children.length; i++) {
+        var childNode = ul.children[i].querySelector('a').children[0];
+        deprecated = deprecated && children_are_deprecated(childNode);
+      }
+      return deprecated;
     }
 
-    var toggle_display_deprecated = toggle_display_deprecated_wrapper();
-    toggle_display_deprecated();
+    var sss = document.querySelectorAll('.supersense-deprecated');
+    for (var i = 0; i < sss.length; i++) {
+      var ss = sss[i];
+      if (!shouldShow) {
+        ss.parentNode.parentNode.style = undefined;
+      } else if (children_are_deprecated(ss)) {
+        ss.parentNode.parentNode.style.display = 'none';
+      } else {
+        ss.parentNode.parentNode.style.backgroundColor = '#ffe7e7';
+        ss.parentNode.parentNode.style.borderRadius = '5px';
+        ss.parentNode.parentNode.style.padding = '3px';
+      }
+    }
+  }
+  toggle_display_deprecated(!document.getElementById('toggle').checked);
   </script>
 
 
