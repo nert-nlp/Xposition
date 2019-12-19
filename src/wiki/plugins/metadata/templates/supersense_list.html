@@ -8,24 +8,60 @@
 {% endblock %}
 
 {% block wiki_contents_tab %}
-  <div class="col-md-3">
-    <ul class="lead">
-    {% supersenses_display "Circumstance" %}
-    </ul>
+  <div class="row">
+    <div class="col-md-3">
+      <ul class="lead">
+      {% supersenses_display "Circumstance" %}
+      </ul>
+    </div>
+    <div class="col-md-3">
+      <ul class="lead">
+      {% supersenses_display "Participant" %}
+      </ul>
+    </div>
+    <div class="col-md-3">
+      <ul class="lead">
+      {% supersenses_display "Configuration" %}
+      </ul>
+    </div>
+    <div class="col-md-3">
+    </div>
   </div>
-  <div class="col-md-3">
-    <ul class="lead">
-    {% supersenses_display "Participant" %}
-    </ul>
-  </div>
-  <div class="col-md-3">
-    <ul class="lead">
-    {% supersenses_display "Configuration" %}
-    </ul>
-  </div>
-  <div class="col-md-3">
+  <p class="text-muted">
+    <input type="checkbox" id="toggle" oninput="toggle_display_deprecated(!this.checked)">
+    <label for="toggle">Show deprecated supersenses</label>
+  </p>
+  <script>
+  function toggle_display_deprecated(shouldShow) {
+    function children_are_deprecated(node) {
+      var deprecated = node.classList.contains("supersense-deprecated");
+      var ul = node.parentNode.parentNode.querySelector('ul');
+      if (!ul) {
+        return deprecated;
+      }
+      for (var i = 0; i < ul.children.length; i++) {
+        var childNode = ul.children[i].querySelector('a').children[0];
+        deprecated = deprecated && children_are_deprecated(childNode);
+      }
+      return deprecated;
+    }
 
-  </div>
+    var sss = document.querySelectorAll('.supersense-deprecated');
+    for (var i = 0; i < sss.length; i++) {
+      var ss = sss[i];
+      if (!shouldShow) {
+        ss.parentNode.parentNode.style = undefined;
+      } else if (children_are_deprecated(ss)) {
+        ss.parentNode.parentNode.style.display = 'none';
+      } else {
+        ss.parentNode.parentNode.style.backgroundColor = '#ffe7e7';
+        ss.parentNode.parentNode.style.borderRadius = '5px';
+        ss.parentNode.parentNode.style.padding = '3px';
+      }
+    }
+  }
+  toggle_display_deprecated(!document.getElementById('toggle').checked);
+  </script>
 
 
 {% endblock %}

@@ -340,7 +340,7 @@ class Supersense(Metadata):
     category = models.ForeignKey(ArticleCategory, null=False, related_name='supersense', on_delete=models.CASCADE)
 
     def field_names(self):
-        return {'name', 'description', 'parent', 'animacy'}
+        return {'name', 'description', 'parent', 'animacy', 'deprecated', 'deprecation_message'}
 
     def __str__(self):
         if self.current_revision:
@@ -358,11 +358,12 @@ class Supersense(Metadata):
     @cached_property
     def html(self):
         """For effeciency, anything that calls this should call .select_related('article__current_revision', 'current_revision__metadatarevision')'"""
-        return mark_safe(f'<a href="{self.url}" class="supersense">{self.name_html}</a>')
+        return mark_safe(f'<a href="{self.url}">{self.name_html}</a>')
 
     @cached_property
     def name_html(self):    # technically this can change if a user edits the supersense name, but it's going to be rare
-        return format_html('{}', self.current_revision.metadatarevision.name)
+        cls = "supersense" if not self.current_revision.metadatarevision.supersenserevision.deprecated else "supersense supersense-deprecated"
+        return format_html(f'<span class="{cls}">'+'{}</span>', self.current_revision.metadatarevision.name)
 
     @cached_property
     def template(self):
@@ -379,6 +380,8 @@ class SupersenseRevision(MetadataRevision):
 
     animacy = models.PositiveIntegerField(choices=AnimacyType.choices(), default=AnimacyType.unspecified)
     parent = models.ForeignKey(Supersense, null=True, blank=True, related_name='sschildren', on_delete=models.CASCADE)
+    deprecated = models.BooleanField(default=False)
+    deprecation_message = models.CharField(max_length=250, default='', null=True, blank=True)
 
     unique_together = [('name', 'revision_number')]
 
@@ -431,7 +434,7 @@ class Construal(SimpleMetadata):
         """For efficiency, callers should invoke .select_related(
         'construal__role__current_revision__metadatarevision', 
         'construal__function__current_revision__metadatarevision') if these fields are not already being queried"""
-        return self.special.strip() or format_html('{}&#x219d;{}', self.role, self.function)
+        return self.special.strip() or format_html('{}&#x219d;{}', self.role.name_html, self.function.name_html)
 
     @cached_property
     def template(self):

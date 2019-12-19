@@ -191,42 +191,6 @@ def paginate(items, context):
     return table
 
 @register.simple_tag(takes_context=True)
-def tokens_for_adposition(context):
-    article = context['article']
-    t = PTokenAnnotation.objects.select_related('construal__article__current_revision', 
-        'construal__role__article__current_revision', 'construal__function__article__current_revision', 
-        'usage__current_revision__metadatarevision__usagerevision__article_revision__article',
-        'sentence', 'adposition').filter(adposition__article=article).order_by('sentence__sent_id')
-    return paginate(t, context)
-
-@register.simple_tag(takes_context=True)
-def tokens_for_construal(context):
-    article = context['article']
-    t = PTokenAnnotation.objects.select_related('construal__article__current_revision', 
-        'construal__role__article__current_revision', 'construal__function__article__current_revision', 
-        'usage__current_revision__metadatarevision__usagerevision__article_revision__article',
-        'sentence', 'adposition').filter(construal__article=article).order_by('sentence__sent_id')
-    return paginate(t, context)
-
-@register.simple_tag(takes_context=True)
-def tokens_for_supersense(context):
-    article = context['article']
-    t = PTokenAnnotation.objects.select_related('construal__article__current_revision', 
-        'construal__role__article__current_revision', 'construal__function__article__current_revision', 
-        'usage__current_revision__metadatarevision__usagerevision__article_revision__article',
-        'sentence', 'adposition').filter(Q(construal__role__article=article) | Q(construal__function__article=article)).order_by('sentence__sent_id')
-    return paginate(t, context)
-
-@register.simple_tag(takes_context=True)
-def tokens_for_usage(context):
-    article = context['article']
-    t = PTokenAnnotation.objects.select_related('construal__article__current_revision', 
-        'construal__role__article__current_revision', 'construal__function__article__current_revision', 
-        'usage__current_revision__metadatarevision__usagerevision__article_revision__article',
-        'sentence', 'adposition').filter(usage__article=article).order_by('sentence__sent_id')
-    return paginate(t, context)
-
-@register.simple_tag(takes_context=True)
 def token_by_exnum(context):
     exnum = int(context['exnum'])
     t = PTokenAnnotation.objects.filter(id=exnum-3000)
@@ -282,7 +246,7 @@ def _category_subtree(c, recursive=False):
     ss = c.supersense.all()[0]
     a = ss.article
     #s = '<li><a href="{url}">{rev}</a>'.format(url=a.get_absolute_url(), rev=a.current_revision.title)
-    s = f'<li class="clt">{ss.html}' if not recursive else f'<li>{ss.metadata.html()}'
+    s = f'<li class="clt">{ss.html}' if not recursive else f'<li>{ss.html}'
     # number of construals for the supersense
     nAsRole = len(ss.rfs_with_role.all())
     nAsFunction = len(ss.rfs_with_function.all())
