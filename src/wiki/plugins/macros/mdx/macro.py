@@ -164,11 +164,16 @@ class MacroPattern(markdown.inlinepatterns.Pattern):
                 return link(short.replace('--','&#x219d;'), '/' + prep + '/' + construal, cl if cl else 'usage')
             else:
                 cl = cl if cl else 'usage'
-                if '--' in construal:
+                if '--' in construal:   # 2 supersenses specified: role, function
                     ss1, ss2 = get_supersenses_for_construal(construal)
                     supersenses = (ss1, ss2)
                 else:
-                    supersenses = (get_supersense(construal),)
+                    ss = get_supersense(construal)
+                    if ss is None:  # special (backtick) labels are represented as construals with no role or function
+                        supersenses = ()
+                    else:   # single supersense specified, so it will be both role and function in the construal
+                        supersenses = (ss,)
+                        construal = construal + '--' + construal
                 cl += " usage-deprecated" if any(ss_is_deprecated(ss) for ss in supersenses) else ""
                 short = short.replace('--','&#x219d;')
                 href = '/' + prep + '/' + construal
