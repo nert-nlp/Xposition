@@ -463,20 +463,20 @@ def get_supersenses_for_construal(construal_string):
 
 def construal_span(ss1, ss2, cls):
     span1 = '<span' + (' class="supersense-deprecated">' if ss_is_deprecated(ss1) else '>')
-    span1 += ss1.current_revision.metadatarevision.name
+    span1 += ss1.current_revision.metadatarevision.name if ss1 else 'INVALIDSS'
     span1 += '</span>'
     span2 = '<span' + (' class="supersense-deprecated">' if ss_is_deprecated(ss2) else '>')
-    span2 += ss2.current_revision.metadatarevision.name
+    span2 += ss2.current_revision.metadatarevision.name if ss2 else 'INVALIDSS'
     span2 += '</span>'
     span = f'<span class="{cls}">{span1}&#x219d;{span2}</span>'
     return etree.fromstring(span)
 
 def construal_link(ss1, ss2, href, cls):
     span1 = '<span' + (' class="supersense-deprecated">' if ss_is_deprecated(ss1) else '>')
-    span1 += ss1.current_revision.metadatarevision.name
+    span1 += ss1.current_revision.metadatarevision.name if ss1 else 'INVALIDSS'
     span1 += '</span>'
     span2 = '<span' + (' class="supersense-deprecated">' if ss_is_deprecated(ss2) else '>')
-    span2 += ss2.current_revision.metadatarevision.name
+    span2 += ss2.current_revision.metadatarevision.name if ss2 else 'INVALIDSS'
     span2 += '</span>'
     a = f'<a href="{href}" class="{cls}">{span1}&#x219d;{span2}</a>'
     return etree.fromstring(a)
