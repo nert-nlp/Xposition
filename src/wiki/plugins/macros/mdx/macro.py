@@ -436,7 +436,7 @@ def argize_kwargs(kwargs):
     return args
 
 def ss_is_deprecated(ss):
-    return ss.current_revision.metadatarevision.supersenserevision.deprecated
+    return ss is None or ss.current_revision.metadatarevision.supersenserevision.deprecated
 
 def show_deprecation(ss, elt, normal_class="supersense", deprecated_class="supersense-deprecated"):
     # unclear why `entry.deprecated` didn't work..
