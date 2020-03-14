@@ -453,12 +453,12 @@ def get_supersense(supersense_string):
 def get_supersenses_for_construal(construal_string):
     try:
         ss_name_1, ss_name_2 = construal_string.split('--')
-        ss1 = models.Supersense.objects.get(category__name=ss_name_1)
-        ss2 = models.Supersense.objects.get(category__name=ss_name_2)
-    except models.Supersense.DoesNotExist:
-        ss1, ss2 = None, None
     except ValueError:
         ss1, ss2 = None, None
+    else:
+        ss1 = get_supersense(ss_name_1)
+        ss2 = get_supersense(ss_name_2)
+
     return ss1, ss2
 
 def construal_span(ss1, ss2, cls):
