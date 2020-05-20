@@ -106,9 +106,9 @@ class ArticleMetadataForm(forms.ModelForm):
 UNICODE_LETTERS_MARKS_HYPHEN_APPOS is [-_\'], all Unicode Letters, Nonspacing Marks, and Spacing Marks
 """
 
-UNICODE_LETTERS_MARKS_HYPHEN_APPOS = r'^[-_\'\p{Letter}\p{Mn}\p{Mc}]+$'
+UNICODE_LETTERS_MARKS_HYPHEN_APPOS = r'^[-_\'\p{L}\p{Mn}\p{Mc}]+$'
 
-slug_mod_unicode_re = _lazy_re_compile(r'^[-\'\w]+\Z')
+slug_mod_unicode_re = regex.compile(r'^[-_\'\p{Letter}\p{Mn}\p{Mc}]+\Z')
 validate_unicode_slug_mod = RegexValidator(
     slug_mod_unicode_re,
     _("Enter a valid 'slug' consisting of Unicode letters, numbers, underscores, hyphens, or apostrophes. Rule of thumb: spell the word as it would appear in a Wiktionary URL (which for some languages means omitting certain diacritics)."),
