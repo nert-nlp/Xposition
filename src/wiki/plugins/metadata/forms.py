@@ -108,9 +108,10 @@ UNICODE_LETTERS_MARKS_HYPHEN_APPOS is [-_\'], all Unicode Letters, Nonspacing Ma
 
 UNICODE_LETTERS_MARKS_HYPHEN_APPOS = r'^[-_\'\p{L}\p{Mn}\p{Mc}]+$'
 
-slug_mod_unicode_re = regex.compile(r'^[-_\'\p{Letter}\p{Mn}\p{Mc}]+\Z')
-validate_unicode_slug_mod = RegexValidator(
-    slug_mod_unicode_re,
+# server-side validation for slugs
+# adpositions can take any reasonable unicode string, supersenses are Latin letters
+validate_unicode_slug_adp = RegexValidator(
+    regex.compile(r'^[-_\'\p{Letter}\p{Mn}\p{Mc}]+\Z'),
     _("Enter a valid 'slug' consisting of Unicode letters, numbers, underscores, hyphens, or apostrophes. Rule of thumb: spell the word as it would appear in a Wiktionary URL (which for some languages means omitting certain diacritics)."),
     'invalid'
 )
@@ -120,12 +121,19 @@ validate_slug_numbers = RegexValidator(
     'invalid',
     inverse_match=True
 )
-class ModSlugField(forms.SlugField):
-    default_validators = [validate_unicode_slug_mod, validate_slug_numbers]
+validate_slug_ss = RegexValidator(
+    r'^[A-Z][-A-Za-z]*[a-z][-A-Za-z]*$',
+    _("Enter a valid 'slug' consisting only of Latin-script lowercase and uppercase letters.")
+)
+
+class AdpSlugField(forms.SlugField):
+    default_validators = [validate_unicode_slug_adp, validate_slug_numbers]
+class SupersenseSlugField(forms.SlugField):
+    default_validators = [validate_slug_ss]
 
 class SupersenseForm(ArticleMetadataForm):
 
-    slug = ModSlugField(max_length=200)
+    slug = SupersenseSlugField(max_length=200)
 
     def __init__(self, article, request, *args, **kwargs):
         super(SupersenseForm, self).__init__(article, request, *args, **kwargs)
@@ -256,7 +264,7 @@ class LanguageForm(ArticleMetadataForm):
 
 class AdpositionForm(ArticleMetadataForm):
 
-    slug = ModSlugField(max_length=200)
+    slug = AdpSlugField(max_length=200)
 
     def __init__(self, article, request, *args, **kwargs):
         """If no initial data, provide some defaults."""
@@ -277,6 +285,7 @@ class AdpositionForm(ArticleMetadataForm):
         self.fields['lang'].choices = [(lang.id, lang.name)]
 
         # set up the slug text field, modeled after the create article page
+        # validation is client-side here
         self.fields['slug'].widget = wiki.forms.TextInputPrepend(
             prepend='/' + self.article.urlpath_set.all()[0].path,
             attrs={
