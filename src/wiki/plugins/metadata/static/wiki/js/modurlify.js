@@ -173,10 +173,10 @@ namespace and hence we couldn't change its behavior from outside.
             // Keep Unicode letters including both lowercase and uppercase
             // characters, whitespace, and dash; remove other characters.
             if (allowApostrophe) {
-              s = XRegExp.replace(s, XRegExp('[^-_\'\\p{L}\\p{N}\\s]', 'g'), '');
+              s = XRegExp.replace(s, XRegExp('[^-_\'\\p{L}\\p{N}\\p{Mn}\\p{Mc}\\s]', 'g'), '');
             }
             else {
-              s = XRegExp.replace(s, XRegExp('[^-_\\p{L}\\p{N}\\s]', 'g'), '');
+              s = XRegExp.replace(s, XRegExp('[^-_\\p{L}\\p{N}\\p{Mn}\\p{Mc}\\s]', 'g'), '');
             }
         } else {
             s = s.replace(/[^-\w\s]/g, '');  // remove unneeded chars
