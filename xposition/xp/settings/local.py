@@ -3,5 +3,5 @@
 
 # git update-index --assume-unchanged testproject/testproject/settings/local.py
 
-from .dev import *  # noqa @UnusedWildImport
-# from .base import *
+#from .dev import *  # noqa @UnusedWildImport
+from .base import *
