@@ -16,7 +16,7 @@ from import_export import resources
 from import_export import fields
 from import_export import widgets
 from import_export.widgets import ForeignKeyWidget, IntegerWidget, Widget
-from wiki.plugins.categories.models import ArticleCategory
+from categories.models import ArticleCategory
 from wiki.models import URLPath, Article
 from django.contrib.auth.models import User
 from wiki.plugins.metadata.models import deepest_instance

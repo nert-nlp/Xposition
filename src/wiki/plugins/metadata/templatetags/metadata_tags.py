@@ -9,7 +9,7 @@ from wiki.models import Article, ArticleRevision
 from wiki.models.pluginbase import RevisionPlugin, RevisionPluginRevision
 from wiki.plugins.metadata.models import MetadataRevision, SimpleMetadata, Supersense, Construal, Language, Corpus, Adposition, AdpositionRevision, Usage, UsageRevision, PTokenAnnotation, deepest_instance
 from wiki.plugins.metadata.tables import PTokenAnnotationTable
-from wiki.plugins.categories.models import Category
+from categories.models import Category
 
 register = template.Library()
 
@@ -88,17 +88,17 @@ def adpositions_for_lang(context):
     context['always_intransitive'] = Adposition.Transitivity.always_intransitive
     larticle = context['article']
     a = Adposition.objects.select_related('article').prefetch_related('current_revision__metadatarevision__adpositionrevision__lang',
-        'article__urlpath_set').filter(current_revision__metadatarevision__adpositionrevision__lang__article=larticle, 
+        'article__urlpath_set').filter(current_revision__metadatarevision__adpositionrevision__lang__article=larticle,
             article__current_revision__deleted=False)
     a = a.annotate(transliteration=F('current_revision__metadatarevision__adpositionrevision__transliteration'),
                    num_usages=Count('usages'))
     context['swps'] = a.filter(current_revision__metadatarevision__adpositionrevision__is_pp_idiom=False).exclude(
         current_revision__metadatarevision__name__contains='_')
-    context['mwps'] = a.filter(current_revision__metadatarevision__adpositionrevision__is_pp_idiom=False, 
+    context['mwps'] = a.filter(current_revision__metadatarevision__adpositionrevision__is_pp_idiom=False,
         current_revision__metadatarevision__name__contains='_')
     context['ppidioms'] = a.filter(current_revision__metadatarevision__adpositionrevision__is_pp_idiom=True)
     context['misc'] = a.exclude(current_revision__metadatarevision__adpositionrevision__is_pp_idiom__in=(True,False))
-    
+
     urs = UsageRevision.objects.filter(adposition__in=a, plugin_set__article__current_revision__deleted=False)
     cc = Construal.objects.filter(usages__in=urs).distinct()
     context['construals'] = cc    # construals attested in this language
@@ -131,12 +131,12 @@ def corpus_stats(context):
     #context['adpositions_nconstruals'] = adpconst
     usages = Usage.objects.select_related('current_revision__metadatarevision__usagerevision__article_revision__article__current_revision',
         #'current_revision__metadatarevision__usagerevision__article_revision__article__owner',
-        'current_revision__metadatarevision__usagerevision__adposition__current_revision__metadatarevision', 
-        'current_revision__metadatarevision__usagerevision__construal__role__current_revision__metadatarevision', 
+        'current_revision__metadatarevision__usagerevision__adposition__current_revision__metadatarevision',
+        'current_revision__metadatarevision__usagerevision__construal__role__current_revision__metadatarevision',
         'current_revision__metadatarevision__usagerevision__construal__function__current_revision__metadatarevision').prefetch_related('current_revision__metadatarevision__usagerevision__article_revision__article__urlpath_set__parent').annotate(usage_freq=Count('ptokenannotation', filter=Q(ptokenannotation__sentence__corpus=c))).filter(usage_freq__gt=0).order_by('-usage_freq', 'current_revision__metadatarevision__name')
     context['usages_freq'] = usages
     construals = Construal.objects.select_related('article__current_revision',
-        'role__current_revision__metadatarevision', 
+        'role__current_revision__metadatarevision',
         'function__current_revision__metadatarevision').annotate(construal_freq=Count('ptoken_with_construal', filter=Q(ptoken_with_construal__sentence__corpus=c))).filter(construal_freq__gt=0).order_by('-construal_freq', 'special', 'role', 'function')
     context['construals_freq'] = construals
     ssr = Supersense.objects.select_related('article__current_revision', 'current_revision__metadatarevision').annotate(role_freq=Count('rfs_with_role__ptoken_with_construal', filter=Q(rfs_with_role__ptoken_with_construal__sentence__corpus=c))).order_by('-role_freq', 'current_revision__metadatarevision__name')
@@ -157,19 +157,19 @@ def corpus_stats(context):
 @register.simple_tag(takes_context=True)
 def usagerevs_for_adp(context):
     particle = context['article']
-    u = UsageRevision.objects.select_related('adposition__current_revision__metadatarevision', 
-        'construal__role__current_revision__metadatarevision', 
+    u = UsageRevision.objects.select_related('adposition__current_revision__metadatarevision',
+        'construal__role__current_revision__metadatarevision',
         'construal__function__current_revision__metadatarevision').filter(adposition__article=particle,
-        article_revision__deleted=False, 
+        article_revision__deleted=False,
         article_revision__article__current_revision=F('article_revision'))  # ensure this isn't an outdated revision
     return u
 
 @register.simple_tag(takes_context=True)
 def usagerevs_for_construal(context):
     carticle = context['article']
-    u = UsageRevision.objects.select_related('adposition__current_revision__metadatarevision', 
-        'construal__role__current_revision__metadatarevision', 
-        'construal__function__current_revision__metadatarevision').filter(construal__article=carticle, 
+    u = UsageRevision.objects.select_related('adposition__current_revision__metadatarevision',
+        'construal__role__current_revision__metadatarevision',
+        'construal__function__current_revision__metadatarevision').filter(construal__article=carticle,
         article_revision__deleted=False,
         article_revision__article__current_revision=F('article_revision'))  # ensure this isn't an outdated revision
     return u
@@ -290,7 +290,7 @@ def construals_display(context, role=None, function=None, order_by='role' or 'fu
                          order_by2+'__current_revision__metadatarevision__name'):
         #a = c.article
         #s += '<li><a href="{url}">{rev}</a></li>\n'.format(url=a.get_absolute_url(), rev=a.current_revision.title)
-        nadps = Usage.objects.filter(current_revision__metadatarevision__usagerevision__construal=c, 
+        nadps = Usage.objects.filter(current_revision__metadatarevision__usagerevision__construal=c,
                                      article__current_revision__deleted=False).count()
         # NOT c.usages, which consists of all UsageRevisions
         s += f'<li>{c.html} (<span class="nadpositions' + (' major' if nadps>=10 else '') + f'">{nadps}</span>)</li>\n'
