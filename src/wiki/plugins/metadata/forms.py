@@ -12,7 +12,7 @@ from django.utils.translation import ugettext
 from wiki.core.plugins.base import PluginSidebarFormMixin
 from . import models
 from .models import deepest_instance
-from wiki.plugins.categories.models import ArticleCategory
+from categories.models import ArticleCategory
 from wiki.models import ArticleRevision
 import wiki.forms
 from wiki.conf import settings

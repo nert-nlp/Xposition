@@ -2,7 +2,7 @@ import re, os, django, json
 os.chdir('..\scripts')
 
 from wiki.plugins.metadata import models as ms
-from wiki.plugins.categories.models import ArticleCategory
+from categories.models import ArticleCategory
 
 for adp in ms.Adposition.objects.all():
     cats = ArticleCategory.objects.filter(name=str(adp))

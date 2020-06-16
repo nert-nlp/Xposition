@@ -13,3 +13,4 @@ bleach==3.1.4
 markdown==3.1.1
 pillow==6.2.2
 regex==2020.5.14
+git+git://github.com/nert-nlp/django-categories.git@master
