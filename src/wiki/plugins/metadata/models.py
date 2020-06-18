@@ -19,7 +19,7 @@ from django.contrib import admin
 from django.db.models.signals import pre_save, post_save
 from wiki.core.markdown import article_markdown
 from wiki.decorators import disable_signal_for_loaddata
-from wiki.plugins.categories.models import ArticleCategory
+from categories.models import ArticleCategory
 from wiki.models.pluginbase import ArticlePlugin, RevisionPlugin, RevisionPluginRevision
 from django.core.exceptions import ObjectDoesNotExist
 
@@ -35,12 +35,12 @@ from django.utils.translation import ugettext_lazy as _
 class StringList(list):
     '''
     List of values stored as space-separated strings.
-    With a custom __str__, providing an instance of this class as a field value 
+    With a custom __str__, providing an instance of this class as a field value
     ensures that it will be rendered correctly in form fields.
     '''
     def __str__(self):
         return ' '.join(map(str, self))
-    
+
     @staticmethod
     def from_str(s):
         return StringList(s.strip().split())
@@ -416,7 +416,7 @@ class Construal(SimpleMetadata):
 
     @cached_property
     def url(self):
-        """For efficiency, callers should invoke .select_related('article__current_revision') 
+        """For efficiency, callers should invoke .select_related('article__current_revision')
         if this field is not already being queried"""
         # The "correct" way would be self.article.get_absolute_url(), but that is expensive.
         # We take advantage of the fact that a construal's article title is always the same as its slug.
@@ -425,14 +425,14 @@ class Construal(SimpleMetadata):
     @cached_property
     def html(self):
         """For efficiency, callers should invoke .select_related('article__current_revision',
-        'construal__role__current_revision__metadatarevision', 
+        'construal__role__current_revision__metadatarevision',
         'construal__function__current_revision__metadatarevision') if these fields are not already being queried"""
         return mark_safe(f'<a href="{self.url}" class="{"misc-label" if self.special and self.special.strip() else "construal"}">{self.name_html}</a>')
 
     @cached_property
     def name_html(self):
         """For efficiency, callers should invoke .select_related(
-        'construal__role__current_revision__metadatarevision', 
+        'construal__role__current_revision__metadatarevision',
         'construal__function__current_revision__metadatarevision') if these fields are not already being queried"""
         return self.special.strip() or format_html('{}&#x219d;{}', self.role.name_html, self.function.name_html)
 
@@ -687,7 +687,7 @@ class Adposition(Metadata):
 
     @cached_property
     def url(self):
-        """For efficiency, callers should invoke .select_related('article') 
+        """For efficiency, callers should invoke .select_related('article')
         if this field is not already being queried"""
         return self.article.get_absolute_url()
 
@@ -699,7 +699,7 @@ class Adposition(Metadata):
 
     @cached_property
     def name_html(self):    # technically this can change if a user edits the adposition name, but it's going to be rare
-        """For efficiency, callers should invoke .select_related('current_revision__metadatarevision') 
+        """For efficiency, callers should invoke .select_related('current_revision__metadatarevision')
         if this field is not already being queried"""
         return format_html('{}', self.current_revision.metadatarevision.name)
 
@@ -739,13 +739,13 @@ class AdpositionRevision(MetadataRevision):
 
     @cached_property
     def url(self):
-        """For efficiency, callers should invoke .select_related('article_revision__article') 
+        """For efficiency, callers should invoke .select_related('article_revision__article')
         if this field is not already being queried"""
         return self.article_revision.article.get_absolute_url()
 
     @cached_property
     def html(self):
-        """For efficiency, callers should invoke .select_related('article_revision__article') 
+        """For efficiency, callers should invoke .select_related('article_revision__article')
         if this field is not already being queried"""
         return mark_safe(f'<a href="{self.url}" class="adposition">{self.name_html}</a>')
 
@@ -813,8 +813,8 @@ class UsageRevision(MetadataRevision):
     @cached_property
     def html(self):
         """For efficiency, callers should invoke .select_related('article_revision__article__current_revision',
-        'adposition__current_revision__metadatarevision', 
-        'construal__role__current_revision__metadatarevision', 
+        'adposition__current_revision__metadatarevision',
+        'construal__role__current_revision__metadatarevision',
         'construal__function__current_revision__metadatarevision') if these fields are not already being queried"""
         special = self.construal.special and self.construal.special.strip()
         return mark_safe(f'<a href="{self.url}" class="usage">'
@@ -957,8 +957,8 @@ class PTokenAnnotation(models.Model):
     @cached_property
     def exnum(self):
         """
-        Example number to display in parentheses. 
-        Starts from 3000 to avoid clashing with examples defined in articles 
+        Example number to display in parentheses.
+        Starts from 3000 to avoid clashing with examples defined in articles
         or looking like a year in a citation.
         """
         return self.id + 3000

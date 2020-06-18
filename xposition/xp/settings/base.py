@@ -12,6 +12,7 @@ import os
 
 from django.urls import reverse_lazy
 
+
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BASE_DIR = os.path.dirname(PROJECT_DIR)
 
@@ -44,8 +45,8 @@ INSTALLED_APPS = [
     "wiki.plugins.notifications.apps.NotificationsConfig",
     'wiki.plugins.globalhistory.apps.GlobalHistoryConfig',
     'wiki.plugins.metadata.apps.MetadataConfig',
-    'wiki.plugins.categories.apps.CategoriesConfig',
-    'wiki.plugins.categories.editor',
+    'categories.apps.CategoriesConfig',
+    'categories.editor',
     'sekizai',
     'sorl.thumbnail',
     "django_nyt.apps.DjangoNytConfig",

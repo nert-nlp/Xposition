@@ -80,7 +80,7 @@ You should now be able to run the server:
 python xposition/manage.py runserver
 ```
 
-**Note**: If you are running on Windows, you might get an error about `wiki.plugins.categories`. This is because a Unix symlink is not interpreted propertly by Windows. In the `xposition` directory, remove `wiki` and replace it with a Windows symlink: `mklink /D wiki ..\wiki`
+**Note**: If you are running on Windows, you might get an error about `wiki.plugins.categories`. This is because a Unix symlink is not interpreted propertly by Windows. In the `xposition` directory, remove `wiki` and replace it with a Windows symlink: `mklink /D wiki ..\src\wiki`.
 
 ## Login
 
