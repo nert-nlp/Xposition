@@ -195,7 +195,7 @@ class CreateRootForm(forms.Form):
 class MoveForm(forms.Form):
 
     destination = forms.CharField(label=_('Destination'))
-    slug = WikiSlugField(max_length=models.URLPath.SLUG_MAX_LENGTH)
+    slug = WikiSlugField(max_length=models.URLPath.SLUG_MAX_LENGTH, allow_unicode=True)
     redirect = forms.BooleanField(label=_('Redirect pages'),
                                   help_text=_('Create a redirect page for every moved article?'),
                                   required=False)
@@ -354,7 +354,8 @@ class CreateForm(forms.Form, SpamProtectionMixin):
         label=_('Slug'),
         help_text=_(
             "This will be the address where your article can be found. Use only alphanumeric characters and - or _.<br>Note: If you change the slug later on, links pointing to this article are <b>not</b> updated."),
-        max_length=models.URLPath.SLUG_MAX_LENGTH)
+        max_length=models.URLPath.SLUG_MAX_LENGTH,
+        allow_unicode=True)
     content = forms.CharField(
         label=_('Contents'),
         required=False,
