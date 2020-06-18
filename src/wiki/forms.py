@@ -38,13 +38,25 @@ from wiki.editors import getEditor
 
 from .forms_account_handling import UserCreationForm, UserUpdateForm
 
+import regex
+
+# server-side validation for slugs
+# adpositions can take any reasonable unicode string, supersenses are Latin letters
+validate_unicode_slug_adp = RegexValidator(
+    regex.compile(r'^[-_\'\p{Letter}\p{Mn}\p{Mc}]+\Z'),
+    _("Enter a valid 'slug' consisting of Unicode letters, numbers, underscores, hyphens, or apostrophes. Rule of thumb: spell the word as it would appear in a Wiktionary URL (which for some languages means omitting certain diacritics)."),
+    'invalid'
+)
 validate_slug_numbers = RegexValidator(
-    r'^[0-9]+$',
+    r'^\d+$',
     _("A 'slug' cannot consist solely of numbers."),
     'invalid',
     inverse_match=True
 )
-
+validate_slug_ss = RegexValidator(
+    r'^[A-Z][-A-Za-z]*[a-z][-A-Za-z]*$',
+    _("Enter a valid 'slug' consisting only of Latin-script lowercase and uppercase letters.")
+)
 
 class WikiSlugField(forms.CharField):
     """
@@ -52,13 +64,13 @@ class WikiSlugField(forms.CharField):
     the default field directly on the model. For now, it's used in CreateForm.
     """
 
-    default_validators = [validators.validate_slug, validate_slug_numbers]
+    default_validators = [validate_slug_ss, validate_slug_numbers]
 
     def __init__(self, *args, **kwargs):
         self.allow_unicode = kwargs.pop('allow_unicode', False)
         if self.allow_unicode:
             self.default_validators = [
-                validators.validate_unicode_slug,
+                validate_unicode_slug_adp,
                 validate_slug_numbers
             ]
         super().__init__(*args, **kwargs)
