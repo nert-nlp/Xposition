@@ -185,7 +185,8 @@ class MacroPattern(markdown.inlinepatterns.Pattern):
                     link_elt.text = short
                     return link_elt
         except:
-            return '<span style="color:red;">'+'Macro Error: please see example usage'+'</span>'
+            span = '<span style="color:red">' + 'Macro Error: please see example usage' + '</span>'
+            return etree.fromstring(span)
         return link(short, '/' + prep, cl if cl else 'adposition')
 
     # meta data
@@ -235,7 +236,8 @@ class MacroPattern(markdown.inlinepatterns.Pattern):
                     link_elt.text = text
                     return link_elt
         except:
-            return '<span style="color:red;">'+'Macro Error: please see example usage'+'</span>'
+            span = '<span style="color:red">' + 'Macro Error: please see example usage' + '</span>'
+            return etree.fromstring(span)
         return link(text, '/' + prep, cl if cl else 'adposition')
 
     # meta data
@@ -280,7 +282,8 @@ class MacroPattern(markdown.inlinepatterns.Pattern):
                 link_elt = link(display, '/' + args[0].replace('`', '%60'), cls)
                 return show_deprecation(supersense, link_elt)
         except:
-            return '<span style="color:red;">'+'Macro Error: please see example usage'+'</span>'
+            span = '<span style="color:red">' + 'Macro Error: please see example usage' + '</span>'
+            return etree.fromstring(span)
 
     # meta data
     ss.meta = dict(
@@ -323,7 +326,8 @@ class MacroPattern(markdown.inlinepatterns.Pattern):
                 display = f'{ref_title}#{id}' if not ref_title == my_title else f'#{id}'
                 a.text = display
         except:
-            return '<span style="color:red;">'+'Macro Error: please see example usage'+'</span>'
+            span = '<span style="color:red">' + 'Macro Error: please see example usage' + '</span>'
+            return etree.fromstring(span)
         return a
 
     # meta data
@@ -357,7 +361,8 @@ class MacroPattern(markdown.inlinepatterns.Pattern):
                 exlabel_a.set("href", "#" + id)
                 exlabel_a.text = id
         except:
-            return '<span style="color:red;">'+'Macro Error: please see example usage'+'</span>'
+            span = '<span style="color:red">' + 'Macro Error: please see example usage' + '</span>'
+            return etree.fromstring(span)
         return span
 
     # meta data
@@ -424,7 +429,8 @@ class MacroPattern(markdown.inlinepatterns.Pattern):
             a_ex.set("class", "exlabel")
             a_ex.text = id
         except:
-            return 'Error: see example usage'
+            span = '<span style="color:red">'+'Macro Error: please see example usage'+'</span>'
+            return etree.fromstring(span)
         return span
 
     # meta data
