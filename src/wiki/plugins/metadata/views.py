@@ -4,7 +4,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Model
 from . import models
 from wiki.models import URLPath, Article
-from wiki.plugins.categories.models import ArticleCategory
+from categories.models import ArticleCategory
 from django.utils.decorators import method_decorator
 from django.utils.functional import cached_property
 from wiki.views.mixins import ArticleMixin

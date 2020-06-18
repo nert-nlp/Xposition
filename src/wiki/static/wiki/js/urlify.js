@@ -172,7 +172,7 @@ namespace and hence we couldn't change its behavior from outside.
         if (allowUnicode) {
             // Keep Unicode letters and numbers including both lowercase and uppercase
             // characters, whitespace, underscore, and hyphen; remove other characters.
-            s = XRegExp.replace(s, XRegExp('[^-_\\p{L}\\p{N}\\s]', 'g'), '');
+            s = XRegExp.replace(s, XRegExp('[^-_\\p{L}\\p{N}\\p{Mn}\\p{Mc}\\s]', 'g'), '');
         } else {
             s = s.replace(/[^-\w\s]/g, '');  // remove unneeded chars
         }
