@@ -147,6 +147,9 @@ class MacroPattern(markdown.inlinepatterns.Pattern):
         example_code='[[WikiLink]]',
         args={})
 
+    def errormsg(self):
+        return etree.fromstring('<span class="error">' + 'Macro Error: please see example usage' + '</span>')
+
     def p(self, **kwargs):
         try:
             args = argize_kwargs(kwargs)
@@ -184,10 +187,10 @@ class MacroPattern(markdown.inlinepatterns.Pattern):
                     link_elt = etree.fromstring(f'<a class="{cl}" href="{href}"></a>')
                     link_elt.text = short
                     return link_elt
+            return link(short, '/' + prep, cl if cl else 'adposition')
         except:
-            span = '<span class="error">' + 'Macro Error: please see example usage' + '</span>'
-            return etree.fromstring(span)
-        return link(short, '/' + prep, cl if cl else 'adposition')
+            return self.errormsg()
+
 
     # meta data
     p.meta = dict(
@@ -235,10 +238,10 @@ class MacroPattern(markdown.inlinepatterns.Pattern):
                     link_elt = etree.fromstring(f'<a class="{cl}" href="{href}"></a>')
                     link_elt.text = text
                     return link_elt
+            return link(text, '/' + prep, cl if cl else 'adposition')
         except:
-            span = '<span class="error">' + 'Macro Error: please see example usage' + '</span>'
-            return etree.fromstring(span)
-        return link(text, '/' + prep, cl if cl else 'adposition')
+            return self.errormsg()
+
 
     # meta data
     pspecial.meta = dict(
@@ -282,8 +285,7 @@ class MacroPattern(markdown.inlinepatterns.Pattern):
                 link_elt = link(display, '/' + args[0].replace('`', '%60'), cls)
                 return show_deprecation(supersense, link_elt)
         except:
-            span = '<span class="error">' + 'Macro Error: please see example usage' + '</span>'
-            return etree.fromstring(span)
+            return self.errormsg()
 
     # meta data
     ss.meta = dict(
@@ -325,10 +327,10 @@ class MacroPattern(markdown.inlinepatterns.Pattern):
             else:
                 display = f'{ref_title}#{id}' if not ref_title == my_title else f'#{id}'
                 a.text = display
+            return a
         except:
-            span = '<span class="error">' + 'Macro Error: please see example usage' + '</span>'
-            return etree.fromstring(span)
-        return a
+            return self.errormsg()
+
 
     # meta data
     exref.meta = dict(
@@ -360,10 +362,9 @@ class MacroPattern(markdown.inlinepatterns.Pattern):
                 exlabel_a.set("class", "exlabel")
                 exlabel_a.set("href", "#" + id)
                 exlabel_a.text = id
+            return span
         except:
-            span = '<span class="error">' + 'Macro Error: please see example usage' + '</span>'
-            return etree.fromstring(span)
-        return span
+            return self.errormsg()
 
     # meta data
     ex.meta = dict(
@@ -428,10 +429,9 @@ class MacroPattern(markdown.inlinepatterns.Pattern):
             a_ex.set("href", "#" + id)
             a_ex.set("class", "exlabel")
             a_ex.text = id
+            return span
         except:
-            span = '<span class="error">'+'Macro Error: please see example usage'+'</span>'
-            return etree.fromstring(span)
-        return span
+            return self.errormsg()
 
     # meta data
     gex.meta = dict(
