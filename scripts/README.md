@@ -4,35 +4,12 @@
 
 * `tex2markdown.py` - converts latex to markdown
 
-* `models_for_import.py` - creates tsv files from json corpus data
-
 * `articles_for_import.py` - creates json for uploading articles (through the admin articlerevision interface)
 
-------------------------------------------------------------------
+* `generate_basic_files.py` - creates json files for uploading Supersenses and Adpositions
 
-To use models_for_import.py,
+* `generate_consrual_file.py` - creates json files for uploading Construals
 
-```
-cd <Xposition>\testproject
-python manage.py shell
-exec(open(r'..\scripts\models_for_import.py').read())
-```
+* `generate_uasge_file.py` - creates json files for uploading Usages
 
-* Step 0) Put file streusle.go.notes.json in scripts directory.
-
-	*  Get the file streusle.json from [STREUSLE](github.com/nert-gu/streusle)
-
-	*  Run govobj.py and annotator_notes.py to get streusle.go.notes.json
-
-* Step 1) Run the script once and then import `AdpositionRevision`s, `SupersenseRevision`s, and `CorpusSentence`s from admin.
-
-	*  (the files for `CorpusSentence` and `PTokenAnnotation` must be converted to an Excel worksheet)
-
-	* Create articles "English", "at", "Locus", "Locus--Locus", and "at: Locus--Locus" by hand.
-
-* Step 2) Run again and then import `Construal`s (depends on `SupersenseRevision`) from admin.
-
-* Step 3) Run again and then import `UsageRevision`s (depends on `Construal`) from admin.
-
-* Step 4) Run again and then import `PTokenAnnotation`s (depends on `UsageRevision`) from admin.
-That way the script can access the ids for foreign keys: `Adposition`, `Supersense`, etc.
+* `generate_corpus_files.py` - creates json files for uploading CorpusSentences and PTokenAnnotations
