@@ -1,10 +1,10 @@
 import csv
-import json
 import os
 
 from unidecode import unidecode
 
-from ..scripts.generate_basic_files import Data
+os.chdir('../scripts')
+from new_corpus import Data
 
 
 class TSV_Writer:
@@ -26,19 +26,18 @@ class TSV_Writer:
 
 
 def main():
-    dir = 'json'
-
-    file = 'streusle.go.notes.json'
 
     data = Data(save_sent=True, save_ptok=True, missing_ss_error=True, missing_con_error=True, missing_adp_error=True, missing_us_error=True)
 
-    data.load_data(file)
-    if not os.path.exists(dir):
-        os.makedirs(dir)
+    output_dir = f'{data.corpus_name}{data.corpus_version}_files'
+
+    data.load_data(data.data_file)
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
 
     # output CorpusSentences
     print('corpus_sentences.json', len(data.corpus_sentences))
-    file = os.path.join(dir, 'corpus_sentences.tsv')
+    file = os.path.join(output_dir, 'corpus_sentences.tsv')
     TSV_Writer.write_tsv(data.corpus_sentences, file)
 
     # output PTokenAnnotations
@@ -46,17 +45,29 @@ def main():
     PER_FILE = 1500
     if data.ptoken_annotations:
         for i in range(int(len(data.ptoken_annotations) / PER_FILE)):
-            file = os.path.join(dir, f'ptoken_annotations{i}.tsv')
+            file = os.path.join(output_dir, f'ptoken_annotations{i}.tsv')
             print(file, i * PER_FILE, '-', (i + 1) * PER_FILE - 1)
             TSV_Writer.write_tsv(data.ptoken_annotations[i * PER_FILE:(i + 1) * PER_FILE], file)
 
         i = int(len(data.ptoken_annotations) / PER_FILE)
-        file = os.path.join(dir, f'ptoken_annotations{i}.tsv')
+        file = os.path.join(output_dir, f'ptoken_annotations{i}.tsv')
         print(file, i * PER_FILE, '-', len(data.ptoken_annotations) - 1)
         TSV_Writer.write_tsv(data.ptoken_annotations[i * PER_FILE:], file)
 
     else:
         raise Exception('No PTokenAnnotations found. Please make sure all Usages and CorpusSentences have been imported or exist.')
+
+
+    unique_sent_and_tokens = set()
+    for p in data.ptoken_annotations:
+        sent_and_tokens = p['sent_id']+' '+str(p['token_indices'])
+        if sent_and_tokens in unique_sent_and_tokens:
+            sent_id = p['sent_id']
+            token_indices = str(p['token_indices'])
+            raise Exception(f'Unique Constraint Failure: sent_id "{sent_id}" and token_indices "{token_indices}"')
+        else:
+            unique_sent_and_tokens.add(sent_and_tokens)
+
 
 
 if __name__ == '__main__':
