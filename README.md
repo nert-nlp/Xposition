@@ -100,7 +100,7 @@ It comes with a prepopulated SQLite database.
 
 We use the library django-import-export for loading new models when there are too many to create by hand. Developers can follow the following procedure to load a new corpus into the database.
 
-- On the webpage, click the language you are working with and then click metadata (You may first need to create the Language object if it doesn't exist - click metadata on the homepage). Click `Create a Corpus` and fill out the form.
+- On the webpage, click the language you are working with and then click metadata (You may first need to create the Language object if it doesn't exist. In this case, click metadata on the homepage). Click `Create a Corpus` and fill out the form.
 - The corpus you want to import must be in the STREUSLE json format. Place it in the directory `<Xposition>/scripts`.
 - Modify the top of the file `new_corpus.py` so that the constants `LANGUAGE`, `CORPUS`, etc. are correct.
 - Go to the xposition directory: `cd <Xposition>\xposition`
