@@ -6,10 +6,12 @@
 
 * `articles_for_import.py` - creates json for uploading articles (through the admin articlerevision interface)
 
+* `new_corpus.py` - the file to modify when uploading a new corpus
+
 * `generate_basic_files.py` - creates json files for uploading Supersenses and Adpositions
 
 * `generate_consrual_file.py` - creates json files for uploading Construals
 
-* `generate_uasge_file.py` - creates json files for uploading Usages
+* `generate_usage_file.py` - creates json files for uploading Usages
 
 * `generate_corpus_files.py` - creates json files for uploading CorpusSentences and PTokenAnnotations
