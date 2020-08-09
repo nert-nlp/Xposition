@@ -119,7 +119,7 @@ We use the library django-import-export for loading new models when there are to
 	- Run `python manage.py shell` and then type `exec(open(r'..\scripts\generate_corpus_files.py').read())`. This will create tsv files for all CorpusSentences and PTokenAnnotations in the corpus. 
 	- You can then import them through the admin interface on the webpage at `<homepage_url>/admin`, by clicking `Corpus sentences` or `Adposition token annotations`, Import, and then choose the corresponding file from `<Xposition>/scripts/<corpus><version>_files`. Adposition token annotations will be divided into multiple files labelled `ptoken_annotations0.tsv`, `ptoken_annotations1.tsv`, etc.  
 	- Note: PTokenAnnotations depend on usages and adpositions, so if there are any usages or adpositions missing from the database, you may get a 'Missing' error.
-
+- If you are importing a new version of an existing Corpus, please mark any older versions of the Corpus as deprecated, so that annotations from older versions will be hidden by default. Go to the corpus page and in the table titled "Metdata", click the edit button and check the box for "Is this a deprecated version of an existing Corpus".
 
 # Credits
 
