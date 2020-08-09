@@ -152,6 +152,11 @@ def corpus_stats(context):
                 <tr><th>Usages</th><td></td><td>{usages.count()}</tr>
                 <tr><th>Construals</th><td></td><td>{construals.count()}</tr>
             </table>'''
+    if c.deprecated:
+        s = '<div class="alert alert-warning">\n' \
+            '<h4>There is a newer version of this corpus. Annotations from this version will not appear on documentation pages by default.</h4>\n' \
+            '</div>\n\n'+s
+
     return mark_safe(s)
 
 @register.simple_tag(takes_context=True)
