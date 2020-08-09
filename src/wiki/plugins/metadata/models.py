@@ -865,7 +865,6 @@ class Corpus(SimpleMetadata):
 
     @classmethod
     def editurl(cls, urlpath):
-        # return "_plugin/metadata/editp"
         return reverse('wiki:metadata_edit_corpus', args=[urlpath])
 
     @cached_property
