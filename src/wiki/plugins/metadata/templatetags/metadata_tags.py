@@ -199,9 +199,12 @@ def token_by_exnum(context):
 @register.simple_tag(takes_context=True)
 def tokens_by_sentid(context):
     sentid = context['sent_id']
-    t = PTokenAnnotation.objects.filter(sentence__sent_id=sentid).order_by('id')
+    corpus_name = context['corpus']
+    corpora = Corpus.objects.all()
+    corpus = [c for c in corpora if str(c)==corpus_name][0]
+    t = PTokenAnnotation.objects.filter(sentence__sent_id=sentid, sentence__corpus=corpus).order_by('id')
     if not t:
-        raise Exception('Sent id "'+sentid+'" does not exist.')
+        raise Exception(f'Sent id "{sentid}" in {corpus_name} does not exist.')
     context['sentence'] = t[0].sentence
     return paginate(t, context)
 
