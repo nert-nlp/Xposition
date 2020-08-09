@@ -858,10 +858,15 @@ class Corpus(SimpleMetadata):
     description = models.CharField(max_length=200, blank=True, verbose_name="Description",
                                    help_text="Include number of tokens and basic statistics")
     languages = models.CharField(max_length=200, null=True, verbose_name="Language(s)")
-    deprecated = models.BooleanField(default=False, verbose_name="Is this an old/outdated version of a corpus?")
+    deprecated = models.BooleanField(default=False, verbose_name="Is this a deprecated version of a corpus?")
 
     def __str__(self):
         return self.name.lower() + self.version
+
+    @classmethod
+    def editurl(cls, urlpath):
+        # return "_plugin/metadata/editp"
+        return reverse('wiki:metadata_edit_corpus', args=[urlpath])
 
     @cached_property
     def template(self):
