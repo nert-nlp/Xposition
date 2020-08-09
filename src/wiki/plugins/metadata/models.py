@@ -858,7 +858,7 @@ class Corpus(SimpleMetadata):
     description = models.CharField(max_length=200, blank=True, verbose_name="Description",
                                    help_text="Include number of tokens and basic statistics")
     languages = models.CharField(max_length=200, null=True, verbose_name="Language(s)")
-
+    deprecated = models.BooleanField(default=False, verbose_name="Is this an old/outdated version of a corpus?")
 
     def __str__(self):
         return self.name.lower() + self.version

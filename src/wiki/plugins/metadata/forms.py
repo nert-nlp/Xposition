@@ -478,7 +478,7 @@ class CorpusForm(ArticleMetadataForm):
     class Meta:
         model = models.Corpus
 
-        fields = ('name', 'version', 'url', 'genre', 'description', 'languages')
+        fields = ('name', 'version', 'url', 'genre', 'description', 'languages', 'deprecated')
 
 
 
