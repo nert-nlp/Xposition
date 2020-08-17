@@ -452,7 +452,7 @@ class UsageForm(ArticleMetadataForm):
 class CorpusForm(ArticleMetadataForm):
 
     def __init__(self, article, request, *args, **kwargs):
-        super(CorpusForm, self).__init__(article, request, *args, **kwargs)
+        super(CorpusForm, self).__init__(article, request, disable_on_edit=('name','version',), *args, **kwargs)
 
     def edit(self, m, commit=True):
         if commit:
@@ -464,8 +464,8 @@ class CorpusForm(ArticleMetadataForm):
         version = m.version
         slug = self.get_corpus_slug(name, version)
         newarticle = self.newArticle_without_category(name=name,
-                                                                   parent=self.article.urlpath_set.all()[0],
-                                                                   slug=slug)
+                                                      parent=self.article.urlpath_set.all()[0],
+                                                      slug=slug)
         m.article = newarticle
         if commit:
             m.save()
@@ -478,7 +478,7 @@ class CorpusForm(ArticleMetadataForm):
     class Meta:
         model = models.Corpus
 
-        fields = ('name', 'version', 'url', 'genre', 'description', 'languages')
+        fields = ('name', 'version', 'url', 'genre', 'description', 'languages', 'deprecated')
 
 
 
