@@ -18,14 +18,14 @@ def other_p_tokens_in_sentence(pt):
 
 class PTokenAnnotationTable(tables.Table):
     """
-    Note: the caller should use 
-        .select_related('construal__article__current_revision', 
-            'construal__role__article__current_revision', 'construal__function__article__current_revision', 
+    Note: the caller should use
+        .select_related('construal__article__current_revision',
+            'construal__role__article__current_revision', 'construal__function__article__current_revision',
             'usage__current_revision__metadatarevision__usagerevision__article_revision__article',
             'sentence', 'adposition')
     for efficiency (if those fields aren't being queried directly).
     """
-    
+
     exid = tables.Column(accessor='id', verbose_name='Ex')
     lcontext = tables.Column(accessor='sentence.tokens', verbose_name='')
     target = tables.Column(accessor='sentence.tokens', verbose_name='P', order_by=('adposition', 'construal'))
@@ -35,11 +35,11 @@ class PTokenAnnotationTable(tables.Table):
     function = tables.Column(accessor='construal.function', verbose_name='Function')
     note = tables.Column(accessor='annotator_cluster', verbose_name='ℹ')
     sentid = tables.Column(accessor='sentence', verbose_name='Sent ID')
-    
-    
+
+
     def render_exid(self, record):
         return record.html
-    
+
     def value_lcontext(self, record, value):    # text only
         return ' '.join(value[:record.main_subtoken_indices[0]-1])
 
@@ -73,10 +73,10 @@ class PTokenAnnotationTable(tables.Table):
         tokens = [format_html('<span title="{}">{}</span>', i+1, value[i]) for i in range(record.main_subtoken_indices[0]-1, record.main_subtoken_indices[-1])]
         usageurl = record.usage.current_revision.metadatarevision.usagerevision.url
         return mark_safe(f'<a href="{usageurl}" class="usage">' + ' '.join(tokens) + '</a>')
-    
+
     def value_rcontext(self, record, value):   # text only
         return ' '.join(value[record.main_subtoken_indices[-1]:])
-    
+
     def render_rcontext(self, record, value):
         h = record.main_subtoken_indices[-1]    # beginning of right context
         tokens = [format_html('<span title="{}"' + self._gohead(q,record,rhs=True) + '>{}</span>', q, x) for q,x in enumerate(value[h:], start=h+1)]
@@ -87,30 +87,30 @@ class PTokenAnnotationTable(tables.Table):
                 assert j-h<=len(tokens)
                 tokens[i-h:j-h] = [anno.tokenhtml(offsets=True)]
         return mark_safe(' '.join(tokens))
-    
+
     def render_role(self, value):
         return value.html
-        
+
     def render_function(self, value):
         return value.html
-    
+
     def value_construal(self, value):
         return value if value.role is None else {True: '=', False: '≠'}[value.role==value.function]
-        
+
     def render_construal(self, value):
         special = value.special and value.special.strip()
         return mark_safe(f'<a href="{value.url}" class="{"misc-label" if special else "construal"}">{self.value_construal(value)}</a>')
-    
+
     def value_note(self, value):
         return value.strip()
-    
+
     def render_note(self, value):
         v = self.value_note(value)
         if v:
             return format_html('<span title="{}" style="cursor: help">ℹ</span>', v)
         else:
             return ''
-    
+
     def value_sentid(self, value):  # text only
         return value.sent_id
 
@@ -129,29 +129,28 @@ def tokens_for_supersense(article_id):
     t = PTokenAnnotation.objects.select_related('construal__article__current_revision',
                                                 'construal__role__article__current_revision', 'construal__function__article__current_revision',
                                                 'usage__current_revision__metadatarevision__usagerevision__article_revision__article',
-                                                'sentence', 'adposition').filter(Q(construal__role__article__id=article_id) | Q(construal__function__article__id=article_id)).order_by('sentence__sent_id')
+                                                'sentence', 'adposition').filter(Q(sentence__corpus__deprecated=False), Q(construal__role__article__id=article_id) | Q(construal__function__article__id=article_id)).order_by('sentence__sent_id')
     return t
-
 
 def tokens_for_construal(article_id):
     t = PTokenAnnotation.objects.select_related('construal__article__current_revision',
         'construal__role__article__current_revision', 'construal__function__article__current_revision',
         'usage__current_revision__metadatarevision__usagerevision__article_revision__article',
-        'sentence', 'adposition').filter(construal__article__id=article_id).order_by('sentence__sent_id')
+        'sentence', 'adposition', 'sentence__corpus').filter(construal__article__id=article_id, sentence__corpus__deprecated=False).order_by('sentence__sent_id')
     return t
 
 def tokens_for_adposition(article_id):
     t = PTokenAnnotation.objects.select_related('construal__article__current_revision',
         'construal__role__article__current_revision', 'construal__function__article__current_revision',
         'usage__current_revision__metadatarevision__usagerevision__article_revision__article',
-        'sentence', 'adposition').filter(adposition__article__id=article_id).order_by('sentence__sent_id')
+        'sentence', 'adposition', 'sentence__corpus').filter(adposition__article__id=article_id, sentence__corpus__deprecated=False).order_by('sentence__sent_id')
     return t
 
 def tokens_for_usage(article_id):
     t = PTokenAnnotation.objects.select_related('construal__article__current_revision',
         'construal__role__article__current_revision', 'construal__function__article__current_revision',
         'usage__current_revision__metadatarevision__usagerevision__article_revision__article',
-        'sentence', 'adposition').filter(usage__article__id=article_id).order_by('sentence__sent_id')
+        'sentence', 'adposition', 'sentence__corpus').filter(usage__article__id=article_id, sentence__corpus__deprecated=False).order_by('sentence__sent_id')
     return t
 
 token_funcs = {

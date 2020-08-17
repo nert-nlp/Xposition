@@ -193,7 +193,7 @@ class CorpusSentenceResource(resources.ModelResource):
 
     class Meta:
         model = ms.CorpusSentence
-        import_id_fields = ('sent_id',)
+        import_id_fields = ('sent_id','corpus')
         fields = ('corpus', 'sent_id', 'language', 'orthography', 'is_parallel', 'doc_id',
                   'text', 'tokens', 'word_gloss', 'sent_gloss', 'note', 'mwe_markup')
 
@@ -238,7 +238,6 @@ class PTokenAnnotationResource(resources.ModelResource):
         column_name='sent_id',
         attribute='sentence',
         widget=SentenceForeignKeyWidget(ms.CorpusSentence, 'sent_id'))
-
 
     usage = fields.Field(
         column_name='usage_id',
