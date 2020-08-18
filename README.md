@@ -124,5 +124,5 @@ We use the library django-import-export for loading new models when there are to
 # Credits
 
 * Project leader: [Nathan Schneider](http://nathan.cl) (Georgetown)
-* Xposition software development: Max Kim, Joseph Ledford (Georgetown)
+* Xposition software development: Max Kim, Joseph Ledford, Austin Blodgett, Luke Gessler (Georgetown)
 * Other collaborators/contributors: TODO/see PrepWiki
