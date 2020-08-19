@@ -1,8 +1,8 @@
 import json
 import os
 
-os.chdir('../scripts')
-from new_corpus import Data
+os.chdir('scripts')
+from .new_corpus import Data
 
 def main():
     data = Data(missing_ss_error=True, save_con=True)

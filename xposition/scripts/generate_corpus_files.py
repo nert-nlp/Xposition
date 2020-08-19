@@ -3,8 +3,8 @@ import os
 
 from unidecode import unidecode
 
-os.chdir('../scripts')
-from new_corpus import Data
+os.chdir('scripts')
+from .new_corpus import Data
 
 
 class TSV_Writer:

@@ -1,7 +1,7 @@
 import os, json
 
-os.chdir('../scripts')
-from new_corpus import Data
+os.chdir('scripts')
+from .new_corpus import Data
 
 
 def main():
