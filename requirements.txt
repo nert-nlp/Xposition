@@ -11,6 +11,6 @@ sorl-thumbnail==12.6.2
 django-nyt==1.1.5
 bleach==3.3.0
 markdown==3.1.1
-pillow==6.2.2
+pillow==7.1.0
 regex==2020.5.14
 git+git://github.com/nert-nlp/django-categories.git@master
