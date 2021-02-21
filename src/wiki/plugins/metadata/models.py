@@ -952,7 +952,7 @@ class PTokenAnnotation(models.Model):
     is_transitive = models.BooleanField(default=True, verbose_name="Transitive?",
                                         help_text='Does the adposition take an object?')
     is_typo  = models.BooleanField(default=False, verbose_name="Typo?")
-    is_abbr  = models.BooleanField(default=False, verbose_name="Abbreviation?")
+    is_abbr  = models.BooleanField(default=False, verbose_name="Abbrev?")
     mwe_subtokens = StringListField(max_length=200, blank=True, verbose_name="MWE Subtokens")
 
     main_subtoken_indices = IntListField(max_length=200, blank=True, null=True, verbose_name="Main Subtoken Indices")
