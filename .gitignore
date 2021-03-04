@@ -41,8 +41,10 @@ pip-log.txt
 
 # Unit test / coverage reports
 .coverage
+htmlcov
 .tox
 .cache
+htmlcov
 
 #Eclipse
 .project

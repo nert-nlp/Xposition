@@ -4,10 +4,13 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.cache import cache
 from django.db import models
 from django.db.models.fields import GenericIPAddressField as IPAddressField
-from django.db.models.signals import post_save, pre_delete, pre_save
+from django.db.models.signals import post_save
+from django.db.models.signals import pre_delete
+from django.db.models.signals import pre_save
 from django.urls import reverse
 from django.utils import translation
 from django.utils.safestring import mark_safe
+from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from mptt.models import MPTTModel
 from wiki import managers
@@ -17,8 +20,10 @@ from wiki.core.markdown import article_markdown
 from wiki.decorators import disable_signal_for_loaddata
 
 __all__ = [
-    'Article', 'ArticleForObject', 'ArticleRevision',
-    'BaseRevisionMixin',
+    "Article",
+    "ArticleForObject",
+    "ArticleRevision",
+    "BaseRevisionMixin",
 ]
 
 
@@ -27,47 +32,58 @@ class Article(models.Model):
     objects = managers.ArticleManager()
 
     current_revision = models.OneToOneField(
-        'ArticleRevision', verbose_name=_('current revision'),
-        blank=True, null=True, related_name='current_set',
+        "ArticleRevision",
+        verbose_name=_("current revision"),
+        blank=True,
+        null=True,
+        related_name="current_set",
         on_delete=models.CASCADE,
         help_text=_(
-            'The revision being displayed for this article. If you need to do a roll-back, simply change the value of this field.'),)
+            "The revision being displayed for this article. If you need to do a roll-back, simply change the value of this field."
+        ),
+    )
 
     created = models.DateTimeField(
         auto_now_add=True,
-        verbose_name=_('created'),
+        verbose_name=_("created"),
     )
     modified = models.DateTimeField(
         auto_now=True,
-        verbose_name=_('modified'),
-        help_text=_('Article properties last modified'))
+        verbose_name=_("modified"),
+        help_text=_("Article properties last modified"),
+    )
 
     owner = models.ForeignKey(
-        django_settings.AUTH_USER_MODEL, verbose_name=_('owner'),
-        blank=True, null=True, related_name='owned_articles',
+        django_settings.AUTH_USER_MODEL,
+        verbose_name=_("owner"),
+        blank=True,
+        null=True,
+        related_name="owned_articles",
         help_text=_(
-            'The owner of the article, usually the creator. The owner always has both read and write access.'),
-        on_delete=models.SET_NULL)
+            "The owner of the article, usually the creator. The owner always has both read and write access."
+        ),
+        on_delete=models.SET_NULL,
+    )
 
     group = models.ForeignKey(
-        settings.GROUP_MODEL, verbose_name=_('group'),
-        blank=True, null=True,
+        settings.GROUP_MODEL,
+        verbose_name=_("group"),
+        blank=True,
+        null=True,
         help_text=_(
-            'Like in a UNIX file system, permissions can be given to a user according to group membership. Groups are handled through the Django auth system.'),
-        on_delete=models.SET_NULL)
+            "Like in a UNIX file system, permissions can be given to a user according to group membership. Groups are handled through the Django auth system."
+        ),
+        on_delete=models.SET_NULL,
+    )
 
-    group_read = models.BooleanField(
-        default=True,
-        verbose_name=_('group read access'))
+    group_read = models.BooleanField(default=True, verbose_name=_("group read access"))
     group_write = models.BooleanField(
-        default=True,
-        verbose_name=_('group write access'))
-    other_read = models.BooleanField(
-        default=True,
-        verbose_name=_('others read access'))
+        default=True, verbose_name=_("group write access")
+    )
+    other_read = models.BooleanField(default=True, verbose_name=_("others read access"))
     other_write = models.BooleanField(
-        default=True,
-        verbose_name=_('others write access'))
+        default=True, verbose_name=_("others write access")
+    )
 
     # PERMISSIONS
     def can_read(self, user):
@@ -100,11 +116,14 @@ class Article(models.Model):
         cnt = 0
         for obj in self.articleforobject_set.filter(is_mptt=True):
             if user_can_read:
-                objects = obj.content_object.get_children().filter(
-                    **kwargs).can_read(user_can_read)
+                objects = (
+                    obj.content_object.get_children()
+                    .filter(**kwargs)
+                    .can_read(user_can_read)
+                )
             else:
                 objects = obj.content_object.get_children().filter(**kwargs)
-            for child in objects.order_by('articles__article__current_revision__title'):
+            for child in objects.order_by("articles__article__current_revision__title"):
                 cnt += 1
                 if max_num and cnt > max_num:
                     return
@@ -140,9 +159,10 @@ class Article(models.Model):
         revision.
         """
         assert self.id or save, (
-            'Article.add_revision: Sorry, you cannot add a'
-            'revision to an article that has not been saved '
-            'without using save=True')
+            "Article.add_revision: Sorry, you cannot add a"
+            "revision to an article that has not been saved "
+            "without using save=True"
+        )
         if not self.id:
             self.save()
         revisions = self.articlerevision_set.all()
@@ -171,12 +191,13 @@ class Article(models.Model):
     def get_for_object(cls, obj):
         return ArticleForObject.objects.get(
             object_id=obj.id,
-            content_type=ContentType.objects.get_for_model(obj)).article
+            content_type=ContentType.objects.get_for_model(obj),
+        ).article
 
     def __str__(self):
         if self.current_revision:
             return self.current_revision.title
-        obj_name = _('Article without content (%(id)d)') % {'id': self.id}
+        obj_name = _("Article without content (%(id)d)") % {"id": self.id}
         return str(obj_name)
 
     class Meta:
@@ -193,23 +214,29 @@ class Article(models.Model):
             content = preview_content
         else:
             content = self.current_revision.content
-        return mark_safe(article_markdown(content, self,
-                                          preview=preview_content is not None,
-                                          user=user))
+        return mark_safe(
+            article_markdown(
+                content, self, preview=preview_content is not None, user=user
+            )
+        )
 
     def get_cache_key(self):
         """Returns per-article cache key."""
         lang = translation.get_language()
 
-        return "wiki:article:{id:d}:{lang:s}".format(
-            id=self.current_revision.id if self.current_revision else self.id,
-            lang=lang)
+        key_raw = "wiki-article-{id}-{lang}".format(
+            id=self.current_revision.id if self.current_revision else self.id, lang=lang
+        )
+        # https://github.com/django-wiki/django-wiki/issues/1065
+        return slugify(key_raw, allow_unicode=True)
 
     def get_cache_content_key(self, user=None):
         """Returns per-article-user cache key."""
-        return "{key}:{user}".format(
-            key=self.get_cache_key(),
-            user=user.get_username() if user else "")
+        key_raw = "{key}-{user}".format(
+            key=self.get_cache_key(), user=user.get_username() if user else ""
+        )
+        # https://github.com/django-wiki/django-wiki/issues/1065
+        return slugify(key_raw, allow_unicode=True)
 
     def get_cached_content(self, user=None):
         """Returns cached version of rendered article.
@@ -241,26 +268,29 @@ class Article(models.Model):
     def clear_cache(self):
         cache.delete(self.get_cache_key())
 
-    def get_absolute_url(self):
+    def get_url_kwargs(self):
         urlpaths = self.urlpath_set.all()
         if urlpaths.exists():
-            return urlpaths[0].get_absolute_url()
-        else:
-            return reverse('wiki:get', kwargs={'article_id': self.id})
+            return {"path": urlpaths[0].path}
+        return {"article_id": self.id}
+
+    def get_absolute_url(self):
+        return reverse("wiki:get", kwargs=self.get_url_kwargs())
 
 
 class ArticleForObject(models.Model):
 
     objects = managers.ArticleFkManager()
 
-    article = models.ForeignKey('Article', on_delete=models.CASCADE)
+    article = models.ForeignKey("Article", on_delete=models.CASCADE)
     # Same as django.contrib.comments
     content_type = models.ForeignKey(
         ContentType,
         on_delete=models.CASCADE,
-        verbose_name=_('content type'),
-        related_name="content_type_set_for_%(class)s")
-    object_id = models.PositiveIntegerField(_('object ID'))
+        verbose_name=_("content type"),
+        related_name="content_type_set_for_%(class)s",
+    )
+    object_id = models.PositiveIntegerField(_("object ID"))
     content_object = GenericForeignKey("content_type", "object_id")
 
     is_mptt = models.BooleanField(default=False, editable=False)
@@ -269,10 +299,10 @@ class ArticleForObject(models.Model):
         return str(self.article)
 
     class Meta:
-        verbose_name = _('Article for object')
-        verbose_name_plural = _('Articles for object')
+        verbose_name = _("Article for object")
+        verbose_name_plural = _("Articles for object")
         # Do not allow several objects
-        unique_together = ('content_type', 'object_id')
+        unique_together = ("content_type", "object_id")
 
 
 class BaseRevisionMixin(models.Model):
@@ -281,37 +311,42 @@ class BaseRevisionMixin(models.Model):
     core model methods but respect the inheritor's freedom to do so itself."""
 
     revision_number = models.IntegerField(
+        editable=False, verbose_name=_("revision number")
+    )
+
+    user_message = models.TextField(
+        blank=True,
+    )
+    automatic_log = models.TextField(
+        blank=True,
         editable=False,
-        verbose_name=_('revision number'))
+    )
 
-    user_message = models.TextField(blank=True,)
-    automatic_log = models.TextField(blank=True, editable=False,)
-
-    ip_address = IPAddressField(
-        _('IP address'),
+    ip_address = IPAddressField(_("IP address"), blank=True, null=True, editable=False)
+    user = models.ForeignKey(
+        django_settings.AUTH_USER_MODEL,
+        verbose_name=_("user"),
         blank=True,
         null=True,
-        editable=False)
-    user = models.ForeignKey(django_settings.AUTH_USER_MODEL, verbose_name=_('user'),
-                             blank=True, null=True,
-                             on_delete=models.SET_NULL)
+        on_delete=models.SET_NULL,
+    )
 
     modified = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
 
     previous_revision = models.ForeignKey(
-        'self', blank=True, null=True, on_delete=models.SET_NULL
+        "self", blank=True, null=True, on_delete=models.SET_NULL
     )
 
     # NOTE! The semantics of these fields are not related to the revision itself
     # but the actual related object. If the latest revision says "deleted=True" then
     # the related object should be regarded as deleted.
     deleted = models.BooleanField(
-        verbose_name=_('deleted'),
+        verbose_name=_("deleted"),
         default=False,
     )
     locked = models.BooleanField(
-        verbose_name=_('locked'),
+        verbose_name=_("locked"),
         default=False,
     )
 
@@ -319,9 +354,9 @@ class BaseRevisionMixin(models.Model):
         if request.user.is_authenticated:
             self.user = request.user
             if settings.LOG_IPS_USERS:
-                self.ip_address = request.META.get('REMOTE_ADDR', None)
+                self.ip_address = request.META.get("REMOTE_ADDR", None)
         elif settings.LOG_IPS_ANONYMOUS:
-            self.ip_address = request.META.get('REMOTE_ADDR', None)
+            self.ip_address = request.META.get("REMOTE_ADDR", None)
 
     def inherit_predecessor(self, predecessor):
         """
@@ -348,19 +383,24 @@ class ArticleRevision(BaseRevisionMixin, models.Model):
 
     objects = managers.ArticleFkManager()
 
-    article = models.ForeignKey('Article', on_delete=models.CASCADE,
-                                verbose_name=_('article'))
+    article = models.ForeignKey(
+        "Article", on_delete=models.CASCADE, verbose_name=_("article")
+    )
 
     # This is where the content goes, with whatever markup language is used
-    content = models.TextField(blank=True, verbose_name=_('article contents'))
+    content = models.TextField(blank=True, verbose_name=_("article contents"))
 
     # This title is automatically set from either the article's title or
     # the last used revision...
     title = models.CharField(
-        max_length=512, verbose_name=_('article title'),
-        null=False, blank=False,
+        max_length=512,
+        verbose_name=_("article title"),
+        null=False,
+        blank=False,
         help_text=_(
-            'Each revision contains a title field that must be filled out, even if the title has not changed'))
+            "Each revision contains a title field that must be filled out, even if the title has not changed"
+        ),
+    )
 
     # TODO:
     # Allow a revision to redirect to another *article*. This
@@ -377,7 +417,7 @@ class ArticleRevision(BaseRevisionMixin, models.Model):
         # Enforce DOS line endings \r\n. It is the standard for web browsers,
         # but when revisions are created programatically, they might
         # have UNIX line endings \n instead.
-        self.content = self.content.replace('\r', '').replace('\n', '\r\n')
+        self.content = self.content.replace("\r", "").replace("\n", "\r\n")
 
     def inherit_predecessor(self, article):
         """
@@ -392,9 +432,9 @@ class ArticleRevision(BaseRevisionMixin, models.Model):
         self.locked = predecessor.locked
 
     class Meta:
-        get_latest_by = 'revision_number'
-        ordering = ('created',)
-        unique_together = ('article', 'revision_number')
+        get_latest_by = "revision_number"
+        ordering = ("created",)
+        unique_together = ("article", "revision_number")
 
 
 ######################################################
@@ -421,13 +461,13 @@ def on_article_delete_clear_cache(instance, **kwargs):
 
 @disable_signal_for_loaddata
 def on_article_revision_pre_save(**kwargs):
-    instance = kwargs['instance']
-    if kwargs.get('created', False):
+    instance = kwargs["instance"]
+    if kwargs.get("created", False):
         revision_changed = (
-            not instance.previous_revision and
-            instance.article and
-            instance.article.current_revision and
-            instance.article.current_revision != instance
+            not instance.previous_revision
+            and instance.article
+            and instance.article.current_revision
+            and instance.article.current_revision != instance
         )
         if revision_changed:
             instance.previous_revision = instance.article.current_revision
@@ -443,7 +483,7 @@ def on_article_revision_pre_save(**kwargs):
 @disable_signal_for_loaddata
 def on_article_revision_post_save(**kwargs):
 
-    instance = kwargs['instance']
+    instance = kwargs["instance"]
     if not instance.article.current_revision:
         # If I'm saved from Django admin, then article.current_revision is
         # me!

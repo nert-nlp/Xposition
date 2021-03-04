@@ -1,5 +1,6 @@
 import html
-from urllib.parse import urljoin, urlparse
+from urllib.parse import urljoin
+from urllib.parse import urlparse
 
 from markdown.extensions import Extension
 from markdown.postprocessors import AndSubstitutePostprocessor
@@ -25,7 +26,7 @@ def urljoin_internal(base, url):
     res1 = urljoin(canary1 + base, url)
     res2 = urljoin(canary2 + base, url)
     if res1.startswith(canary1) and res2.startswith(canary2):
-        return res1[len(canary1):]
+        return res1[len(canary1) :]
 
 
 class LinkTreeprocessor(Treeprocessor):

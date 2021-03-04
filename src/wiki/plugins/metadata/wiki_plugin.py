@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-from wiki.compat import include, url
+#from wiki.compat import include, url
+from django.urls import include, re_path as url
 from django.utils.translation import gettext as _
 from wiki.core.plugins import registry
 from wiki.core.plugins.base import BasePlugin

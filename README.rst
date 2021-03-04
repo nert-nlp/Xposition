@@ -1,22 +1,20 @@
 django-wiki
 ===========
 
-|Docs| |Build Status| |Coverage Status| |PyPi| |Dependency Status| |IRC|
+|Docs| |Build Status| |Coverage Status| |PyPi| |Downloads| |IRC|
 
 .. |Docs| image:: https://readthedocs.org/projects/django-wiki/badge/?version=latest
-   :target: http://django-wiki.readthedocs.io/
+   :target: https://django-wiki.readthedocs.io/
 .. |Build Status| image:: https://travis-ci.org/django-wiki/django-wiki.png?branch=master
    :target: https://travis-ci.org/django-wiki/django-wiki
 .. |Coverage Status| image:: https://codecov.io/github/django-wiki/django-wiki/coverage.svg?branch=master
    :target: https://codecov.io/github/django-wiki/django-wiki?branch=master
 .. |PyPi| image:: https://badge.fury.io/py/wiki.svg
-   :target: https://pypi.python.org/pypi/wiki/
+   :target: https://pypi.org/project/wiki/
 .. |Downloads| image:: https://img.shields.io/pypi/dm/wiki.svg
-   :target: https://pypi.python.org/pypi/wiki/
-.. |Dependency Status| image:: https://gemnasium.com/django-wiki/django-wiki.svg
-   :target: https://gemnasium.com/django-wiki/django-wiki
+   :target: https://pypi.org/project/wiki/
 .. |IRC| image:: https://img.shields.io/badge/irc-%23django--wiki%20on%20freenode-blue.svg
-   :target: http://webchat.freenode.net?channels=%23django-wiki
+   :target: https://webchat.freenode.net?channels=%23django-wiki
 
 Django support
 --------------
@@ -26,6 +24,12 @@ The below table explains which Django versions are supported.
 +------------------+----------------+--------------+
 | Release          | Django         | Upgrade from |
 +==================+================+==============+
+| 0.7.x            | 2.2, 3.0, 3.1  | 0.5 or 0.6   |
++------------------+----------------+--------------+
+| 0.6.x            | 2.1, 2.2, 3.0  | 0.5          |
++------------------+----------------+--------------+
+| 0.5.x            | 2.1, 2.2       | 0.4          |
++------------------+----------------+--------------+
 | 0.4.x            | 1.11, 2.0, 2.1 | 0.3          |
 +------------------+----------------+--------------+
 | 0.3.x            | 1.8, 1.9,      | 0.2          |
@@ -40,23 +44,30 @@ The below table explains which Django versions are supported.
 +------------------+----------------+--------------+
 
 For upgrade instructions, please refer to the `Release
-Notes <http://django-wiki.readthedocs.io/en/latest/release_notes.html>`__
+Notes <https://django-wiki.readthedocs.io/en/latest/release_notes.html>`__
 
 
 Translations (Transifex)
 ------------------------
 
-Django-wiki has almost fully translated into 7 languages, apart from the
+Django-wiki has almost fully translated into 12 languages, apart from the
 default (English). But please help out in adding more languages! It's
 very easy, you don't even need to be a programmer.
 
-https://www.transifex.com/django-wiki/django-wiki/
+Some languages...
+
+* Just need a little push, as they are almost fully complete
+* Got initiatied and need a new instigator to carry on the ambitions
+* Do not exist yet - but you can request them and become the coordinator.
+
+`Visit the django-wiki project on Transifex <https://www.transifex.com/django-wiki/django-wiki/>`__
 
 Demo
 ----
 
 A demo running the latest ``master`` is available here, sign up for an
-account to see the notification system.
+account to see the notification system, or you can log in with
+user:``test`` and password:``test``.
 
 https://demo.django-wiki.org
 
@@ -94,7 +105,7 @@ Contributing
 ------------
 
 Please read our
-`Developer Guide <http://django-wiki.readthedocs.io/en/latest/development/index.html>`__
+`Developer Guide <https://django-wiki.readthedocs.io/en/latest/development/index.html>`__
 
 Manifesto
 ---------
@@ -128,7 +139,7 @@ Docs
 
 See the docs/ folder, or read them at:
 
-http://django-wiki.readthedocs.io/en/latest/
+https://django-wiki.readthedocs.io/en/latest/
 
 If you wish to add something, please ask in the google group or raise an
 issue if you're in doubt about whether something might change.
@@ -148,6 +159,7 @@ As of now, Django has existed for too long without a proper wiki
 application. The dream of django-wiki is to become a contestant
 alongside Mediawiki, so that Django developers can stick to the Django
 platform even when facing tough challenges such as implementing a wiki.
+
 
 Q&A
 ---
@@ -183,8 +195,13 @@ on your host system.
 -  `django-sekizai <https://github.com/ojii/django-sekizai/>`__
 -  `sorl-thumbnail <https://github.com/mariocesar/sorl-thumbnail>`__
 -  `Pillow (Python Imaging Library) <https://pillow.readthedocs.io/en/latest/installation.html>`__
--  Python>=3.4
+-  Python>=3.5
 
+
+Docker tl;dr
+------------
+
+There is a docker container available here: https://github.com/riotkit-org/docker-django-wiki
 
 
 Acknowledgements

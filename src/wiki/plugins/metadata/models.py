@@ -3,6 +3,7 @@ from django.urls import reverse
 from django.core.validators import RegexValidator
 from django.utils.html import conditional_escape, format_html, mark_safe
 from django.db import models
+
 from bitfield import BitField
 import copy, sys, re, urllib
 from enum import IntEnum
@@ -20,6 +21,7 @@ from django.db.models.signals import pre_save, post_save
 from wiki.core.markdown import article_markdown
 from wiki.decorators import disable_signal_for_loaddata
 from categories.models import ArticleCategory
+
 from wiki.models.pluginbase import ArticlePlugin, RevisionPlugin, RevisionPluginRevision
 from django.core.exceptions import ObjectDoesNotExist
 

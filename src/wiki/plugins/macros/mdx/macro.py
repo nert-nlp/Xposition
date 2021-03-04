@@ -17,9 +17,8 @@ re_sq_short = r'"([^"\\]*(?:\\.[^"\\]*)*)"'
 MACRO_RE = r"(?i)(\[(?P<macro>\w+)(?P<kwargs>(\s(\w+:)?(%s|[\w'`&!%%+/$-]+))*)\])" % re_sq_short
 MACRO_RE_COMPILED = re.compile(MACRO_RE)
 KWARG_RE = re.compile(
-    r'\s*((?P<arg>\w+):)?(?P<value>(%s|[^\s:]+))' %
-    re_sq_short,
-    re.IGNORECASE)
+    r"\s*(?P<arg>\w+)(:(?P<value>([^\']+|%s)))?" % re_sq_short, re.IGNORECASE
+)
 
 # Positional macros were deprecated in markdown 3.0, so we need to kwargize
 # the existing positional macros during the preprocessing step. This dict
@@ -32,9 +31,7 @@ class MacroExtension(markdown.Extension):
     """ Macro plugin markdown extension for django-wiki. """
 
     def extendMarkdown(self, md):
-        md.preprocessors.register(SubstitutionPreprocessor(), 'escaper', 5)
-        md.inlinePatterns.register(MacroPattern(MACRO_RE, md), 'dw-macros', 5)
-        md.postprocessors.register(SubstitutionPostprocessor(), 'unescaper', 5)
+        md.inlinePatterns.add("dw-macros", MacroPattern(MACRO_RE, md), ">link")
 
 
 # Escaping --------------------------------------------------------------------------------
@@ -76,28 +73,21 @@ class SubstitutionPostprocessor(markdown.postprocessors.Postprocessor):
 # Macro implementation ----------------------------------------------------------------------
 class MacroPattern(markdown.inlinepatterns.Pattern):
     """django-wiki macro preprocessor - parse text for various [some_macro] and
-    [some_macro (kw:arg)*] references. """
+    [some_macro (kw:arg)*] references."""
 
     def handleMatch(self, m):
-        macro = m.group('macro').strip()
+        macro = m.group("macro").strip()
         if macro not in settings.METHODS or not hasattr(self, macro):
             return m.group(2)
 
-        kwargs = m.group('kwargs')
+        kwargs = m.group("kwargs")
         if not kwargs:
             return getattr(self, macro)()
         kwargs_dict = {}
-        for i, kwarg in enumerate(KWARG_RE.finditer(kwargs)):
-
-            # Begin Xposition-specific hack: if there's no :, we have a positional macro
-            arg = kwarg.group('arg')
-            value = kwarg.group('value')
-            if arg is None and macro in POSITIONAL_MACROS:
-                arg = "arg" + str(i)
-                if len(value) > 2 and value[0] == '"' and value[-1] == '"':
-                    value = value[1:-1]
-            elif arg is None:
-                arg = value
+        for kwarg in KWARG_RE.finditer(kwargs):
+            arg = kwarg.group("arg")
+            value = kwarg.group("value")
+            if value is None:
                 value = True
             if isinstance(value, str):
                 # If value is enclosed with ': Remove and
@@ -114,38 +104,40 @@ class MacroPattern(markdown.inlinepatterns.Pattern):
         html = render_to_string(
             "wiki/plugins/macros/article_list.html",
             context={
-                'article_children': self.markdown.article.get_children(
-                    article__current_revision__deleted=False),
-                'depth': int(depth) + 1,
-            })
+                "article_children": self.markdown.article.get_children(
+                    article__current_revision__deleted=False
+                ),
+                "depth": int(depth) + 1,
+            },
+        )
         return self.markdown.htmlStash.store(html)
 
     article_list.meta = dict(
-        short_description=_('Article list'),
-        help_text=_('Insert a list of articles in this level.'),
-        example_code='[article_list depth:2]',
-        args={'depth': _('Maximum depth to show levels for.')}
+        short_description=_("Article list"),
+        help_text=_("Insert a list of articles in this level."),
+        example_code="[article_list depth:2]",
+        args={"depth": _("Maximum depth to show levels for.")},
     )
 
     def toc(self):
         return "[TOC]"
 
     toc.meta = dict(
-        short_description=_('Table of contents'),
-        help_text=_('Insert a table of contents matching the headings.'),
-        example_code='[TOC]',
-        args={}
+        short_description=_("Table of contents"),
+        help_text=_("Insert a table of contents matching the headings."),
+        example_code="[TOC]",
+        args={},
     )
 
     def wikilink(self):
         return ""
 
     wikilink.meta = dict(
-        short_description=_('WikiLinks'),
-        help_text=_(
-            'Insert a link to another wiki page with a short notation.'),
-        example_code='[[WikiLink]]',
-        args={})
+        short_description=_("WikiLinks"),
+        help_text=_("Insert a link to another wiki page with a short notation."),
+        example_code="[[WikiLink]]",
+        args={},
+    )
 
     def errormsg(self):
         return etree.fromstring('<span class="error">' + 'Macro Error: please see example usage' + '</span>')
