@@ -91,7 +91,7 @@ def adpositions_for_lang(context):
         'article__urlpath_set').filter(current_revision__metadatarevision__adpositionrevision__lang__article=larticle,
             article__current_revision__deleted=False)
     a = a.annotate(transliteration=F('current_revision__metadatarevision__adpositionrevision__transliteration'),
-                   num_usages=Count('usages'))
+                   num_usages=Count('usages__construal',distinct=True))
     context['swps'] = a.filter(current_revision__metadatarevision__adpositionrevision__is_pp_idiom=False).exclude(
         current_revision__metadatarevision__name__contains='_')
     context['mwps'] = a.filter(current_revision__metadatarevision__adpositionrevision__is_pp_idiom=False,
