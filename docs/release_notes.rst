@@ -10,24 +10,45 @@ Release plan
 * **0.4.x** supports Django 1.11 and Django 2.1 and Python 3.4+.
 * **0.5.x** Remove Django 1.11 support, adds Django 2.2 and 3.x support. Python 3.5+.
 * **0.6.x** Targets Bootstrap v4, if you are interested in this work, please get in touch on Github!
-* **0.7.x** Removes Django 2.1 support, adds Django 3.1
+* **0.7.x** Removes Django 2.1 support, adds Django 3.1, 3.2
 
-0.7.4.dev
----------
+
+0.7.5
+-----
+
+Released on 2021-04-10.
+
+Added
+~~~~~
+
+* Django 3.2 support :url-issue:`1121` (Benjamin Bach)
+
+
+0.7.4
+-----
+
+Released on 2021-04-10.
 
 Fixed
 ~~~~~
 
+* Settings page on article broken for non-superusers :url-issue:`1058` (Benjamin Bach)
 * Dependency ``bleach`` is bumped to ``>=3.3.0,<3.4`` after security advisory :url-issue:`1109` (Benjamin Balder Bach)
+* Font-awesome icon on external links was not showing :url-issue:`1111` (Benjamin Balder Bach)
+* Red links were not correctly displaying in some cases :url-issue:`1114` (Gereon Kaiping)
 
 
-Translations
-~~~~~~~~~~~~
+Translation updates
+~~~~~~~~~~~~~~~~~~~
 
+* Chinese: 100% translated, 100% reviewed
 * Czech: 100% translated
-* Turkish: 100% translated
+* Dutch: 100% translated, 100% reviewed
 * French: Some syntax fixes, remains 100% translated
-* Dutch: 100% reviewed
+* Hungarian: 100% translated
+* Korean: 100% translated, 96% reviewed
+* Russian: 100% translated
+* Turkish: 100% translated
 
 
 0.7.3

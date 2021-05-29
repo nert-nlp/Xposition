@@ -1,6 +1,7 @@
 import pprint
 
 from django.contrib.messages import constants
+from django.contrib.messages import get_messages
 from django.http import JsonResponse
 from django.shortcuts import resolve_url
 from django.test import override_settings
@@ -16,6 +17,8 @@ from wiki.models import URLPath
 
 from ..base import ArticleWebTestUtils
 from ..base import DjangoClientTestBase
+from ..base import NORMALUSER1_PASSWORD
+from ..base import NORMALUSER1_USERNAME
 from ..base import RequireRootArticleMixin
 from ..base import SeleniumBase
 from ..base import SUPERUSER1_USERNAME
@@ -120,14 +123,31 @@ class ArticleViewViewTests(
             },
         )
 
-        message = getattr(self.client.cookies["messages"], "value")
-
         self.assertRedirects(response, resolve_url("wiki:get", path=""))
+        messages = [m.message for m in get_messages(response.wsgi_request)]
         self.assertIn(
-            "This article together with all " "its contents are now completely gone",
-            message,
+            "This article together with all its contents are now completely gone",
+            messages[0],
         )
         self.assertNotContains(self.get_by_path(""), "Sub Article 1")
+
+    def test_anonymous_root(self):
+        self.client.logout()
+        response = self.client.get(
+            reverse("wiki:get", kwargs={"article_id": self.root_article.pk})
+        )
+        self.assertEqual(response.status_code, 200)
+        response = self.client.get(reverse("wiki:get", kwargs={"path": ""}))
+        self.assertEqual(response.status_code, 200)
+
+    def test_normaluser_root(self):
+        self.client.login(username=NORMALUSER1_USERNAME, password=NORMALUSER1_PASSWORD)
+        response = self.client.get(
+            reverse("wiki:get", kwargs={"article_id": self.root_article.pk})
+        )
+        self.assertEqual(response.status_code, 200)
+        response = self.client.get(reverse("wiki:get", kwargs={"path": ""}))
+        self.assertEqual(response.status_code, 200)
 
 
 class CreateViewTest(
@@ -713,8 +733,9 @@ class SettingsViewTests(
         self.root_article.refresh_from_db()
         self.assertEqual(self.root_article.group, group)
         self.assertEqual(self.root_article.owner, self.superuser1)
-        self.assertEqual(len(response.context.get("messages")), 1)
-        message = response.context.get("messages")._loaded_messages[0]
+        messages = [m for m in get_messages(response.wsgi_request)]
+        self.assertEqual(len(messages), 1)
+        message = messages[0]
         self.assertEqual(message.level, constants.SUCCESS)
         self.assertEqual(
             message.message, "Permission settings for the article were updated."
@@ -748,8 +769,9 @@ class SettingsViewTests(
             form_values,
             follow=True,
         )
-        self.assertEqual(len(response.context.get("messages")), 1)
-        message = response.context.get("messages")._loaded_messages[0]
+        messages = [m for m in get_messages(response.wsgi_request)]
+        self.assertEqual(len(messages), 1)
+        message = messages[0]
         self.assertEqual(message.level, constants.SUCCESS)
         self.assertEqual(
             message.message,
@@ -769,6 +791,19 @@ class SettingsViewTests(
         response = self.client.get(
             reverse("wiki:settings", kwargs={"article_id": self.root_article.pk})
         )
+        self.assertEqual(response.status_code, 200)
+
+    def test_normal_user(self):
+        """
+        Tests that the settings view page renders for a normal user
+        Regression test: https://github.com/django-wiki/django-wiki/issues/1058
+        """
+        response = self.client.post(
+            resolve_url("wiki:create", path=""),
+            {"title": "Level 1", "slug": "Level1", "content": "Content level 1"},
+        )
+        self.client.login(username=NORMALUSER1_USERNAME, password=NORMALUSER1_PASSWORD)
+        response = self.client.get(reverse("wiki:settings", kwargs={"path": "level1/"}))
         self.assertEqual(response.status_code, 200)
 
     def test_content(self):
