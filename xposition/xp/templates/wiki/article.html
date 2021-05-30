@@ -11,8 +11,8 @@
 {% block wiki_contents %}
 
   <div id="article-container">
-   <nav id="article-menu" class="nav navbar navbar-expand-md nav-pills ml-auto">
-    <ul class="navbar-nav">
+   <nav id="article-menu" class="nav navbar navbar-expand-md nav-pills ">
+    <ul class="navbar-nav mr-auto">
       <li class="float-left nav-item" id="article-title-li">
         <h1 id="article-title">
           {% block wiki_articletitle %}
@@ -29,7 +29,7 @@
         </h1>
       </li>
     </ul>
-     <ul class="nav navbar-nav  justify-content-right ml-auto">
+     <ul class=" justify-content-end navbar-nav ml-auto ">
       {% include "wiki/includes/article_menu.html" %}
     </ul>
    </nav>
