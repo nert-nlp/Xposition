@@ -8,10 +8,10 @@
 {% endblock %}
 
 {% block wiki_contents_tab %}
-  <div class="col-md-9">
+  <div class="col-md-3">
     {% wiki_render article %}
 
-    <div class="col-md-4">
+    <div class="col-md-3">
       {% usagerevs_for_adp as usages %}
       <h4 id="usages">Usages ({{usages|length}})</h4>
       <ul>
@@ -21,7 +21,7 @@
       </ul>
     </div>
 
-    <div class="col-md-12">
+    <div class="col-md-3">
       {% include "category_article_view.html" %}
     </div>
   </div>
@@ -30,7 +30,7 @@
   <div class="col-md-3">
     {% metadata_display %}{# if there is metadata for the article, display it! #}
   </div>
-  <div class="col-md-12">
+  <div class="col-md-3">
     <div id="table-container" class="table-responsive" style="max-height: 50vh; overflow: auto;">
       <div style="height: 50vh;" class="text-center">
         <i class="fa fa-spinner fa-spin" style="font-size:24px; margin-top: 25vh;"></i>

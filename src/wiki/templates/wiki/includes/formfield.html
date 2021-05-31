@@ -2,8 +2,8 @@
   {{ field }}
 {% else %}
 
-<div id="div_{{ field.auto_id }}" class="row form-group{% if field.errors %} has-error{% endif %}">
-  <div class="wiki-label col-xs-3 col-lg-2">
+<div id="div_{{ field.auto_id }}" class="form-group{% if field.errors %} has-error{% endif %}">
+  <div class="wiki-label ">
   {% if field.label %}
     <label for="{{ field.id_for_label }}" class="control-label {% if field.field.required %}requiredField{% endif %}">
     {{ field.label|safe }}
@@ -11,7 +11,7 @@
   {% endif %}
   </div>
   <div class="wiki-control col-xs-9 col-lg-10">
-    <div class="flex-wrap">{{ field }} {% if field.field.required %}<span class="asteriskField">*</span>{% endif %}</div>
+    {{ field }} {% if field.field.required %}<span class="asteriskField">*</span>{% endif %}
     {% if field.errors %}
       {% for error in field.errors %}
         <div id="error_{{ forloop.counter }}_{{ field.auto_id }}" class="help-block"><strong>{{ error }}</strong></div>

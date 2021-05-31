@@ -5659,10 +5659,12 @@ input[type="button"].btn-block {
   color: #6c757d;
 }
 .pagination {
-  display: flex;
+  display: grid;
+  grid-auto-flow:column;
   padding-left: 0;
   list-style: none;
   border-radius: 0.25rem;
+
 }
 .page-link {
   position: relative;
