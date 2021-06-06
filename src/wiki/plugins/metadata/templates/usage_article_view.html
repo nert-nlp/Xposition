@@ -1,6 +1,7 @@
 {% extends "wiki/article.html" %}
 {% load wiki_tags i18n sekizai_tags %}
 {% load metadata_tags %}
+{% load static %}
 
 {% block wiki_articletitle %}
 <i class="fa fa-book fa-2x" aria-hidden="true" style="opacity: .1; position: absolute; left: -80px;"></i>
@@ -8,17 +9,18 @@
 {% endblock %}
 
 {% block wiki_contents_tab %}
-  <div class="col-md-9">
+<div class="row">
+<div class="col-md-9">
     {% wiki_render article %}
 
-    <div class="col-md-4">
+    <div class="col-md-auto">
       <h4>Examples</h4>
       <ul>
         TODO
       </ul>
     </div>
 
-    <div class="col-md-12">
+    <div class="col-md-auto">
       {% include "category_article_view.html" %}
     </div>
   </div>
@@ -27,6 +29,7 @@
   <div class="col-md-3">
     {% metadata_display %}{# if there is metadata for the article, display it! #}
   </div>
+  </div>
   <div class="col-md-12">
     <div id="table-container" class="table-responsive" style="max-height: 50vh; overflow: auto;">
       <div style="height: 50vh;" class="text-center">
@@ -34,6 +37,8 @@
       </div>
     </div>
   </div>
+      <script src="{% static "wiki/js/jquery.min.js" %}"></script>
+      <script src="{% static "wiki/js/jquery-3.4.1.min.js" %}"></script>
   <script>
     $.ajax({
       url: "/_table/usage/{{article.id}}",

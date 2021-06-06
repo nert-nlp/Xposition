@@ -8,13 +8,14 @@
 {% endblock %}
 
 {% block wiki_contents_tab %}
+<div class="row">
   <div class="col-md-9">
     {% wiki_render article %}
-    
+
     {% corpus_stats %}
-    
-    
-    
+
+
+
     <div class="col-md-12">
       {% include "category_article_view.html" %}
     </div>
@@ -24,36 +25,37 @@
   <div class="col-md-3">
     {% metadata_display %}{# if there is metadata for the article, display it! #}
   </div>
-
+</div>
 
 <div class="col-md-12">
+  <div class="row">
     <div class="col-md-2">
 		<h5 style="min-height: 50px;">Adpositions by token frequency</h5>
 		<ul class="list-unstyled">
 		  {% for p in adpositions_freq %}
-		  <li>{{p.html}} {{p.transliteration}} 
+		  <li>{{p.html}} {{p.transliteration}}
 		  (<span class="freq">{{p.adposition_freq}}</span>)</li>
 		  {% endfor %}
 		</ul>
     </div>
-    
+
     {% comment %}
     <div class="col-md-2">
 		<h5 style="min-height: 50px;">Adpositions by unique construals</h5>
 		<ul class="list-unstyled">
 		  {% for p in adpositions_nconstruals %}
-		  <li>{{p.html}} {{p.transliteration}} 
+		  <li>{{p.html}} {{p.transliteration}}
 		  (<span class="freq">{{p.adposition_nconst}}</span>)</li>
 		  {% endfor %}
 		</ul>
     </div>
     {% endcomment %}
-    
+
     <div class="col-md-3">
 		<h5 style="min-height: 50px;">Usages by token frequency</h5>
 		<ul class="list-unstyled">
 		  {% for u in usages_freq %}
-		  <li>{{u.html}} 
+		  <li>{{u.html}}
 		  (<span class="freq">{{u.usage_freq}}</span>)</li>
 		  {% endfor %}
 		</ul>
@@ -62,7 +64,7 @@
 		<h5 style="min-height: 50px;">Construals by token frequency</h5>
 		<ul class="list-unstyled">
 		  {% for c in construals_freq %}
-		  <li>{{c.html}} 
+		  <li>{{c.html}}
 		  (<span class="freq">{{c.construal_freq}}</span>)</li>
 		  {% endfor %}
 		</ul>
@@ -71,7 +73,7 @@
 		<h5 style="min-height: 50px;">Supersenses by role token frequency</h5>
 		<ul class="list-unstyled">
 		  {% for s in ss_role_freq %}
-		  <li>{{s.html}} 
+		  <li>{{s.html}}
 		  (<span class="freq">{{s.role_freq}}</span>)</li>
 		  {% endfor %}
 		</ul>
@@ -80,11 +82,12 @@
 		<h5 style="min-height: 50px;">Supersenses by function token frequency</h5>
 		<ul class="list-unstyled">
 		  {% for s in ss_fxn_freq %}
-		  <li>{{s.html}} 
+		  <li>{{s.html}}
 		  (<span class="freq">{{s.fxn_freq}}</span>)</li>
 		  {% endfor %}
 		</ul>
     </div>
+  </div>
 </div>
 
 {% endblock %}
