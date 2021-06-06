@@ -1,6 +1,7 @@
 {% extends "wiki/article.html" %}
 {% load wiki_tags i18n sekizai_tags %}
 {% load metadata_tags %}
+{% load  static %}
 
 {% block wiki_articletitle %}
 <i class="fa fa-globe fa-2x" aria-hidden="true" style="opacity: .1; position: absolute; left: -80px;"></i>
@@ -52,6 +53,14 @@
       </div>
     </div>
   </div>
+      <script src="{% static "wiki/js/jquery.min.js" %}"></script>
+      <script src="{% static "wiki/js/jquery-3.4.1.min.js" %}"></script>
+      <script src="{% static "wiki/js/core.js" %}"></script>
+      <script src="{% static "wiki/js/popper.js" %}"></script>
+      <script src="{% static "wiki/bootstrap/js/bootstrap.bundle.min.js" %}"></script>
+      <script src="{% static "wiki/js/respond.min.js" %}"></script>
+
+
   <script>
     $.ajax({
       url: "/_table/supersense/{{article.id}}",
