@@ -18,7 +18,7 @@
       {% endblocktrans %}
     {% endwith %}
   </div>
-  <div class="float-right">
+  <div class="justify-content-end ml-auto">
     <a class="btn btn-secondary"
        {% if only_last == "1" %}
          href="{% url 'wiki:globalhistory' only_last=0 %}">
@@ -109,8 +109,8 @@
       {% endif %}
     </div>
   {% endif %}
-
-  {% include "wiki/includes/pagination.html" %}
 </div>
+  {% include "wiki/includes/pagination.html" %}
+
 {% endspaceless %}
 {% endblock %}

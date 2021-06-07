@@ -197,13 +197,13 @@ def paginate(items, context):
 
 @register.simple_tag(takes_context=True)
 def token_by_exnum(context):
-    exnum = int(context['exnum'])
+    exnum = int(context['exnum']._wrapped)
     t = PTokenAnnotation.objects.filter(id=exnum-3000)
     return paginate(t, context)
 
 @register.simple_tag(takes_context=True)
 def tokens_by_sentid(context):
-    sentid = context['sent_id']
+    sentid = context['sent_id']._wrapped
     corpus_name = context['corpus']
     corpora = Corpus.objects.all()
     corpus = [c for c in corpora if str(c)==corpus_name][0]
