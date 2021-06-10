@@ -15,10 +15,27 @@
   align-items: center;
   justify-content: space-between;
 }
+
+
 .nav-dark {
   background-color: #101010;
   }
 
+.lead-mg {
+  font-size: 1.25rem;
+  font-weight: 300;
+  margin-bottom: 1rem;
+}
+
+.pagination-xpos {
+  display: flex;
+  display: grid;
+  grid-auto-flow:column;
+  padding-left: 0;
+  list-style: none;
+  border-radius: 0.25rem;
+
+}
 
 /* for horizontal radio buttons */
 ul.inline,ul.inline > li { display: inline-block; }

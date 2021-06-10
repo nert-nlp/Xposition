@@ -4,7 +4,7 @@
 {% load  static %}
 
 {% block wiki_articletitle %}
-<i class="fa fa-globe fa-2x" aria-hidden="true" style="opacity: .1; position: absolute; left: -80px;"></i>
+<i class="fa fa-globe fa-2x" aria-hidden="true" style="opacity: .1; position: absolute; left: -5.00rem;"></i>
 {{block.super}}
 {% endblock %}
 
@@ -21,7 +21,7 @@
     </div>
     {% endif %}
 
-    <div class="lead" style="border: solid 1px #aaa; padding: 1em 1em .5em 1em;">{{article.current_revision.metadata_revision.descriptionhtml}}</div>
+    <div class="lead-mg" style="border: solid 1px #aaa; padding: 1em 1em .5em 1em;">{{article.current_revision.metadata_revision.descriptionhtml}}</div>
 
     {% wiki_render article %}
 

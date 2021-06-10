@@ -339,7 +339,7 @@ h6,
 }
 h1,
 .h1 {
-  font-size: 2.5rem;
+  font-size: 1.0rem;
 }
 h2,
 .h2 {
@@ -10211,7 +10211,7 @@ a.text-dark:focus {
   padding: 6px;
 }
 h1#article-title {
-  font-size: 2.5em;
+  font-size: 2.0em;
   margin-top: 0;
 }
 .article-edit-title-link {
@@ -10542,6 +10542,7 @@ input[type="file"] {
   display: inline-block;
   font-style: normal;
   font-variant: normal;
+  font-size: inherit;
   text-rendering: auto;
   line-height: 1;
 }
