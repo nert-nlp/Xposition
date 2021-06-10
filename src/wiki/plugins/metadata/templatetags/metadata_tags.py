@@ -75,10 +75,10 @@ def langs_display(context):
     s = ''
     for lang in Language.with_nav_links().order_by('name'):
         langart = lang.article
-        s += '<li'
+        s += '<li class="nav-item"'
         if article==langart:
             s += ' class="active"'
-        s += '><a href="' + langart.get_absolute_url() + '">' + lang.name + '</a></li>'
+        s += '><a class="nav-link" href="' + langart.get_absolute_url() + '">' + lang.name + '</a></li>'
     return mark_safe(s)
 
 @register.simple_tag(takes_context=True)

@@ -8,6 +8,17 @@
 .nav > li > a { padding-left: 10px; padding-right: 10px; }
 .navbar-fixed-top { margin-bottom: 0px; max-height: 50px; }
 .navbar-inverse .navbar-collapse { background-color: #101010; } /* necessary for hamburger menu with narrow window */
+.navbar-nopad {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+}
+.nav-dark {
+  background-color: #101010;
+  }
+
 
 /* for horizontal radio buttons */
 ul.inline,ul.inline > li { display: inline-block; }
@@ -20,13 +31,13 @@ ul.inline > li { margin: 0px 5px; }
 .wiki-article h1 > a.headerlink,.wiki-article h2 > a.headerlink,.wiki-article h3 > a.headerlink,.wiki-article h4 > a.headerlink,.wiki-article h5 > a.headerlink,.wiki-article h6 > a.headerlink {
 	visibility: hidden;
 }
-.wiki-article h1:hover > a.headerlink,.wiki-article h2:hover > a.headerlink,.wiki-article h3:hover > a.headerlink,.wiki-article h4:hover > a.headerlink,.wiki-article h5:hover > a.headerlink,.wiki-article h6:hover > a.headerlink { 
+.wiki-article h1:hover > a.headerlink,.wiki-article h2:hover > a.headerlink,.wiki-article h3:hover > a.headerlink,.wiki-article h4:hover > a.headerlink,.wiki-article h5:hover > a.headerlink,.wiki-article h6:hover > a.headerlink {
 	visibility: visible;
 }
 a.headerlink { color: #ddd; font-size: 80%; margin-left: 0.5em; font-weight: normal; }
 
 /* Xposition macros: special styling */
-.example { font-family: 'Roboto Light', sans-serif; }
+.example { font-family: 'Roboto', sans-serif; font-weight:300; }
 .example a.exlabel,.example .exlabel > a { font-size: 10pt; color: #ddd; border: solid 1px transparent; padding-left: 5px; padding-right: 5px; }
 .example:hover a.exlabel,
 .example:hover .exlabel > a,
@@ -75,7 +86,7 @@ a.exref { color: #aaa; }
   color: #f93;
 }
 .target .usage,.usage.target,.example .usage { font-weight: bold; }
-a.usage:hover { 
+a.usage:hover {
   color: #fc6;
   text-decoration: underline;
 }
@@ -89,7 +100,7 @@ th:empty { display: none; }
 
 u { text-decoration: none; background-color: #eee; }
 
-/* Tree list, adapted from https://two-wrongs.com/draw-a-tree-structure-with-only-css 
+/* Tree list, adapted from https://two-wrongs.com/draw-a-tree-structure-with-only-css
    Set class="clt" on the parent element
 */
 .clt, .clt ul, .clt li {
@@ -122,7 +133,7 @@ ul > li.clt { list-style: none; }
     height: .7em;
 }
 
-table.ptokenannotation { 
+table.ptokenannotation {
   border: solid 1px #000;
 }
 table.ptokenannotation tr { border: solid 1px #777; }
@@ -153,7 +164,7 @@ http://nicolasgallagher.com/jump-links-and-viewport-positioning/demo/#method-D *
 
 // interlinear.css 2/28/2009 Kevin B. McGowan <clunis@umich.edu>
 
-// this first class is thorougly unnecessary unless you want to 
+// this first class is thorougly unnecessary unless you want to
 // be able to manipulate all of the glls in a given interlinear
 .interlinear {
     padding-left: 20px;
