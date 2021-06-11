@@ -13,11 +13,9 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with django-wiki. If not, see <http://www.gnu.org/licenses/>.
-
-
 from wiki.core.version import get_version
 
-default_app_config = 'wiki.apps.WikiConfig'
+default_app_config = "wiki.apps.WikiConfig"
 
-VERSION = (0, 5, 0, 'alpha', 0)
+VERSION = (0, 7, 5, "final", 0)
 __version__ = get_version(VERSION)

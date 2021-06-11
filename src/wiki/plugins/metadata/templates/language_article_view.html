@@ -1,78 +1,81 @@
 {% extends "wiki/article.html" %}
 {% load wiki_tags i18n sekizai_tags %}
 {% load metadata_tags %}
-
 {% block wiki_articletitle %}
-<i class="fa fa-language fa-2x" aria-hidden="true" style="opacity: .1; position: absolute; left: -80px;"></i>
+<i class="fa fa-language fa-2x" aria-hidden="true" style="opacity: .1; position: absolute; left: -6.00rem;"></i>
 {{block.super}}
 {% endblock %}
-
 {% block wiki_contents_tab %}
 
-  <div class="col-md-9">
-    {% wiki_render article %}
+   <div class="row">
+      <div class="col-md-10">
+         {% wiki_render article %}
+         {% corpora_for_lang as corpora %}
+         {% if corpora %}
+         <h4 id="corpora">Corpora</h4>
+         <ul>
+            {% for c in corpora %}
+            <li><a href="/{{c.article.urlpath_set.first}}">{{c.article}} {{c.version}}</a></li>
+            {% endfor %}
+         </ul>
+         {% else %}
+         <h4 id="corpora">No Corpora</h4>
+         {% endif %}
+         {% adpositions_for_lang as adpositions %}
+         <h4 id="adps">Adpositions ({{adpositions|length}})</h4>
+         <p>The number of <b>construals</b> (role/function combinations) in a usage with each adposition is shown in parentheses.</p>
 
-	
-	{% corpora_for_lang as corpora %}
-	{% if corpora %}
-	<h4 id="corpora">Corpora</h4>
-	<ul>
-		{% for c in corpora %}<li><a href="/{{c.article.urlpath_set.first}}">{{c.article}} {{c.version}}</a></li>
-		{% endfor %}
-	</ul>
-	{% else %}
-	<h4 id="corpora">No Corpora</h4>
-	{% endif %}
+            <div class="row">
+               <div class="col-sm-auto">
+                  <h5>Single-word ({{swps|length}})</h5>
+                  <ul>
+                     {% for p in swps %}
+                     <li>{{p.html}} {{p.transliteration}} {% if p.transitivity == always_intransitive %}[intr.]{% elif p.transitivity == sometimes_transitive %}[tr./intr.]{% endif %}
+                        (<span class="nusages{% if p.num_usages >= 10 %} major{% endif %}">{{p.num_usages}}</span>)
+                     </li>
+                     {% endfor %}
+                  </ul>
+               </div>
+               <div class="col-sm-auto">
+                  <h5>Multiword ({{mwps|length}})</h5>
+                  <ul>
+                     {% for p in mwps %}
+                     <li>{{p.html}} {{p.transliteration}} {% if p.transitivity == always_intransitive %}[intr.]{% elif p.transitivity == sometimes_transitive %}[tr./intr.]{% endif %}
+                        (<span class="nusages{% if p.num_usages >= 10 %} major{% endif %}">{{p.num_usages}}</span>)
+                     </li>
+                     {% endfor %}
+                  </ul>
+               </div>
+               <div class="col-sm-auto">
+                  <h5>PP Idioms ({{ppidioms|length}})</h5>
+                  <ul>
+                     {% for p in ppidioms %}
+                     <li>{{p.html}} {{p.transliteration}} {% if p.transitivity == always_intransitive %}[intr.]{% elif p.transitivity == sometimes_transitive %}[tr./intr.]{% endif %}
+                        (<span class="nusages{% if p.num_Usages >= 10 %} major{% endif %}">{{p.num_usages}}</span>)
+                     </li>
+                     {% endfor %}
+                  </ul>
+               </div>
+            </div>
 
-    {% adpositions_for_lang as adpositions %}
-    <h4 id="adps">Adpositions ({{adpositions|length}})</h4>
-    <p>The number of <b>construals</b> (role/function combinations) in a usage with each adposition is shown in parentheses.</p>
-    <div class="container-fluid">
-    <div class="col-md-4">
-		<h5>Single-word ({{swps|length}})</h5>
-		<ul>
-		  {% for p in swps %}
-		  <li>{{p.html}} {{p.transliteration}} {% if p.transitivity == always_intransitive %}[intr.]{% elif p.transitivity == sometimes_transitive %}[tr./intr.]{% endif %}
-		  (<span class="nusages{% if p.num_usages >= 10 %} major{% endif %}">{{p.num_usages}}</span>)</li>
-		  {% endfor %}
-		</ul>
-    </div>
-    <div class="col-md-4">
-		<h5>Multiword ({{mwps|length}})</h5>
-		<ul>
-		  {% for p in mwps %}
-		  <li>{{p.html}} {{p.transliteration}} {% if p.transitivity == always_intransitive %}[intr.]{% elif p.transitivity == sometimes_transitive %}[tr./intr.]{% endif %}
-		  (<span class="nusages{% if p.num_usages >= 10 %} major{% endif %}">{{p.num_usages}}</span>)</li>
-		  {% endfor %}
-		</ul>
-    </div>
-    <div class="col-md-4">
-		<h5>PP Idioms ({{ppidioms|length}})</h5>
-		<ul>
-		  {% for p in ppidioms %}
-		  <li>{{p.html}} {{p.transliteration}} {% if p.transitivity == always_intransitive %}[intr.]{% elif p.transitivity == sometimes_transitive %}[tr./intr.]{% endif %}
-		  (<span class="nusages{% if p.num_Usages >= 10 %} major{% endif %}">{{p.num_usages}}</span>)</li>
-		  {% endfor %}
-		</ul>
-    </div>
-	</div>
-    
-  <div class="container-fluid">
-    <h4>Construals ({{construals|length}})</h4>
-    <ul>
-      {% for c in construals %}<li>{{c.html}}</li>{% endfor %}
-    </ul>    
-  </div>
+         <div class="">
+            <h4>Construals ({{construals|length}})</h4>
+            <ul>
+               {% for c in construals %}
+               <li>{{c.html}}</li>
+               {% endfor %}
+            </ul>
+         </div>
+         {# this list should be empty--indicates an invalid value for is_pp_idiom! #}
+         {% for p in misc %}
+         {{p.html}} {{p.transliteration}} {% if p.transitivity == always_intransitive %}[intr.]{% elif p.transitivity == sometimes_transitive %}[tr./intr.]{% endif %}</li>
+         {% endfor %}
+         {% include "category_article_view.html" %}
+      </div>
 
-	{# this list should be empty--indicates an invalid value for is_pp_idiom! #}
-	{% for p in misc %}
-		  {{p.html}} {{p.transliteration}} {% if p.transitivity == always_intransitive %}[intr.]{% elif p.transitivity == sometimes_transitive %}[tr./intr.]{% endif %}</li>
-	{% endfor %}
-
-    {% include "category_article_view.html" %}
-  </div>
-  <div class="col-md-3">
-    {% metadata_display %}{# if there is metadata for the article, display it! #}
-  </div>
-
+   <div class="col-md-2">
+      {% metadata_display %}{# if there is metadata for the article, display it! #}
+   </div>
+</div>
 {% endblock %}
+

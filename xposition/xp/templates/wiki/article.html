@@ -11,24 +11,34 @@
 {% block wiki_contents %}
 
   <div id="article-container">
-    <ul class="nav nav-pills" id="article-menu">
-      <li class="pull-left" id="article-title-li">
+   <nav id="article-menu" class="nav navbar navbar-expand-lg nav-pills ">
+    <ul class="navbar-nav mr-auto justify-content-end">
+      <li class="float-right justify-content-end nav-item" id="article-title-li">
         <h1 id="article-title">
+          <div class="floatcontainer">
+            <div style="display:inline-block">
           {% block wiki_articletitle %}
             {{ article.current_revision.title }}
           {% endblock %}
+            </div>
+            <div style="display:inline-block">
           <small style="font-size: 14px;">
             {% if urlpath.parent %}
-            <a href="{% url 'wiki:get' path=urlpath.path %}"><span class="fa fa-bookmark"></span> {{ urlpath.slug }}</a>
+            <a href="{% url 'wiki:get' path=urlpath.path %}" class="nav-link"><span class="fa fa-bookmark"></span> {{ urlpath.slug }}</a>
             {% endif %}
             {% if article.current_revision.locked %}
               <span class="fa fa-lock"></span> {% trans "locked" %}
             {% endif %}
           </small>
+            </div>
+          </div>
         </h1>
       </li>
+    </ul>
+     <ul class=" justify-content-end navbar-nav ml-auto ">
       {% include "wiki/includes/article_menu.html" %}
     </ul>
+   </nav>
     <div>
       {% block wiki_contents_tab %}
       {% endblock %}

@@ -119,7 +119,7 @@ class PTokenAnnotationTable(tables.Table):
 
     class Meta:
         model = PTokenAnnotation
-        fields = ('adp_pos', 'gov_head', 'gov_pos', 'gov_supersense', 'obj_head', 'obj_pos', 'obj_supersense', 'gov_obj_syntax', 'is_transitive')
+        fields = ('adp_pos', 'gov_head', 'gov_pos', 'gov_supersense', 'obj_head', 'obj_pos', 'obj_supersense', 'gov_obj_syntax', 'is_transitive','is_typo','is_abbr')
         sequence = ('exid', 'lcontext', 'target', 'rcontext', 'role', 'construal', 'function', 'note') # columns to prepose
         template_name = 'django_tables2/bootstrap.html'
         attrs = {'class': 'table ptokenannotation'}

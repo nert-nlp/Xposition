@@ -21,7 +21,7 @@ If you would like to contribute to these or other languages, let us know.
 
 # Installation
 
-Note: Xposition requires Python 3.6+. 
+Note: Xposition requires Python 3.6+.
 
 0. We recommend you [create a new conda environment](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#creating-an-environment-with-commands) for Xposition:
 
@@ -70,7 +70,7 @@ from .base import *
 3. Run the migration to update the server's SQL schema:
 
 ```sh
-python xposition/manage.py migrate 
+python xposition/manage.py migrate
 ```
 
 ## Running
@@ -105,24 +105,24 @@ We use the library django-import-export for loading new models when there are to
 - Modify the top of the file `new_corpus.py` so that the constants `LANGUAGE`, `CORPUS`, etc. are correct.
 - Go to the xposition directory: `cd <Xposition>/xposition`
 - Import new supersenses and adpositions:
-	- Run `python manage.py shell` and then type `from scripts.generate_basic_files import main; main()`. This will create json files for all supersenses and adpositions in the corpus and it will place them in `<Xposition>/xposition/scripts/<corpus><version>_files`. 
+	- Run `python manage.py shell` and then type `from scripts.generate_basic_files import main; main()`. This will create json files for all supersenses and adpositions in the corpus and it will place them in `<Xposition>/xposition/scripts/<corpus><version>_files`.
 	- You can then import new supersenses and adpositions through the admin interface on the webpage at `<homepage_url>/admin`, by clicking `Supersense revisions` or `Adposition revisions`, Import, and then choose the corresponding file from `<Xposition>/xposition/scripts/<corpus><version>_files`.
 - Import new construals:
-	- Run `python manage.py shell` and then type `from scripts.generate_construal_file import main; main()`. This will create a json file for all construals in the corpus. 
+	- Run `python manage.py shell` and then type `from scripts.generate_construal_file import main; main()`. This will create a json file for all construals in the corpus.
 	- You can then import new construals through the admin interface on the webpage at `<homepage_url>/admin`, by clicking `Construals`, Import, and then choose the corresponding file from `<Xposition>/xposition/scripts/<corpus><version>_files`.
 	- Note: Construals depend on supersenses, so if there are any supersenses missing from the database, you may get a 'Missing Supersense' error.
 - Import new usages:
-	- Run `python manage.py shell` and then type `from scripts.generate_usage_file import main; main()`. This will create a json file for all usages in the corpus. 
+	- Run `python manage.py shell` and then type `from scripts.generate_usage_file import main; main()`. This will create a json file for all usages in the corpus.
 	- You can then import new usages through the admin interface on the webpage at `<homepage_url>/admin`, by clicking `Usage revisions`, Import, and then choose the corresponding file from `<Xposition>/xposition/scripts/<corpus><version>_files`.
 	- Note: Usages depend on construals and adpositions, so if there are any construals or adpositions missing from the database, you may get a 'Missing' error.
 - Import new sentences and ptoken_annotations:
-	- Run `python manage.py shell` and then type `from scripts.generate_corpus_files import main; main()`. This will create a tsv file for all CorpusSentences and PTokenAnnotations in the corpus. 
-	- You can then import them through the admin interface on the webpage at `<homepage_url>/admin`, by clicking `Corpus sentences` or `Adposition token annotations`, Import, and then choose the corresponding file from `<Xposition>/xposition/scripts/<corpus><version>_files`. Adposition token annotations will be divided into multiple files labelled `ptoken_annotations0.tsv`, `ptoken_annotations1.tsv`, etc.  
+	- Run `python manage.py shell` and then type `from scripts.generate_corpus_files import main; main()`. This will create a tsv file for all CorpusSentences and PTokenAnnotations in the corpus.
+	- You can then import them through the admin interface on the webpage at `<homepage_url>/admin`, by clicking `Corpus sentences` or `Adposition token annotations`, Import, and then choose the corresponding file from `<Xposition>/xposition/scripts/<corpus><version>_files`. Adposition token annotations will be divided into multiple files labelled `ptoken_annotations0.tsv`, `ptoken_annotations1.tsv`, etc.
 	- Note: PTokenAnnotations depend on usages and adpositions, so if there are any usages or adpositions missing from the database, you may get a 'Missing' error.
 - If you are importing a new version of an existing Corpus, please mark any older versions of the Corpus as deprecated, so that annotations from older versions will be hidden by default. Go to the corpus page and in the table titled "Metadata", click the edit button and check the box for "Is this a deprecated version of an existing Corpus".
 
 # Credits
 
 * Project leader: [Nathan Schneider](http://nathan.cl) (Georgetown)
-* Xposition software development: Max Kim, Joseph Ledford, Austin Blodgett, Luke Gessler (Georgetown)
+* Xposition software development: Max Kim, Joseph Ledford, Austin Blodgett, Luke Gessler, Nitin Venkateswaran (Georgetown)
 * Other collaborators/contributors: TODO/see PrepWiki

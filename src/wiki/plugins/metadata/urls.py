@@ -1,7 +1,9 @@
 from __future__ import absolute_import, unicode_literals
 
 import wiki
-from wiki.compat import url
+#from wiki.compat import url
+
+from django.urls import include, re_path as url
 from wiki.sites import WikiSite
 import wiki.plugins.metadata.views as views
 import wiki.plugins.metadata.tables as tables
