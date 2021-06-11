@@ -9,21 +9,22 @@
 
   <div id="article-container">
     <ul id="article-menu" class="nav nav-pills">
-		<li><h1 id="article-title"><i class="fa fa-files-o fa-2x" aria-hidden="true" style="opacity: .1; position: absolute; left: -80px;"></i>
+		<li><h1 id="article-title"><i class="fa fa-files-o fa-2x" aria-hidden="true" style="opacity: .1; position: absolute; left: -5.00rem;"></i>
 			Sentence {{sent_id}}</h1></li>
 	</ul>
-	
+
     <div>
 		{% tokens_by_sentid as tokens %}
+      <div class="row">
 		<div class="col-md-9">
 		  <p class="lead" style="font-size: 200%; max-width: 30em;">
 			{% all_p_tokens_in_sentence sentence as pts %}
 			{% for st in sentence.tokens %}
 				{# all tokens of the adposition: pt.token_indices (ints), pt.mwe_subtokens (strings) #}
 				{# first contiguous portion of the adposition: pt.main_subtoken_indices, pt.main_subtoken_string  #}
-		
+
 				{% with pt=pts|get_item:forloop.counter %}
-				  {% spaceless %}	
+				  {% spaceless %}
 					{% if pt and forloop.counter == pt.main_subtoken_indices.0 %}<a href="{{pt.usage.current_revision.plugin.article.get_absolute_url}}" class="usage">{% endif %}
 					<span title="{{forloop.counter}}">{{st}}</span>
 					{% if pt and forloop.counter == pt.main_subtoken_indices|last %}</a><sub>{{pt.construal.html|safe}}</sub>{% endif %}
@@ -33,7 +34,7 @@
 		  </p>
 		  <p class="sent-gloss">{{sentence.sent_gloss}}</p>
 		  {% if sentence.note.strip %}<p class="bg-info" style="padding: 10px">{{sentence.note}}</p>{% endif %}
-  
+
 			{% include "ptoken_data_table_contents.html" %}
 		</div>
 		<div class="col-md-3">
@@ -50,6 +51,7 @@
 			<tr><th>MWE markup</th><td><tt>{{sentence.mwe_markup}}</tt></td></tr>
 			</table>
 		</div>
+        </div>
 
 	</div>
 

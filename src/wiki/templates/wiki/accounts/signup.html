@@ -4,24 +4,24 @@
 
 {% block wiki_contents %}
 <h1 class="page-header">{% trans "Sign up" %}</h1>
-<form method="POST" class="form-horizontal">
+<form method="POST" class="">
 {% wiki_form form %}
-<div class="form-group form-actions">
-  <div class="col-lg-2"></div>
-  <div class="col-lg-10">
-    <button type="submit" name="save_changes" class="btn btn-primary btn-lg">
+<div class="">
+
+  <div class="col-lg-auto">
+    <button type="submit" name="save_changes" class="btn btn-primary ">
       <span class="fa fa-plus"></span>
       {% trans "Sign me up..." %}
     </button>
   </div>
 </div>
 </form>
-{% addtoblock "js" %}
+
 <script type="text/javascript">
   function {{ honeypot_jsfunction }}() {
-    $('.{{ honeypot_class }}').parent().parent().hide();
+    $('.{{ honeypot_class }}').parent().parent().parent().hide();
   }
   $(document).ready({{ honeypot_jsfunction }});
 </script>
-{% endaddtoblock %}
+
 {% endblock %}

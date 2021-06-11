@@ -18,8 +18,8 @@
       {% endblocktrans %}
     {% endwith %}
   </div>
-  <div class="pull-right">
-    <a class="btn btn-default"
+  <div class="justify-content-end ml-auto">
+    <a class="btn btn-secondary"
        {% if only_last == "1" %}
          href="{% url 'wiki:globalhistory' only_last=0 %}">
          {% trans "Show all revisions of all articles" %}
@@ -71,10 +71,10 @@
                 <span class="badge badge-success">{% trans "restored" %}</span>
               {% endif %}
               {% if article_revision.locked %}
-                <span class="badge">{% trans "locked" %}</span>
+                <span class="badge badge-dark">{% trans "locked" %}</span>
               {% endif %}
               {% if article_revision.previous_revision.locked and not revision.locked %}
-                <span class="badge">{% trans "unlocked" %}</span>
+                <span class="badge badge-dark">{% trans "unlocked" %}</span>
               {% endif %}
             </td>
             <td>
@@ -109,8 +109,8 @@
       {% endif %}
     </div>
   {% endif %}
-
-  {% include "wiki/includes/pagination.html" %}
 </div>
+  {% include "wiki/includes/pagination.html" %}
+
 {% endspaceless %}
 {% endblock %}

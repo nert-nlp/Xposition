@@ -3,6 +3,7 @@ from django.urls import reverse
 from django.core.validators import RegexValidator
 from django.utils.html import conditional_escape, format_html, mark_safe
 from django.db import models
+
 from bitfield import BitField
 import copy, sys, re, urllib
 from enum import IntEnum
@@ -20,6 +21,7 @@ from django.db.models.signals import pre_save, post_save
 from wiki.core.markdown import article_markdown
 from wiki.decorators import disable_signal_for_loaddata
 from categories.models import ArticleCategory
+
 from wiki.models.pluginbase import ArticlePlugin, RevisionPlugin, RevisionPluginRevision
 from django.core.exceptions import ObjectDoesNotExist
 
@@ -54,7 +56,7 @@ class StringListField(models.TextField):
             return value
         return StringList.from_str(str(value))
 
-    def from_db_value(self, value, expression, connection, context):
+    def from_db_value(self, value, expression, connection, context=None):
         return self.to_python(value)
 
     def get_db_prep_value(self, value, connection=None, prepared=True, **kwargs):
@@ -952,7 +954,7 @@ class PTokenAnnotation(models.Model):
     is_transitive = models.BooleanField(default=True, verbose_name="Transitive?",
                                         help_text='Does the adposition take an object?')
     is_typo  = models.BooleanField(default=False, verbose_name="Typo?")
-    is_abbr  = models.BooleanField(default=False, verbose_name="Abbreviation?")
+    is_abbr  = models.BooleanField(default=False, verbose_name="Abbrev?")
     mwe_subtokens = StringListField(max_length=200, blank=True, verbose_name="MWE Subtokens")
 
     main_subtoken_indices = IntListField(max_length=200, blank=True, null=True, verbose_name="Main Subtoken Indices")

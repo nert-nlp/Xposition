@@ -3,7 +3,8 @@ import zipfile
 
 from django import forms
 from django.core.files.uploadedfile import File
-from django.utils.translation import gettext, gettext_lazy as _
+from django.utils.translation import gettext
+from django.utils.translation import gettext_lazy as _
 from wiki.core.permissions import can_moderate
 from wiki.plugins.attachments import models
 from wiki.plugins.attachments.models import IllegalFileExtension
@@ -12,19 +13,19 @@ from wiki.plugins.attachments.models import IllegalFileExtension
 class AttachmentForm(forms.ModelForm):
 
     description = forms.CharField(
-        label=_('Description'),
-        help_text=_('A short summary of what the file contains'),
-        required=False
+        label=_("Description"),
+        help_text=_("A short summary of what the file contains"),
+        required=False,
     )
 
     def __init__(self, *args, **kwargs):
-        self.article = kwargs.pop('article', None)
-        self.request = kwargs.pop('request', None)
-        self.attachment = kwargs.pop('attachment', None)
+        self.article = kwargs.pop("article", None)
+        self.request = kwargs.pop("request", None)
+        self.attachment = kwargs.pop("attachment", None)
         super().__init__(*args, **kwargs)
 
     def clean_file(self):
-        uploaded_file = self.cleaned_data.get('file', None)
+        uploaded_file = self.cleaned_data.get("file", None)
         if uploaded_file:
             try:
                 models.extension_allowed(uploaded_file.name)
@@ -33,12 +34,12 @@ class AttachmentForm(forms.ModelForm):
         return uploaded_file
 
     def save(self, *args, **kwargs):
-        commit = kwargs.get('commit', True)
+        commit = kwargs.get("commit", True)
         attachment_revision = super().save(commit=False)
 
         # Added because of AttachmentArchiveForm removing file from fields
         # should be more elegant
-        attachment_revision.file = self.cleaned_data['file']
+        attachment_revision.file = self.cleaned_data["file"]
         if not self.attachment:
             attachment = models.Attachment()
             attachment.article = self.article
@@ -56,15 +57,19 @@ class AttachmentForm(forms.ModelForm):
 
     class Meta:
         model = models.AttachmentRevision
-        fields = ('file', 'description',)
+        fields = (
+            "file",
+            "description",
+        )
 
 
 class AttachmentReplaceForm(AttachmentForm):
 
     replace = forms.BooleanField(
-        label=_('Remove previous'),
-        help_text=_('Remove previous attachment revisions and their files (to '
-                    'save space)?'),
+        label=_("Remove previous"),
+        help_text=_(
+            "Remove previous attachment revisions and their files (to " "save space)?"
+        ),
         required=False,
     )
 
@@ -72,26 +77,20 @@ class AttachmentReplaceForm(AttachmentForm):
 class AttachmentArchiveForm(AttachmentForm):
 
     file = forms.FileField(  # @ReservedAssignment
-        label=_('File or zip archive'),
-        required=True
+        label=_("File or zip archive"), required=True
     )
 
     unzip_archive = forms.BooleanField(
-        label=_('Unzip file'),
+        label=_("Unzip file"),
         help_text=_(
-            'Create individual attachments for files in a .zip file - directories do not work.'),
-        required=False)
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        ordered_fields = ['unzip_archive', 'file']
-        self.fields.keyOrder = ordered_fields + [k
-                                                 for k in self.fields.keys()
-                                                 if k not in ordered_fields]
+            "Create individual attachments for files in a .zip file - directories do not work."
+        ),
+        required=False,
+    )
 
     def clean_file(self):
-        uploaded_file = self.cleaned_data.get('file', None)
-        if uploaded_file and self.cleaned_data.get('unzip_archive', False):
+        uploaded_file = self.cleaned_data.get("file", None)
+        if uploaded_file and self.cleaned_data.get("unzip_archive", False):
             try:
                 self.zipfile = zipfile.ZipFile(uploaded_file.file, mode="r")
                 for zipinfo in self.zipfile.filelist:
@@ -109,20 +108,21 @@ class AttachmentArchiveForm(AttachmentForm):
         super().clean()
         if not can_moderate(self.article, self.request.user):
             raise forms.ValidationError(
-                gettext("User not allowed to moderate this article"))
+                gettext("User not allowed to moderate this article")
+            )
         return self.cleaned_data
 
     def save(self, *args, **kwargs):
 
         # This is not having the intended effect
-        if 'file' not in self._meta.fields:
-            self._meta.fields.append('file')
+        if "file" not in self._meta.fields:
+            self._meta.fields.append("file")
 
-        if self.cleaned_data['unzip_archive']:
+        if self.cleaned_data["unzip_archive"]:
             new_attachments = []
             try:
                 for zipinfo in self.zipfile.filelist:
-                    f = tempfile.NamedTemporaryFile(mode='r+w')
+                    f = tempfile.NamedTemporaryFile(mode="r+w")
                     f.write(self.zipfile.read(zipinfo.filename))
                     f = File(f, name=zipinfo.filename)
                     try:
@@ -134,7 +134,8 @@ class AttachmentArchiveForm(AttachmentForm):
                         attachment_revision = models.AttachmentRevision()
                         attachment_revision.file = f
                         attachment_revision.description = self.cleaned_data[
-                            'description']
+                            "description"
+                        ]
                         attachment_revision.attachment = attachment
                         attachment_revision.set_from_request(self.request)
                         attachment_revision.save()
@@ -149,18 +150,19 @@ class AttachmentArchiveForm(AttachmentForm):
             return super().save(*args, **kwargs)
 
     class Meta(AttachmentForm.Meta):
-        fields = ['description', ]
+        fields = [
+            "description",
+        ]
 
 
 class DeleteForm(forms.Form):
-
     """This form is both used for dereferencing and deleting attachments"""
-    confirm = forms.BooleanField(label=_('Yes I am sure...'),
-                                 required=False)
+
+    confirm = forms.BooleanField(label=_("Yes I am sure..."), required=False)
 
     def clean_confirm(self):
-        if not self.cleaned_data['confirm']:
-            raise forms.ValidationError(gettext('You are not sure enough!'))
+        if not self.cleaned_data["confirm"]:
+            raise forms.ValidationError(gettext("You are not sure enough!"))
         return True
 
 
@@ -168,7 +170,5 @@ class SearchForm(forms.Form):
 
     query = forms.CharField(
         label="",
-        widget=forms.TextInput(
-            attrs={
-                'class': 'search-query form-control'}),
+        widget=forms.TextInput(attrs={"class": "search-query form-control"}),
     )

@@ -6,18 +6,190 @@ Release plan
 ------------
 
 
-* **0.3** series supported Django 1.11. As with the upstream Django release, 0.3 was be the last series with Python 2.7 support.
-* **0.4+** supports Django 1.11 and Django 2.x and Python 3.4+.
-* **0.5** should remove Django 1.11 support and target Bootstrap v4, if you are interested in this work, please get in touch on Github!
+* **0.3.x** series suppors Django 1.11. As with the upstream Django release, 0.3 was be the last series with Python 2.7 support.
+* **0.4.x** supports Django 1.11 and Django 2.1 and Python 3.4+.
+* **0.5.x** Remove Django 1.11 support, adds Django 2.2 and 3.x support. Python 3.5+.
+* **0.6.x** Targets Bootstrap v4, if you are interested in this work, please get in touch on Github!
+* **0.7.x** Removes Django 2.1 support, adds Django 3.1, 3.2
 
 
-0.5.dev (unreleased)
---------------------
+0.7.5
+-----
+
+Released on 2021-04-10.
+
+Added
+~~~~~
+
+* Django 3.2 support :url-issue:`1121` (Benjamin Bach)
+
+
+0.7.4
+-----
+
+Released on 2021-04-10.
+
+Fixed
+~~~~~
+
+* Settings page on article broken for non-superusers :url-issue:`1058` (Benjamin Bach)
+* Dependency ``bleach`` is bumped to ``>=3.3.0,<3.4`` after security advisory :url-issue:`1109` (Benjamin Balder Bach)
+* Font-awesome icon on external links was not showing :url-issue:`1111` (Benjamin Balder Bach)
+* Red links were not correctly displaying in some cases :url-issue:`1114` (Gereon Kaiping)
+
+
+Translation updates
+~~~~~~~~~~~~~~~~~~~
+
+* Chinese: 100% translated, 100% reviewed
+* Czech: 100% translated
+* Dutch: 100% translated, 100% reviewed
+* French: Some syntax fixes, remains 100% translated
+* Hungarian: 100% translated
+* Korean: 100% translated, 96% reviewed
+* Russian: 100% translated
+* Turkish: 100% translated
+
+
+0.7.3
+-----
+
+Released on 2021-01-11.
+
+Fixed
+~~~~~
+
+* Plugin ``editsection`` failing with unexpected contents :url-issue:`1094` (Teury Diaz, Benjamin Balder Bach, OTR)
+
+
+0.7.2
+-----
+
+Released on 2021-01-08.
+
+Fixed
+~~~~~
+
+* Use ``.iter()`` instead of long deprecated and removed method ``.getiterator`` :url-issue:`1083` (Teury Diaz, Benjamin Balder Bach)
+
+
+0.7.1
+-----
+
+Released on 2020-12-28.
+
+Fixed
+~~~~~
+
+* Fixed cache key exceptions for ``SafeString` objects ``no attribute append`` :url-issue:`1072` (Gert-Jan Braas)
+
+
+0.7
+---
+
+Released on 2020-10-28.
+
+Added
+~~~~~
+
+* Django 3.1 support :url-issue:`1061` and :url-issue:`1082` (Mads Jensen, Benjamin Bach)
+
+Fixed
+~~~~~
+
+* Do not fail prematurely during Django checks framework (rare issue) :url-issue:`1059` (Benjamin Bach)
+* Cache keys failing in memcached if username contains space characters (rare) :url-issue:`1065` (Benjamin Bach)
+
+Removed
+~~~~~~~
+
+* Django 2.1 support removed :url-issue:`1061` (Mads Jensen)
+
+Translations
+~~~~~~~~~~~~
+
+* Japanese (ja): 100% translated
+* Brazilian Portuguese (pt_BR): 100% translated
+
+
+0.6
+---
+
+Released on 2020-06-03.
+
+.. warning::
+
+  These release contains Bootstrap v4. If you have overridden django-wiki's templates but rely on
+  the distributed Bootstrap CSS, then a lot of CSS class names have changed. Please refer to
+  the `Bootstrap Documentation <https://getbootstrap.com/docs/4.4/getting-started/introduction/>`__.
+
+Added
+~~~~~
+
+* Bootstrap 4 replaces Bootstrap 3: Improved default theming. :url-issue:`1035` (slinkymanbyday, Benjamin Bach)
+* Django 3.0 support :url-issue:`1019` (Benjamin Bach, slinkymanbyday)
+* New plugin ``wiki.plugins.editsection`` displays an ``[edit]`` link next to section headers (Frank Loemker) :url-issue:`652`
+
+Fixed
+~~~~~
+
+* Python 3.7 issue with notifications plugin main view ``/_plugin/notifications/`` :url-issue:`1000` (Mads Jensen)
+* Broken Delete and Deleted pages :url-issue:`976` (Benjamin Bach)
+* Can't delete article with ``USE_THOUSAND_SEPARATOR = True`` :url-issue:`1014` (tim3towers)
+* Deleting images fails :url-issue:'936' (Gert-Jan Braas, Steckelfisch)
 
 Changed
 ~~~~~~~
 
-* Update to Markdown >= 3 :url-issue:`920` (Don Bowman)
+* Use SASS instead of LESS for Stylesheets. The compiler in ``Makefile`` is ``lessc``. :url-issue:`1035` (Benjamin Bach)
+* Removed ``src/wiki/static/wiki/css/wiki-bootstrap.css`` - Only distribute a minified CSS version. :url-issue:`1035` (Benjamin Bach)
+* Test coverage upped from 75 to 80+% :url-issue:`976` (Mads Jensen, Benjamin Bach)
+* PDF attachment Content-Disposition header changed to ``inline`` for browser previewing :url-issue:`1010` (nicolazilio)
+* PyTest upgraded to latest 5.3
+* django-mptt updated from 0.9 to 0.11.0 :url-issue:`1019` (Benjamin Bach, slinkymanbyday)
+* sorl-thumbnail bumped to 12.6.2 :url-issue:`1019` (Benjamin Bach, slinkymanbyday)
+* Upgrade bleach from 2.1 to 3.1 :url-issue:`1020` (slinkymanbyday)
+* Python-Markdown 3.2 compatibility (Benjamin Bach)
+
+Removed
+~~~~~~~
+
+* Python 3.4 support more or less definitively removed (no longer supported by test suite PyTest)
+* Removed unmaintained plugin ``wiki.plugins.haystack``
+
+Translations
+~~~~~~~~~~~~
+
+* Dutch translation 100% completed :url-issue:`1037` (Gert-Jan Braas)
+* Polish 100% completed
+
+0.5
+---
+
+**Compatibility note, 2020-02-18**: Django 3.0 support was scheduled but never completed, as dependencies lacked the support. It was completed in 0.6.
+
+Changed
+~~~~~~~
+
+* Update to Markdown >= 3.1 :url-issue:`920` (Don Bowman, Benjamin Bach)
+* Several code-cleanups, test improvements and test
+
+Added
+~~~~~
+
+* Django 2.2
+
+Removed
+~~~~~~~
+
+* Django 1.11 support
+
+Translations
+~~~~~~~~~~~~
+
+We need help to complete translations. It's done easily by creating a profile and joining
+`the django-wiki project on Transifex <https://www.transifex.com/django-wiki/django-wiki/>`__. You are also
+encouraged to create new languages if you would like to translate to a language that doesn't yet exist.
 
 
 0.4.5
@@ -498,15 +670,15 @@ News archive
 April 15, 2017
 ~~~~~~~~~~~~~~
 
-0.2.3 released: `Release notes <http://django-wiki.readthedocs.io/en/master/release_notes.html#django-wiki-0-2-3>`__
+0.2.3 released: `Release notes <http://django-wiki.readthedocs.io/en/main/release_notes.html#django-wiki-0-2-3>`__
 
-0.2.2 released: `Release notes <http://django-wiki.readthedocs.io/en/master/release_notes.html#django-wiki-0-2-2>`__
+0.2.2 released: `Release notes <http://django-wiki.readthedocs.io/en/main/release_notes.html#django-wiki-0-2-2>`__
 
 
 February 27, 2017
 ~~~~~~~~~~~~~~~~~
 
-0.2.1 released: `Release notes <http://django-wiki.readthedocs.io/en/master/release_notes.html#django-wiki-0-2-1>`__
+0.2.1 released: `Release notes <http://django-wiki.readthedocs.io/en/main/release_notes.html#django-wiki-0-2-1>`__
 
 
 December 27, 2016

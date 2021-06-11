@@ -75,10 +75,10 @@ def langs_display(context):
     s = ''
     for lang in Language.with_nav_links().order_by('name'):
         langart = lang.article
-        s += '<li'
+        s += '<li class="nav-item"'
         if article==langart:
             s += ' class="active"'
-        s += '><a href="' + langart.get_absolute_url() + '">' + lang.name + '</a></li>'
+        s += '><a class="nav-link" href="' + langart.get_absolute_url() + '">' + lang.name + '</a></li>'
     return mark_safe(s)
 
 @register.simple_tag(takes_context=True)
@@ -91,7 +91,7 @@ def adpositions_for_lang(context):
         'article__urlpath_set').filter(current_revision__metadatarevision__adpositionrevision__lang__article=larticle,
             article__current_revision__deleted=False)
     a = a.annotate(transliteration=F('current_revision__metadatarevision__adpositionrevision__transliteration'),
-                   num_usages=Count('usages'))
+                   num_usages=Count('usages__construal',distinct=True))
     context['swps'] = a.filter(current_revision__metadatarevision__adpositionrevision__is_pp_idiom=False).exclude(
         current_revision__metadatarevision__name__contains='_')
     context['mwps'] = a.filter(current_revision__metadatarevision__adpositionrevision__is_pp_idiom=False,
@@ -197,13 +197,13 @@ def paginate(items, context):
 
 @register.simple_tag(takes_context=True)
 def token_by_exnum(context):
-    exnum = int(context['exnum'])
+    exnum = int(context['exnum']._wrapped)
     t = PTokenAnnotation.objects.filter(id=exnum-3000)
     return paginate(t, context)
 
 @register.simple_tag(takes_context=True)
 def tokens_by_sentid(context):
-    sentid = context['sent_id']
+    sentid = context['sent_id']._wrapped
     corpus_name = context['corpus']
     corpora = Corpus.objects.all()
     corpus = [c for c in corpora if str(c)==corpus_name][0]

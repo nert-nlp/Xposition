@@ -33,9 +33,9 @@
   <form method="POST" class="form-horizontal">
     {% wiki_form create_form %}
     <div class="form-group form-actions">
-      <div class="col-lg-2"></div>
-      <div class="col-lg-10">
-        <a href="{% url 'wiki:get' path=parent_urlpath.path %}" class="btn btn-default">
+      <div class="col-lg-auto" ></div>
+      <div class="col-lg-auto">
+        <a href="{% url 'wiki:get' path=parent_urlpath.path %}" class="btn btn-secondary">
           <span class="fa fa-arrow-left"></span>
           {% trans "Go back" %}
         </a>
