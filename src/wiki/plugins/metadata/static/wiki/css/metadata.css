@@ -7,7 +7,7 @@
 /* make more horizontal space in navbar */
 .nav > li > a { padding-left: 10px; padding-right: 10px; }
 .navbar-fixed-top { margin-bottom: 0px; max-height: 50px; }
-.navbar-inverse .navbar-collapse { background-color: #101010; } /* necessary for hamburger menu with narrow window */
+.navbar-inverse .navbar-collapse { background-color: #232323; } /* necessary for hamburger menu with narrow window */
 .navbar-nopad {
   position: relative;
   display: flex;
@@ -18,7 +18,7 @@
 
 
 .nav-dark {
-  background-color: #101010;
+  background-color: #232323;
   }
 
 .lead-mg {
