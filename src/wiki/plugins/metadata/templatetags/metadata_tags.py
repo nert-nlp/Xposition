@@ -197,7 +197,7 @@ def paginate(items, context):
 
 @register.simple_tag(takes_context=True)
 def token_by_exnum(context):
-    exnum = int(context['exnum']._wrapped)
+    exnum = int(context['exnum'])
     t = PTokenAnnotation.objects.filter(id=exnum-3000)
     return paginate(t, context)
 
