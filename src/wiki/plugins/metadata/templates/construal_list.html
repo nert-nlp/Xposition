@@ -3,27 +3,28 @@
 {% load metadata_tags %}
 
 {% block wiki_articletitle %}
-<i class="fa fa-paint-brush fa-2x" aria-hidden="true" style="opacity: .1; position: absolute; left: -80px;"></i>
+<i class="fa fa-paint-brush fa-2x" aria-hidden="true" style="opacity: .1; position: absolute; left: -5.00rem;"></i>
 {{block.super}}
 {% endblock %}
 
 {% block wiki_contents_tab %}
+
   <p>The number of <b>adpositions</b> in a usage with each construal is shown in parentheses.</p>
-  <div class="col-md-4">
+<div class="row">
+  <div class="col-md-auto">
     <h3>Sorted by role</h3>
     <ul>
     {% construals_display order_by="role" %}
     </ul>
   </div>
-  <div class="col-md-4">
+  <div class="col-md-auto">
     <h3>Sorted by function</h3>
     <ul>
     {% construals_display order_by="function" %}
     </ul>
   </div>
-  <div class="col-md-4">
+</div>
 
-  </div>
 
 
 {% endblock %}

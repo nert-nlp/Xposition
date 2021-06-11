@@ -1,13 +1,16 @@
 {% extends "wiki/article.html" %}
 {% load wiki_tags i18n sekizai_tags %}
 {% load metadata_tags %}
+{% load  static %}
 
 {% block wiki_articletitle %}
-<i class="fa fa-globe fa-2x" aria-hidden="true" style="opacity: .1; position: absolute; left: -80px;"></i>
+<i class="fa fa-globe fa-2x" aria-hidden="true" style="opacity: .1; position: absolute; left: -5.00rem;"></i>
 {{block.super}}
 {% endblock %}
 
 {% block wiki_contents_tab %}
+ <div class="">
+   <div class="row">
   <div class="col-md-9">
     {% if article.current_revision.metadata_revision.supersenserevision.deprecated %}
     <div class="alert alert-warning">
@@ -18,40 +21,45 @@
     </div>
     {% endif %}
 
-    <div class="lead" style="border: solid 1px #aaa; padding: 1em 1em .5em 1em;">{{article.current_revision.metadata_revision.descriptionhtml}}</div>
+    <div class="lead-mg" style="border: solid 1px #aaa; padding: 1em 1em .5em 1em;">{{article.current_revision.metadata_revision.descriptionhtml}}</div>
 
     {% wiki_render article %}
 
-
-    <div class="col-md-4">
+    <div class="row">
+    <div class="col-md-auto">
       <h4>Construals with role</h4>
       <ul>
         {% construals_display role=article.current_revision.title %}
       </ul>
     </div>
-    <div class="col-md-5">
+    <div class="col-md-auto">
       <h4>Construals with function</h4>
       <ul>
         {% construals_display function=article.current_revision.title %}
       </ul>
     </div>
+    </div>
 
-    <div class="col-md-12">
+    <div class="col-md-auto">
       {% include "category_article_view.html" %}
     </div>
   </div>
 
-
   <div class="col-md-3">
     {% metadata_display %}{# if there is metadata for the article, display it! #}
   </div>
-  <div class="col-md-12">
+   </div>
+  <div class="col-md-auto">
     <div id="table-container" class="table-responsive" style="max-height: 50vh; overflow: auto;">
       <div style="height: 50vh;" class="text-center">
         <i class="fa fa-spinner fa-spin" style="font-size:24px; margin-top: 25vh;"></i>
       </div>
     </div>
   </div>
+</div>
+      <script src="{% static "wiki/js/jquery.min.js" %}"></script>
+      <script src="{% static "wiki/js/jquery-3.4.1.min.js" %}"></script>
+
   <script>
     $.ajax({
       url: "/_table/supersense/{{article.id}}",

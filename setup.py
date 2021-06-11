@@ -1,15 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
 import os
 import sys
 from glob import glob
 
-from setuptools import find_packages, setup
+from setuptools import find_packages
+from setuptools import setup
 
-sys.path.append(
-    os.path.join(os.path.dirname(__file__), 'src')
-)
+sys.path.append(os.path.join(os.path.dirname(__file__), "src"))
 
 # noqa
 from wiki import __version__  # isort:skip  # noqa
@@ -24,41 +22,45 @@ def get_path(fname):
 
 
 install_requirements = [
-    "Django>=1.11,<2.3",
-    "bleach>=3.1.4",
+    "Django>=2.1,<3.3",
+    "bleach>=3.3.0,<3.4",
     "Pillow",
-    "django-nyt>=1.1.1,<1.2",
-    "django-mptt>=0.9,<0.10",
+    "django-nyt>=1.2,<1.3",
+    "django-mptt>=0.11,<0.12",
     "django-sekizai>=0.10",
-    "sorl-thumbnail>=12,<13",
-    "Markdown>=3.0.0,<3.1.0"
+    "sorl-thumbnail>=12.6.2,<13",
+    "Markdown>=3.1,<3.3",
 ]
 
 test_requirements = [
-    'django-functest>=1.0.3,<1.1',
-    'pytest>=3.4,<3.5',
-    'pytest-django>=3.1,<3.2',
-    'pytest-cov>=2.4,<2.5',
-    'pytest-pythonpath>=0.7,<0.8',
+    "django-functest>=1.0.3,<1.1",
+    "pytest>=5.3,<5.4",
+    "pytest-django",
+    "pytest-cov",
+    "coverage",
+    "codecov",
+    "pytest-pythonpath",
 ]
 
 test_lint_requirements = [
-    'flake8>=3.5,<3.6',
-    'flake8-isort',
+    "flake8>=3.7,<3.8",
+    # Somewhat pin black, such that older code bases can
+    # be verified CI without linting them lots
+    "black>=20.8b1,<20.9",
+    "pre-commit",
 ]
 
 setup_requirements = [
-    'pytest-runner',
+    "pytest-runner",
 ]
 
-development_requirements = test_requirements + test_lint_requirements + [
-    'pre-commit',
-]
+development_requirements = test_requirements + test_lint_requirements
 
 extras_requirements = {
-    'devel': development_requirements,
-    'test': test_requirements,
-    'testlint': test_lint_requirements,
+    "devel": development_requirements,
+    "test": test_requirements,
+    "testlint": test_lint_requirements,
+    "transifex": ["transifex-client"],
 }
 
 setup(
@@ -70,28 +72,33 @@ setup(
     description="A wiki system written for the Django framework.",
     license="GPLv3",
     keywords=["django", "wiki", "markdown"],
-    packages=find_packages('src'),
-    package_dir={'': 'src'},
-    py_modules=[os.path.splitext(os.path.basename(path))[0] for path in glob('src/*.py')],
-    long_description=open('README.rst').read(),
+    packages=find_packages("src"),
+    package_dir={"": "src"},
+    py_modules=[
+        os.path.splitext(os.path.basename(path))[0] for path in glob("src/*.py")
+    ],
+    long_description=open("README.rst").read(),
     zip_safe=False,
     install_requires=install_requirements,
     classifiers=[
-        'Development Status :: 5 - Production/Stable',
-        'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
-        'Environment :: Web Environment',
-        'Framework :: Django',
-        'Intended Audience :: Developers',
-        'Operating System :: OS Independent',
-        'Programming Language :: Python',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: Implementation :: CPython',
-        'Programming Language :: Python :: Implementation :: PyPy',
-        'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
-        'Topic :: Software Development',
-        'Topic :: Software Development :: Libraries :: Application Frameworks',
+        "Development Status :: 5 - Production/Stable",
+        "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+        "Environment :: Web Environment",
+        "Framework :: Django",
+        "Intended Audience :: Developers",
+        "Operating System :: OS Independent",
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 3 :: Only",
+        "Programming Language :: Python :: 3.5",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: Implementation :: CPython",
+        "Programming Language :: Python :: Implementation :: PyPy",
+        "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+        "Topic :: Software Development",
+        "Topic :: Software Development :: Libraries :: Application Frameworks",
     ],
     include_package_data=True,
     setup_requires=setup_requirements,
