@@ -203,7 +203,7 @@ def token_by_exnum(context):
 
 @register.simple_tag(takes_context=True)
 def tokens_by_sentid(context):
-    sentid = context['sent_id']._wrapped
+    sentid = context['sent_id']
     corpus_name = context['corpus']
     corpora = Corpus.objects.all()
     corpus = [c for c in corpora if str(c)==corpus_name][0]
