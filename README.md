@@ -73,6 +73,16 @@ from .base import *
 python xposition/manage.py migrate
 ```
 
+4. _(optional)_ Instead of using a blank database, you may place a copy of the production 
+database in `xposition/xp/db/prepopulated.db`. Ask Nathan for a backup. If the backup
+is a SQL dump instead of a raw database file, you may reconsistute the database like below.
+Note that some backups end in a `ROLLBACK;` for some reason--check to see if it's there and
+replace it with an `END` instead.
+
+```
+$ sqlite3 prepopulated.db < prod_dump.sql
+```
+
 ## Running
 You should now be able to run the server:
 
