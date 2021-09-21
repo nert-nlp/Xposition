@@ -130,18 +130,27 @@ class Data:
                     if words[i]['lexcat'] in ['P', 'PRON.POSS', 'POSS', 'PP', 'INF.P']:
 
                         tok_sem = words[i]  # token semantic features
+                        if tok_sem['ss'] is None:
+                            print(f"WARNING: skipping preposition with no supersense annotations in {self.sent_id}, token {tok_sem} ({words[i]})")
+                            continue
                         tok_morph = sent['toks'][tok_sem['toknums'][0] - 1]  # token morphological/syntactic features
 
                         if self.save_adp or self.save_us or self.save_ptok:
                             self.adposition_name = query.get_adp(words[i]['lexlemma'], self.language_name)
 
-                            govobj = tok_sem['heuristic_relation']  # used to check NoneType
+                            try:
+                                govobj = tok_sem['heuristic_relation']  # used to check NoneType
+                            except KeyError:
+                                govobj = None
+                                hasobj = False
+                                hasgov = False
                             if self.adposition_name in ['in_this_day', 'to_eat', 'to_go']:
                                 tok_sem['lexcat'] = 'PP'
                             elif self.adposition_name in ['in_hope_to', 'just_about', 'nothing_but', 'back_and_forth', 'up_and_run']:
                                 tok_sem['lexcat'] = 'P'
-                            hasobj = type(govobj['obj']) is int and not tok_sem['lexcat'] == 'PP'
-                            hasgov = type(govobj['gov']) is int
+                            if govobj is not None:
+                                hasobj = type(govobj['obj']) is int and not tok_sem['lexcat'] == 'PP'
+                                hasgov = type(govobj['gov']) is int
 
                         if not tok_sem['toknums']:
                             raise Exception(f'No toknums: {self.sent_id}')
@@ -164,7 +173,7 @@ class Data:
                         if self.save_ptok and int(self.construal_id) > 0 and int(self.usage_id) > 0 and int(self.adposition_id) > 0:
                             self.obj_head = govobj['objlemma'] if hasobj else DEFAULT_STR
                             self.gov_head = govobj['govlemma'] if hasgov else DEFAULT_STR
-                            self.gov_obj_syntax = govobj['config']
+                            self.gov_obj_syntax = govobj['config'] if govobj is not None else DEFAULT_STR
                             self.adp_pos = tok_morph['upos']
                             self.gov_pos = sent['toks'][govobj['gov'] - 1]['upos'] if hasgov else DEFAULT_STR
                             self.obj_pos = sent['toks'][govobj['obj'] - 1]['upos'] if hasobj else DEFAULT_STR
