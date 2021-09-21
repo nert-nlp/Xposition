@@ -80,7 +80,7 @@ Note that some backups end in a `ROLLBACK;` for some reason--check to see if it'
 replace it with an `END` instead.
 
 ```
-$ sqlite3 prepopulated.db < prod_dump.sql
+sqlite3 prepopulated.db < prod_dump.sql
 ```
 
 ## Running
