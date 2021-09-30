@@ -130,9 +130,6 @@ class Data:
                     if words[i]['lexcat'] in ['P', 'PRON.POSS', 'POSS', 'PP', 'INF.P']:
 
                         tok_sem = words[i]  # token semantic features
-                        if tok_sem['ss'] is None:
-                            print(f"WARNING: skipping preposition with no supersense annotations in {self.sent_id}, token {tok_sem} ({words[i]})")
-                            continue
                         tok_morph = sent['toks'][tok_sem['toknums'][0] - 1]  # token morphological/syntactic features
 
                         if self.save_adp or self.save_us or self.save_ptok:
