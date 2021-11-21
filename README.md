@@ -73,6 +73,16 @@ from .base import *
 python xposition/manage.py migrate
 ```
 
+4. _(optional)_ Instead of using a blank database, you may place a copy of the production 
+database in `xposition/xp/db/prepopulated.db`. Ask Nathan for a backup. If the backup
+is a SQL dump instead of a raw database file, you may reconsistute the database like below.
+Note that some backups end in a `ROLLBACK;` for some reason--check to see if it's there and
+replace it with an `END` instead.
+
+```
+sqlite3 prepopulated.db < prod_dump.sql
+```
+
 ## Running
 You should now be able to run the server:
 
@@ -99,6 +109,12 @@ It comes with a prepopulated SQLite database.
 ## Importing a new Corpus
 
 We use the library django-import-export for loading new models when there are too many to create by hand. Developers can follow the following procedure to load a new corpus into the database.
+
+### Sentence and Document IDs
+Before import, make sure that [the way `doc_id` is set](https://github.com/nert-nlp/Xposition/blob/master/xposition/scripts/new_corpus.py#L121) is appropriate for your corpus.
+If it is not, then either temporarily change the import script or change your document IDs.
+
+### Performing the Import
 
 - On the webpage, click the language you are working with and then click metadata (You may first need to create the Language object if it doesn't exist. In this case, click metadata on the homepage). Click `Create a Corpus` and fill out the form.
 - The corpus you want to import must be in the STREUSLE json format. Place it in the directory `<Xposition>/xposition/scripts`.
