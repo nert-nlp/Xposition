@@ -98,7 +98,9 @@ It comes with a prepopulated SQLite database.
 
 ## Importing a new Corpus
 
-We use the library django-import-export for loading new models when there are too many to create by hand. Developers can follow the following procedure to load a new corpus into the database.
+We use the library django-import-export for loading new models when there are too many to create by hand.
+Developers can follow the following procedure to load a new corpus into the database.
+Make sure that you have validated your corpus using the [conllulex validator](https://github.com/nert-nlp/conllulex).
 
 - On the webpage, click the language you are working with and then click metadata (You may first need to create the Language object if it doesn't exist. In this case, click metadata on the homepage). Click `Create a Corpus` and fill out the form.
 - The corpus you want to import must be in the STREUSLE json format. Place it in the directory `<Xposition>/xposition/scripts`.
