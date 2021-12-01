@@ -118,7 +118,7 @@ class Data:
             # assign fields
             self.sent_id = sent['sent_id']
             if self.save_sent:
-                self.doc_id = sent['sent_id'].split('-')[0] + '-' + sent['sent_id'].split('-')[1]
+                self.doc_id, sentnum = sent['sent_id'].rsplit('-',1)
                 self.text = sent['text']
                 self.tokens = ' '.join([x['word'] for x in sent['toks']])
                 self.note = sent['note'] if 'note' in sent else DEFAULT_STR
