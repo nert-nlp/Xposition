@@ -7,7 +7,8 @@ from django_tables2 import RequestConfig
 from bitfield import BitField
 from wiki.models import Article, ArticleRevision
 from wiki.models.pluginbase import RevisionPlugin, RevisionPluginRevision
-from wiki.plugins.metadata.models import MetadataRevision, SimpleMetadata, Supersense, Construal, Language, Corpus, Adposition, AdpositionRevision, Usage, UsageRevision, PTokenAnnotation, deepest_instance
+from wiki.plugins.metadata.models import MetadataRevision, SimpleMetadata, Supersense, Construal, Language, Corpus, Adposition, AdpositionRevision, Usage, \
+    UsageRevision, PTokenAnnotation, deepest_instance, CorpusSentence
 from wiki.plugins.metadata.tables import PTokenAnnotationTable
 from categories.models import Category
 
@@ -208,9 +209,8 @@ def tokens_by_sentid(context):
     corpora = Corpus.objects.all()
     corpus = [c for c in corpora if str(c)==corpus_name][0]
     t = PTokenAnnotation.objects.filter(sentence__sent_id=sentid, sentence__corpus=corpus).order_by('id')
-    if not t:
-        raise Exception(f'Sent id "{sentid}" in {corpus_name} does not exist.')
-    context['sentence'] = t[0].sentence
+    s = CorpusSentence.objects.get(corpus=corpus, sent_id=sentid)
+    context['sentence'] = s
     return paginate(t, context)
 
 @register.simple_tag(takes_context=False)
