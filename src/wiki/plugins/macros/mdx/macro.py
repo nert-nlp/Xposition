@@ -259,7 +259,7 @@ class MacroPattern(markdown.inlinepatterns.Pattern):
             if len(args) >= 2:
                 cl = args[1]
 
-            self_reference = args[0] == escape_patterns_in_string(self.markdown.article.current_revision.title)
+            self_reference = (args[0] == escape_patterns_in_string(self.markdown.article.current_revision.title))
 
             if '--' in args[0]:
                 ss1, ss2 = get_supersenses_for_construal(args[0])
@@ -272,10 +272,11 @@ class MacroPattern(markdown.inlinepatterns.Pattern):
                     clink = construal_link(ss1, ss2, '/' + args[0], cl if cl else 'construal')
                     return clink
             else:
-                supersense = get_supersense(args[0])
+                supersense = get_supersense(args[0]) # Will be None for `i, which is technically a Construal
                 display = args[0].replace('`', r'\`')
                 cls = cl or 'supersense'
-                if args[0] in ['??', '`d', '`i', '`c', '`$']:
+                # Note: args[0] is escaped at this point for `i etc. (will be unescaped before rendering; set cls=str(list(args[0])) to debug)
+                if args[0]==escape_patterns_in_string('??') or escape_patterns_in_string('`') in args[0]:
                     cls = cl or 'misc-label'
                 if self_reference:
                     span = etree.Element("span")
