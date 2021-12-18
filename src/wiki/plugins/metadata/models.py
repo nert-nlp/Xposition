@@ -60,7 +60,7 @@ class StringListField(models.TextField):
         return self.to_python(value)
 
     def get_db_prep_value(self, value, connection=None, prepared=True, **kwargs):
-        if not value: return
+        if not value: return ""
         if not isinstance(value, (list, tuple)):
             value = self.to_python(value)
         return str(StringList(value))

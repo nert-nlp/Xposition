@@ -108,7 +108,9 @@ It comes with a prepopulated SQLite database.
 
 ## Importing a new Corpus
 
-We use the library django-import-export for loading new models when there are too many to create by hand. Developers can follow the following procedure to load a new corpus into the database.
+We use the library django-import-export for loading new models when there are too many to create by hand.
+Developers can follow the following procedure to load a new corpus into the database.
+Make sure that you have validated your corpus using the [conllulex validator](https://github.com/nert-nlp/conllulex).
 
 ### Sentence and Document IDs
 Before import, make sure that [the way `doc_id` is set](https://github.com/nert-nlp/Xposition/blob/master/xposition/scripts/new_corpus.py#L121) is appropriate for your corpus.
