@@ -920,6 +920,28 @@ class CorpusSentence(models.Model):
         unique_together = [('corpus', 'sent_id')]
         ordering = ['corpus', 'sent_id']
 
+class ParallelSentenceAlignment(models.Model):
+
+    source_sentence = models.ForeignKey(CorpusSentence,on_delete=models.CASCADE,related_name='source_sentence')
+    target_sentence = models.ForeignKey(CorpusSentence,on_delete=models.CASCADE,related_name='target_sentence')
+
+    @cached_property
+    def html(self):
+        return format_html(f'<a href="{self.url}" class="exnum">({{}})</a>', self.id)
+
+    #def __str__(self):
+    #    return str(self.adposition) + ' : ' + str(self.sentence)
+
+    @cached_property
+    def template_name(self):
+        return "sentence_alignment_data_table.html"
+
+    class Meta:
+        verbose_name = _('parallel sentence alignment')
+        unique_together = ('source_sentence', 'target_sentence')
+        ordering = ['id']
+
+
 
 class PTokenAnnotation(models.Model):
     # adp/adp lemma (foreign key), construal (foreign key), usage (foreign key),
@@ -998,6 +1020,22 @@ class PTokenAnnotation(models.Model):
         unique_together = ('sentence', 'token_indices')
         # issue #10: alphabetize models
         ordering = ['sentence', 'token_indices']
+
+
+class ParallelPTokenAlignment(models.Model):
+
+    source_example = models.ForeignKey(PTokenAnnotation,on_delete=models.CASCADE,related_name="source_example")
+    target_example = models.ForeignKey(PTokenAnnotation, on_delete=models.CASCADE, related_name="target_example")
+
+    @cached_property
+    def template_name(self):
+        return "ptoken_alignment_data_table.html"
+
+
+    class Meta:
+        verbose_name = _('adposition alignment')
+        unique_together = ('source_example', 'target_example')
+        ordering = ['id']
 
 
 # You must register the model here

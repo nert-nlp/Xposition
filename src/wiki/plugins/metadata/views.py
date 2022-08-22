@@ -1,12 +1,11 @@
 from django.shortcuts import redirect, get_object_or_404
 from django.utils.safestring import mark_safe
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Model
 from . import models
+from . import tables
 from wiki.models import URLPath, Article
-from categories.models import ArticleCategory
 from django.utils.decorators import method_decorator
-from django.utils.functional import cached_property
+
 from wiki.views.mixins import ArticleMixin
 from . import forms
 from django.views import View
@@ -124,8 +123,28 @@ class CorpusView(ArticleMetadataView):
 class CorpusSentenceView(TemplateView):
     template_name = models.CorpusSentence.template_name
 
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+        data = tables.ParallelSentenceAlignmentTable(models.ParallelSentenceAlignment.objects.filter(source_sentence__sent_id__contains=context['sent_id']))
+        data.paginate(page=request.GET.get("page",1),per_page=25)
+        data.exclude = ('id','exid')
+        context['table'] = data
+        return self.render_to_response(context)
+
 class PTokenView(TemplateView):
     template_name = models.PTokenAnnotation.template_name
+
+    def get(self, request, *args, **kwargs):
+        context = self.get_context_data(**kwargs)
+        data = tables.ParallelPTokenAlignmentTable(models.ParallelPTokenAlignment.objects.filter(source_example__id=int(context['exnum']) - 3000))
+        data.paginate(page=request.GET.get("page",1),per_page=25)
+        data.exclude = ('id','sourceexid','sourcesentid')
+        context['table'] = data
+        return self.render_to_response(context)
+
+
+class ParallelSentenceView(TemplateView):
+    template_name = models.ParallelSentenceAlignment.template_name
 
 class MetadataView(LoginRequiredMixin, ArticleMixin, TemplateView):
     template_name = "metadata.html"

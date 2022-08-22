@@ -36,6 +36,12 @@
 		  {% if sentence.note.strip %}<p class="bg-info" style="padding: 10px">{{sentence.note}}</p>{% endif %}
 
 			{% include "ptoken_data_table_contents.html" %}
+
+      {% include "sentence_alignment_data_table.html" %}
+
+
+
+
 		</div>
 		<div class="col-md-3">
 			<h4 id="metadata">Metadata</h4>

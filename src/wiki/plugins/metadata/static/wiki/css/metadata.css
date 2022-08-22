@@ -150,6 +150,18 @@ ul > li.clt { list-style: none; }
     height: .7em;
 }
 
+table.parallelsentencealignment{
+  border: solid 1px #000;
+}
+table.parallelsentencealignment tr { border: solid 1px #777; }
+table.parallelsentencealignment th { text-align: center; background-color: #ddd; }
+table.parallelsentencealignment th.asc > a { text-decoration: underline #f93; -webkit-text-decoration: underline #f93; }
+table.parallelsentencealignment th.desc > a { text-decoration: overline #f93; -webkit-text-decoration: overline #f93; }
+table.parallelsentencealignment td {vertical-align:top; text-align:center },table.parallelsentencealignment th { padding: 3pt 3pt !important; }
+table.parallelsentencealignment source_sentence_text { font-weight: bold; text-decoration: #3c3 underline; -webkit-text-decoration: #3c3 underline;}
+table.parallelsentencealignment target_sentence_text { font-weight: bold; text-decoration: #d3b dotted underline; -webkit-text-decoration: #d3b dotted underline;}
+
+
 table.ptokenannotation {
   border: solid 1px #000;
 }
