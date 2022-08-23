@@ -24,9 +24,9 @@ class ParallelSentenceAlignmentTable(tables.Table):
     source_sentence = tables.Column(accessor='source_sentence',verbose_name='Source Sentence ID')
     source_sentence_text = tables.Column(accessor='source_sentence.text', verbose_name="Source Sentence Text")
     source_sentence_language = tables.Column(accessor = 'source_sentence.language.name',verbose_name="Source Sentence Language")
-    target_sentence = tables.Column(accessor='target_sentence',verbose_name='Target Sentence ID')
-    target_sentence_text = tables.Column(accessor='target_sentence.text', verbose_name="Target Sentence Text")
-    target_sentence_language = tables.Column(accessor='target_sentence.language.name', verbose_name="Target Sentence Language")
+    target_sentence = tables.Column(accessor='target_sentence',verbose_name='Sentence ID')
+    target_sentence_text = tables.Column(accessor='target_sentence.text', verbose_name="Sentence Text")
+    target_sentence_language = tables.Column(accessor='target_sentence.language.name', verbose_name="Sentence Language")
 
     def value_source_sentence(self, value):
         return value.sent_id

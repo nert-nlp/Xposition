@@ -127,7 +127,7 @@ class CorpusSentenceView(TemplateView):
         context = self.get_context_data(**kwargs)
         data = tables.ParallelSentenceAlignmentTable(models.ParallelSentenceAlignment.objects.filter(source_sentence__sent_id__contains=context['sent_id']))
         data.paginate(page=request.GET.get("page",1),per_page=25)
-        data.exclude = ('id','exid')
+        data.exclude = ('id','exid','source_sentence','source_sentence_language','source_sentence_text')
         context['table'] = data
         return self.render_to_response(context)
 
