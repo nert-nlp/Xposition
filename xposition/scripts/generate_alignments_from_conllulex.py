@@ -113,6 +113,10 @@ def main():
 
     args = parser.parse_args()
 
+    if '.conllulex' not in args.conllulexfile:
+        print ('File must be conllulex format',file=sys.stderr)
+        return
+
     if args.language1.strip().lower() not in ('zh', 'en', 'hi', 'de', 'ko','he'):
         print('Language 1 must be one of zh,en,hi,de,ko,he', file=sys.stderr)
         return
