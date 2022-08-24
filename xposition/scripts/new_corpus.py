@@ -13,7 +13,6 @@ FILE = 'streusle.go.notes.json'
 LANGUAGE = 'English'
 CORPUS = 'STREUSLE'
 VERSION = '4.3'
-IS_PARALLEL = '0'
 ORTHOGRAPHY = DEFAULT_STR
 
 
@@ -54,7 +53,6 @@ class Data:
         self.language_name = LANGUAGE
         self.sent_id = '0'
         self.orthography = ORTHOGRAPHY
-        self.is_parallel = IS_PARALLEL
         self.doc_id = '0'
         self.text = DEFAULT_STR
         self.tokens = DEFAULT_STR

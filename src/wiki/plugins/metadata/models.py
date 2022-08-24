@@ -881,7 +881,7 @@ class Corpus(SimpleMetadata):
 
 
 class CorpusSentence(models.Model):
-    # Corpus (foreign key), sent id, lang, orthography, is_parallel, doc id,
+    # Corpus (foreign key), sent id, lang, orthography, doc id,
     # offset within doc, sent text: original string, sent text: tokenized,
     # word glosses?, sentence gloss?, note?
     corpus = models.ForeignKey(Corpus, null=True, related_name='corpus_sentences', on_delete=models.CASCADE)
@@ -889,9 +889,6 @@ class CorpusSentence(models.Model):
     language = models.ForeignKey(Language, blank=True, related_name='corpus_sentences', on_delete=models.CASCADE)
     orthography = models.CharField(max_length=200, blank=True, verbose_name="Orthography",
                                    help_text="language-specific details such as style of transliteration")
-    is_parallel = models.BooleanField(default=False)
-    # parallel sentences
-    # parallel = models.ManyToManyField(CorpusSentence, blank=True, related_name='parallel')
     doc_id = models.CharField(max_length=200, null=True, verbose_name="Document ID")
     text = models.CharField(max_length=1000, null=True, verbose_name="Text")
     tokens = StringListField(max_length=1000, null=True, verbose_name="Tokens")

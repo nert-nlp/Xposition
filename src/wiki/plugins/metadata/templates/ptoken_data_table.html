@@ -25,7 +25,14 @@
   </head>
   <body>
     <h4 id="data">Data ({{tokstable.page.start_index}}–{{tokstable.page.end_index}} of {{tokstable.paginator.count}})</h4>
+
     {% render_table tokstable %}
+
   </body>
+<style>
+  .table-container {
+    width: 150%;
+  }
+</style>
 </html>
 

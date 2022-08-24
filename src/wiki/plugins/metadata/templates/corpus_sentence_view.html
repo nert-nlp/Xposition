@@ -7,6 +7,8 @@
 
 {% block wiki_contents %}
 
+
+
   <div id="article-container">
     <ul id="article-menu" class="nav nav-pills">
 		<li><h1 id="article-title"><i class="fa fa-files-o fa-2x" aria-hidden="true" style="opacity: .1; position: absolute; left: -5.00rem;"></i>
@@ -38,10 +40,6 @@
 			{% include "ptoken_data_table_contents.html" %}
 
       {% include "sentence_alignment_data_table.html" %}
-
-
-
-
 		</div>
 		<div class="col-md-3">
 			<h4 id="metadata">Metadata</h4>
@@ -51,7 +49,6 @@
 			<tr><th>genre</th><td>{{sentence.corpus.genre}}</td></tr>
 			<tr><th>document ID</th><td>{{sentence.doc_id}}</td></tr>
 			<tr><th>orthography</th><td>{{sentence.orthography}}</td></tr>
-			<tr><th>parallel?</th><td>{{sentence.is_parallel}}</td></tr>
 			<tr><th>raw text</th><td>{{sentence.text}}</td></tr>
 			<tr><th>tokenized</th><td>{{sentence.tokens|join:" "}}</td></tr>
 			<tr><th>MWE markup</th><td><tt>{{sentence.mwe_markup}}</tt></td></tr>

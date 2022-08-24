@@ -154,10 +154,10 @@ table.parallelsentencealignment{
   border: solid 1px #000;
 }
 table.parallelsentencealignment tr { border: solid 1px #777; }
-table.parallelsentencealignment th { text-align: center; background-color: #ddd; }
+table.parallelsentencealignment th { text-align: left; background-color: #ddd; }
 table.parallelsentencealignment th.asc > a { text-decoration: underline #f93; -webkit-text-decoration: underline #f93; }
 table.parallelsentencealignment th.desc > a { text-decoration: overline #f93; -webkit-text-decoration: overline #f93; }
-table.parallelsentencealignment td {vertical-align:top; text-align:center },table.parallelsentencealignment th { padding: 3pt 3pt !important; }
+table.parallelsentencealignment td {vertical-align:top; text-align:left },table.parallelsentencealignment th { padding: 3pt 3pt !important; }
 table.parallelsentencealignment source_sentence_text { font-weight: bold; text-decoration: #3c3 underline; -webkit-text-decoration: #3c3 underline;}
 table.parallelsentencealignment target_sentence_text { font-weight: bold; text-decoration: #d3b dotted underline; -webkit-text-decoration: #d3b dotted underline;}
 
@@ -171,9 +171,9 @@ table.ptokenannotation th.asc > a { text-decoration: underline #f93; -webkit-tex
 table.ptokenannotation th.desc > a { text-decoration: overline #f93; -webkit-text-decoration: overline #f93; }
 table.ptokenannotation td,table.ptokenannotation th { padding: 3pt 3pt !important; }
 table.ptokenannotation td.construal,table.ptokenannotation th.construal { padding: 3pt !important; text-align: center; }
-table.ptokenannotation td.lcontext,table.ptokenannotation th.lcontext { text-align: right; padding: 3pt .5em 3pt 1em !important; min-width: 20em; }
-table.ptokenannotation td.target,table.ptokenannotation th.target { text-align: center; padding: 3pt .5em !important; }
-table.ptokenannotation td.rcontext,table.ptokenannotation th.rcontext { text-align: left; padding: 3pt 1em 3pt .5em !important; min-width: 20em; }
+table.ptokenannotation td.lcontext ,table.ptokenannotation th.lcontext { text-align: right; padding: 3pt .5em 3pt 1em !important; min-width: 20em; }
+table.ptokenannotation td.target  ,table.ptokenannotation th.target { text-align: center; padding: 3pt .5em !important; }
+table.ptokenannotation td.rcontext ,table.ptokenannotation th.rcontext { text-align: left; padding: 3pt 1em 3pt .5em !important; min-width: 20em; }
 table.ptokenannotation .govhead { font-weight: bold; text-decoration: #3c3 underline; -webkit-text-decoration: #3c3 underline; }
 table.ptokenannotation .objhead { font-weight: bold; text-decoration: #d3b dotted underline; -webkit-text-decoration: #d3b dotted underline; }
 
