@@ -1,10 +1,14 @@
 """
 This script will update the Alignment Models (ParallelSentenceAlignment and ParallelPTokenAlignment) directly in the database.
-Input: the conllulex file containing the alignments to English, and the language 1 and language 2 pairs.
+Input: the conllulex file containing the alignments to English, and the language 1 and language 2 pair slug values.
 NOTE: Alignments are read only off the other language's (i.e non-English) conllulex file, which is assumed to have all the sentence / token alignment info
+IMPORTANT: Make sure the conllulex file contains all the alignments for the language pair. Piece-wise loading of alignments via conllulex is not supported (too many tricky use cases).
+           The loading operation will truncate and load all alignments for the language pair, everytime.
+
 TODO: Language pairs where English is not one of the pair.
 """
 import os, sys
+sys.path.insert(0,'../xposition')
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "xp.settings")
 
 from django.core.wsgi import get_wsgi_application
@@ -16,7 +20,7 @@ import warnings
 
 from wiki.plugins.metadata.models import CorpusSentence,ParallelSentenceAlignment,PTokenAnnotation,ParallelPTokenAlignment
 
-def generate_alignments(conllulexfile,language1,language2):
+def generate_alignments(conllulexfile,language1,language2,truncate=True):
 
     def read_conllulex(conllulexfile):
         fields = tuple(
@@ -39,6 +43,13 @@ def generate_alignments(conllulexfile,language1,language2):
 
     data = read_conllulex(conllulexfile)
 
+
+    if truncate == True:
+        ParallelSentenceAlignment.objects.filter(target_sentence__language__slug=language2).delete()
+        ParallelSentenceAlignment.objects.filter(target_sentence__language__slug=language1).delete()
+        ParallelPTokenAlignment.objects.filter(target_example__sentence__language__slug=language1).delete()
+        ParallelPTokenAlignment.objects.filter(target_example__sentence__language__slug=language2).delete()
+
     for sent in data:
         en_sent_id = sent.metadata['en_sent_id'].strip()
         sent_id = sent.metadata['sent_id'].strip()
@@ -47,62 +58,43 @@ def generate_alignments(conllulexfile,language1,language2):
             # Get the sentence objects first..
             engsentobj = CorpusSentence.objects.get(sent_id=en_sent_id)
             sentobj = CorpusSentence.objects.get(sent_id=sent_id)
-
-            for token in sent:
-                if token['misc'] != '_':
-                    if token['misc'] is not None and 'AlignedAdposition' in token['misc'].keys() and token['misc']['AlignedAdposition'] != 'None':
-
-                        alignedadposition = token['misc']['AlignedAdposition']
-                        alignedadposition = alignedadposition.replace('_',' ').strip()
-                        alignedtokid = token['misc']['AlignedTokId']
-                        alignedtokid = alignedtokid.replace(',',' ').strip()
-
-                        adposition = token['form'].strip()
-                        tokid = str(token['id'])
-
-                        # Get the token objects
-                        engtokenobj = PTokenAnnotation.objects.get(sentence=engsentobj,main_subtoken_string=alignedadposition,main_subtoken_indices=alignedtokid)
-                        tokenobj = PTokenAnnotation.objects.get(sentence=sentobj,main_subtoken_string=adposition,main_subtoken_indices=tokid)
-
-                        # remove the token alignments first - these are two way
-                        objs = ParallelPTokenAlignment.objects.filter(source_example=engtokenobj)
-
-                        # delete only those objects in the language pair
-                        for obj in objs:
-                            if obj.target_example.sentence.language.slug in (language1,language2):
-                                obj.delete()
-
-                        objs = ParallelPTokenAlignment.objects.filter(source_example=tokenobj)
-                        for obj in objs:
-                            if obj.target_example.sentence.language.slug in (language1,language2):
-                                obj.delete()
-
-                        # then create the new ones - two way
-                        ParallelPTokenAlignment.objects.create(source_example=engtokenobj,target_example=tokenobj)
-                        ParallelPTokenAlignment.objects.create(source_example=tokenobj, target_example=engtokenobj)
-
-            # first delete existing alignments, if any
-            objs = ParallelSentenceAlignment.objects.filter(source_sentence=sentobj)
-            for obj in objs:
-                if obj.target_sentence.language.slug in (language1,language2):
-                    obj.delete()
-            objs = ParallelSentenceAlignment.objects.filter(source_sentence=engsentobj) # two way alignments
-            for obj in objs:
-                if obj.target_sentence.language.slug in (language1,language2):
-                    obj.delete()
-
-
-            # then add the alignment
-            ParallelSentenceAlignment.objects.create(source_sentence=engsentobj,target_sentence=sentobj)
-            ParallelSentenceAlignment.objects.create(source_sentence=sentobj, target_sentence=engsentobj)
-
         except Exception as e:
             if 'matching query does not exist' in str(e):
-                warnings.warn('Warning: No CorpusSentence or Adposition Token for sentence pairs %s \t %s ' % (sent_id,en_sent_id))
+                warnings.warn('Warning: No CorpusSentence object for sentence pairs %s \t %s ' % (sent_id,en_sent_id))
                 continue
             else:
                 print ('Error with sentence pairs %s \t %s \n Error is: %s' % (sent_id,en_sent_id,str(e)),file=sys.stderr)
                 raise
+
+
+        for token in sent:
+            if token['misc'] != '_':
+                if token['misc'] is not None and 'AlignedAdposition' in token['misc'].keys() and token['misc']['AlignedAdposition'] != 'None':
+
+                    alignedtokid = token['misc']['AlignedTokId']
+                    alignedtokid = alignedtokid.replace(',',' ').strip()
+
+                    tokid = str(token['id'])
+
+                    # Get the token objects
+                    try:
+                        engtokenobj = PTokenAnnotation.objects.get(sentence=engsentobj,main_subtoken_indices=alignedtokid)
+                        tokenobj = PTokenAnnotation.objects.get(sentence=sentobj,main_subtoken_indices=tokid)
+                    except Exception as e:
+                        if 'matching query does not exist' in str(e):
+                            warnings.warn('Warning: No Token object ID: %s \t %s for sentence pairs %s \t %s ' % (tokid,alignedtokid,sent_id, en_sent_id))
+                            continue
+                        else:
+                            print('Error with sentence pairs %s \t %s \n Error is: %s' % (sent_id, en_sent_id, str(e)), file=sys.stderr)
+                            raise
+
+                    # then create the new ones - two way
+                    ParallelPTokenAlignment.objects.create(source_example=engtokenobj,target_example=tokenobj)
+                    ParallelPTokenAlignment.objects.create(source_example=tokenobj, target_example=engtokenobj)
+
+        # then add the alignment
+        ParallelSentenceAlignment.objects.create(source_sentence=engsentobj,target_sentence=sentobj)
+        ParallelSentenceAlignment.objects.create(source_sentence=sentobj, target_sentence=engsentobj)
 
 
 def main():
