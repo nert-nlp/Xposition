@@ -60,11 +60,11 @@ class PTokenAnnotationTable(tables.Table):
     """
 
     exid = tables.Column(accessor='id', verbose_name='Ex')
-    lcontext = tables.Column(accessor='sentence.tokens', verbose_name='')
-    target = tables.Column(accessor='sentence.tokens', verbose_name='P', order_by=('adposition', 'construal'))
-    rcontext = tables.Column(accessor='sentence.tokens', verbose_name='')
+    lcontext = tables.Column(accessor='sentence.tokens', verbose_name='', attrs={'td': {'class': "lcontext"}})
+    target = tables.Column(accessor='sentence.tokens', verbose_name='P', order_by=('adposition', 'construal'), attrs={'td': {'class': "construal"}})
+    rcontext = tables.Column(accessor='sentence.tokens', verbose_name='', attrs={'td': {'class': "rcontext"}})
     role = tables.Column(accessor='construal.role', verbose_name='Role')
-    construal = tables.Column(accessor='construal', verbose_name='↝')
+    construal = tables.Column(accessor='construal', verbose_name='↝', attrs={'td': {'class': "construal"}})
     function = tables.Column(accessor='construal.function', verbose_name='Function')
     note = tables.Column(accessor='annotator_cluster', verbose_name='ℹ')
     sentid = tables.Column(accessor='sentence', verbose_name='Sent ID')
