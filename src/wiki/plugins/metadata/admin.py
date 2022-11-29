@@ -182,7 +182,6 @@ class CorpusSentenceResource(resources.ModelResource):
 
     sent_id = fields.Field(attribute='sent_id', widget=widgets.CharWidget())
     orthography = fields.Field(attribute='orthography', widget=widgets.CharWidget())
-    is_parallel = fields.Field(attribute='is_parallel', widget=widgets.BooleanWidget())
     doc_id = fields.Field(attribute='doc_id', widget=widgets.CharWidget())
     text = fields.Field(attribute='text', widget=widgets.CharWidget())
     tokens = fields.Field(attribute='tokens', widget=widgets.CharWidget())
@@ -194,7 +193,7 @@ class CorpusSentenceResource(resources.ModelResource):
     class Meta:
         model = ms.CorpusSentence
         import_id_fields = ('sent_id','corpus')
-        fields = ('corpus', 'sent_id', 'language', 'orthography', 'is_parallel', 'doc_id',
+        fields = ('corpus', 'sent_id', 'language', 'orthography', 'doc_id',
                   'text', 'tokens', 'word_gloss', 'sent_gloss', 'note', 'mwe_markup')
 
 
