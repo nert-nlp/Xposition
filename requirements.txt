@@ -16,3 +16,4 @@ pillow>=7.1.0
 tqdm
 regex==2020.5.14
 git+git://github.com/nert-nlp/django-categories.git@master
+conllu
