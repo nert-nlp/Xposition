@@ -1,4 +1,4 @@
-django==3.1.14
+django==3.2.24
 django-bitfield==2.0.1
 django-import-export==2.5.0
 django-debug-toolbar==3.2.1
